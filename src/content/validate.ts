@@ -23,6 +23,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('weapons', catalog.weapons);
   assertUniqueIds('alienTechnologies', catalog.alienTechnologies);
   assertUniqueIds('pilots', catalog.pilots);
+  assertUniqueIds('enemies', catalog.enemies);
 
   for (const weapon of catalog.weapons) {
     if (weapon.damage <= 0 || weapon.shotsPerSecond <= 0) {
@@ -33,6 +34,17 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   for (const pilot of catalog.pilots) {
     if (pilot.speedMultiplier <= 0 || pilot.damageMultiplier <= 0) {
       throw new Error(`Pilot ${pilot.id} must have positive multipliers.`);
+    }
+  }
+
+  for (const enemy of catalog.enemies) {
+    if (
+      enemy.armour <= 0 ||
+      enemy.speed <= 0 ||
+      enemy.contactDamage <= 0 ||
+      enemy.score <= 0
+    ) {
+      throw new Error(`Enemy ${enemy.id} must have positive combat values.`);
     }
   }
 }

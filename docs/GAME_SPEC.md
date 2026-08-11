@@ -36,6 +36,25 @@ corporate base on Earth.
 6. Extract or continue for a greater possible reward.
 7. Return resources, progress research, repair, and prepare the next sortie.
 
+## Playable MVP
+
+The first playable product test is one short, complete loop. It is smaller than the
+first vertical slice and exists to test whether combat, uncertain technology, and
+the extraction decision create useful tension.
+
+- One pilot and one starting weapon.
+- One 5–8 minute sortie.
+- Bounded movement, automatic forward fire, and armour.
+- Two regular enemy types and one elite encounter.
+- One partly understood artefact with install-or-preserve choice.
+- One extraction decision: leave safely or continue for a better reward.
+- Partial loss after defeat.
+- One research result or permanent improvement after return.
+- Browser-local persistence.
+
+Art, audio, narrative expansion, multiple sectors, and a deep base economy are not
+required to validate this MVP.
+
 ## Alien technology
 
 Before use, the player sees a broad category, symbols, reliability, and danger.

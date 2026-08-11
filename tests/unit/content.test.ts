@@ -18,4 +18,15 @@ describe('validateContentCatalog', () => {
       'weapons contains duplicate id',
     );
   });
+
+  it('rejects enemies with non-positive combat values', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      enemies: [{ ...contentCatalog.enemies[0], armour: 0 }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'Enemy enemy-scout must have positive combat values',
+    );
+  });
 });

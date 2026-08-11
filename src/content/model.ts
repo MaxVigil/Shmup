@@ -22,8 +22,21 @@ export interface PilotDefinition {
   readonly damageMultiplier: number;
 }
 
+export type EnemyMovementPattern = 'straight' | 'sine';
+
+export interface EnemyDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly armour: number;
+  readonly speed: number;
+  readonly contactDamage: number;
+  readonly score: number;
+  readonly movementPattern: EnemyMovementPattern;
+}
+
 export interface ContentCatalog {
   readonly weapons: readonly WeaponDefinition[];
   readonly alienTechnologies: readonly AlienTechnologyDefinition[];
   readonly pilots: readonly PilotDefinition[];
+  readonly enemies: readonly EnemyDefinition[];
 }

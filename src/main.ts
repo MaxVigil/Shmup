@@ -21,8 +21,8 @@ app.innerHTML = `
       <p class="eyebrow">INTERNATIONAL RECOVERY DIRECTORATE</p>
       <h1 id="mission-title">Alien Systems Programme</h1>
       <p class="lede">
-        Foundation systems are online. Combat, research, and personnel modules
-        arrive in the next milestones.
+        M1 combat telemetry is live. Move, read the incoming patterns, and let the
+        pulse cannon fire automatically.
       </p>
 
       <dl class="status-grid">
@@ -39,18 +39,19 @@ app.innerHTML = `
           <dd>${
             contentCatalog.weapons.length +
             contentCatalog.alienTechnologies.length +
-            contentCatalog.pilots.length
+            contentCatalog.pilots.length +
+            contentCatalog.enemies.length
           }</dd>
         </div>
       </dl>
 
       <div class="system-check" role="status">
         <span class="system-check__light" aria-hidden="true"></span>
-        M0 validation boundary active
+        M1 combat prototype active
       </div>
     </section>
 
-    <section class="combat-frame" aria-label="Combat systems preview">
+    <section class="combat-frame" aria-label="Playable combat prototype">
       <div id="game-root"></div>
     </section>
   </main>

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { FoundationScene } from './scenes/FoundationScene';
+import { CombatScene } from './scenes/CombatScene';
 
 export const LOGICAL_WIDTH = 540;
 export const LOGICAL_HEIGHT = 960;
@@ -19,7 +19,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [FoundationScene],
+    scene: [CombatScene],
   };
 
   return new Phaser.Game(config);
