@@ -26,4 +26,24 @@ export const contentCatalog = {
       damageMultiplier: 1,
     },
   ],
+  enemies: [
+    {
+      id: 'enemy-scout',
+      name: 'Scout',
+      armour: 10,
+      speed: 150,
+      contactDamage: 12,
+      score: 100,
+      movementPattern: 'straight',
+    },
+    {
+      id: 'enemy-weaver',
+      name: 'Weaver',
+      armour: 20,
+      speed: 105,
+      contactDamage: 18,
+      score: 250,
+      movementPattern: 'sine',
+    },
+  ],
 } as const satisfies ContentCatalog;

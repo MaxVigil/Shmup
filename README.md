@@ -9,8 +9,8 @@ Extraction secures the haul; failure loses part of it.
 
 ## Status
 
-M0 Foundation. The repository contains the reproducible build, domain skeleton,
-content validation, seeded randomness, persistence boundary, tests, and CI.
+M0 Foundation is published for review. M1 combat prototyping is in progress with a
+playable greybox encounter, automatic fire, armour, two enemy types, and a HUD.
 
 ## Requirements
 
