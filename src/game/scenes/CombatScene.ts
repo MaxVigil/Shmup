@@ -11,7 +11,6 @@ import {
   failRun,
   forceExtraction,
   offerExtraction,
-  offerTechnology,
   toSortieOutcome,
   type RiskExtractionState,
   type TechnologyDecision,
@@ -27,11 +26,10 @@ const ARMOUR_BAR_OFFSET_Y = 27;
 const SHOT_SPEED = 620;
 const SHOT_DAMAGE = contentCatalog.weapons[0].damage;
 const FIRE_INTERVAL_MS = 1000 / contentCatalog.weapons[0].shotsPerSecond;
-const M2_TIMING_SCALE = import.meta.env.DEV &&
-  new URLSearchParams(window.location.search).get('m2Fast') === 'true' ? 0.05 : 1;
-const ENCOUNTER_DURATION_MS = 180_000 * M2_TIMING_SCALE;
-const TECHNOLOGY_SIGNAL_MS = 45_000 * M2_TIMING_SCALE;
-const EXTRACTION_WINDOW_MS = 90_000 * M2_TIMING_SCALE;
+const M2_FAST_MODE = import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get('m2Fast') === 'true';
+const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
+const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -154,7 +152,7 @@ export class CombatScene extends Phaser.Scene {
     this.armourText = this.createHudText(20, 18, 'ARMOUR 100');
     this.salvageText = this.createHudText(20, 42, 'SALVAGE 000');
     this.scoreText = this.createHudText(width - 20, 18, 'SCORE 000000').setOrigin(1, 0);
-    this.technologyText = this.createHudText(width - 20, 42, 'SIGNAL SEARCH').setOrigin(1, 0);
+    this.technologyText = this.createHudText(width - 20, 42, 'WARDEN SIGNAL').setOrigin(1, 0);
     this.timeText = this.createHudText(width / 2, 18, '03:00').setOrigin(0.5, 0);
     this.statusText = this.add
       .text(width / 2, height - 28, 'MOVE: WASD / ARROWS / HOLD POINTER', {
@@ -224,13 +222,8 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
 
-    if (this.runState.phase === 'combat' && this.elapsedMs >= TECHNOLOGY_SIGNAL_MS) {
-      this.presentTechnologySignal();
-      return;
-    }
-
     if (
-      this.runState.phase === 'combat-after-technology' &&
+      this.runState.phase === 'combat' &&
       this.elapsedMs >= EXTRACTION_WINDOW_MS
     ) {
       this.presentExtractionWindow();
@@ -264,9 +257,8 @@ export class CombatScene extends Phaser.Scene {
 
   private presentTechnologySignal(): void {
     const technology = contentCatalog.alienTechnologies[0];
-    this.runState = offerTechnology(this.runState);
     this.showDecision(
-      'UNKNOWN ARTEFACT SIGNAL',
+      'ARTEFACT RECOVERED FROM WARDEN',
       [
         `${technology.signalGlyphs} // ${technology.category.toUpperCase()}`,
         `RELIABILITY ${technology.reliability}/5 // DANGER ${technology.danger}/5`,
@@ -289,8 +281,9 @@ export class CombatScene extends Phaser.Scene {
     this.statusText.setText(
       decision === 'install'
         ? 'PRISM ACTIVE // SPLIT PULSE + PRISMATIC SHEATH'
-        : 'PRISM SEALED // RESEARCH PAYLOAD AT RISK',
+        : 'PRISM SEALED // LAB TRANSFER READY',
     );
+    this.endEncounter(true, 'ARTEFACT SECURED // EXTRACTION COMPLETE');
   }
 
   private presentExtractionWindow(): void {
@@ -299,11 +292,11 @@ export class CombatScene extends Phaser.Scene {
       'EXTRACTION WINDOW OPEN',
       [
         `SALVAGE ${this.runState.materialsFound} // RESEARCH ${this.runState.researchFound}`,
-        'Extract now, or remain for the Warden signal.',
+        'Extract now, or intercept the Warden carrying an unknown signal.',
       ],
       [
         { label: '[E] EXTRACT // secure the complete haul', action: () => this.chooseExtraction('extract') },
-        { label: '[C] CONTINUE // optional elite, greater reward', action: () => this.chooseExtraction('continue') },
+        { label: '[C] INTERCEPT // optional elite + unknown artefact', action: () => this.chooseExtraction('continue') },
       ],
     );
   }
@@ -574,7 +567,8 @@ export class CombatScene extends Phaser.Scene {
           }
           this.destroyEnemy(enemyIndex);
           if (enemy.definition.kind === 'elite') {
-            this.endEncounter(true, 'WARDEN DESTROYED // EXTRACTION COMPLETE');
+            this.statusText.setText('WARDEN DESTROYED // ARTEFACT RECOVERED');
+            this.presentTechnologySignal();
             return;
           }
         }
@@ -624,7 +618,7 @@ export class CombatScene extends Phaser.Scene {
         ? 'PRISM INSTALLED'
         : this.runState.technologyDecision === 'preserve'
           ? `PRISM SEALED +${this.runState.researchFound}R`
-          : 'SIGNAL SEARCH',
+          : this.runState.phase === 'elite' ? 'WARDEN INTERCEPT' : 'WARDEN SIGNAL',
     );
     this.timeText.setText(`${minutes}:${seconds}`);
   }

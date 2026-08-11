@@ -21,9 +21,10 @@ M2 — Risk and extraction.
 - Playable MVP scope recorded in the repository specification.
 - First M1 greybox increment implemented locally.
 - M1 combat prototype merged in PR #2.
-- One partly understood Prism signal implemented with install-or-preserve choice.
+- The optional Warden carries the partly understood Prism; destroying it opens the
+  install-or-preserve choice.
 - Installing activates Prismatic Sheath and transforms the Pulse Cannon into Split Pulse.
-- Preserving creates a 10-research payload that remains at risk until extraction.
+- Preserving the recovered Prism grants 10 research on the completed extraction.
 - Safe extraction and the optional Warden intercept are playable.
 - Failed sorties retain half of recovered materials and research.
 - Recovered totals persist in the existing browser-local v1 save.

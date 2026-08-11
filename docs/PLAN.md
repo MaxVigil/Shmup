@@ -40,10 +40,12 @@ Status: implemented; draft publication in progress.
 Add artefact signals, install-or-preserve choice, one passive effect, one weapon
 transformation, an optional elite encounter, extraction, and partial loss on failure.
 
-- [x] Show broad signal category, glyphs, reliability, and danger before the choice.
+- [x] Drop the Prism from the optional Warden and only then show its broad category,
+  glyphs, reliability, danger, and install-or-preserve choice.
 - [x] Install the Prism for Prismatic Sheath and the Split Pulse transformation.
 - [x] Preserve the Prism for recoverable research value.
-- [x] Offer a safe extraction window or an optional Warden intercept.
+- [x] Offer a safe extraction window or an optional Warden intercept carrying the
+  artefact.
 - [x] Award deterministic salvage and retain only 50% after defeat.
 - [x] Persist recovered materials and research in the existing versioned local save.
 - [x] Add deterministic domain tests and a fast local playtest mode.

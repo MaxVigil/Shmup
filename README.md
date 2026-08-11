@@ -27,8 +27,8 @@ npm run dev
 ```
 
 The normal M2 encounter lasts three minutes. During local development, append
-`?m2Fast=true` to the URL to compress the signal, extraction, and forced-extraction
-timings to 5% for repeatable decision-flow checks.
+`?m2Fast=true` to the URL to open the extraction window after 4.5 seconds and leave
+enough time to destroy the Warden for repeatable decision-flow checks.
 
 ## Validate
 

@@ -5,10 +5,9 @@ export type TechnologyDecision = 'install' | 'preserve';
 export type ExtractionDecision = 'extract' | 'continue';
 export type RiskExtractionPhase =
   | 'combat'
-  | 'technology-choice'
-  | 'combat-after-technology'
   | 'extraction-choice'
   | 'elite'
+  | 'technology-choice'
   | 'complete';
 
 export interface RiskExtractionState {
@@ -43,11 +42,6 @@ function assertPhase(state: RiskExtractionState, expected: RiskExtractionPhase):
   }
 }
 
-export function offerTechnology(state: RiskExtractionState): RiskExtractionState {
-  assertPhase(state, 'combat');
-  return { ...state, phase: 'technology-choice' };
-}
-
 export function decideTechnology(
   state: RiskExtractionState,
   technology: AlienTechnologyDefinition,
@@ -57,13 +51,14 @@ export function decideTechnology(
 
   return {
     ...state,
-    phase: 'combat-after-technology',
+    phase: 'complete',
     technologyDecision: decision,
     installedTechnologyIds: decision === 'install' ? [technology.id] : [],
     preservedTechnologyIds: decision === 'preserve' ? [technology.id] : [],
     researchFound: decision === 'preserve'
       ? state.researchFound + technology.preservationResearch
       : state.researchFound,
+    extracted: true,
   };
 }
 
@@ -81,7 +76,7 @@ export function addMaterials(
 }
 
 export function offerExtraction(state: RiskExtractionState): RiskExtractionState {
-  assertPhase(state, 'combat-after-technology');
+  assertPhase(state, 'combat');
   return { ...state, phase: 'extraction-choice' };
 }
 
@@ -113,9 +108,8 @@ export function defeatElite(
   const rewarded = addMaterials(state, materialReward);
   return {
     ...rewarded,
-    phase: 'complete',
+    phase: 'technology-choice',
     eliteDefeated: true,
-    extracted: true,
   };
 }
 

@@ -22,8 +22,8 @@ app.innerHTML = `
       <p class="eyebrow">INTERNATIONAL RECOVERY DIRECTORATE</p>
       <h1 id="mission-title">Alien Systems Programme</h1>
       <p class="lede">
-        Recover an unknown signal, decide whether to install or preserve it, then
-        extract safely or remain for the optional Warden intercept.
+        Extract safely with the current salvage, or intercept the Warden and recover
+        its unknown artefact for installation or research.
       </p>
 
       <dl class="status-grid">
@@ -82,7 +82,7 @@ const game = createGame(gameRoot, (result) => {
     const retention = result.outcome.extracted ? 'full haul secured' : '50% recovery after loss';
     const technology = result.technologyDecision === 'install'
       ? 'artefact installed'
-      : result.technologyDecision === 'preserve' ? 'artefact preserved' : 'signal missed';
+      : result.technologyDecision === 'preserve' ? 'artefact preserved' : 'artefact not recovered';
     const elite = result.eliteDefeated ? '; Warden destroyed' : '';
     runReport.textContent = `${technology}; ${retention}${elite}.`;
   }
