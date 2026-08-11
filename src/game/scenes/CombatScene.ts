@@ -6,6 +6,9 @@ import { createSeededRng, type RandomSource } from '../../domain/rng';
 const PLAYER_SPEED = 330;
 const PLAYER_ARMOUR = 100;
 const PLAYER_MARGIN = 28;
+const ARMOUR_BAR_WIDTH = 44;
+const ARMOUR_BAR_HEIGHT = 6;
+const ARMOUR_BAR_OFFSET_Y = 27;
 const SHOT_SPEED = 620;
 const SHOT_DAMAGE = contentCatalog.weapons[0].damage;
 const FIRE_INTERVAL_MS = 1000 / contentCatalog.weapons[0].shotsPerSecond;
@@ -27,6 +30,8 @@ interface Star {
 
 export class CombatScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Triangle;
+  private playerArmourBarBackground!: Phaser.GameObjects.Rectangle;
+  private playerArmourBarFill!: Phaser.GameObjects.Rectangle;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private movementKeys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private readonly shots: Phaser.GameObjects.Rectangle[] = [];
@@ -69,6 +74,25 @@ export class CombatScene extends Phaser.Scene {
       36,
       0x9dd7c7,
     );
+    this.playerArmourBarBackground = this.add
+      .rectangle(
+        this.player.x,
+        this.player.y + ARMOUR_BAR_OFFSET_Y,
+        ARMOUR_BAR_WIDTH,
+        ARMOUR_BAR_HEIGHT,
+        0x05080d,
+        0.9,
+      )
+      .setStrokeStyle(1, 0xb7d9d2, 0.8);
+    this.playerArmourBarFill = this.add
+      .rectangle(
+        this.player.x - ARMOUR_BAR_WIDTH / 2,
+        this.player.y + ARMOUR_BAR_OFFSET_Y,
+        ARMOUR_BAR_WIDTH,
+        ARMOUR_BAR_HEIGHT - 2,
+        0x70d6b3,
+      )
+      .setOrigin(0, 0.5);
 
     const keyboard = this.input.keyboard;
     if (keyboard === null) {
@@ -189,6 +213,23 @@ export class CombatScene extends Phaser.Scene {
     this.player.x = Phaser.Math.Clamp(this.player.x, PLAYER_MARGIN, this.scale.width - PLAYER_MARGIN);
     this.player.y = Phaser.Math.Clamp(this.player.y, 90, this.scale.height - 58);
     this.player.setAlpha(this.invulnerableMs > 0 && Math.floor(this.invulnerableMs / 80) % 2 === 0 ? 0.3 : 1);
+  }
+
+  private updatePlayerArmourBar(): void {
+    const armourRatio = Phaser.Math.Clamp(this.armour / PLAYER_ARMOUR, 0, 1);
+    const fillColour = armourRatio > 0.5 ? 0x70d6b3 : armourRatio > 0.25 ? 0xf2c66d : 0xf07178;
+
+    this.playerArmourBarBackground.setPosition(
+      this.player.x,
+      this.player.y + ARMOUR_BAR_OFFSET_Y,
+    );
+    this.playerArmourBarFill
+      .setPosition(
+        this.player.x - ARMOUR_BAR_WIDTH / 2,
+        this.player.y + ARMOUR_BAR_OFFSET_Y,
+      )
+      .setDisplaySize(ARMOUR_BAR_WIDTH * armourRatio, ARMOUR_BAR_HEIGHT - 2)
+      .setFillStyle(fillColour);
   }
 
   private updateStarfield(deltaMs: number): void {
@@ -326,6 +367,7 @@ export class CombatScene extends Phaser.Scene {
     const remainingSeconds = Math.max(0, Math.ceil((ENCOUNTER_DURATION_MS - this.elapsedMs) / 1000));
     const minutes = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
     const seconds = (remainingSeconds % 60).toString().padStart(2, '0');
+    this.updatePlayerArmourBar();
     this.armourText.setText(`ARMOUR ${this.armour.toString().padStart(3, '0')}`);
     this.scoreText.setText(`SCORE ${this.score.toString().padStart(6, '0')}`);
     this.timeText.setText(`${minutes}:${seconds}`);
