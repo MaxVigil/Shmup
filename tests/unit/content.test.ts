@@ -29,4 +29,21 @@ describe('validateContentCatalog', () => {
       'Enemy enemy-scout must have positive combat values',
     );
   });
+
+  it('rejects invalid alien-technology risk and reward values', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      alienTechnologies: [{
+        ...contentCatalog.alienTechnologies[0],
+        passiveEffect: {
+          ...contentCatalog.alienTechnologies[0].passiveEffect,
+          armourDamageMultiplier: 1.5,
+        },
+      }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'Alien technology alien-prism-unclassified has invalid risk/reward values',
+    );
+  });
 });

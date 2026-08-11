@@ -124,6 +124,15 @@ h1 {
   box-shadow: 0 0 1rem rgb(125 200 169 / 75%);
 }
 
+.run-report {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  color: #607781;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
 .combat-frame {
   width: min(100%, 34rem);
   aspect-ratio: 9 / 16;

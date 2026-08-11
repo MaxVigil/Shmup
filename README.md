@@ -9,8 +9,10 @@ Extraction secures the haul; failure loses part of it.
 
 ## Status
 
-M0 Foundation is published for review. M1 combat prototyping is in progress with a
-playable greybox encounter, automatic fire, armour, two enemy types, and a HUD.
+M0 and M1 are merged. M2 is a playable risk-and-extraction prototype with a partly
+understood artefact, install-or-preserve choice, transformed weapon, defensive
+passive, safe extraction option, optional elite encounter, and partial loss after
+failure.
 
 ## Requirements
 
@@ -23,6 +25,10 @@ playable greybox encounter, automatic fire, armour, two enemy types, and a HUD.
 npm ci
 npm run dev
 ```
+
+The normal M2 encounter lasts three minutes. During local development, append
+`?m2Fast=true` to the URL to open the extraction window after 4.5 seconds and leave
+enough time to destroy the Warden for repeatable decision-flow checks.
 
 ## Validate
 

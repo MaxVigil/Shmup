@@ -5,7 +5,7 @@ This file is the repository-resident execution contract.
 
 ## M0 — Foundation
 
-Status: complete; draft PR #1 awaiting review.
+Status: complete; merged in PR #1.
 
 - [x] Scaffold Phaser 4, TypeScript, and Vite.
 - [x] Add repository instructions and project documentation.
@@ -19,7 +19,7 @@ typecheck, unit tests, and production build.
 
 ## M1 — Combat feel prototype
 
-Status: in progress.
+Status: merged in PR #2; tuning follow-up remains open.
 
 Create a 3–5 minute greybox encounter with bounded movement, automatic fire, armour,
 damage feedback, two enemy types, simple patterns, and a readable HUD.
@@ -29,15 +29,26 @@ damage feedback, two enemy types, simple patterns, and a readable HUD.
 - [x] Add automatic fire, armour, damage feedback, scoring, and restart.
 - [x] Add straight and sine-wave enemy movement.
 - [x] Add a readable encounter HUD and three-minute survival target.
-- [ ] Playtest movement, spawn pressure, collision readability, and firing cadence.
-- [ ] Tune the encounter from playtest evidence.
+- [ ] Record repeatable playtest evidence for movement, spawn pressure, collision
+  readability, and firing cadence.
+- [x] Add local armour feedback and reset all encounter state on restart.
 
 ## M2 — Risk and extraction
 
-Status: planned.
+Status: implemented; draft publication in progress.
 
 Add artefact signals, install-or-preserve choice, one passive effect, one weapon
 transformation, an optional elite encounter, extraction, and partial loss on failure.
+
+- [x] Drop the Prism from the optional Warden and only then show its broad category,
+  glyphs, reliability, danger, and install-or-preserve choice.
+- [x] Install the Prism for Prismatic Sheath and the Split Pulse transformation.
+- [x] Preserve the Prism for recoverable research value.
+- [x] Offer a safe extraction window or an optional Warden intercept carrying the
+  artefact.
+- [x] Award deterministic salvage and retain only 50% after defeat.
+- [x] Persist recovered materials and research in the existing versioned local save.
+- [x] Add deterministic domain tests and a fast local playtest mode.
 
 ## M3 — Base loop
 
