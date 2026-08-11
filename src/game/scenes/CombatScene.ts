@@ -50,6 +50,8 @@ export class CombatScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.resetEncounterState();
+
     const { width, height } = this.scale;
     this.rng = createSeededRng(0x5eed2026);
 
@@ -91,6 +93,19 @@ export class CombatScene extends Phaser.Scene {
         fontSize: '11px',
       })
       .setOrigin(0.5);
+  }
+
+  private resetEncounterState(): void {
+    this.shots.length = 0;
+    this.enemies.length = 0;
+    this.stars.length = 0;
+    this.armour = PLAYER_ARMOUR;
+    this.score = 0;
+    this.elapsedMs = 0;
+    this.fireCooldownMs = 0;
+    this.spawnCooldownMs = 400;
+    this.invulnerableMs = 0;
+    this.ended = false;
   }
 
   override update(_time: number, delta: number): void {

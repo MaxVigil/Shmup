@@ -17,14 +17,15 @@ M1 — Combat feel prototype.
 - All 11 unit tests pass.
 - Production build completes successfully.
 - M0 published in draft pull request #1; GitHub Actions CI passes.
+- M0 pull request #1 reviewed and merged into `main`.
 - Playable MVP scope recorded in the repository specification.
 - First M1 greybox increment implemented locally.
 
 ## Next
 
-1. Review and merge the M0 bootstrap pull request.
-2. Playtest the M1 greybox encounter.
-3. Tune movement, pressure, collisions, and firing cadence before adding M2 systems.
+1. Playtest the M1 greybox encounter.
+2. Tune movement, pressure, collisions, and firing cadence before adding M2 systems.
+3. Review and merge the M1 combat prototype pull request.
 
 ## Known gaps
 
