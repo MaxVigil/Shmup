@@ -13,6 +13,20 @@ export interface AlienTechnologyDefinition {
   readonly category: AlienTechnologyCategory;
   readonly danger: 1 | 2 | 3 | 4 | 5;
   readonly reliability: 1 | 2 | 3 | 4 | 5;
+  readonly signalGlyphs: string;
+  readonly preservationResearch: number;
+  readonly passiveEffect: {
+    readonly id: string;
+    readonly name: string;
+    readonly armourDamageMultiplier: number;
+  };
+  readonly weaponTransformation: {
+    readonly id: string;
+    readonly name: string;
+    readonly projectileCount: number;
+    readonly damageMultiplier: number;
+    readonly spread: number;
+  };
 }
 
 export interface PilotDefinition {
@@ -32,6 +46,8 @@ export interface EnemyDefinition {
   readonly contactDamage: number;
   readonly score: number;
   readonly movementPattern: EnemyMovementPattern;
+  readonly kind: 'regular' | 'elite';
+  readonly materialReward: number;
 }
 
 export interface ContentCatalog {

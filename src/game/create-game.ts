@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
-import { CombatScene } from './scenes/CombatScene';
+import { CombatScene, type CombatRunResult } from './scenes/CombatScene';
 
 export const LOGICAL_WIDTH = 540;
 export const LOGICAL_HEIGHT = 960;
 
-export function createGame(parent: HTMLElement): Phaser.Game {
+export function createGame(
+  parent: HTMLElement,
+  onRunComplete: (result: CombatRunResult) => void = () => {},
+): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent,
@@ -19,7 +22,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [CombatScene],
+    scene: [new CombatScene(onRunComplete)],
   };
 
   return new Phaser.Game(config);

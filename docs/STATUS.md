@@ -4,7 +4,7 @@ Last updated: 2026-08-11
 
 ## Current milestone
 
-M1 — Combat feel prototype.
+M2 — Risk and extraction.
 
 ## Completed
 
@@ -20,17 +20,28 @@ M1 — Combat feel prototype.
 - M0 pull request #1 reviewed and merged into `main`.
 - Playable MVP scope recorded in the repository specification.
 - First M1 greybox increment implemented locally.
+- M1 combat prototype merged in PR #2.
+- One partly understood Prism signal implemented with install-or-preserve choice.
+- Installing activates Prismatic Sheath and transforms the Pulse Cannon into Split Pulse.
+- Preserving creates a 10-research payload that remains at risk until extraction.
+- Safe extraction and the optional Warden intercept are playable.
+- Failed sorties retain half of recovered materials and research.
+- Recovered totals persist in the existing browser-local v1 save.
+- All 19 unit tests, lint, typecheck, and the production build pass locally.
+- Both M2 decision branches were exercised in the local browser without runtime errors.
 
 ## Next
 
-1. Playtest the M1 greybox encounter.
-2. Tune movement, pressure, collisions, and firing cadence before adding M2 systems.
-3. Review and merge the M1 combat prototype pull request.
+1. Review and playtest the M2 draft pull request.
+2. Record M1 combat metrics and tune Prism values, extraction timing, and Warden
+   pressure from playtest evidence.
+3. Merge M2 before beginning the M3 base loop.
 
 ## Known gaps
 
 - Working title and narrative premise remain open.
-- M1 combat balance has not yet been playtested.
+- M1 combat tuning still lacks a repeatable metrics pass.
+- M2 values are first-pass prototype tuning and need player evidence.
 - Production art and audio intentionally remain out of scope.
 - Phaser currently forms one large production chunk; defer code splitting until the
   combat and base routes are separated in M1–M3.

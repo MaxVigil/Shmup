@@ -37,12 +37,34 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     }
   }
 
+  for (const technology of catalog.alienTechnologies) {
+    const passive = technology.passiveEffect;
+    const weapon = technology.weaponTransformation;
+    if (
+      technology.signalGlyphs.trim().length === 0 ||
+      technology.preservationResearch <= 0 ||
+      passive.id.trim().length === 0 ||
+      passive.name.trim().length === 0 ||
+      passive.armourDamageMultiplier <= 0 ||
+      passive.armourDamageMultiplier > 1 ||
+      weapon.id.trim().length === 0 ||
+      weapon.name.trim().length === 0 ||
+      !Number.isInteger(weapon.projectileCount) ||
+      weapon.projectileCount <= 0 ||
+      weapon.damageMultiplier <= 0 ||
+      weapon.spread < 0
+    ) {
+      throw new Error(`Alien technology ${technology.id} has invalid risk/reward values.`);
+    }
+  }
+
   for (const enemy of catalog.enemies) {
     if (
       enemy.armour <= 0 ||
       enemy.speed <= 0 ||
       enemy.contactDamage <= 0 ||
-      enemy.score <= 0
+      enemy.score <= 0 ||
+      enemy.materialReward <= 0
     ) {
       throw new Error(`Enemy ${enemy.id} must have positive combat values.`);
     }
