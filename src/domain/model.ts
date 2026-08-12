@@ -1,4 +1,4 @@
-export const SAVE_SCHEMA_VERSION = 1 as const;
+export const SAVE_SCHEMA_VERSION = 8 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -8,12 +8,18 @@ export interface PilotState {
 }
 
 export interface ResearchProjectState {
-  readonly technologyId: string;
+  readonly blueprintId: string;
   readonly progress: number;
   readonly requiredProgress: number;
 }
 
+export interface StaffMemberState {
+  readonly id: string;
+  readonly roleId: string;
+}
+
 export interface BaseState {
+  readonly credits: number;
   readonly materials: number;
   readonly research: number;
   readonly energyCapacity: number;
@@ -21,6 +27,19 @@ export interface BaseState {
   readonly pilots: readonly PilotState[];
   readonly activePilotId: string;
   readonly researchQueue: readonly ResearchProjectState[];
+  readonly preservedTechnologyIds: readonly string[];
+  readonly ownedPrimaryWeaponIds: readonly string[];
+  readonly equippedPrimaryWeaponIds: readonly [string | null, string | null];
+  readonly marketSeed: number;
+  readonly sortiesCompleted: number;
+  readonly constructedBuildingIds: readonly string[];
+  readonly staff: readonly StaffMemberState[];
+  readonly unlockedBlueprintIds: readonly string[];
+  readonly locallyProducedWeaponIds: readonly string[];
+  readonly researchedWeaponUpgradeIds: readonly string[];
+  readonly manufacturedWeaponUpgradeIds: readonly string[];
+  readonly manufacturedEquipmentIds: readonly string[];
+  readonly equippedEquipmentId: string | null;
 }
 
 export interface TechnologyKnowledge {
@@ -48,4 +67,9 @@ export interface SortieOutcome {
   readonly extracted: boolean;
   readonly materialsFound: number;
   readonly researchFound: number;
+  readonly preservedTechnologyIds: readonly string[];
+  readonly targetsDestroyed: number;
+  readonly targetsBreached: number;
+  readonly creditsEarned: number;
+  readonly creditsPenalized: number;
 }

@@ -29,4 +29,75 @@ describe('validateContentCatalog', () => {
       'Enemy enemy-scout must have positive combat values',
     );
   });
+
+  it('rejects invalid alien-technology risk and reward values', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      alienTechnologies: [{
+        ...contentCatalog.alienTechnologies[0],
+        passiveEffect: {
+          ...contentCatalog.alienTechnologies[0].passiveEffect,
+          armourDamageMultiplier: 1.5,
+        },
+      }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'Alien technology alien-prism-unclassified has invalid risk/reward values',
+    );
+  });
+
+  it('rejects invalid base economy and construction costs', () => {
+    const invalidEconomy: ContentCatalog = {
+      ...contentCatalog,
+      economy: { ...contentCatalog.economy, missedEnemyPenaltyMultiplier: 1 },
+    };
+    const invalidBuilding: ContentCatalog = {
+      ...contentCatalog,
+      buildings: [{ ...contentCatalog.buildings[0], materialCost: -1 }],
+    };
+
+    expect(() => validateContentCatalog(invalidEconomy)).toThrow(
+      'Base economy has invalid credit values',
+    );
+    expect(() => validateContentCatalog(invalidBuilding)).toThrow(
+      'has invalid construction costs',
+    );
+  });
+
+  it('rejects invalid blueprint research requirements', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      blueprints: [{ ...contentCatalog.blueprints[0], requiredProgress: 0 }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'has invalid research requirements',
+    );
+  });
+
+  it('classifies the Capturer as a terrestrial research programme', () => {
+    expect(contentCatalog.blueprints[0].researchDomain).toBe('earth');
+  });
+
+  it('defines the Impulse Accelerator as a measured piercing weapon', () => {
+    const accelerator = contentCatalog.weapons[1];
+
+    expect(accelerator.shotsPerSecond).toBe(1);
+    expect(accelerator.penetration).toBe('all-targets');
+    expect(accelerator.damage).toBeGreaterThan(contentCatalog.weapons[0].damage);
+  });
+
+  it('defines the M3g.2 blueprint and two perceptible terrestrial upgrades', () => {
+    const blueprint = contentCatalog.marketWeaponBlueprints[0];
+    const [machineUpgrade, acceleratorUpgrade] = contentCatalog.weaponUpgrades;
+
+    expect(blueprint.minimumSorties).toBe(5);
+    expect(blueprint.productionCreditCost).toBeLessThan(
+      contentCatalog.weapons[1].marketPrice!.minimum,
+    );
+    expect(machineUpgrade.damageMultiplier).toBe(2);
+    expect(acceleratorUpgrade.cadenceMultiplier).toBe(1.25);
+    expect(acceleratorUpgrade.requiredBlueprintId).toBe(blueprint.id);
+  });
 });

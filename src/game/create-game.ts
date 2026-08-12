@@ -1,10 +1,23 @@
 import Phaser from 'phaser';
-import { CombatScene } from './scenes/CombatScene';
+import type { Locale } from '../i18n';
+import { CombatScene, type CombatRunResult } from './scenes/CombatScene';
 
 export const LOGICAL_WIDTH = 540;
 export const LOGICAL_HEIGHT = 960;
 
-export function createGame(parent: HTMLElement): Phaser.Game {
+export function createGame(
+  parent: HTMLElement,
+  onRunComplete: (result: CombatRunResult) => void = () => {},
+  getEquippedPrimaryWeaponIds: () => readonly [string | null, string | null] = () => [
+    'weapon-pulse-cannon',
+    null,
+  ],
+  getEquippedEquipmentId: () => string | null = () => null,
+  getAvailableCredits: () => number = () => 0,
+  getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
+  getLocale: () => Locale = () => 'uk',
+  onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
+): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent,
@@ -19,8 +32,18 @@ export function createGame(parent: HTMLElement): Phaser.Game {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [CombatScene],
+    scene: [new CombatScene(
+      onRunComplete,
+      getEquippedPrimaryWeaponIds,
+      getEquippedEquipmentId,
+      getAvailableCredits,
+      getManufacturedWeaponUpgradeIds,
+      getLocale,
+      onActiveWeaponChanged,
+    )],
   };
 
-  return new Phaser.Game(config);
+  const game = new Phaser.Game(config);
+  game.canvas.tabIndex = 0;
+  return game;
 }
