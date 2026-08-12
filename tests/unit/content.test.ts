@@ -100,4 +100,18 @@ describe('validateContentCatalog', () => {
     expect(acceleratorUpgrade.cadenceMultiplier).toBe(1.25);
     expect(acceleratorUpgrade.requiredBlueprintId).toBe(blueprint.id);
   });
+
+  it('rejects building blueprints whose output is not a known building', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      buildingBlueprints: [{
+        ...contentCatalog.buildingBlueprints[0],
+        outputBuildingId: 'building-does-not-exist',
+      }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'Building blueprint blueprint-safe-containment has invalid research requirements',
+    );
+  });
 });

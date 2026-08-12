@@ -35,6 +35,10 @@ export type GameCommand =
   | { readonly type: 'CONSTRUCT_BUILDING'; readonly buildingId: string }
   | { readonly type: 'HIRE_STAFF'; readonly roleId: string }
   | { readonly type: 'START_BLUEPRINT_RESEARCH'; readonly blueprintId: string }
+  | {
+      readonly type: 'START_BUILDING_BLUEPRINT_RESEARCH';
+      readonly blueprintId: string;
+    }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -83,9 +87,16 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           }
           const laboratory = contentCatalog.buildings[0];
           const scientistRole = contentCatalog.staffRoles[0];
+          const quarantine = contentCatalog.buildings.find(
+            (entry) => entry.id === 'building-quarantine-centre',
+          );
+          if (quarantine === undefined) {
+            throw new Error('Quarantine Centre is not defined in the content catalogue.');
+          }
           state = researchTechnology(state, technology, {
             buildingId: laboratory.id,
             staffRoleId: scientistRole.id,
+            containmentBuildingId: quarantine.id,
           });
           break;
         }
@@ -164,6 +175,16 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           );
           if (blueprint === undefined) {
             throw new Error(`Unknown blueprint ${command.blueprintId}.`);
+          }
+          state = startBlueprintResearch(state, blueprint);
+          break;
+        }
+        case 'START_BUILDING_BLUEPRINT_RESEARCH': {
+          const blueprint = contentCatalog.buildingBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown building blueprint ${command.blueprintId}.`);
           }
           state = startBlueprintResearch(state, blueprint);
           break;

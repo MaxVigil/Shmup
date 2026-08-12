@@ -4,8 +4,8 @@ Last updated: 2026-08-12
 
 ## Current milestone
 
-M3g.2a is implemented, playtested, and published on `main`. M3g.3 — alien containment
-and the Quarantine Centre — is the next planned stage.
+M3g.3a — the safe-containment gate — is implemented and awaiting playtest. M3g.3b —
+adapted-blueprint analysis — is the next planned stage.
 
 ## Completed
 
@@ -205,16 +205,33 @@ and the Quarantine Centre — is the next planned stage.
   launch all work without runtime errors.
 - The M2–M3g.2a change set is published on `main` (commits 9b1e40d, 5ec64fc). Lint,
   typecheck, all 96 unit tests, the production build, and GitHub Actions CI pass.
+- M3g.3a adds the safe-containment gate. Delivering the first preserved sample locks
+  it as a sealed artefact: analysis is impossible until containment exists.
+- The terrestrial safe-containment project is researched in the Research and
+  Development Centre through the existing sortie-driven queue, then unlocks the
+  Quarantine Centre blueprint.
+- The Quarantine Centre is a researched extension constructed by the Production Works
+  (350 credits / 20 materials). Construction lives in Engineering; analysis surface
+  lives in Research.
+- With Quarantine operational, the sealed Prism sample can be analysed again; the
+  adapted-blueprint loop is deferred to M3g.3b.
+- The next-objective chain extends through start/advance containment, construct
+  quarantine, and analyse sample, routed to Research/Engineering/Hangar correctly.
+- No schema change was required: the sealed state derives from existing persisted
+  fields, so save schema remains v8 and no migration is needed.
+- Development-only `?m3g3aReady=true` starts a profile with a delivered Prism, an
+  operational Centre, a scientist, and the Works for immediate containment testing.
+- All 101 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
 1. ~~Playtest the M3g.2a staffing gate and the complete terrestrial research → blueprint
    → production pipeline before further numerical tuning.~~ Completed in the local
    browser; recorded in the status history above.
-2. Continue M3g with the alien-containment stage (M3g.3): early Warden signal, Capturer
-   telemetry unlock, preserved-sample containment project, Quarantine Centre extension,
-   and adapted-blueprint manufacturing loop, using the agreed 1–2, 5–7, 7–10, and
-   10–15-sortie progression beats.
+2. Continue M3g with the alien-containment stage. M3g.3a (safe containment and the
+   Quarantine Centre) is implemented and needs a playtest pass; M3g.3b adds the early
+   Warden signal, Capturer telemetry unlock, and the adapted-blueprint manufacturing
+   loop, using the agreed 1–2, 5–7, 7–10, and 10–15-sortie progression beats.
 3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
    hardpoint plus manually fired rocket pod cycles.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket

@@ -113,8 +113,11 @@ cycle at a time.
   blueprints, local manufacturing, and the first machine-gun/Accelerator improvements.
 - [x] M3g.2a: move scientist hiring into Research, add one lead engineer to the Works,
   require production staffing, and clarify that completed research creates a blueprint.
-- [ ] M3g.3: early Warden signal, Capturer telemetry unlock, preserved-sample containment
-  project, Quarantine Centre extension, and adapted-blueprint manufacturing loop.
+- [x] M3g.3a: preserved-sample containment gate — safe-containment research project,
+  Quarantine Centre extension constructed by the Works, and sealed samples that cannot
+  be analysed before containment exists.
+- [ ] M3g.3b: early Warden signal, Capturer telemetry unlock, and the adapted-blueprint
+  manufacturing loop (analyse → adapted blueprint → Works → Hangar).
 - [ ] M3h: one readable ranged enemy and hostile-projectile lifecycle.
 - [ ] M3i: Canister Aircraft Cannon with short range, pellet spread, and capped
   knockback.

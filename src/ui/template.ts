@@ -128,6 +128,13 @@ export function buildAppTemplate(initialState: GameState): string {
               <small id="blueprint-contribution" class="programme-note"></small>
               <button id="start-blueprint-research" class="base-action" type="button"></button>
             </div>
+            <div class="containment-programme" id="containment-programme" hidden>
+              <p class="technology-lab__eyebrow" id="containment-eyebrow"></p>
+              <h3 id="containment-title"></h3>
+              <p id="containment-status" class="technology-lab__status"></p>
+              <small id="containment-note" class="programme-note"></small>
+              <button id="start-containment-research" class="base-action" type="button"></button>
+            </div>
           </section>
 
           <section class="technology-lab research-domain is-alien" aria-labelledby="technology-lab-title">
@@ -157,6 +164,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <div class="facility-row">
               <div><span class="loadout-row__label" id="workshop-label"></span><strong id="workshop-status"></strong><small id="workshop-cost"></small></div>
               <button id="construct-workshop" class="base-action" type="button"></button>
+            </div>
+            <div id="quarantine-row" class="facility-row" hidden>
+              <div><span class="loadout-row__label" id="quarantine-label"></span><strong id="quarantine-status"></strong><small id="quarantine-cost"></small></div>
+              <button id="construct-quarantine" class="base-action" type="button"></button>
             </div>
           </section>
 

@@ -13,6 +13,8 @@ const definitions: ProgressionDefinitions = {
   engineerRoleId: contentCatalog.staffRoles[1].id,
   blueprintId: contentCatalog.blueprints[0].id,
   equipmentId: contentCatalog.equipment[0].id,
+  containmentBlueprintId: contentCatalog.buildingBlueprints[0].id,
+  quarantineId: contentCatalog.buildings[2].id,
 };
 
 describe('progression guidance', () => {
@@ -90,5 +92,68 @@ describe('progression guidance', () => {
     };
 
     expect(getProgressionObjective(withoutEngineer, definitions).kind).toBe('hire-engineer');
+  });
+
+  it('routes a recovered sample through the containment chain', () => {
+    const initial = createInitialGameState();
+    const ready = {
+      ...initial,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
+        staff: [
+          { id: 'scientist-1', roleId: definitions.scientistRoleId },
+          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+        ],
+        unlockedBlueprintIds: [definitions.blueprintId],
+        manufacturedEquipmentIds: [definitions.equipmentId],
+        equippedEquipmentId: definitions.equipmentId,
+        preservedTechnologyIds: [contentCatalog.alienTechnologies[0].id],
+      },
+    };
+    expect(getProgressionObjective(ready, definitions).kind).toBe('start-containment');
+
+    const researching = {
+      ...ready,
+      base: {
+        ...ready.base,
+        researchQueue: [{
+          blueprintId: definitions.containmentBlueprintId,
+          progress: 1,
+          requiredProgress: 3,
+        }],
+      },
+    };
+    expect(getProgressionObjective(researching, definitions)).toMatchObject({
+      kind: 'advance-containment',
+      progress: 1,
+      requiredProgress: 3,
+    });
+
+    const unlocked = {
+      ...researching,
+      base: {
+        ...researching.base,
+        researchQueue: [],
+        unlockedBlueprintIds: [
+          definitions.blueprintId,
+          definitions.containmentBlueprintId,
+        ],
+      },
+    };
+    expect(getProgressionObjective(unlocked, definitions).kind).toBe('construct-quarantine');
+
+    const quarantined = {
+      ...unlocked,
+      base: {
+        ...unlocked.base,
+        constructedBuildingIds: [
+          definitions.laboratoryId,
+          definitions.workshopId,
+          definitions.quarantineId,
+        ],
+      },
+    };
+    expect(getProgressionObjective(quarantined, definitions).kind).toBe('analyse-sample');
   });
 });

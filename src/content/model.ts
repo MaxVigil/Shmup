@@ -90,6 +90,15 @@ export interface BlueprintDefinition {
   readonly outputEquipmentId: string;
 }
 
+export interface BuildingBlueprintDefinition {
+  readonly id: string;
+  readonly researchDomain: 'earth' | 'alien';
+  readonly requiredProgress: number;
+  readonly requiredBuildingId: string;
+  readonly requiredStaffRoleId: string;
+  readonly outputBuildingId: string;
+}
+
 export interface EquipmentDefinition {
   readonly id: string;
   readonly creditCost: number;
@@ -137,6 +146,7 @@ export interface ContentCatalog {
   readonly buildings: readonly BuildingDefinition[];
   readonly staffRoles: readonly StaffRoleDefinition[];
   readonly blueprints: readonly BlueprintDefinition[];
+  readonly buildingBlueprints: readonly BuildingBlueprintDefinition[];
   readonly equipment: readonly EquipmentDefinition[];
   readonly marketWeaponBlueprints: readonly MarketWeaponBlueprintDefinition[];
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];

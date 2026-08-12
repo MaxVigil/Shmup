@@ -51,6 +51,8 @@ const capturerEquipment = contentCatalog.equipment[0];
 const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
 const machineGunUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
+const containmentBlueprint = contentCatalog.buildingBlueprints[0];
+const quarantine = contentCatalog.buildings[2];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
   scientistRoleId: scientistRole.id,
@@ -58,6 +60,8 @@ const progressionDefinitions = {
   blueprintId: capturerBlueprint.id,
   workshopId: workshop.id,
   equipmentId: capturerEquipment.id,
+  containmentBlueprintId: containmentBlueprint.id,
+  quarantineId: quarantine.id,
 };
 
 let game: ReturnType<typeof createGame> | null = null;
@@ -130,6 +134,14 @@ const hireEngineerButton = byId<HTMLButtonElement>('hire-engineer');
 const workshopStatus = byId<HTMLElement>('workshop-status');
 const workshopCost = byId<HTMLElement>('workshop-cost');
 const constructWorkshopButton = byId<HTMLButtonElement>('construct-workshop');
+const containmentProgramme = byId<HTMLElement>('containment-programme');
+const containmentStatus = byId<HTMLElement>('containment-status');
+const containmentNote = byId<HTMLElement>('containment-note');
+const startContainmentResearchButton = byId<HTMLButtonElement>('start-containment-research');
+const quarantineRow = byId<HTMLElement>('quarantine-row');
+const quarantineStatus = byId<HTMLElement>('quarantine-status');
+const quarantineCost = byId<HTMLElement>('quarantine-cost');
+const constructQuarantineButton = byId<HTMLButtonElement>('construct-quarantine');
 const blueprintStatus = byId<HTMLElement>('blueprint-status');
 const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
 const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
@@ -238,6 +250,14 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
       return { title: 'objective.equip', detail: 'objective.equipDetail' };
     case 'recover-artefact':
       return { title: 'objective.recover', detail: 'objective.recoverDetail' };
+    case 'start-containment':
+      return { title: 'objective.startContainment', detail: 'objective.startContainmentDetail' };
+    case 'advance-containment':
+      return { title: 'objective.advanceContainment', detail: 'objective.advanceContainmentDetail' };
+    case 'construct-quarantine':
+      return { title: 'objective.constructQuarantine', detail: 'objective.constructQuarantineDetail' };
+    case 'analyse-sample':
+      return { title: 'objective.analyseSample', detail: 'objective.analyseSampleDetail' };
   }
 }
 
@@ -324,6 +344,11 @@ function renderBase(): void {
       state,
       capturerEquipment.creditCost,
       capturerEquipment.materialCost,
+    ),
+    quarantineResources: resourceShortfall(
+      state,
+      quarantine.creditCost,
+      quarantine.materialCost,
     ),
   };
 
@@ -430,19 +455,22 @@ function renderBase(): void {
     state.base.credits < capturerEquipment.creditCost ||
     state.base.materials < capturerEquipment.materialCost
   );
-  technologyStatus.textContent = !labBuilt
-    ? t('lab.requiresLaboratory')
-    : scientists === 0
-      ? t('lab.requiresScientist')
-      : hasSample
-        ? splitPulseUnlocked
-          ? t('lab.extraSample', { technology: technologyName, research: prism.preservationResearch })
-          : t('lab.sampleReady', { technology: technologyName, module: moduleName })
-        : splitPulseUnlocked
-          ? t('lab.researchComplete', { module: moduleName })
-          : t('lab.noSample');
+  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  technologyStatus.textContent = hasSample && !quarantineBuilt
+    ? t('research.sampleSealed')
+    : !labBuilt
+      ? t('lab.requiresLaboratory')
+      : scientists === 0
+        ? t('lab.requiresScientist')
+        : hasSample
+          ? splitPulseUnlocked
+            ? t('lab.extraSample', { technology: technologyName, research: prism.preservationResearch })
+            : t('lab.sampleReady', { technology: technologyName, module: moduleName })
+          : splitPulseUnlocked
+            ? t('lab.researchComplete', { module: moduleName })
+            : t('lab.noSample');
   researchTechnologyButton.hidden = !hasSample;
-  researchTechnologyButton.disabled = bankrupt || !researchReady;
+  researchTechnologyButton.disabled = bankrupt || !researchReady || !quarantineBuilt;
   researchTechnologyButton.textContent = splitPulseUnlocked
     ? t('lab.analyseSample', { research: prism.preservationResearch })
     : t('lab.researchUnlock', { module: moduleName.toUpperCase() });
@@ -628,6 +656,75 @@ function renderBase(): void {
     : t('loadout.preflightWarning');
   preflightWarning.classList.toggle('is-ready', capturerEquipped);
   launchSortieButton.disabled = bankrupt;
+  renderContainment();
+}
+
+function renderContainment(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
+  const containmentUnlocked = state.base.unlockedBlueprintIds.includes(
+    containmentBlueprint.id,
+  );
+  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const containmentProject = state.base.researchQueue.find(
+    (project) => project.blueprintId === containmentBlueprint.id,
+  );
+  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const scientists = state.base.staff.filter(
+    (member) => member.roleId === scientistRole.id,
+  ).length;
+  const researchReady = labBuilt && scientists > 0;
+  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+
+  containmentProgramme.hidden = !hasSample;
+  if (containmentUnlocked) {
+    containmentStatus.textContent = t('containment.unlocked');
+    containmentNote.textContent = '';
+    startContainmentResearchButton.hidden = true;
+  } else if (containmentProject !== undefined) {
+    containmentStatus.textContent = t('containment.active', {
+      progress: containmentProject.progress,
+      required: containmentProject.requiredProgress,
+    });
+    containmentNote.textContent = researchReady
+      ? t('containment.contribution', { count: scientists })
+      : '';
+    startContainmentResearchButton.hidden = true;
+  } else {
+    containmentStatus.textContent = researchReady
+      ? t('containment.available')
+      : t('containment.requiresTeam');
+    containmentNote.textContent = '';
+    startContainmentResearchButton.hidden = false;
+    startContainmentResearchButton.disabled = bankrupt || !researchReady;
+  }
+
+  quarantineRow.hidden = !containmentUnlocked;
+  if (quarantineBuilt) {
+    quarantineStatus.textContent = t('facility.quarantineBuilt');
+    quarantineCost.textContent = '';
+    constructQuarantineButton.hidden = true;
+  } else {
+    quarantineStatus.textContent =
+      state.base.credits >= quarantine.creditCost &&
+      state.base.materials >= quarantine.materialCost
+        ? t('facility.quarantineAffordable')
+        : t('facility.quarantineShortfall', {
+            credits: Math.max(0, quarantine.creditCost - state.base.credits),
+            materials: Math.max(0, quarantine.materialCost - state.base.materials),
+          });
+    quarantineCost.textContent = t('facility.quarantineCost', {
+      credits: quarantine.creditCost,
+      materials: quarantine.materialCost,
+    });
+    constructQuarantineButton.hidden = false;
+    constructQuarantineButton.disabled =
+      bankrupt ||
+      !workshopBuilt ||
+      state.base.credits < quarantine.creditCost ||
+      state.base.materials < quarantine.materialCost;
+  }
 }
 
 function renderLocale(): void {
@@ -710,6 +807,11 @@ function renderLocale(): void {
   setText('hire-engineer', 'facility.hireEngineer');
   setText('workshop-label', 'facility.workshop');
   setText('construct-workshop', 'facility.constructWorkshop');
+  setText('quarantine-label', 'facility.quarantine');
+  setText('construct-quarantine', 'facility.constructQuarantine');
+  setText('containment-eyebrow', 'containment.eyebrow');
+  setText('containment-title', 'containment.title');
+  setText('start-containment-research', 'containment.start');
   setText('programme-eyebrow', 'programme.eyebrow');
   setText('capturer-programme-title', 'programme.title');
   setText('start-blueprint-research', 'programme.start');
@@ -897,6 +999,17 @@ startBlueprintResearchButton.addEventListener('click', () => {
     type: 'START_BLUEPRINT_RESEARCH',
     blueprintId: capturerBlueprint.id,
   });
+});
+
+startContainmentResearchButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'START_BUILDING_BLUEPRINT_RESEARCH',
+    blueprintId: containmentBlueprint.id,
+  });
+});
+
+constructQuarantineButton.addEventListener('click', () => {
+  store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
 });
 
 manufactureCapturerButton.addEventListener('click', () => {

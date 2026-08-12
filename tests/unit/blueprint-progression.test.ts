@@ -7,6 +7,7 @@ import {
   startBlueprintResearch,
 } from '../../src/domain/blueprint-progression';
 import { createInitialGameState } from '../../src/domain/initial-state';
+import type { GameState } from '../../src/domain/model';
 
 const laboratory = contentCatalog.buildings[0];
 const workshop = contentCatalog.buildings[1];
@@ -75,5 +76,24 @@ describe('blueprint progression', () => {
     expect(() => startBlueprintResearch(createInitialGameState(), blueprint)).toThrow(
       'is required for research',
     );
+  });
+
+  it('researches a building blueprint and constructs its Quarantine Centre', () => {
+    const buildingBlueprint = contentCatalog.buildingBlueprints[0];
+    const quarantine = contentCatalog.buildings[2];
+    let state: GameState = researchReadyState();
+    state = startBlueprintResearch(state, buildingBlueprint);
+    for (let index = 0; index < buildingBlueprint.requiredProgress; index += 1) {
+      state = advanceBlueprintResearch(state, scientist.id);
+    }
+
+    expect(state.base.unlockedBlueprintIds).toEqual([buildingBlueprint.id]);
+    state = constructBuilding(state, workshop);
+    state = constructBuilding(state, quarantine);
+    expect(state.base.constructedBuildingIds).toEqual([
+      laboratory.id,
+      workshop.id,
+      quarantine.id,
+    ]);
   });
 });

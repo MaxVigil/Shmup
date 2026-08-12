@@ -7,6 +7,9 @@ export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection
     case 'start-blueprint':
     case 'advance-blueprint':
     case 'hire-scientist':
+    case 'start-containment':
+    case 'advance-containment':
+    case 'analyse-sample':
       return 'research';
     case 'equip-equipment':
     case 'recover-artefact':
@@ -15,6 +18,7 @@ export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection
     case 'hire-engineer':
     case 'build-workshop':
     case 'manufacture-equipment':
+    case 'construct-quarantine':
       return 'engineering';
   }
 }

@@ -4,7 +4,18 @@ import { contentCatalog } from '../../src/content/catalog';
 
 describe('game store M3a cycle', () => {
   it('delivers, researches, and equips the preserved Prism', () => {
-    const store = createGameStore();
+    const initial = createGameStore().getSnapshot();
+    const laboratory = contentCatalog.buildings[0];
+    const quarantine = contentCatalog.buildings[2];
+    const scientist = contentCatalog.staffRoles[0];
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: [laboratory.id, quarantine.id],
+        staff: [{ id: 'staff-scientist-1', roleId: scientist.id }],
+      },
+    });
     const technology = contentCatalog.alienTechnologies[0];
     const moduleId = technology.weaponTransformation.id;
 
@@ -23,11 +34,6 @@ describe('game store M3a cycle', () => {
     });
     expect(store.getSnapshot().base.preservedTechnologyIds).toEqual([technology.id]);
 
-    store.dispatch({
-      type: 'CONSTRUCT_BUILDING',
-      buildingId: contentCatalog.buildings[0].id,
-    });
-    store.dispatch({ type: 'HIRE_STAFF', roleId: contentCatalog.staffRoles[0].id });
     store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id });
     expect(store.getSnapshot().base.research).toBe(technology.preservationResearch);
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toEqual([
@@ -40,6 +46,53 @@ describe('game store M3a cycle', () => {
       contentCatalog.weapons[0].id,
       moduleId,
     ]);
+  });
+
+  it('seals a delivered sample behind the containment chain', () => {
+    const store = createGameStore();
+    const laboratory = contentCatalog.buildings[0];
+    const workshop = contentCatalog.buildings[1];
+    const quarantine = contentCatalog.buildings[2];
+    const scientist = contentCatalog.staffRoles[0];
+    const containment = contentCatalog.buildingBlueprints[0];
+    const technology = contentCatalog.alienTechnologies[0];
+    const outcome = {
+      extracted: true,
+      materialsFound: 18,
+      researchFound: 0,
+      preservedTechnologyIds: [technology.id],
+      targetsDestroyed: 25,
+      targetsBreached: 0,
+      creditsEarned: 200,
+      creditsPenalized: 0,
+    } as const;
+
+    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
+    store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
+
+    expect(() =>
+      store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id }),
+    ).toThrow('required for quarantine analysis');
+
+    store.dispatch({
+      type: 'START_BUILDING_BLUEPRINT_RESEARCH',
+      blueprintId: containment.id,
+    });
+    for (let index = 0; index < containment.requiredProgress; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: { ...outcome, preservedTechnologyIds: [] },
+      });
+    }
+    expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(containment.id);
+
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
+    expect(store.getSnapshot().base.constructedBuildingIds).toContain(quarantine.id);
+
+    store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id });
+    expect(store.getSnapshot().base.preservedTechnologyIds).toEqual([]);
   });
 
   it('researches, constructs, and manufactures the Capturer across sorties', () => {

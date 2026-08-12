@@ -9,7 +9,11 @@ export type ProgressionObjectiveKind =
   | 'build-workshop'
   | 'manufacture-equipment'
   | 'equip-equipment'
-  | 'recover-artefact';
+  | 'recover-artefact'
+  | 'start-containment'
+  | 'advance-containment'
+  | 'construct-quarantine'
+  | 'analyse-sample';
 
 export interface ProgressionDefinitions {
   readonly laboratoryId: string;
@@ -18,6 +22,8 @@ export interface ProgressionDefinitions {
   readonly blueprintId: string;
   readonly workshopId: string;
   readonly equipmentId: string;
+  readonly containmentBlueprintId: string;
+  readonly quarantineId: string;
 }
 
 export interface ProgressionObjective {
@@ -60,5 +66,23 @@ export function getProgressionObjective(
   if (state.base.equippedEquipmentId !== definitions.equipmentId) {
     return { kind: 'equip-equipment', progress: null, requiredProgress: null };
   }
-  return { kind: 'recover-artefact', progress: null, requiredProgress: null };
+  if (state.base.preservedTechnologyIds.length === 0) {
+    return { kind: 'recover-artefact', progress: null, requiredProgress: null };
+  }
+  if (!state.base.unlockedBlueprintIds.includes(definitions.containmentBlueprintId)) {
+    const project = state.base.researchQueue.find(
+      (entry) => entry.blueprintId === definitions.containmentBlueprintId,
+    );
+    return project === undefined
+      ? { kind: 'start-containment', progress: null, requiredProgress: null }
+      : {
+          kind: 'advance-containment',
+          progress: project.progress,
+          requiredProgress: project.requiredProgress,
+        };
+  }
+  if (!state.base.constructedBuildingIds.includes(definitions.quarantineId)) {
+    return { kind: 'construct-quarantine', progress: null, requiredProgress: null };
+  }
+  return { kind: 'analyse-sample', progress: null, requiredProgress: null };
 }

@@ -7,10 +7,16 @@ export function researchTechnology(
   requirements: {
     readonly buildingId: string;
     readonly staffRoleId: string;
+    readonly containmentBuildingId: string;
   },
 ): GameState {
   if (!state.base.constructedBuildingIds.includes(requirements.buildingId)) {
     throw new Error(`Building ${requirements.buildingId} is required for research.`);
+  }
+  if (!state.base.constructedBuildingIds.includes(requirements.containmentBuildingId)) {
+    throw new Error(
+      `Building ${requirements.containmentBuildingId} is required for quarantine analysis.`,
+    );
   }
   if (!state.base.staff.some((member) => member.roleId === requirements.staffRoleId)) {
     throw new Error(`Staff role ${requirements.staffRoleId} is required for research.`);

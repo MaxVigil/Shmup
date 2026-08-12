@@ -27,6 +27,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('buildings', catalog.buildings);
   assertUniqueIds('staffRoles', catalog.staffRoles);
   assertUniqueIds('blueprints', catalog.blueprints);
+  assertUniqueIds('buildingBlueprints', catalog.buildingBlueprints);
   assertUniqueIds('equipment', catalog.equipment);
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
@@ -44,7 +45,9 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       building.creditCost < 0 ||
       building.materialCost < 0 ||
       (building.requiredBlueprintId !== null &&
-        !catalog.blueprints.some((blueprint) => blueprint.id === building.requiredBlueprintId)) ||
+        !catalog.blueprints.some((blueprint) => blueprint.id === building.requiredBlueprintId) &&
+        !catalog.buildingBlueprints.some((blueprint) =>
+          blueprint.id === building.requiredBlueprintId)) ||
       (building.requiredBuildingId !== null &&
         !catalog.buildings.some((candidate) => candidate.id === building.requiredBuildingId))
     ) {
@@ -63,6 +66,21 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       !catalog.equipment.some((equipment) => equipment.id === blueprint.outputEquipmentId)
     ) {
       throw new Error(`Blueprint ${blueprint.id} has invalid research requirements.`);
+    }
+  }
+
+  for (const blueprint of catalog.buildingBlueprints) {
+    if (
+      !['earth', 'alien'].includes(blueprint.researchDomain) ||
+      !Number.isInteger(blueprint.requiredProgress) ||
+      blueprint.requiredProgress <= 0 ||
+      !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
+      !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId) ||
+      !catalog.buildings.some((building) => building.id === blueprint.outputBuildingId)
+    ) {
+      throw new Error(
+        `Building blueprint ${blueprint.id} has invalid research requirements.`,
+      );
     }
   }
 

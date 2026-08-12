@@ -8,9 +8,12 @@ import {
 
 const technology = contentCatalog.alienTechnologies[0];
 const moduleId = technology.weaponTransformation.id;
+const laboratory = contentCatalog.buildings[0];
+const quarantine = contentCatalog.buildings[2];
 const requirements = {
-  buildingId: contentCatalog.buildings[0].id,
+  buildingId: laboratory.id,
   staffRoleId: contentCatalog.staffRoles[0].id,
+  containmentBuildingId: quarantine.id,
 };
 
 function stateWithPreservedPrism() {
@@ -20,7 +23,7 @@ function stateWithPreservedPrism() {
     base: {
       ...state.base,
       preservedTechnologyIds: [technology.id],
-      constructedBuildingIds: [requirements.buildingId],
+      constructedBuildingIds: [laboratory.id, quarantine.id],
       staff: [{ id: 'staff-scientist-1', roleId: requirements.staffRoleId }],
     },
   };
@@ -78,7 +81,7 @@ describe('technology progression', () => {
       ...sampleOnly,
       base: {
         ...sampleOnly.base,
-        constructedBuildingIds: [requirements.buildingId],
+        constructedBuildingIds: [laboratory.id, quarantine.id],
       },
     };
 
@@ -87,6 +90,18 @@ describe('technology progression', () => {
     );
     expect(() => researchTechnology(laboratoryOnly, technology, requirements)).toThrow(
       'Staff role',
+    );
+  });
+
+  it('blocks analysis until the Quarantine Centre is constructed', () => {
+    const state = stateWithPreservedPrism();
+    const withoutQuarantine = {
+      ...state,
+      base: { ...state.base, constructedBuildingIds: [laboratory.id] },
+    };
+
+    expect(() => researchTechnology(withoutQuarantine, technology, requirements)).toThrow(
+      'required for quarantine analysis',
     );
   });
 });

@@ -1,9 +1,16 @@
 import type { BlueprintDefinition, EquipmentDefinition } from '../content/model';
 import type { GameState, ResearchProjectState } from './model';
 
+export interface ResearchBlueprint {
+  readonly id: string;
+  readonly requiredBuildingId: string;
+  readonly requiredStaffRoleId: string;
+  readonly requiredProgress: number;
+}
+
 export function startBlueprintResearch(
   state: GameState,
-  blueprint: BlueprintDefinition,
+  blueprint: ResearchBlueprint,
 ): GameState {
   if (!state.base.constructedBuildingIds.includes(blueprint.requiredBuildingId)) {
     throw new Error(`Building ${blueprint.requiredBuildingId} is required for research.`);

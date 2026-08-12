@@ -133,6 +133,13 @@ export const contentCatalog = {
       requiredBlueprintId: null,
       requiredBuildingId: 'building-laboratory',
     },
+    {
+      id: 'building-quarantine-centre',
+      creditCost: 350,
+      materialCost: 20,
+      requiredBlueprintId: 'blueprint-safe-containment',
+      requiredBuildingId: 'building-workshop',
+    },
   ],
   staffRoles: [
     {
@@ -156,6 +163,16 @@ export const contentCatalog = {
       requiredBuildingId: 'building-laboratory',
       requiredStaffRoleId: 'staff-scientist',
       outputEquipmentId: 'equipment-alien-technology-capturer',
+    },
+  ],
+  buildingBlueprints: [
+    {
+      id: 'blueprint-safe-containment',
+      researchDomain: 'earth',
+      requiredProgress: 3,
+      requiredBuildingId: 'building-laboratory',
+      requiredStaffRoleId: 'staff-scientist',
+      outputBuildingId: 'building-quarantine-centre',
     },
   ],
   equipment: [
