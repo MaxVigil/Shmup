@@ -105,8 +105,21 @@ properties over time.
 - Chinese characters appear in key constructive roles across Research, Engineering, and
   the Council. Chinese-sourced conventional technology is a credible progression path
   through the terrestrial lanes.
-- Russia does not exist in this game's world. No Russian state, faction, characters,
-  weapons, symbols, or references appear in any content, copy, or localization.
+- Russia does not exist in this game's present-day world. Ukraine won the war, and the
+  former Russian state collapsed into small, locally organised factions that never
+  appear and are never identified as Russian. No Russian state, faction, characters,
+  weapons, or symbols appear in gameplay, content, copy, or localization.
+
+## Ukraine
+
+- Ukraine has become one of Earth's technology-innovation leaders after the war for
+  its survival and independence. The strongest engineers, scientists, and pilots are
+  often Ukrainian, and the best available hireable staff frequently come from Ukraine.
+- In the game's present-day world the former Russian state no longer exists: Ukraine
+  won the war, and the collapsed state left no unified actor, characters, weapons,
+  symbols, or references in current content.
+- Ukrainian staff appear in future personnel systems with characteristics and
+  progression; Ukrainian hires are meant to be a desirable, high-skill option.
 
 ## First vertical slice
 

@@ -132,8 +132,12 @@ cycle at a time.
   essential funding and staff, and a Chinese-sourced conventional-technology lane.
 - The PRC sometimes offers better conditions, technologies, and contracts than other
   Council states, demonstrating China's advantage without making it a constant.
-- Russia does not exist in the game's world. This is a hard content constraint for all
-  future milestones, content, copy, and localization.
+- Ukraine, after the war for its survival and independence, is one of Earth's
+  technology-innovation leaders; the strongest hireable engineers, scientists, and
+  pilots are often Ukrainian.
+- The former Russian state does not exist in the game's present-day world: it collapsed
+  after the war, and no Russian actors or references appear in content. This is a hard
+  content constraint for all future milestones, content, copy, and localization.
 
 ## Stop-and-fix rule
 

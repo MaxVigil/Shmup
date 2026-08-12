@@ -14,8 +14,14 @@ unrelated scope.
   essential funding and staff, and a Chinese-sourced conventional-technology lane.
 - The PRC sometimes offers better conditions, technologies, and contracts than the
   other Council states, demonstrating China's advantage without making it a constant.
-- Russia does not exist in the game's world. No Russian state, faction, characters,
-  weapons, symbols, or references appear in any content, copy, or localization.
+- Ukraine, after the war for its survival and independence, has become one of Earth's
+  technology-innovation leaders. The strongest engineers, scientists, and pilots are
+  therefore often Ukrainian, and the best available hireable staff frequently come
+  from Ukraine.
+- Russia does not exist in the game's present-day world. Ukraine won the war, and the
+  former Russian state collapsed into small, locally organised factions that never
+  appear and are never identified as Russian. No Russian state, faction, characters,
+  weapons, or symbols appear in gameplay, content, copy, or localization.
 - Treat these as standing context for every milestone, content definition, copy,
   localization, and review — not as one-off notes.
 
