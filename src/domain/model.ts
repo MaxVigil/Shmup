@@ -1,4 +1,6 @@
-export const SAVE_SCHEMA_VERSION = 10 as const;
+import type { MissionState } from '../content/model';
+
+export const SAVE_SCHEMA_VERSION = 11 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -43,6 +45,9 @@ export interface BaseState {
   readonly telemetryRecorded: boolean;
   readonly hangarSlots: readonly (string | null)[];
   readonly activeAircraftId: string | null;
+  readonly month: number;
+  readonly fueledAircraftIds: readonly string[];
+  readonly threatMap: readonly MissionState[];
 }
 
 export interface TechnologyKnowledge {

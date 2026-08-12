@@ -184,4 +184,20 @@ describe('validateContentCatalog', () => {
       gunship.marketPrice?.minimum ?? 0,
     );
   });
+
+  it('scales refuel cost with aircraft weight and lists the Council states', () => {
+    const interceptor = contentCatalog.aircraft[0];
+    const gunship = contentCatalog.aircraft[1];
+    const aegis = contentCatalog.aircraft[2];
+
+    expect(gunship.refuelCreditCost).toBeGreaterThan(interceptor.refuelCreditCost);
+    expect(aegis.refuelCreditCost).toBeGreaterThan(gunship.refuelCreditCost);
+
+    const ids = contentCatalog.councilStates.map((state) => state.id);
+    expect(ids).toContain('council-prc');
+    expect(ids).toContain('council-ukraine');
+    for (const state of contentCatalog.councilStates) {
+      expect(state.nameKey).toMatch(/^country\./);
+    }
+  });
 });

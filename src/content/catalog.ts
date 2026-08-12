@@ -313,6 +313,7 @@ export const contentCatalog = {
       armour: 100,
       speedMultiplier: 1,
       damageMultiplier: 1,
+      refuelCreditCost: 30,
       marketPrice: null,
     },
     {
@@ -323,6 +324,7 @@ export const contentCatalog = {
       armour: 150,
       speedMultiplier: 0.82,
       damageMultiplier: 1.15,
+      refuelCreditCost: 45,
       marketPrice: {
         minimum: 900,
         maximum: 1100,
@@ -336,10 +338,29 @@ export const contentCatalog = {
       armour: 210,
       speedMultiplier: 0.68,
       damageMultiplier: 1.3,
+      refuelCreditCost: 60,
       marketPrice: {
         minimum: 1300,
         maximum: 1600,
       },
+    },
+  ],
+  councilStates: [
+    {
+      id: 'council-prc',
+      nameKey: 'country.prc',
+    },
+    {
+      id: 'council-ukraine',
+      nameKey: 'country.ukraine',
+    },
+    {
+      id: 'council-brazil',
+      nameKey: 'country.brazil',
+    },
+    {
+      id: 'council-india',
+      nameKey: 'country.india',
     },
   ],
 } as const satisfies ContentCatalog;

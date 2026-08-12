@@ -45,6 +45,20 @@ export function isGameState(value: unknown): value is GameState {
     ) &&
     (value.base.activeAircraftId === null ||
       typeof value.base.activeAircraftId === 'string') &&
+    typeof value.base.month === 'number' &&
+    Number.isInteger(value.base.month) &&
+    value.base.month >= 1 &&
+    Array.isArray(value.base.fueledAircraftIds) &&
+    value.base.fueledAircraftIds.every((id) => typeof id === 'string') &&
+    Array.isArray(value.base.threatMap) &&
+    value.base.threatMap.every(
+      (mission) =>
+        typeof mission.id === 'string' &&
+        typeof mission.targetCountryId === 'string' &&
+        typeof mission.threatLevel === 'number' &&
+        Number.isInteger(mission.threatLevel) &&
+        mission.threatLevel >= 1,
+    ) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

@@ -1,6 +1,7 @@
 import type { GameState } from './model';
 import { SAVE_SCHEMA_VERSION } from './model';
 import { contentCatalog } from '../content/catalog';
+import { generateThreatMap } from './command-centre';
 
 export function createInitialGameState(): GameState {
   const startingWeapon = contentCatalog.weapons[0];
@@ -36,6 +37,13 @@ export function createInitialGameState(): GameState {
       telemetryRecorded: false,
       hangarSlots: ['aircraft-interceptor', null],
       activeAircraftId: 'aircraft-interceptor',
+      month: 1,
+      fueledAircraftIds: ['aircraft-interceptor'],
+      threatMap: generateThreatMap(
+        contentCatalog.councilStates,
+        0x3a7e2026,
+        1,
+      ),
     },
     technologyCatalog: [],
     activeRun: null,

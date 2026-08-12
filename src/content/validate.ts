@@ -34,6 +34,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
   assertUniqueIds('aircraft', catalog.aircraft);
+  assertUniqueIds('councilStates', catalog.councilStates);
 
   if (
     catalog.economy.startingCredits < 0 ||
@@ -270,6 +271,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       aircraft.armour <= 0 ||
       aircraft.speedMultiplier <= 0 ||
       aircraft.damageMultiplier <= 0 ||
+      !Number.isInteger(aircraft.refuelCreditCost) ||
+      aircraft.refuelCreditCost <= 0 ||
       !['earth', 'alien', 'hybrid'].includes(aircraft.origin) ||
       (aircraft.marketPrice !== null && (
         !Number.isInteger(aircraft.marketPrice.minimum) ||
@@ -279,6 +282,12 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       ))
     ) {
       throw new Error(`Aircraft ${aircraft.id} must have positive combat values.`);
+    }
+  }
+
+  for (const state of catalog.councilStates) {
+    if (typeof state.nameKey !== 'string' || state.nameKey.length === 0) {
+      throw new Error(`Council state ${state.id} must reference a localized name key.`);
     }
   }
 }

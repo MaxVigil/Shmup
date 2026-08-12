@@ -6,6 +6,12 @@ import {
   purchaseHangarSlot,
   setActiveAircraft,
 } from '../domain/hangar';
+import {
+  consumeAircraftFuel,
+  generateThreatMap,
+  monthForSorties,
+  refuelAircraft,
+} from '../domain/command-centre';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
 import {
@@ -65,6 +71,7 @@ export type GameCommand =
   | { readonly type: 'PURCHASE_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'PURCHASE_HANGAR_SLOT' }
   | { readonly type: 'SET_ACTIVE_AIRCRAFT'; readonly aircraftId: string | null }
+  | { readonly type: 'REFUEL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -96,18 +103,30 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         case 'RESET':
           state = createInitialGameState();
           break;
-        case 'SETTLE_SORTIE':
+        case 'SETTLE_SORTIE': {
+          const settled = settleSortie(state.base, command.outcome);
+          const nextMonth = monthForSorties(settled.sortiesCompleted);
+          const afterFuel = consumeAircraftFuel(settled, state.base.activeAircraftId);
           state = {
             ...state,
             base: {
-              ...settleSortie(state.base, command.outcome),
+              ...afterFuel,
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
+              month: nextMonth,
+              threatMap: nextMonth > state.base.month
+                ? generateThreatMap(
+                    contentCatalog.councilStates,
+                    state.base.marketSeed,
+                    nextMonth,
+                  )
+                : state.base.threatMap,
             },
             activeRun: null,
           };
           state = advanceBlueprintResearch(state, contentCatalog.staffRoles[0].id);
           break;
+        }
         case 'RESEARCH_TECHNOLOGY': {
           const technology = contentCatalog.alienTechnologies.find(
             (entry) => entry.id === command.technologyId,
@@ -290,6 +309,16 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         case 'SET_ACTIVE_AIRCRAFT':
           state = setActiveAircraft(state, command.aircraftId);
           break;
+        case 'REFUEL_AIRCRAFT': {
+          const aircraft = contentCatalog.aircraft.find(
+            (entry) => entry.id === command.aircraftId,
+          );
+          if (aircraft === undefined) {
+            throw new Error(`Unknown aircraft ${command.aircraftId}.`);
+          }
+          state = refuelAircraft(state, aircraft, aircraft.refuelCreditCost);
+          break;
+        }
         case 'MANUFACTURE_EQUIPMENT': {
           const equipment = contentCatalog.equipment.find(
             (entry) => entry.id === command.equipmentId,

@@ -1,8 +1,10 @@
 import { contentCatalog } from '../content/catalog';
+import { generateThreatMap } from '../domain/command-centre';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v10';
+export const SAVE_KEY = 'shmup.save.v11';
+export const LEGACY_V10_SAVE_KEY = 'shmup.save.v10';
 export const LEGACY_V9_SAVE_KEY = 'shmup.save.v9';
 export const LEGACY_V8_SAVE_KEY = 'shmup.save.v8';
 export const LEGACY_V7_SAVE_KEY = 'shmup.save.v7';
@@ -15,6 +17,16 @@ export const LEGACY_V1_SAVE_KEY = 'shmup.save.v1';
 
 const DEFAULT_MARKET_SEED = 0x3a7e2026;
 const STARTING_AIRCRAFT_ID = contentCatalog.aircraft[0].id;
+
+function startingThreatMap(marketSeed: number): GameState['base']['threatMap'] {
+  return generateThreatMap(contentCatalog.councilStates, marketSeed, 1);
+}
+
+function startingFueledAircraftIds(
+  slots: readonly (string | null)[],
+): readonly string[] {
+  return slots.filter((id): id is string => id !== null);
+}
 
 export interface KeyValueStorage {
   getItem(key: string): string | null;
@@ -29,6 +41,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V10_SAVE_KEY, migrateV10Save],
     [LEGACY_V9_SAVE_KEY, migrateV9Save],
     [LEGACY_V8_SAVE_KEY, migrateV8Save],
     [LEGACY_V7_SAVE_KEY, migrateV7Save],
@@ -180,6 +193,9 @@ interface MigrationOptions {
   readonly telemetryRecorded: boolean;
   readonly hangarSlots: readonly (string | null)[];
   readonly activeAircraftId: string | null;
+  readonly month: number;
+  readonly fueledAircraftIds: readonly string[];
+  readonly threatMap: GameState['base']['threatMap'];
 }
 
 function migratedState(
@@ -191,7 +207,7 @@ function migratedState(
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 10,
+    schemaVersion: 11,
     base: {
       credits: options.credits,
       materials: base.materials,
@@ -214,6 +230,9 @@ function migratedState(
       telemetryRecorded: options.telemetryRecorded,
       hangarSlots: options.hangarSlots,
       activeAircraftId: options.activeAircraftId,
+      month: options.month,
+      fueledAircraftIds: options.fueledAircraftIds,
+      threatMap: options.threatMap,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -248,7 +267,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 10,
+    schemaVersion: 11,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -277,9 +296,36 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       telemetryRecorded: hadCapturerProgress(base),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
       activeAircraftId: STARTING_AIRCRAFT_ID,
+      month: 1,
+      fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+      threatMap: startingThreatMap(base.marketSeed as number),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
+  };
+  return isGameState(migrated) ? migrated : null;
+}
+
+function migrateV10Save(rawSave: string | null): GameState | null {
+  const legacy = parseLegacy(rawSave, 10);
+  if (legacy === null) {
+    return null;
+  }
+  const { parsed, base } = legacy;
+  const slots = [STARTING_AIRCRAFT_ID, null];
+  const migrated: GameState = {
+    ...(parsed as unknown as GameState),
+    schemaVersion: 11,
+    base: {
+      ...(base as unknown as BaseState),
+      hangarSlots: slots,
+      activeAircraftId: STARTING_AIRCRAFT_ID,
+      month: 1,
+      fueledAircraftIds: startingFueledAircraftIds(slots),
+      threatMap: startingThreatMap(
+        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
+      ),
+    },
   };
   return isGameState(migrated) ? migrated : null;
 }
@@ -292,11 +338,16 @@ function migrateV9Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 10,
+    schemaVersion: 11,
     base: {
       ...(base as unknown as BaseState),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
       activeAircraftId: STARTING_AIRCRAFT_ID,
+      month: 1,
+      fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+      threatMap: startingThreatMap(
+        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
+      ),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -310,12 +361,17 @@ function migrateV8Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 10,
+    schemaVersion: 11,
     base: {
       ...(base as unknown as BaseState),
       telemetryRecorded: hadCapturerProgress(base),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
       activeAircraftId: STARTING_AIRCRAFT_ID,
+      month: 1,
+      fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+      threatMap: startingThreatMap(
+        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
+      ),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -350,7 +406,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 10,
+    schemaVersion: 11,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -376,6 +432,9 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       telemetryRecorded: hadCapturerProgress(base),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
       activeAircraftId: STARTING_AIRCRAFT_ID,
+      month: 1,
+      fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+      threatMap: startingThreatMap(base.marketSeed as number),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -434,6 +493,9 @@ function migrateV5Save(rawSave: string | null): GameState | null {
     telemetryRecorded: hadCapturerProgress(base),
     hangarSlots: [STARTING_AIRCRAFT_ID, null],
     activeAircraftId: STARTING_AIRCRAFT_ID,
+    month: 1,
+    fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+    threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
   });
 }
 
@@ -464,6 +526,9 @@ function migrateV4Save(rawSave: string | null): GameState | null {
     telemetryRecorded: false,
     hangarSlots: [STARTING_AIRCRAFT_ID, null],
     activeAircraftId: STARTING_AIRCRAFT_ID,
+    month: 1,
+    fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+    threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
   });
 }
 
@@ -492,6 +557,9 @@ function migrateV3Save(rawSave: string | null): GameState | null {
     telemetryRecorded: false,
     hangarSlots: [STARTING_AIRCRAFT_ID, null],
     activeAircraftId: STARTING_AIRCRAFT_ID,
+    month: 1,
+    fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+    threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
   });
 }
 
@@ -518,6 +586,9 @@ function migrateV2Save(rawSave: string | null): GameState | null {
     telemetryRecorded: false,
     hangarSlots: [STARTING_AIRCRAFT_ID, null],
     activeAircraftId: STARTING_AIRCRAFT_ID,
+    month: 1,
+    fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+    threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
   });
 }
 
@@ -540,6 +611,9 @@ function migrateV1Save(rawSave: string | null): GameState | null {
     telemetryRecorded: false,
     hangarSlots: [STARTING_AIRCRAFT_ID, null],
     activeAircraftId: STARTING_AIRCRAFT_ID,
+    month: 1,
+    fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
+    threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
   });
 }
 
@@ -549,6 +623,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V10_SAVE_KEY);
   storage.removeItem(LEGACY_V9_SAVE_KEY);
   storage.removeItem(LEGACY_V8_SAVE_KEY);
   storage.removeItem(LEGACY_V7_SAVE_KEY);

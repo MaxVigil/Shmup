@@ -35,6 +35,7 @@ export function buildAppTemplate(initialState: GameState): string {
     <main id="base-screen" class="screen base-screen">
       <nav id="base-navigation" class="base-navigation" role="tablist">
         <button id="base-tab-overview" type="button" role="tab" data-base-section="overview" aria-controls="base-panel-overview" aria-selected="true"></button>
+        <button id="base-tab-command" type="button" role="tab" data-base-section="command" aria-controls="base-panel-command" aria-selected="false"></button>
         <button id="base-tab-research" type="button" role="tab" data-base-section="research" aria-controls="base-panel-research" aria-selected="false"></button>
         <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
         <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
@@ -77,6 +78,25 @@ export function buildAppTemplate(initialState: GameState): string {
             <button id="restart-programme" class="base-action" type="button"></button>
           </section>
         </div>
+      </section>
+
+      <section id="base-panel-command" class="base-panel" role="tabpanel" aria-labelledby="base-tab-command" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="command-section-eyebrow"></p>
+          <h1 id="command-section-title"></h1>
+          <p class="lede" id="command-section-lede"></p>
+        </header>
+        <section class="technology-lab command-panel" aria-labelledby="command-month-title">
+          <p class="technology-lab__eyebrow" id="command-month-eyebrow"></p>
+          <h2 id="command-month-title"></h2>
+          <p class="lede" id="command-month-summary"></p>
+          <div id="threat-map-list" class="threat-map" aria-live="polite"></div>
+        </section>
+        <section class="technology-lab command-panel" aria-labelledby="command-fuel-title">
+          <p class="technology-lab__eyebrow" id="command-fuel-eyebrow"></p>
+          <h2 id="command-fuel-title"></h2>
+          <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
+        </section>
       </section>
 
       <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>
@@ -310,6 +330,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <p id="preflight-warning" class="preflight-warning" role="status"></p>
         <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
         <p id="hardpoint-status" class="preflight-warning" role="status" hidden></p>
+        <p id="fuel-status" class="preflight-warning" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>
         <section class="technology-lab hangar-panel" aria-labelledby="hangar-fleet-title">

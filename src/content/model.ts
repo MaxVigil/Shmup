@@ -159,10 +159,22 @@ export interface AircraftDefinition {
   readonly armour: number;
   readonly speedMultiplier: number;
   readonly damageMultiplier: number;
+  readonly refuelCreditCost: number;
   readonly marketPrice: {
     readonly minimum: number;
     readonly maximum: number;
   } | null;
+}
+
+export interface CouncilStateDefinition {
+  readonly id: string;
+  readonly nameKey: string;
+}
+
+export interface MissionState {
+  readonly id: string;
+  readonly targetCountryId: string;
+  readonly threatLevel: number;
 }
 
 export interface WeaponUpgradeDefinition {
@@ -197,4 +209,5 @@ export interface ContentCatalog {
   readonly marketWeaponBlueprints: readonly MarketWeaponBlueprintDefinition[];
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];
   readonly aircraft: readonly AircraftDefinition[];
+  readonly councilStates: readonly CouncilStateDefinition[];
 }

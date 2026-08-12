@@ -10,6 +10,7 @@ import { isBankrupt } from '../domain/operational-economy';
 import { marketWeaponPrice } from '../domain/terrestrial-market';
 import { marketBlueprintPrice } from '../domain/terrestrial-market';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
+import { isAircraftFueled } from '../domain/command-centre';
 import {
   sectionForObjective,
   type BaseSection,
@@ -720,11 +721,27 @@ function renderBase(): void {
   preflightWarning.classList.toggle('is-ready', capturerEquipped);
   wardenSignalWarning.hidden = state.base.sortiesCompleted < 1;
   wardenSignalWarning.textContent = t('base.wardenSignal');
-  launchSortieButton.disabled = bankrupt;
+  const activeAircraftId = state.base.activeAircraftId;
+  const activeAircraft = activeAircraftId === null
+    ? undefined
+    : contentCatalog.aircraft.find((entry) => entry.id === activeAircraftId);
+  const activeAircraftName = t(
+    aircraftNameKey[activeAircraft?.id ?? ''] ?? 'content.interceptor',
+  );
+  const activeFueled = activeAircraftId !== null && isAircraftFueled(state.base, activeAircraftId);
+  const fuelStatus = byId<HTMLElement>('fuel-status');
+  fuelStatus.hidden = false;
+  fuelStatus.classList.toggle('is-ready', activeFueled);
+  fuelStatus.textContent = t(
+    activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
+    { aircraft: activeAircraftName },
+  );
+  launchSortieButton.disabled = bankrupt || !activeFueled;
   renderContainment();
   renderCanister();
   renderHardpoint();
   renderFleet();
+  renderCommand();
 }
 
 function renderHardpoint(): void {
@@ -834,6 +851,27 @@ function renderFleet(): void {
         const stats = document.createElement('small');
         stats.textContent = aircraftStatSummary(aircraft);
         header.appendChild(stats);
+        const fuel = document.createElement('span');
+        fuel.textContent = t(
+          isAircraftFueled(state.base, aircraft.id)
+            ? 'command.fueled'
+            : 'command.unfueled',
+        );
+        header.appendChild(fuel);
+        if (!isAircraftFueled(state.base, aircraft.id)) {
+          const refuel = document.createElement('button');
+          refuel.className = 'base-action';
+          refuel.type = 'button';
+          refuel.textContent = t('hangar.refuel');
+          refuel.title = t('command.refuelCost', {
+            credits: aircraft.refuelCreditCost,
+          });
+          refuel.disabled = bankrupt || state.base.credits < aircraft.refuelCreditCost;
+          refuel.addEventListener('click', () => {
+            store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: aircraft.id });
+          });
+          header.appendChild(refuel);
+        }
         if (state.base.activeAircraftId === aircraft.id) {
           const active = document.createElement('em');
           active.textContent = t('hangar.activeAircraft');
@@ -912,6 +950,55 @@ function renderFleet(): void {
   const purchaseSlotButton = byId<HTMLButtonElement>('purchase-hangar-slot');
   purchaseSlotButton.hidden = false;
   purchaseSlotButton.disabled = bankrupt || state.base.credits < HANGAR_SLOT_COST;
+}
+
+function renderCommand(): void {
+  const state = store.getSnapshot();
+  byId<HTMLElement>('command-month-eyebrow').textContent = t('command.monthEyebrow', {
+    month: state.base.month,
+  });
+  byId<HTMLElement>('command-month-summary').textContent = t('command.monthSummary', {
+    count: state.base.threatMap.length,
+  });
+  const threatList = byId<HTMLElement>('threat-map-list');
+  threatList.textContent = '';
+  for (const mission of state.base.threatMap) {
+    const stateDefinition = contentCatalog.councilStates.find(
+      (entry) => entry.id === mission.targetCountryId,
+    );
+    const row = document.createElement('article');
+    row.className = 'threat-row';
+    const name = document.createElement('strong');
+    name.textContent = stateDefinition === undefined
+      ? mission.targetCountryId
+      : t(stateDefinition.nameKey as TranslationKey);
+    const level = document.createElement('span');
+    level.textContent = t('command.threatLevel', { value: mission.threatLevel });
+    row.append(name, level);
+    threatList.appendChild(row);
+  }
+
+  const fuelList = byId<HTMLElement>('command-fuel-list');
+  fuelList.textContent = '';
+  for (const aircraftId of state.base.hangarSlots) {
+    if (aircraftId === null) {
+      continue;
+    }
+    const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+    if (aircraft === undefined) {
+      continue;
+    }
+    const row = document.createElement('article');
+    row.className = 'threat-row';
+    const name = document.createElement('strong');
+    name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
+    const fuel = document.createElement('span');
+    fuel.textContent = t(
+      isAircraftFueled(state.base, aircraft.id) ? 'command.fueled' : 'command.unfueled',
+    );
+    row.append(name, fuel);
+    fuelList.appendChild(row);
+  }
 }
 
 function renderCanister(): void {
@@ -1063,6 +1150,7 @@ function renderLocale(): void {
   setText('route-sortie', 'nav.sortie');
   baseNavigation.setAttribute('aria-label', t('baseNav.aria'));
   setText('base-tab-overview', 'baseNav.overview');
+  setText('base-tab-command', 'baseNav.command');
   setText('base-tab-research', 'baseNav.research');
   setText('base-tab-engineering', 'baseNav.engineering');
   setText('base-tab-hangar', 'baseNav.hangar');
@@ -1132,6 +1220,12 @@ function renderLocale(): void {
   setText('hangar-fleet-lede', 'hangar.fleetLede');
   setText('hangar-slot-label', 'hangar.slotLabel');
   setText('hangar-slot-note', 'hangar.slotNote');
+  setText('command-section-eyebrow', 'command.eyebrow');
+  setText('command-section-title', 'command.title');
+  setText('command-section-lede', 'command.lede');
+  setText('command-month-title', 'command.monthTitle');
+  setText('command-fuel-eyebrow', 'command.fuelEyebrow');
+  setText('command-fuel-title', 'command.fuelTitle');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');
   setText('laboratory-label', 'facility.laboratory');

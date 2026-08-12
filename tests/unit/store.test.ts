@@ -356,4 +356,63 @@ describe('game store M3a cycle', () => {
     store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId: aegis.id });
     expect(store.getSnapshot().base.activeAircraftId).toBe(aegis.id);
   });
+
+  it('refuels an unfueled aircraft and consumes fuel at settlement', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 500, fueledAircraftIds: [] },
+    });
+    const interceptor = contentCatalog.aircraft[0];
+    const outcome = {
+      extracted: true,
+      materialsFound: 10,
+      researchFound: 0,
+      preservedTechnologyIds: [],
+      targetsDestroyed: 20,
+      targetsBreached: 0,
+      creditsEarned: 200,
+      creditsPenalized: 0,
+      wardenSignalDetected: false,
+    } as const;
+
+    store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: interceptor.id });
+    expect(store.getSnapshot().base.fueledAircraftIds).toContain(interceptor.id);
+
+    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    expect(store.getSnapshot().base.fueledAircraftIds).not.toContain(interceptor.id);
+    expect(store.getSnapshot().base.month).toBe(1);
+  });
+
+  it('advances the month and regenerates the threat map every six sorties', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, fueledAircraftIds: [] },
+    });
+    const threatMap = store.getSnapshot().base.threatMap;
+    const outcome = {
+      extracted: true,
+      materialsFound: 10,
+      researchFound: 0,
+      preservedTechnologyIds: [],
+      targetsDestroyed: 20,
+      targetsBreached: 0,
+      creditsEarned: 200,
+      creditsPenalized: 0,
+      wardenSignalDetected: false,
+    } as const;
+
+    for (let index = 0; index < 5; index += 1) {
+      store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: contentCatalog.aircraft[0].id });
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
+    expect(store.getSnapshot().base.month).toBe(1);
+    expect(store.getSnapshot().base.threatMap).toEqual(threatMap);
+
+    store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: contentCatalog.aircraft[0].id });
+    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    expect(store.getSnapshot().base.month).toBe(2);
+    expect(store.getSnapshot().base.threatMap).not.toEqual(threatMap);
+  });
 });
