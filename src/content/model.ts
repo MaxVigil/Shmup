@@ -48,6 +48,13 @@ export interface PilotDefinition {
 
 export type EnemyMovementPattern = 'straight' | 'sine';
 
+export interface EnemyRangedProfile {
+  readonly shotDamage: number;
+  readonly shotSpeed: number;
+  readonly shotIntervalMs: number;
+  readonly telegraphMs: number;
+}
+
 export interface EnemyDefinition {
   readonly id: string;
   readonly name: string;
@@ -59,6 +66,7 @@ export interface EnemyDefinition {
   readonly kind: 'regular' | 'elite';
   readonly materialReward: number;
   readonly creditReward: number;
+  readonly ranged: EnemyRangedProfile | null;
 }
 
 export interface BaseEconomyDefinition {

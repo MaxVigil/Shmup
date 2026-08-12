@@ -91,6 +91,22 @@ interface EnemyActor {
   livedMs: number;
   knockbackX: number;
   knockbackY: number;
+  nextShotAtMs: number;
+  telegraph: EnemyTelegraph | null;
+}
+
+interface EnemyTelegraph {
+  readonly line: Phaser.GameObjects.Rectangle;
+  readonly targetX: number;
+  readonly targetY: number;
+  elapsedMs: number;
+}
+
+interface HostileShot {
+  readonly body: Phaser.GameObjects.Rectangle;
+  readonly damage: number;
+  readonly vx: number;
+  readonly vy: number;
 }
 
 interface Star {
@@ -119,6 +135,7 @@ export class CombatScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private movementKeys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private readonly shots: ShotActor[] = [];
+  private readonly hostileShots: HostileShot[] = [];
   private readonly enemies: EnemyActor[] = [];
   private readonly stars: Star[] = [];
   private rng!: RandomSource;
@@ -356,6 +373,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateStarfield(frameMs);
     this.updateShots(frameMs);
     this.updateEnemies(frameMs);
+    this.updateHostileShots(frameMs);
     this.resolveCollisions();
     if (this.ended) {
       return;
@@ -451,6 +469,7 @@ export class CombatScene extends Phaser.Scene {
       }
       this.clearRegularEnemies();
       this.clearShots();
+      this.clearHostileShots();
     }
     if (!signalPresent) {
       this.showDecision(
@@ -514,6 +533,7 @@ export class CombatScene extends Phaser.Scene {
     }
     this.clearRegularEnemies();
     this.clearShots();
+    this.clearHostileShots();
     this.bossWarningElapsedMs = 0;
     this.setStatus('combat.wardenApproach');
     this.renderBossWarning();
@@ -838,11 +858,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private spawnEnemy(definition?: EnemyDefinition): void {
-    const selectedDefinition = definition ?? (
-      this.elapsedMs > 12_000 && this.rng.next() > 0.58
-        ? contentCatalog.enemies[1]
-        : contentCatalog.enemies[0]
-    );
+    const selectedDefinition = definition ?? this.pickRegularEnemy();
     const isElite = selectedDefinition.kind === 'elite';
     const x = this.rng.integer(42, this.scale.width - 42);
     const isWeaver = selectedDefinition.movementPattern === 'sine';
@@ -877,8 +893,27 @@ export class CombatScene extends Phaser.Scene {
       livedMs: 0,
       knockbackX: 0,
       knockbackY: 0,
+      nextShotAtMs: selectedDefinition.ranged === null
+        ? Number.POSITIVE_INFINITY
+        : 1_400 + this.rng.integer(0, 1_200),
+      telegraph: null,
     });
     this.nextEnemyActorId += 1;
+  }
+
+  private pickRegularEnemy(): EnemyDefinition {
+    const first = contentCatalog.enemies[0];
+    if (first === undefined) {
+      throw new Error('No regular enemies are defined.');
+    }
+    const regular = contentCatalog.enemies.filter((entry) => entry.kind === 'regular');
+    if (this.elapsedMs > 20_000 && this.rng.next() > 0.72) {
+      return regular[2] ?? first;
+    }
+    if (this.elapsedMs > 12_000 && this.rng.next() > 0.58) {
+      return regular[1] ?? first;
+    }
+    return regular[0] ?? first;
   }
 
   private spawnElite(): void {
@@ -924,6 +959,10 @@ export class CombatScene extends Phaser.Scene {
         enemy.body.x = Phaser.Math.Clamp(enemy.body.x, 24, this.scale.width - 24);
       }
 
+      if (enemy.definition.ranged !== null) {
+        this.updateEnemyRanged(enemy, deltaMs);
+      }
+
       this.updateEnemyArmourBar(enemy);
 
       if (enemy.definition.kind !== 'elite' && enemy.body.y > this.scale.height + 40) {
@@ -938,6 +977,104 @@ export class CombatScene extends Phaser.Scene {
         this.destroyEnemy(index);
       }
     }
+  }
+
+  private updateEnemyRanged(enemy: EnemyActor, deltaMs: number): void {
+    const profile = enemy.definition.ranged;
+    if (profile === null) {
+      return;
+    }
+    if (enemy.telegraph === null) {
+      enemy.nextShotAtMs -= deltaMs;
+      if (enemy.nextShotAtMs <= 0) {
+        const targetX = Phaser.Math.Clamp(this.player.x, 36, this.scale.width - 36);
+        const targetY = this.player.y - 18;
+        const line = this.add.rectangle(
+          enemy.body.x,
+          enemy.body.y,
+          2,
+          2,
+          0xff5a4f,
+          0.85,
+        );
+        enemy.telegraph = { line, targetX, targetY, elapsedMs: 0 };
+      }
+    } else {
+      enemy.telegraph.elapsedMs += deltaMs;
+      const dx = enemy.telegraph.targetX - enemy.body.x;
+      const dy = enemy.telegraph.targetY - enemy.body.y;
+      const length = Math.max(2, Math.hypot(dx, dy));
+      enemy.telegraph.line
+        .setPosition(enemy.body.x + dx / 2, enemy.body.y + dy / 2)
+        .setDisplaySize(length, 2)
+        .setRotation(Math.atan2(dy, dx));
+      if (enemy.telegraph.elapsedMs >= profile.telegraphMs) {
+        this.fireHostileShot(enemy, dx / length, dy / length);
+        enemy.telegraph.line.destroy();
+        enemy.telegraph = null;
+        enemy.nextShotAtMs = profile.shotIntervalMs + this.rng.integer(0, 600);
+      }
+    }
+  }
+
+  private fireHostileShot(enemy: EnemyActor, unitX: number, unitY: number): void {
+    const profile = enemy.definition.ranged;
+    if (profile === null) {
+      return;
+    }
+    const body = this.add.rectangle(enemy.body.x, enemy.body.y, 7, 7, 0xff5a4f);
+    body.setStrokeStyle(1, 0xffd1c6, 0.8);
+    this.hostileShots.push({
+      body,
+      damage: profile.shotDamage,
+      vx: unitX * profile.shotSpeed,
+      vy: unitY * profile.shotSpeed,
+    });
+  }
+
+  private updateHostileShots(deltaMs: number): void {
+    for (let index = this.hostileShots.length - 1; index >= 0; index -= 1) {
+      const shot = this.hostileShots[index];
+      if (shot === undefined) {
+        continue;
+      }
+      shot.body.x += shot.vx * (deltaMs / 1000);
+      shot.body.y += shot.vy * (deltaMs / 1000);
+      const hitPlayer =
+        this.invulnerableMs <= 0 &&
+        Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), shot.body.getBounds());
+      if (hitPlayer) {
+        const impactX = shot.body.x;
+        const impactY = shot.body.y;
+        shot.body.destroy();
+        this.hostileShots.splice(index, 1);
+        this.armour = Math.max(0, this.armour - shot.damage);
+        this.invulnerableMs = 700;
+        this.createContactBurst(impactX, impactY);
+        this.cameras.main.shake(70, 0.004);
+        if (this.armour === 0) {
+          this.beginEnding(false, 'combat.shipLost');
+          return;
+        }
+        continue;
+      }
+      if (
+        shot.body.y > this.scale.height + 20 ||
+        shot.body.y < -40 ||
+        shot.body.x < -40 ||
+        shot.body.x > this.scale.width + 40
+      ) {
+        shot.body.destroy();
+        this.hostileShots.splice(index, 1);
+      }
+    }
+  }
+
+  private clearHostileShots(): void {
+    for (const shot of this.hostileShots) {
+      shot.body.destroy();
+    }
+    this.hostileShots.length = 0;
   }
 
   private resolveCollisions(): void {
@@ -1052,6 +1189,7 @@ export class CombatScene extends Phaser.Scene {
     if (enemy === undefined) {
       return;
     }
+    enemy.telegraph?.line.destroy();
     enemy.body.destroy();
     enemy.armourBarBackground?.destroy();
     enemy.armourBarFill?.destroy();
@@ -1197,10 +1335,12 @@ export class CombatScene extends Phaser.Scene {
 
   private clearCombatActors(): void {
     this.clearShots();
+    this.clearHostileShots();
     for (const enemy of this.enemies) {
       enemy.body.destroy();
       enemy.armourBarBackground?.destroy();
       enemy.armourBarFill?.destroy();
+      enemy.telegraph?.line.destroy();
     }
     this.enemies.length = 0;
   }

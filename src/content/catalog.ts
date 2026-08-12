@@ -88,6 +88,7 @@ export const contentCatalog = {
       kind: 'regular',
       materialReward: 1,
       creditReward: 8,
+      ranged: null,
     },
     {
       id: 'enemy-weaver',
@@ -100,6 +101,7 @@ export const contentCatalog = {
       kind: 'regular',
       materialReward: 2,
       creditReward: 12,
+      ranged: null,
     },
     {
       id: 'enemy-warden',
@@ -112,6 +114,25 @@ export const contentCatalog = {
       kind: 'elite',
       materialReward: 18,
       creditReward: 100,
+      ranged: null,
+    },
+    {
+      id: 'enemy-gunship',
+      name: 'Gunship',
+      armour: 26,
+      speed: 70,
+      contactDamage: 14,
+      score: 320,
+      movementPattern: 'straight',
+      kind: 'regular',
+      materialReward: 2,
+      creditReward: 16,
+      ranged: {
+        shotDamage: 8,
+        shotSpeed: 280,
+        shotIntervalMs: 2400,
+        telegraphMs: 750,
+      },
     },
   ],
   economy: {

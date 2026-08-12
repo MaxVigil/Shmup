@@ -142,4 +142,15 @@ describe('validateContentCatalog', () => {
     expect(emitter.shotsPerSecond).toBe(6);
     expect(emitterDps).toBeGreaterThan(upgradedGunDps);
   });
+
+  it('defines the Gunship as a telegraphed ranged regular enemy', () => {
+    const gunship = contentCatalog.enemies.find(
+      (enemy) => enemy.kind === 'regular' && enemy.ranged !== null,
+    );
+
+    expect(gunship?.ranged).toBeDefined();
+    expect(gunship?.ranged?.shotDamage).toBeGreaterThan(0);
+    expect(gunship?.ranged?.shotSpeed).toBeGreaterThan(0);
+    expect(gunship?.ranged?.telegraphMs).toBeGreaterThan(0);
+  });
 });

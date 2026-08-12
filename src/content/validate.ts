@@ -228,7 +228,15 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       enemy.score <= 0 ||
       enemy.materialReward <= 0 ||
       !Number.isInteger(enemy.creditReward) ||
-      enemy.creditReward <= 0
+      enemy.creditReward <= 0 ||
+      (enemy.ranged !== null && (
+        enemy.ranged.shotDamage <= 0 ||
+        enemy.ranged.shotSpeed <= 0 ||
+        !Number.isInteger(enemy.ranged.shotIntervalMs) ||
+        enemy.ranged.shotIntervalMs <= 0 ||
+        !Number.isInteger(enemy.ranged.telegraphMs) ||
+        enemy.ranged.telegraphMs <= 0
+      ))
     ) {
       throw new Error(`Enemy ${enemy.id} must have positive combat values.`);
     }
