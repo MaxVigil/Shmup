@@ -143,6 +143,16 @@ describe('validateContentCatalog', () => {
     expect(emitterDps).toBeGreaterThan(upgradedGunDps);
   });
 
+  it('keeps the Canister Cannon competitive at point-blank range', () => {
+    const canister = contentCatalog.weapons[3];
+    const canisterDps =
+      canister.damage * canister.projectileCount * canister.shotsPerSecond;
+
+    expect(canister.damage).toBe(7);
+    expect(canister.shotsPerSecond).toBe(1.8);
+    expect(canisterDps).toBeGreaterThan(70);
+  });
+
   it('defines the Gunship as a ranged regular enemy', () => {
     const gunship = contentCatalog.enemies.find(
       (enemy) => enemy.kind === 'regular' && enemy.ranged !== null,
