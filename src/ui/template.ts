@@ -1,0 +1,289 @@
+import type { GameState } from '../domain/model';
+
+export function buildAppTemplate(initialState: GameState): string {
+  return `
+  <div class="app-frame">
+    <header class="top-bar">
+      <div class="top-bar__brand" id="app-brand"></div>
+      <div class="top-bar__route" aria-live="polite">
+        <span id="route-base"></span>
+        <span aria-hidden="true">/</span>
+        <span id="route-sortie"></span>
+      </div>
+      <div class="settings">
+        <button
+          id="settings-toggle"
+          class="icon-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="settings-menu"
+        >
+          <span aria-hidden="true">⚙</span>
+        </button>
+        <div id="settings-menu" class="settings-menu" hidden>
+          <strong id="settings-title"></strong>
+          <label for="locale-select" id="language-label"></label>
+          <select id="locale-select">
+            <option id="locale-option-uk" value="uk"></option>
+            <option id="locale-option-en" value="en"></option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main id="base-screen" class="screen base-screen">
+      <nav id="base-navigation" class="base-navigation" role="tablist">
+        <button id="base-tab-overview" type="button" role="tab" data-base-section="overview" aria-controls="base-panel-overview" aria-selected="true"></button>
+        <button id="base-tab-research" type="button" role="tab" data-base-section="research" aria-controls="base-panel-research" aria-selected="false"></button>
+        <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
+        <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
+      </nav>
+
+      <dl class="base-resource-strip">
+        <div><dt id="credit-label"></dt><dd id="credit-total">${initialState.base.credits}</dd></div>
+        <div><dt id="material-label"></dt><dd id="material-total">${initialState.base.materials}</dd></div>
+        <div><dt id="research-label"></dt><dd id="research-total">${initialState.base.research}</dd></div>
+      </dl>
+
+      <section id="base-panel-overview" class="base-panel base-overview" role="tabpanel" aria-labelledby="base-tab-overview">
+        <div class="base-hero" aria-labelledby="base-title">
+          <p class="eyebrow" id="base-eyebrow"></p>
+          <h1 id="base-title"></h1>
+          <p class="lede" id="base-lede"></p>
+
+          <div class="mandate-brief">
+            <span id="mandate-label"></span>
+            <p id="mandate-copy"></p>
+            <small id="mandate-terms"></small>
+          </div>
+
+          <div class="system-check" role="status">
+            <span class="system-check__light" aria-hidden="true"></span>
+            <span id="prototype-status"></span>
+            <small><span id="save-schema-label"></span> v${initialState.schemaVersion}</small>
+          </div>
+          <div class="progression-objective" aria-live="polite">
+            <span id="objective-label"></span>
+            <strong id="objective-title"></strong>
+            <p id="objective-detail"></p>
+            <button id="objective-open-section" class="text-action" type="button"></button>
+          </div>
+          <p class="run-report" id="base-run-report" aria-live="polite"></p>
+          <section id="insolvency-panel" class="insolvency-panel" hidden>
+            <span id="insolvency-label"></span>
+            <strong id="insolvency-title"></strong>
+            <p id="insolvency-detail"></p>
+            <button id="restart-programme" class="base-action" type="button"></button>
+          </section>
+        </div>
+      </section>
+
+      <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="research-section-eyebrow"></p>
+          <h1 id="research-section-title"></h1>
+          <p class="lede" id="research-section-lede"></p>
+        </header>
+        <div class="research-grid">
+          <section class="programme-panel research-domain is-earth" aria-labelledby="earth-research-title">
+            <p class="technology-lab__eyebrow" id="earth-research-eyebrow"></p>
+            <h2 id="earth-research-title"></h2>
+            <p id="earth-research-intro" class="technology-lab__status"></p>
+            <div class="facility-row research-staff-row">
+              <div><span class="loadout-row__label" id="scientists-label"></span><strong id="scientist-count"></strong><small id="scientist-note"></small></div>
+              <button id="hire-scientist" class="base-action" type="button"></button>
+            </div>
+            <div class="research-lane">
+              <span id="earth-airframe-label"></span>
+              <strong id="earth-airframe-status"></strong>
+              <small id="earth-airframe-note"></small>
+            </div>
+            <div class="research-lane">
+              <span id="earth-weapons-label"></span>
+              <strong id="earth-weapons-status"></strong>
+              <small id="earth-weapons-note"></small>
+            </div>
+            <div class="terrestrial-projects">
+              <article class="terrestrial-project" id="machine-upgrade-project">
+                <div>
+                  <span id="machine-upgrade-label" class="loadout-row__label"></span>
+                  <strong id="machine-upgrade-status"></strong>
+                  <small id="machine-upgrade-note"></small>
+                </div>
+                <button id="research-machine-upgrade" class="base-action" type="button"></button>
+              </article>
+              <article class="terrestrial-project" id="accelerator-upgrade-project" hidden>
+                <div>
+                  <span id="accelerator-upgrade-label" class="loadout-row__label"></span>
+                  <strong id="accelerator-upgrade-status"></strong>
+                  <small id="accelerator-upgrade-note"></small>
+                </div>
+                <button id="research-accelerator-upgrade" class="base-action" type="button"></button>
+              </article>
+            </div>
+            <div class="special-project">
+              <p class="technology-lab__eyebrow" id="programme-eyebrow"></p>
+              <h3 id="capturer-programme-title"></h3>
+              <p id="blueprint-status" class="technology-lab__status"></p>
+              <small id="blueprint-contribution" class="programme-note"></small>
+              <button id="start-blueprint-research" class="base-action" type="button"></button>
+            </div>
+          </section>
+
+          <section class="technology-lab research-domain is-alien" aria-labelledby="technology-lab-title">
+            <p class="technology-lab__eyebrow" id="technology-lab-eyebrow"></p>
+            <h2 id="technology-lab-title"></h2>
+            <p id="alien-research-intro" class="domain-intro"></p>
+            <p id="technology-status" class="technology-lab__status"></p>
+            <button id="research-technology" class="base-action" type="button" hidden></button>
+          </section>
+        </div>
+      </section>
+
+      <section id="base-panel-engineering" class="base-panel" role="tabpanel" aria-labelledby="base-tab-engineering" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="engineering-section-eyebrow"></p>
+          <h1 id="engineering-section-title"></h1>
+          <p class="lede" id="engineering-section-lede"></p>
+        </header>
+        <div class="engineering-grid">
+          <section class="facility-panel" aria-labelledby="facility-title">
+            <p class="technology-lab__eyebrow" id="facility-eyebrow"></p>
+            <h2 id="facility-title"></h2>
+            <div class="facility-row">
+              <div><span class="loadout-row__label" id="laboratory-label"></span><strong id="laboratory-status"></strong><small id="laboratory-cost"></small></div>
+              <button id="construct-laboratory" class="base-action" type="button"></button>
+            </div>
+            <div class="facility-row">
+              <div><span class="loadout-row__label" id="workshop-label"></span><strong id="workshop-status"></strong><small id="workshop-cost"></small></div>
+              <button id="construct-workshop" class="base-action" type="button"></button>
+            </div>
+          </section>
+
+          <section class="programme-panel" aria-labelledby="manufacturing-title">
+            <p class="technology-lab__eyebrow" id="manufacturing-eyebrow"></p>
+            <h2 id="manufacturing-title"></h2>
+            <div class="facility-row production-staff-row">
+              <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
+              <button id="hire-engineer" class="base-action" type="button"></button>
+            </div>
+            <div class="facility-row programme-equipment">
+              <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
+              <button id="manufacture-capturer" class="base-action" type="button"></button>
+            </div>
+            <div id="accelerator-production-row" class="facility-row programme-equipment" hidden>
+              <div><span class="loadout-row__label" id="accelerator-production-label"></span><strong id="accelerator-production-status"></strong><small id="accelerator-production-note"></small></div>
+              <button id="manufacture-accelerator" class="base-action" type="button"></button>
+            </div>
+            <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
+              <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>
+              <button id="manufacture-machine-upgrade" class="base-action" type="button"></button>
+            </div>
+            <div id="accelerator-upgrade-production-row" class="facility-row programme-equipment" hidden>
+              <div><span class="loadout-row__label" id="accelerator-upgrade-production-label"></span><strong id="accelerator-upgrade-production-status"></strong><small id="accelerator-upgrade-production-note"></small></div>
+              <button id="manufacture-accelerator-upgrade" class="base-action" type="button"></button>
+            </div>
+          </section>
+
+          <section class="market-panel" aria-labelledby="market-title">
+            <p class="technology-lab__eyebrow" id="market-eyebrow"></p>
+            <h2 id="market-title"></h2>
+            <p id="market-intro" class="domain-intro"></p>
+            <article class="market-offer">
+              <div class="market-offer__copy">
+                <span id="market-offer-label" class="loadout-row__label"></span>
+                <strong id="market-weapon-name"></strong>
+                <p id="market-weapon-role"></p>
+                <small id="market-offer-status"></small>
+              </div>
+              <div class="market-offer__action">
+                <strong id="market-weapon-price"></strong>
+                <button id="purchase-market-weapon" class="base-action" type="button"></button>
+              </div>
+            </article>
+            <article id="market-blueprint-offer" class="market-offer" hidden>
+              <div class="market-offer__copy">
+                <span id="market-blueprint-label" class="loadout-row__label"></span>
+                <strong id="market-blueprint-name"></strong>
+                <p id="market-blueprint-role"></p>
+                <small id="market-blueprint-status"></small>
+              </div>
+              <div class="market-offer__action">
+                <strong id="market-blueprint-price"></strong>
+                <button id="purchase-market-blueprint" class="base-action" type="button"></button>
+              </div>
+            </article>
+          </section>
+        </div>
+      </section>
+
+      <section id="base-panel-hangar" class="base-panel" role="tabpanel" aria-labelledby="base-tab-hangar" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="hangar-section-eyebrow"></p>
+          <h1 id="hangar-section-title"></h1>
+          <p class="lede" id="hangar-section-lede"></p>
+        </header>
+        <section class="technology-lab hangar-panel" aria-labelledby="hangar-loadout-title">
+          <p class="technology-lab__eyebrow" id="hangar-loadout-eyebrow"></p>
+          <h2 id="hangar-loadout-title"></h2>
+          <div class="primary-loadout" aria-labelledby="weapon-module-label">
+            <span class="loadout-row__label" id="weapon-module-label"></span>
+            <div class="weapon-slot-summary" aria-live="polite">
+              <div><span id="weapon-slot-1-label"></span><strong id="weapon-slot-1-name"></strong></div>
+              <div><span id="weapon-slot-2-label"></span><strong id="weapon-slot-2-name"></strong></div>
+            </div>
+            <div class="weapon-options">
+              <article id="weapon-option-standard" class="weapon-option" data-weapon-id="weapon-pulse-cannon">
+                <div><strong id="weapon-standard-name"></strong><small id="weapon-standard-role"></small></div>
+                <div class="weapon-slot-actions">
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
+                </div>
+              </article>
+              <article id="weapon-option-accelerator" class="weapon-option" data-weapon-id="weapon-impulse-accelerator" hidden>
+                <div><strong id="weapon-accelerator-name"></strong><small id="weapon-accelerator-role"></small></div>
+                <div class="weapon-slot-actions">
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
+                </div>
+              </article>
+              <article id="weapon-option-split" class="weapon-option" data-weapon-id="weapon-split-pulse" hidden>
+                <div><strong id="weapon-split-name"></strong><small id="weapon-split-role"></small></div>
+                <div class="weapon-slot-actions">
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="loadout-row">
+            <div><span class="loadout-row__label" id="special-equipment-label"></span><strong id="special-equipment-status"></strong><small id="special-equipment-note"></small></div>
+            <button id="toggle-special-equipment" class="base-action" type="button" hidden></button>
+          </div>
+          <p id="preflight-warning" class="preflight-warning" role="status"></p>
+          <button id="launch-sortie" class="base-action launch-action" type="button"></button>
+        </section>
+      </section>
+    </main>
+
+    <main id="sortie-screen" class="screen sortie-screen" hidden>
+      <aside class="sortie-brief" aria-labelledby="sortie-title">
+        <p class="eyebrow" id="sortie-eyebrow"></p>
+        <h1 id="sortie-title"></h1>
+        <p class="lede" id="sortie-instructions"></p>
+        <p class="run-report" id="sortie-run-report" aria-live="polite"></p>
+        <button id="return-to-base" class="base-action return-action" type="button" hidden></button>
+      </aside>
+      <section id="combat-frame" class="combat-frame">
+        <div id="game-root"></div>
+      </section>
+      <aside class="sortie-controls" aria-live="polite">
+        <span id="active-weapon-label"></span>
+        <strong id="active-weapon-name"></strong>
+        <button id="switch-primary-weapon" class="weapon-switch-action" type="button" aria-keyshortcuts="X"></button>
+        <small id="weapon-switch-note"></small>
+      </aside>
+    </main>
+  </div>
+  `;
+}
