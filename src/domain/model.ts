@@ -1,4 +1,4 @@
-export const SAVE_SCHEMA_VERSION = 9 as const;
+export const SAVE_SCHEMA_VERSION = 10 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -41,6 +41,8 @@ export interface BaseState {
   readonly manufacturedEquipmentIds: readonly string[];
   readonly equippedEquipmentId: string | null;
   readonly telemetryRecorded: boolean;
+  readonly hangarSlots: readonly (string | null)[];
+  readonly activeAircraftId: string | null;
 }
 
 export interface TechnologyKnowledge {

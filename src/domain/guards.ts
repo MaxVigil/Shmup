@@ -39,6 +39,12 @@ export function isGameState(value: unknown): value is GameState {
     (value.base.equippedEquipmentId === null ||
       typeof value.base.equippedEquipmentId === 'string') &&
     typeof value.base.telemetryRecorded === 'boolean' &&
+    Array.isArray(value.base.hangarSlots) &&
+    value.base.hangarSlots.every(
+      (slot) => slot === null || typeof slot === 'string',
+    ) &&
+    (value.base.activeAircraftId === null ||
+      typeof value.base.activeAircraftId === 'string') &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

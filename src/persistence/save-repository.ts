@@ -2,7 +2,8 @@ import { contentCatalog } from '../content/catalog';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v9';
+export const SAVE_KEY = 'shmup.save.v10';
+export const LEGACY_V9_SAVE_KEY = 'shmup.save.v9';
 export const LEGACY_V8_SAVE_KEY = 'shmup.save.v8';
 export const LEGACY_V7_SAVE_KEY = 'shmup.save.v7';
 export const LEGACY_V6_SAVE_KEY = 'shmup.save.v6';
@@ -13,6 +14,7 @@ export const LEGACY_V2_SAVE_KEY = 'shmup.save.v2';
 export const LEGACY_V1_SAVE_KEY = 'shmup.save.v1';
 
 const DEFAULT_MARKET_SEED = 0x3a7e2026;
+const STARTING_AIRCRAFT_ID = contentCatalog.aircraft[0].id;
 
 export interface KeyValueStorage {
   getItem(key: string): string | null;
@@ -27,6 +29,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V9_SAVE_KEY, migrateV9Save],
     [LEGACY_V8_SAVE_KEY, migrateV8Save],
     [LEGACY_V7_SAVE_KEY, migrateV7Save],
     [LEGACY_V6_SAVE_KEY, migrateV6Save],
@@ -175,6 +178,8 @@ interface MigrationOptions {
   readonly equippedEquipmentId: string | null;
   readonly preservedTechnologyIds: readonly string[];
   readonly telemetryRecorded: boolean;
+  readonly hangarSlots: readonly (string | null)[];
+  readonly activeAircraftId: string | null;
 }
 
 function migratedState(
@@ -186,7 +191,7 @@ function migratedState(
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 9,
+    schemaVersion: 10,
     base: {
       credits: options.credits,
       materials: base.materials,
@@ -207,6 +212,8 @@ function migratedState(
       manufacturedEquipmentIds: options.manufacturedEquipmentIds,
       equippedEquipmentId: options.equippedEquipmentId,
       telemetryRecorded: options.telemetryRecorded,
+      hangarSlots: options.hangarSlots,
+      activeAircraftId: options.activeAircraftId,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -241,7 +248,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 9,
+    schemaVersion: 10,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -268,9 +275,29 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
       equippedEquipmentId: base.equippedEquipmentId as string | null,
       telemetryRecorded: hadCapturerProgress(base),
+      hangarSlots: [STARTING_AIRCRAFT_ID, null],
+      activeAircraftId: STARTING_AIRCRAFT_ID,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
+  };
+  return isGameState(migrated) ? migrated : null;
+}
+
+function migrateV9Save(rawSave: string | null): GameState | null {
+  const legacy = parseLegacy(rawSave, 9);
+  if (legacy === null) {
+    return null;
+  }
+  const { parsed, base } = legacy;
+  const migrated: GameState = {
+    ...(parsed as unknown as GameState),
+    schemaVersion: 10,
+    base: {
+      ...(base as unknown as BaseState),
+      hangarSlots: [STARTING_AIRCRAFT_ID, null],
+      activeAircraftId: STARTING_AIRCRAFT_ID,
+    },
   };
   return isGameState(migrated) ? migrated : null;
 }
@@ -283,10 +310,12 @@ function migrateV8Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 9,
+    schemaVersion: 10,
     base: {
       ...(base as unknown as BaseState),
       telemetryRecorded: hadCapturerProgress(base),
+      hangarSlots: [STARTING_AIRCRAFT_ID, null],
+      activeAircraftId: STARTING_AIRCRAFT_ID,
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -321,7 +350,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 9,
+    schemaVersion: 10,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -345,6 +374,8 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
       equippedEquipmentId: base.equippedEquipmentId as string | null,
       telemetryRecorded: hadCapturerProgress(base),
+      hangarSlots: [STARTING_AIRCRAFT_ID, null],
+      activeAircraftId: STARTING_AIRCRAFT_ID,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -401,6 +432,8 @@ function migrateV5Save(rawSave: string | null): GameState | null {
     manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
     equippedEquipmentId: base.equippedEquipmentId as string | null,
     telemetryRecorded: hadCapturerProgress(base),
+    hangarSlots: [STARTING_AIRCRAFT_ID, null],
+    activeAircraftId: STARTING_AIRCRAFT_ID,
   });
 }
 
@@ -429,6 +462,8 @@ function migrateV4Save(rawSave: string | null): GameState | null {
     manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
     equippedEquipmentId: null,
     telemetryRecorded: false,
+    hangarSlots: [STARTING_AIRCRAFT_ID, null],
+    activeAircraftId: STARTING_AIRCRAFT_ID,
   });
 }
 
@@ -455,6 +490,8 @@ function migrateV3Save(rawSave: string | null): GameState | null {
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
     telemetryRecorded: false,
+    hangarSlots: [STARTING_AIRCRAFT_ID, null],
+    activeAircraftId: STARTING_AIRCRAFT_ID,
   });
 }
 
@@ -479,6 +516,8 @@ function migrateV2Save(rawSave: string | null): GameState | null {
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
     telemetryRecorded: false,
+    hangarSlots: [STARTING_AIRCRAFT_ID, null],
+    activeAircraftId: STARTING_AIRCRAFT_ID,
   });
 }
 
@@ -499,6 +538,8 @@ function migrateV1Save(rawSave: string | null): GameState | null {
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
     telemetryRecorded: false,
+    hangarSlots: [STARTING_AIRCRAFT_ID, null],
+    activeAircraftId: STARTING_AIRCRAFT_ID,
   });
 }
 
@@ -508,6 +549,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V9_SAVE_KEY);
   storage.removeItem(LEGACY_V8_SAVE_KEY);
   storage.removeItem(LEGACY_V7_SAVE_KEY);
   storage.removeItem(LEGACY_V6_SAVE_KEY);

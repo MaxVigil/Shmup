@@ -304,4 +304,42 @@ export const contentCatalog = {
       cadenceMultiplier: 1.25,
     },
   ],
+  aircraft: [
+    {
+      id: 'aircraft-interceptor',
+      name: 'Interceptor',
+      role: 'Light interceptor // balanced speed and armour',
+      origin: 'earth',
+      armour: 100,
+      speedMultiplier: 1,
+      damageMultiplier: 1,
+      marketPrice: null,
+    },
+    {
+      id: 'aircraft-gunship',
+      name: 'Gunship',
+      role: 'Assault gunship // heavier armour, slower, harder hits',
+      origin: 'earth',
+      armour: 150,
+      speedMultiplier: 0.82,
+      damageMultiplier: 1.15,
+      marketPrice: {
+        minimum: 900,
+        maximum: 1100,
+      },
+    },
+    {
+      id: 'aircraft-aegis',
+      name: 'Aegis',
+      role: 'Heavy tank // most armour, slowest, heaviest hits',
+      origin: 'earth',
+      armour: 210,
+      speedMultiplier: 0.68,
+      damageMultiplier: 1.3,
+      marketPrice: {
+        minimum: 1300,
+        maximum: 1600,
+      },
+    },
+  ],
 } as const satisfies ContentCatalog;

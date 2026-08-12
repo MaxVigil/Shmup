@@ -8,6 +8,7 @@ import {
   LEGACY_V6_SAVE_KEY,
   LEGACY_V7_SAVE_KEY,
   LEGACY_V8_SAVE_KEY,
+  LEGACY_V9_SAVE_KEY,
   LEGACY_V1_SAVE_KEY,
   LEGACY_V2_SAVE_KEY,
   LEGACY_V3_SAVE_KEY,
@@ -62,7 +63,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         credits: contentCatalog.economy.startingCredits,
         materials: 23,
@@ -108,7 +109,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         constructedBuildingIds: [contentCatalog.buildings[0].id],
         staff: [{ roleId: contentCatalog.staffRoles[0].id }],
@@ -140,7 +141,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         credits: 275,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
@@ -172,7 +173,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         manufacturedEquipmentIds: [capturer.id],
         equippedEquipmentId: null,
@@ -199,7 +200,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, splitPulseId],
         equippedPrimaryWeaponIds: [splitPulseId, null],
@@ -224,7 +225,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         equippedPrimaryWeaponIds: [acceleratorId, null],
@@ -250,7 +251,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 9,
+      schemaVersion: 10,
       base: {
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         locallyProducedWeaponIds: [],
@@ -284,7 +285,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(9);
+    expect(loaded?.schemaVersion).toBe(10);
     expect(loaded?.base.telemetryRecorded).toBe(true);
   });
 
@@ -300,5 +301,26 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)?.base.telemetryRecorded).toBe(false);
+  });
+
+  it('migrates a v9 save and provisions the starting hangar fleet', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const v9Base: Record<string, unknown> = { ...initial.base };
+    delete v9Base.hangarSlots;
+    delete v9Base.activeAircraftId;
+    storage.setItem(LEGACY_V9_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 9,
+      base: v9Base,
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(10);
+    expect(loaded?.base.hangarSlots).toEqual([
+      contentCatalog.aircraft[0].id,
+      null,
+    ]);
+    expect(loaded?.base.activeAircraftId).toBe(contentCatalog.aircraft[0].id);
   });
 });

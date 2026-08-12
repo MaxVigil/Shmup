@@ -163,4 +163,25 @@ describe('validateContentCatalog', () => {
     expect(gunship?.ranged?.shotSpeed).toBeGreaterThan(0);
     expect(gunship?.ranged?.shotIntervalMs).toBeGreaterThan(0);
   });
+
+  it('balances the aircraft fleet across armour, speed, and damage', () => {
+    const interceptor = contentCatalog.aircraft[0];
+    const gunship = contentCatalog.aircraft[1];
+    const aegis = contentCatalog.aircraft[2];
+
+    expect(contentCatalog.aircraft).toHaveLength(3);
+    expect(interceptor.marketPrice).toBeNull();
+
+    expect(gunship.armour).toBeGreaterThan(interceptor.armour);
+    expect(gunship.speedMultiplier).toBeLessThan(interceptor.speedMultiplier);
+    expect(gunship.damageMultiplier).toBeGreaterThan(interceptor.damageMultiplier);
+
+    expect(aegis.armour).toBeGreaterThan(gunship.armour);
+    expect(aegis.speedMultiplier).toBeLessThan(gunship.speedMultiplier);
+    expect(aegis.damageMultiplier).toBeGreaterThan(gunship.damageMultiplier);
+
+    expect(aegis.marketPrice?.minimum).toBeGreaterThan(
+      gunship.marketPrice?.minimum ?? 0,
+    );
+  });
 });

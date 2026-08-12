@@ -16,6 +16,11 @@ export function createGame(
   getAvailableCredits: () => number = () => 0,
   getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
   getSortiesCompleted: () => number = () => 0,
+  getAircraftStats: () => Readonly<{
+    readonly armour: number;
+    readonly speedMultiplier: number;
+    readonly damageMultiplier: number;
+  }> = () => ({ armour: 100, speedMultiplier: 1, damageMultiplier: 1 }),
   getAuxiliaryHardpointInstalled: () => boolean = () => false,
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
@@ -41,6 +46,7 @@ export function createGame(
       getAvailableCredits,
       getManufacturedWeaponUpgradeIds,
       getSortiesCompleted,
+      getAircraftStats,
       getAuxiliaryHardpointInstalled,
       getLocale,
       onActiveWeaponChanged,

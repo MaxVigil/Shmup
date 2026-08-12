@@ -312,6 +312,17 @@ export function buildAppTemplate(initialState: GameState): string {
         <p id="hardpoint-status" class="preflight-warning" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>
+        <section class="technology-lab hangar-panel" aria-labelledby="hangar-fleet-title">
+          <p class="technology-lab__eyebrow" id="hangar-fleet-eyebrow"></p>
+          <h2 id="hangar-fleet-title"></h2>
+          <p class="lede" id="hangar-fleet-lede"></p>
+          <div class="fleet-slots" id="hangar-slots-list" aria-live="polite"></div>
+          <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
+          <div class="loadout-row">
+            <div><span class="loadout-row__label" id="hangar-slot-label"></span><strong id="hangar-slot-cost"></strong><small id="hangar-slot-note"></small></div>
+            <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
+          </div>
+        </section>
       </section>
     </main>
 

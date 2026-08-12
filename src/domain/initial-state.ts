@@ -34,6 +34,8 @@ export function createInitialGameState(): GameState {
       manufacturedEquipmentIds: [],
       equippedEquipmentId: null,
       telemetryRecorded: false,
+      hangarSlots: ['aircraft-interceptor', null],
+      activeAircraftId: 'aircraft-interceptor',
     },
     technologyCatalog: [],
     activeRun: null,

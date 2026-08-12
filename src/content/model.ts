@@ -151,6 +151,20 @@ export interface MarketWeaponBlueprintDefinition {
   readonly requiredStaffRoleId: string;
 }
 
+export interface AircraftDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly role: string;
+  readonly origin: 'earth' | 'alien' | 'hybrid';
+  readonly armour: number;
+  readonly speedMultiplier: number;
+  readonly damageMultiplier: number;
+  readonly marketPrice: {
+    readonly minimum: number;
+    readonly maximum: number;
+  } | null;
+}
+
 export interface WeaponUpgradeDefinition {
   readonly id: string;
   readonly weaponId: string;
@@ -182,4 +196,5 @@ export interface ContentCatalog {
   readonly equipment: readonly EquipmentDefinition[];
   readonly marketWeaponBlueprints: readonly MarketWeaponBlueprintDefinition[];
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];
+  readonly aircraft: readonly AircraftDefinition[];
 }

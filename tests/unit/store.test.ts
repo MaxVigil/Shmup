@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createGameStore } from '../../src/app/store';
 import { contentCatalog } from '../../src/content/catalog';
+import { createInitialGameState } from '../../src/domain/initial-state';
 
 describe('game store M3a cycle', () => {
   it('delivers, researches, manufactures, and equips the preserved Prism', () => {
@@ -320,5 +321,39 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'MANUFACTURE_EQUIPMENT', equipmentId: equipment.id });
     expect(store.getSnapshot().base.manufacturedEquipmentIds).toContain(equipment.id);
+  });
+
+  it('purchases aircraft, expands the hangar, and switches the active one', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 5_000 },
+    });
+    const gunship = contentCatalog.aircraft[1];
+    const aegis = contentCatalog.aircraft[2];
+    const interceptor = contentCatalog.aircraft[0];
+
+    store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: gunship.id });
+    expect(store.getSnapshot().base.hangarSlots).toEqual([
+      interceptor.id,
+      gunship.id,
+    ]);
+
+    store.dispatch({ type: 'PURCHASE_HANGAR_SLOT' });
+    expect(store.getSnapshot().base.hangarSlots).toEqual([
+      interceptor.id,
+      gunship.id,
+      null,
+    ]);
+
+    store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: aegis.id });
+    expect(store.getSnapshot().base.hangarSlots).toEqual([
+      interceptor.id,
+      gunship.id,
+      aegis.id,
+    ]);
+
+    store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId: aegis.id });
+    expect(store.getSnapshot().base.activeAircraftId).toBe(aegis.id);
   });
 });

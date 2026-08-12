@@ -33,6 +33,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('equipment', catalog.equipment);
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
+  assertUniqueIds('aircraft', catalog.aircraft);
 
   if (
     catalog.economy.startingCredits < 0 ||
@@ -261,6 +262,23 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       ))
     ) {
       throw new Error(`Enemy ${enemy.id} must have positive combat values.`);
+    }
+  }
+
+  for (const aircraft of catalog.aircraft) {
+    if (
+      aircraft.armour <= 0 ||
+      aircraft.speedMultiplier <= 0 ||
+      aircraft.damageMultiplier <= 0 ||
+      !['earth', 'alien', 'hybrid'].includes(aircraft.origin) ||
+      (aircraft.marketPrice !== null && (
+        !Number.isInteger(aircraft.marketPrice.minimum) ||
+        !Number.isInteger(aircraft.marketPrice.maximum) ||
+        aircraft.marketPrice.minimum <= 0 ||
+        aircraft.marketPrice.maximum < aircraft.marketPrice.minimum
+      ))
+    ) {
+      throw new Error(`Aircraft ${aircraft.id} must have positive combat values.`);
     }
   }
 }

@@ -360,6 +360,52 @@ select:focus-visible {
   width: min(100%, 54rem);
 }
 
+.fleet-slots,
+.fleet-market {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.fleet-slot,
+.aircraft-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(140, 170, 255, 0.14);
+  border-radius: 0.4rem;
+  background: rgba(140, 170, 255, 0.05);
+}
+
+.fleet-slot__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.fleet-slot__header em,
+.aircraft-offer em {
+  color: var(--accent, #70d6b3);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.aircraft-offer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem 0.75rem;
+  align-items: center;
+}
+
+.aircraft-offer > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .text-action {
   margin-top: 0.8rem;
   padding: 0;

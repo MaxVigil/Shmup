@@ -44,8 +44,8 @@ import {
   type TranslationParams,
 } from '../../i18n';
 
-const PLAYER_SPEED = 330;
-const PLAYER_ARMOUR = 100;
+const PLAYER_BASE_SPEED = 330;
+const DEFAULT_PLAYER_ARMOUR = 100;
 const PLAYER_MARGIN = 28;
 const ARMOUR_BAR_WIDTH = 44;
 const ARMOUR_BAR_HEIGHT = 6;
@@ -138,6 +138,12 @@ export interface CombatRunResult {
   readonly eliteDefeated: boolean;
 }
 
+export interface AircraftCombatStats {
+  readonly armour: number;
+  readonly speedMultiplier: number;
+  readonly damageMultiplier: number;
+}
+
 export class CombatScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Triangle;
   private playerArmourBarBackground!: Phaser.GameObjects.Rectangle;
@@ -150,7 +156,10 @@ export class CombatScene extends Phaser.Scene {
   private readonly enemies: EnemyActor[] = [];
   private readonly stars: Star[] = [];
   private rng!: RandomSource;
-  private armour = PLAYER_ARMOUR;
+  private armour = DEFAULT_PLAYER_ARMOUR;
+  private maxArmour = DEFAULT_PLAYER_ARMOUR;
+  private aircraftSpeed = PLAYER_BASE_SPEED;
+  private aircraftDamageMultiplier = 1;
   private score = 0;
   private startingCredits = 0;
   private contractLedger: SortieContractLedger = EMPTY_SORTIE_CONTRACT;
@@ -202,6 +211,11 @@ export class CombatScene extends Phaser.Scene {
     private readonly getAvailableCredits: () => number = () => 0,
     private readonly getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
     private readonly getSortiesCompleted: () => number = () => 0,
+    private readonly getAircraftStats: () => Readonly<AircraftCombatStats> = () => ({
+      armour: DEFAULT_PLAYER_ARMOUR,
+      speedMultiplier: 1,
+      damageMultiplier: 1,
+    }),
     private readonly getAuxiliaryHardpointInstalled: () => boolean = () => false,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
@@ -294,7 +308,11 @@ export class CombatScene extends Phaser.Scene {
     this.shots.length = 0;
     this.enemies.length = 0;
     this.stars.length = 0;
-    this.armour = PLAYER_ARMOUR;
+    const stats = this.getAircraftStats();
+    this.maxArmour = Math.max(1, Math.round(stats.armour));
+    this.armour = this.maxArmour;
+    this.aircraftSpeed = PLAYER_BASE_SPEED * stats.speedMultiplier;
+    this.aircraftDamageMultiplier = stats.damageMultiplier;
     this.score = 0;
     this.startingCredits = this.getAvailableCredits();
     this.contractLedger = EMPTY_SORTIE_CONTRACT;
@@ -770,7 +788,7 @@ export class CombatScene extends Phaser.Scene {
     const vertical = Number(this.cursors.down.isDown || this.movementKeys.down.isDown) -
       Number(this.cursors.up.isDown || this.movementKeys.up.isDown);
     const length = Math.hypot(horizontal, vertical) || 1;
-    const distance = PLAYER_SPEED * (deltaMs / 1000);
+    const distance = this.aircraftSpeed * (deltaMs / 1000);
 
     this.player.x += (horizontal / length) * distance;
     this.player.y += (vertical / length) * distance;
@@ -788,7 +806,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private updatePlayerArmourBar(): void {
-    const armourRatio = Phaser.Math.Clamp(this.armour / PLAYER_ARMOUR, 0, 1);
+    const armourRatio = Phaser.Math.Clamp(this.armour / this.maxArmour, 0, 1);
     const fillColour = armourRatio > 0.5 ? 0x70d6b3 : armourRatio > 0.25 ? 0xf2c66d : 0xf07178;
 
     this.playerArmourBarBackground.setPosition(
@@ -875,7 +893,7 @@ export class CombatScene extends Phaser.Scene {
       }
       this.shots.push({
         body,
-        damage: weapon.damage,
+        damage: weapon.damage * this.aircraftDamageMultiplier,
         projectileSpeed: weapon.projectileSpeed,
         penetratesAllTargets: weapon.penetration === 'all-targets',
         hitEnemyIds: new Set<number>(),

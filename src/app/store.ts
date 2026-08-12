@@ -1,4 +1,11 @@
 import { createInitialGameState } from '../domain/initial-state';
+import {
+  HANGAR_SLOT_COST,
+  marketAircraftPrice,
+  purchaseAircraft,
+  purchaseHangarSlot,
+  setActiveAircraft,
+} from '../domain/hangar';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
 import {
@@ -55,6 +62,9 @@ export type GameCommand =
       readonly type: 'MANUFACTURE_RESEARCH_WEAPON';
       readonly blueprintId: string;
     }
+  | { readonly type: 'PURCHASE_AIRCRAFT'; readonly aircraftId: string }
+  | { readonly type: 'PURCHASE_HANGAR_SLOT' }
+  | { readonly type: 'SET_ACTIVE_AIRCRAFT'; readonly aircraftId: string | null }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -259,6 +269,27 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = manufactureAdaptedWeapon(state, blueprint, weapon);
           break;
         }
+        case 'PURCHASE_AIRCRAFT': {
+          const aircraft = contentCatalog.aircraft.find(
+            (entry) => entry.id === command.aircraftId,
+          );
+          if (aircraft === undefined) {
+            throw new Error(`Unknown aircraft ${command.aircraftId}.`);
+          }
+          const price = marketAircraftPrice(
+            aircraft,
+            state.base.marketSeed,
+            state.base.sortiesCompleted,
+          );
+          state = purchaseAircraft(state, aircraft, price);
+          break;
+        }
+        case 'PURCHASE_HANGAR_SLOT':
+          state = purchaseHangarSlot(state, HANGAR_SLOT_COST);
+          break;
+        case 'SET_ACTIVE_AIRCRAFT':
+          state = setActiveAircraft(state, command.aircraftId);
+          break;
         case 'MANUFACTURE_EQUIPMENT': {
           const equipment = contentCatalog.equipment.find(
             (entry) => entry.id === command.equipmentId,

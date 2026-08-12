@@ -9,6 +9,7 @@ import type { GameState } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
 import { marketWeaponPrice } from '../domain/terrestrial-market';
 import { marketBlueprintPrice } from '../domain/terrestrial-market';
+import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import {
   sectionForObjective,
   type BaseSection,
@@ -723,6 +724,7 @@ function renderBase(): void {
   renderContainment();
   renderCanister();
   renderHardpoint();
+  renderFleet();
 }
 
 function renderHardpoint(): void {
@@ -783,6 +785,133 @@ function renderHardpoint(): void {
     hardpointInstalled ? 'hangar.hardpointInstalled' : 'hangar.hardpointMissing',
   );
   hardpointStatus.classList.toggle('is-ready', hardpointInstalled);
+}
+
+const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
+  'aircraft-interceptor': 'content.interceptor',
+  'aircraft-gunship': 'content.gunship',
+  'aircraft-aegis': 'content.aegis',
+};
+const aircraftRoleKey: Readonly<Record<string, TranslationKey>> = {
+  'aircraft-interceptor': 'aircraft.interceptorRole',
+  'aircraft-gunship': 'aircraft.gunshipRole',
+  'aircraft-aegis': 'aircraft.aegisRole',
+};
+
+function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number; damageMultiplier: number }): string {
+  return [
+    t('combat.armour', { value: aircraft.armour }),
+    t('aircraft.speed', { value: aircraft.speedMultiplier }),
+    t('aircraft.damage', { value: aircraft.damageMultiplier }),
+  ].join(' // ');
+}
+
+function renderFleet(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const slotsList = byId<HTMLElement>('hangar-slots-list');
+  const marketList = byId<HTMLElement>('aircraft-market-list');
+
+  slotsList.textContent = '';
+  state.base.hangarSlots.forEach((aircraftId, index) => {
+    const slot = document.createElement('article');
+    slot.className = 'fleet-slot';
+    const header = document.createElement('div');
+    header.className = 'fleet-slot__header';
+    const slotLabel = document.createElement('span');
+    slotLabel.textContent = t('loadout.primarySlot', { slot: index + 1 });
+    header.appendChild(slotLabel);
+    if (aircraftId === null) {
+      const empty = document.createElement('strong');
+      empty.textContent = t('hangar.slotEmpty');
+      header.appendChild(empty);
+    } else {
+      const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+      if (aircraft !== undefined) {
+        const name = document.createElement('strong');
+        name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
+        header.appendChild(name);
+        const stats = document.createElement('small');
+        stats.textContent = aircraftStatSummary(aircraft);
+        header.appendChild(stats);
+        if (state.base.activeAircraftId === aircraft.id) {
+          const active = document.createElement('em');
+          active.textContent = t('hangar.activeAircraft');
+          header.appendChild(active);
+        } else {
+          const activate = document.createElement('button');
+          activate.className = 'base-action';
+          activate.type = 'button';
+          activate.textContent = t('hangar.activate');
+          activate.disabled = bankrupt;
+          activate.addEventListener('click', () => {
+            store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
+          });
+          header.appendChild(activate);
+        }
+      }
+    }
+    slot.appendChild(header);
+    slotsList.appendChild(slot);
+  });
+
+  marketList.textContent = '';
+  for (const aircraft of contentCatalog.aircraft) {
+    if (aircraft.marketPrice === null) {
+      continue;
+    }
+    const owned = state.base.hangarSlots.includes(aircraft.id);
+    const freeSlot = state.base.hangarSlots.includes(null);
+    const price = marketAircraftPrice(
+      aircraft,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const offer = document.createElement('article');
+    offer.className = 'aircraft-offer';
+    const info = document.createElement('div');
+    const name = document.createElement('strong');
+    name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
+    const role = document.createElement('small');
+    role.textContent = t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole');
+    const stats = document.createElement('small');
+    stats.textContent = aircraftStatSummary(aircraft);
+    info.append(name, role, stats);
+    offer.appendChild(info);
+    if (owned) {
+      const badge = document.createElement('em');
+      badge.textContent = t('hangar.aircraftOwned');
+      offer.appendChild(badge);
+    } else {
+      const priceText = document.createElement('strong');
+      priceText.textContent = t('hangar.aircraftCost', { credits: price });
+      const note = document.createElement('small');
+      note.textContent = !freeSlot
+        ? t('hangar.slotFull')
+        : state.base.credits >= price
+          ? t('hangar.aircraftAffordable')
+          : t('hangar.aircraftShortfall', { credits: price - state.base.credits });
+      const buyButton = document.createElement('button');
+      buyButton.className = 'base-action';
+      buyButton.type = 'button';
+      buyButton.textContent = t('hangar.purchaseAircraft', {
+        aircraft: t(aircraftNameKey[aircraft.id] ?? 'content.interceptor'),
+      });
+      buyButton.disabled = bankrupt || !freeSlot || state.base.credits < price;
+      buyButton.addEventListener('click', () => {
+        store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: aircraft.id });
+      });
+      offer.append(priceText, note, buyButton);
+    }
+    marketList.appendChild(offer);
+  }
+
+  byId<HTMLElement>('hangar-slot-cost').textContent = t('hangar.slotCost', {
+    credits: HANGAR_SLOT_COST,
+  });
+  const purchaseSlotButton = byId<HTMLButtonElement>('purchase-hangar-slot');
+  purchaseSlotButton.hidden = false;
+  purchaseSlotButton.disabled = bankrupt || state.base.credits < HANGAR_SLOT_COST;
 }
 
 function renderCanister(): void {
@@ -998,6 +1127,11 @@ function renderLocale(): void {
   setText('hangar-section-lede', 'hangar.lede');
   setText('hangar-loadout-eyebrow', 'hangar.loadoutEyebrow');
   setText('hangar-loadout-title', 'hangar.loadoutTitle');
+  setText('hangar-fleet-eyebrow', 'hangar.fleetEyebrow');
+  setText('hangar-fleet-title', 'hangar.fleetTitle');
+  setText('hangar-fleet-lede', 'hangar.fleetLede');
+  setText('hangar-slot-label', 'hangar.slotLabel');
+  setText('hangar-slot-note', 'hangar.slotNote');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');
   setText('laboratory-label', 'facility.laboratory');
@@ -1188,6 +1322,10 @@ toggleSpecialEquipmentButton.addEventListener('click', () => {
   });
 });
 
+byId<HTMLButtonElement>('purchase-hangar-slot').addEventListener('click', () => {
+  store.dispatch({ type: 'PURCHASE_HANGAR_SLOT' });
+});
+
 constructLaboratoryButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
 });
@@ -1308,6 +1446,19 @@ launchSortieButton.addEventListener('click', () => {
       () => store.getSnapshot().base.credits,
       () => store.getSnapshot().base.manufacturedWeaponUpgradeIds,
       () => store.getSnapshot().base.sortiesCompleted,
+      () => {
+        const aircraftId = store.getSnapshot().base.activeAircraftId;
+        const definition = contentCatalog.aircraft.find(
+          (entry) => entry.id === aircraftId,
+        );
+        return definition === undefined
+          ? { armour: 100, speedMultiplier: 1, damageMultiplier: 1 }
+          : {
+              armour: definition.armour,
+              speedMultiplier: definition.speedMultiplier,
+              damageMultiplier: definition.damageMultiplier,
+            };
+      },
       () => store.getSnapshot().base.manufacturedEquipmentIds.includes(
         hardpointEquipment.id,
       ),
