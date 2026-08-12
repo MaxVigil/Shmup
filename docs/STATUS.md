@@ -4,8 +4,9 @@ Last updated: 2026-08-12
 
 ## Current milestone
 
-M3g.3a — safe containment and the adapted Split Pulse Emitter loop — is implemented
-and awaiting playtest. M3g.3b (early Warden signal and Capturer telemetry) is next.
+The M3g.3b + M3h + M3i + M3j package (Warden signal gate, ranged Gunship, Canister
+Aircraft Cannon, auxiliary hardpoint with rocket pod) plus the controls-hint
+auto-hide are implemented on `test` and awaiting playtest before merging to `main`.
 
 ## Completed
 
@@ -230,6 +231,24 @@ and awaiting playtest. M3g.3b (early Warden signal and Capturer telemetry) is ne
 - Playtest feedback rebalanced the Split Pulse Emitter to 6 volleys per second with
   spread 12 (≈90 single-target DPS), beating the upgraded machine gun (≈80 DPS).
 - All 106 unit tests, lint, typecheck, and the production build pass locally.
+- M3g.3b adds the Warden signal gate: the signal appears from the second sortie
+  onward, the first detection records telemetry whether the player intercepts or
+  avoids, and the terrestrial Capturer project unlocks only after that telemetry.
+  Save schema is now v9 with a v8→v9 migration that derives telemetry from prior
+  Capturer progress.
+- M3h adds the Gunship: a ranged regular enemy that telegraphs a shot toward the
+  sampled player position and fires slow, sparse, high-contrast projectiles with a
+  lifecycle that is safe across pause, elite isolation, extraction, and defeat.
+- M3i adds the Canister Aircraft Cannon (Дробовик): a terrestrial research →
+  production → equip pipeline, a short-lived fan of pellets with close-range payoff,
+  and one capped knockback impulse per target per volley.
+- M3j adds the auxiliary hardpoint (terrestrial research → Works manufacture → Hangar
+  status) and a manual rocket pod activated with Space or the right mouse button.
+  Rockets prioritise a living elite target, otherwise acquire the nearest forward
+  target, and expose a small per-sortie charge counter.
+- The controls hint auto-hides on first movement or after 15 seconds; phase warnings
+  still appear in the bottom status line.
+- All 113 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
