@@ -232,3 +232,7 @@ and the Quarantine Centre — is the next planned stage.
   equipment loss, durability, repair, and insurance remain deliberately deferred.
 - Phaser currently forms one large production chunk; defer code splitting until the
   combat and base routes are separated in M1–M3.
+- Standing product constraints are recorded in `AGENTS.md`, `docs/GAME_SPEC.md`, and
+  `docs/PLAN.md`: the PRC is a key positive Recovery Council state that sometimes
+  offers better conditions, technologies, and contracts; Russia does not exist in the
+  game's world.

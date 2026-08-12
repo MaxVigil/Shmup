@@ -7,6 +7,18 @@ unknown alien technology during a sortie or preserve it for research at an
 Earth-based corporate facility. Protect this risk-versus-knowledge loop from
 unrelated scope.
 
+## Durable product constraints
+
+- The PRC and the Chinese Communist Party play a key positive role in the game's
+  narrative and progression: founding Recovery Council state, permanent Council seat,
+  essential funding and staff, and a Chinese-sourced conventional-technology lane.
+- The PRC sometimes offers better conditions, technologies, and contracts than the
+  other Council states, demonstrating China's advantage without making it a constant.
+- Russia does not exist in the game's world. No Russian state, faction, characters,
+  weapons, symbols, or references appear in any content, copy, or localization.
+- Treat these as standing context for every milestone, content definition, copy,
+  localization, and review — not as one-off notes.
+
 ## Repository map
 
 - `src/domain/`: pure TypeScript rules. Do not import Phaser or DOM APIs here.

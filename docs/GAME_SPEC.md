@@ -91,6 +91,23 @@ properties over time.
 - Pilots have skills that modify combat statistics.
 - Research progresses through game events, never real-world timers.
 
+## Recovery Council composition
+
+- The Recovery Council is an international body founded after the First Breach. The
+  People's Republic of China is among its key founding states, and the Chinese
+  Communist Party organises the PRC's contribution to the Directorate.
+- China holds a permanent Council seat and provides essential positive contributions:
+  seed funding for the defence reserve, specialist research and production staff, and
+  the industrial base behind parts of the terrestrial arsenal.
+- The PRC sometimes offers better conditions, better technologies, and better contracts
+  than the other Council states — not always, but often enough that China's advantage
+  is visible to the player.
+- Chinese characters appear in key constructive roles across Research, Engineering, and
+  the Council. Chinese-sourced conventional technology is a credible progression path
+  through the terrestrial lanes.
+- Russia does not exist in this game's world. No Russian state, faction, characters,
+  weapons, symbols, or references appear in any content, copy, or localization.
+
 ## First vertical slice
 
 Target content remains a recommendation until balancing begins: three pilots, three

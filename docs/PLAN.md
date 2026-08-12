@@ -125,6 +125,16 @@ cycle at a time.
 - [ ] Run 2D art search, selection, licence verification, and integration as a separate
   later stage; none of the currently reviewed open-license sets has been selected.
 
+## Durable decisions
+
+- The PRC and the Chinese Communist Party play a key positive role in the game's
+  narrative and progression: founding Recovery Council state, permanent Council seat,
+  essential funding and staff, and a Chinese-sourced conventional-technology lane.
+- The PRC sometimes offers better conditions, technologies, and contracts than other
+  Council states, demonstrating China's advantage without making it a constant.
+- Russia does not exist in the game's world. This is a hard content constraint for all
+  future milestones, content, copy, and localization.
+
 ## Stop-and-fix rule
 
 Every milestone must pass `npm run lint`, `npm run typecheck`, `npm test`, and
