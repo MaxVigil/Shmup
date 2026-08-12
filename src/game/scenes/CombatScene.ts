@@ -56,6 +56,8 @@ const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
 const CONTROLS_HINT_DURATION_MS = 15_000;
 const ROCKET_CHARGES = 3;
+const ENEMY_BOUNCE_DAMPING = 0.5;
+const ENEMY_BOUND_MARGIN = 24;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
 const PRE_EXTRACTION_CLEARANCE_MS = M2_FAST_MODE ? 1_000 : 3_000;
 const BOSS_WARNING_DURATION_MS = M2_FAST_MODE ? 900 : 1_500;
@@ -78,6 +80,7 @@ interface ShotActor {
   readonly penetratesAllTargets: boolean;
   readonly hitEnemyIds: Set<number>;
   readonly visualProfile: WeaponDefinition['visualProfile'];
+  readonly vx: number;
   lifetimeMs: number | null;
   readonly knockbackVolleyId: number | null;
   readonly knockbackImpulse: number;
@@ -96,15 +99,7 @@ interface EnemyActor {
   knockbackX: number;
   knockbackY: number;
   nextShotAtMs: number;
-  telegraph: EnemyTelegraph | null;
   knockbackVolleyApplied: number | null;
-}
-
-interface EnemyTelegraph {
-  readonly line: Phaser.GameObjects.Rectangle;
-  readonly targetX: number;
-  readonly targetY: number;
-  elapsedMs: number;
 }
 
 interface HostileShot {
@@ -867,6 +862,7 @@ export class CombatScene extends Phaser.Scene {
     }
     for (let index = 0; index < weapon.projectileCount; index += 1) {
       const offset = (index - (weapon.projectileCount - 1) / 2) * weapon.spread;
+      const vx = canister ? offset * (weapon.projectileSpeed / 210) : 0;
       const body = this.add.rectangle(
         this.player.x + offset,
         this.player.y - 22,
@@ -884,6 +880,7 @@ export class CombatScene extends Phaser.Scene {
         penetratesAllTargets: weapon.penetration === 'all-targets',
         hitEnemyIds: new Set<number>(),
         visualProfile: weapon.visualProfile,
+        vx,
         lifetimeMs: canister ? 340 : null,
         knockbackVolleyId: volleyId,
         knockbackImpulse: canister ? 26 : 0,
@@ -898,6 +895,7 @@ export class CombatScene extends Phaser.Scene {
       if (shot === undefined) {
         continue;
       }
+      shot.body.x += shot.vx * (deltaMs / 1000);
       shot.body.y -= shot.projectileSpeed * (deltaMs / 1000);
       if (shot.lifetimeMs !== null) {
         shot.lifetimeMs -= deltaMs;
@@ -953,7 +951,6 @@ export class CombatScene extends Phaser.Scene {
       nextShotAtMs: selectedDefinition.ranged === null
         ? Number.POSITIVE_INFINITY
         : 1_400 + this.rng.integer(0, 1_200),
-      telegraph: null,
       knockbackVolleyApplied: null,
     });
     this.nextEnemyActorId += 1;
@@ -1014,9 +1011,12 @@ export class CombatScene extends Phaser.Scene {
         enemy.body.x = enemy.originX +
           Math.sin(enemy.livedMs / 430 + enemy.phase) * 72 +
           enemy.knockbackX;
-        enemy.body.x = Phaser.Math.Clamp(enemy.body.x, 24, this.scale.width - 24);
       } else {
         enemy.body.x += enemy.knockbackX;
+      }
+
+      if (enemy.definition.kind !== 'elite') {
+        this.applySoftBounce(enemy);
       }
 
       if (enemy.definition.ranged !== null) {
@@ -1039,41 +1039,37 @@ export class CombatScene extends Phaser.Scene {
     }
   }
 
+  private applySoftBounce(enemy: EnemyActor): void {
+    const left = ENEMY_BOUND_MARGIN;
+    const right = this.scale.width - ENEMY_BOUND_MARGIN;
+    const top = ENEMY_BOUND_MARGIN;
+    if (enemy.body.x < left) {
+      enemy.body.x = left;
+      enemy.knockbackX = Math.abs(enemy.knockbackX) * ENEMY_BOUNCE_DAMPING;
+    } else if (enemy.body.x > right) {
+      enemy.body.x = right;
+      enemy.knockbackX = -Math.abs(enemy.knockbackX) * ENEMY_BOUNCE_DAMPING;
+    }
+    if (enemy.body.y < top) {
+      enemy.body.y = top;
+      enemy.knockbackY = Math.abs(enemy.knockbackY) * ENEMY_BOUNCE_DAMPING;
+    }
+  }
+
   private updateEnemyRanged(enemy: EnemyActor, deltaMs: number): void {
     const profile = enemy.definition.ranged;
     if (profile === null) {
       return;
     }
-    if (enemy.telegraph === null) {
-      enemy.nextShotAtMs -= deltaMs;
-      if (enemy.nextShotAtMs <= 0) {
-        const targetX = Phaser.Math.Clamp(this.player.x, 36, this.scale.width - 36);
-        const targetY = this.player.y - 18;
-        const line = this.add.rectangle(
-          enemy.body.x,
-          enemy.body.y,
-          2,
-          2,
-          0xff5a4f,
-          0.85,
-        );
-        enemy.telegraph = { line, targetX, targetY, elapsedMs: 0 };
-      }
-    } else {
-      enemy.telegraph.elapsedMs += deltaMs;
-      const dx = enemy.telegraph.targetX - enemy.body.x;
-      const dy = enemy.telegraph.targetY - enemy.body.y;
-      const length = Math.max(2, Math.hypot(dx, dy));
-      enemy.telegraph.line
-        .setPosition(enemy.body.x + dx / 2, enemy.body.y + dy / 2)
-        .setDisplaySize(length, 2)
-        .setRotation(Math.atan2(dy, dx));
-      if (enemy.telegraph.elapsedMs >= profile.telegraphMs) {
-        this.fireHostileShot(enemy, dx / length, dy / length);
-        enemy.telegraph.line.destroy();
-        enemy.telegraph = null;
-        enemy.nextShotAtMs = profile.shotIntervalMs + this.rng.integer(0, 600);
-      }
+    enemy.nextShotAtMs -= deltaMs;
+    if (enemy.nextShotAtMs <= 0) {
+      const targetX = Phaser.Math.Clamp(this.player.x, 36, this.scale.width - 36);
+      const targetY = this.player.y - 18;
+      const dx = targetX - enemy.body.x;
+      const dy = targetY - enemy.body.y;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      this.fireHostileShot(enemy, dx / length, dy / length);
+      enemy.nextShotAtMs = profile.shotIntervalMs + this.rng.integer(0, 600);
     }
   }
 
@@ -1390,7 +1386,6 @@ export class CombatScene extends Phaser.Scene {
     if (enemy === undefined) {
       return;
     }
-    enemy.telegraph?.line.destroy();
     enemy.body.destroy();
     enemy.armourBarBackground?.destroy();
     enemy.armourBarFill?.destroy();
@@ -1545,7 +1540,6 @@ export class CombatScene extends Phaser.Scene {
       enemy.body.destroy();
       enemy.armourBarBackground?.destroy();
       enemy.armourBarFill?.destroy();
-      enemy.telegraph?.line.destroy();
     }
     this.enemies.length = 0;
   }

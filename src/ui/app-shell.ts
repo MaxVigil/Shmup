@@ -115,6 +115,7 @@ const weaponOptions = Array.from(
   document.querySelectorAll<HTMLElement>('[data-weapon-id]'),
 );
 const purchaseMarketWeaponButton = byId<HTMLButtonElement>('purchase-market-weapon');
+const marketOffer = byId<HTMLElement>('market-offer');
 const marketOfferStatus = byId<HTMLElement>('market-offer-status');
 const marketWeaponPriceText = byId<HTMLElement>('market-weapon-price');
 const marketBlueprintOffer = byId<HTMLElement>('market-blueprint-offer');
@@ -638,6 +639,7 @@ function renderBase(): void {
     state.base.marketSeed,
     state.base.sortiesCompleted,
   );
+  marketOffer.hidden = acceleratorOwned;
   marketWeaponPriceText.textContent = acceleratorOwned
     ? ''
     : t('market.price', { credits: offerPrice });
@@ -654,7 +656,8 @@ function renderBase(): void {
     state.base.marketSeed,
     state.base.sortiesCompleted,
   );
-  marketBlueprintOffer.hidden = !blueprintOfferAvailable;
+  marketBlueprintOffer.hidden =
+    acceleratorBlueprintOwned || !blueprintOfferAvailable;
   marketBlueprintPriceText.textContent = acceleratorBlueprintOwned
     ? ''
     : t('market.price', { credits: blueprintPrice });

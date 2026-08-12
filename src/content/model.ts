@@ -52,7 +52,6 @@ export interface EnemyRangedProfile {
   readonly shotDamage: number;
   readonly shotSpeed: number;
   readonly shotIntervalMs: number;
-  readonly telegraphMs: number;
 }
 
 export interface EnemyDefinition {

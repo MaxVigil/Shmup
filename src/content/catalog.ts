@@ -144,7 +144,6 @@ export const contentCatalog = {
         shotDamage: 8,
         shotSpeed: 280,
         shotIntervalMs: 2400,
-        telegraphMs: 750,
       },
     },
   ],

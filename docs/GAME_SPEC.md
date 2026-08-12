@@ -71,6 +71,10 @@ properties over time.
   cheaply after acquiring its blueprint and constructing the Prototype and Production
   Works. Research creates designs, the Works manufactures physical upgrades, and the
   Hangar installs them.
+- The terrestrial market is intended to grow into a rotating offer surface: finished
+  weapons, production blueprints, and consumable munitions such as rocket-pod charges.
+  This is a design intent for a later cycle; today it offers one finished weapon and
+  one production licence, and a purchased offer disappears from the market.
 - Primary weapons fire automatically, and only one is equipped at a time. Market and
   Hangar surfaces communicate roles qualitatively; exact combat coefficients remain
   hidden unless a later diagnostic interface gives the player a reason to need them.

@@ -228,7 +228,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <p class="technology-lab__eyebrow" id="market-eyebrow"></p>
             <h2 id="market-title"></h2>
             <p id="market-intro" class="domain-intro"></p>
-            <article class="market-offer">
+            <article id="market-offer" class="market-offer">
               <div class="market-offer__copy">
                 <span id="market-offer-label" class="loadout-row__label"></span>
                 <strong id="market-weapon-name"></strong>
