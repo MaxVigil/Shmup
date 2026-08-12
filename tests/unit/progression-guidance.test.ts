@@ -49,6 +49,7 @@ describe('progression guidance', () => {
           { id: 'engineer-1', roleId: definitions.engineerRoleId },
         ],
         researchQueue: [{ blueprintId: definitions.blueprintId, progress: 1, requiredProgress: 3 }],
+        telemetryRecorded: true,
       },
     };
     expect(getProgressionObjective(researching, definitions)).toMatchObject({
@@ -71,6 +72,7 @@ describe('progression guidance', () => {
         ],
         unlockedBlueprintIds: [definitions.blueprintId],
         manufacturedEquipmentIds: [definitions.equipmentId],
+        telemetryRecorded: true,
       },
     };
 
@@ -90,6 +92,7 @@ describe('progression guidance', () => {
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
         staff: [{ id: 'scientist-1', roleId: definitions.scientistRoleId }],
         unlockedBlueprintIds: [definitions.blueprintId],
+        telemetryRecorded: true,
       },
     };
 
@@ -111,6 +114,7 @@ describe('progression guidance', () => {
         manufacturedEquipmentIds: [definitions.equipmentId],
         equippedEquipmentId: definitions.equipmentId,
         preservedTechnologyIds: [contentCatalog.alienTechnologies[0].id],
+        telemetryRecorded: true,
       },
     };
     expect(getProgressionObjective(ready, definitions).kind).toBe('start-containment');
@@ -181,6 +185,7 @@ describe('progression guidance', () => {
         ],
         manufacturedEquipmentIds: [definitions.equipmentId],
         equippedEquipmentId: definitions.equipmentId,
+        telemetryRecorded: true,
       },
     };
     expect(getProgressionObjective(baseReady, definitions).kind).toBe(
@@ -210,5 +215,24 @@ describe('progression guidance', () => {
       },
     };
     expect(getProgressionObjective(equipped, definitions).kind).toBe('recover-artefact');
+  });
+
+  it('waits for Warden telemetry before opening the Capturer programme', () => {
+    const initial = createInitialGameState();
+    const staffed = {
+      ...initial,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
+        staff: [{ id: 'scientist-1', roleId: definitions.scientistRoleId }],
+      },
+    };
+    expect(getProgressionObjective(staffed, definitions).kind).toBe('await-warden-signal');
+
+    const withTelemetry = {
+      ...staffed,
+      base: { ...staffed.base, telemetryRecorded: true },
+    };
+    expect(getProgressionObjective(withTelemetry, definitions).kind).toBe('start-blueprint');
   });
 });

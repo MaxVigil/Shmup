@@ -15,6 +15,7 @@ export function createGame(
   getEquippedEquipmentId: () => string | null = () => null,
   getAvailableCredits: () => number = () => 0,
   getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
+  getSortiesCompleted: () => number = () => 0,
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
 ): Phaser.Game {
@@ -38,6 +39,7 @@ export function createGame(
       getEquippedEquipmentId,
       getAvailableCredits,
       getManufacturedWeaponUpgradeIds,
+      getSortiesCompleted,
       getLocale,
       onActiveWeaponChanged,
     )],

@@ -38,6 +38,7 @@ export function isGameState(value: unknown): value is GameState {
     Array.isArray(value.base.manufacturedEquipmentIds) &&
     (value.base.equippedEquipmentId === null ||
       typeof value.base.equippedEquipmentId === 'string') &&
+    typeof value.base.telemetryRecorded === 'boolean' &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

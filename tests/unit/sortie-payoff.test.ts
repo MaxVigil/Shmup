@@ -13,6 +13,7 @@ const outcome = {
   targetsBreached: 0,
   creditsEarned: 200,
   creditsPenalized: 0,
+  wardenSignalDetected: false,
 } as const;
 
 describe('sortie payoff summary', () => {

@@ -1,4 +1,4 @@
-export const SAVE_SCHEMA_VERSION = 8 as const;
+export const SAVE_SCHEMA_VERSION = 9 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -40,6 +40,7 @@ export interface BaseState {
   readonly manufacturedWeaponUpgradeIds: readonly string[];
   readonly manufacturedEquipmentIds: readonly string[];
   readonly equippedEquipmentId: string | null;
+  readonly telemetryRecorded: boolean;
 }
 
 export interface TechnologyKnowledge {
@@ -72,4 +73,5 @@ export interface SortieOutcome {
   readonly targetsBreached: number;
   readonly creditsEarned: number;
   readonly creditsPenalized: number;
+  readonly wardenSignalDetected: boolean;
 }

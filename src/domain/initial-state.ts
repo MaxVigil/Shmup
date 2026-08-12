@@ -33,6 +33,7 @@ export function createInitialGameState(): GameState {
       manufacturedWeaponUpgradeIds: [],
       manufacturedEquipmentIds: [],
       equippedEquipmentId: null,
+      telemetryRecorded: false,
     },
     technologyCatalog: [],
     activeRun: null,

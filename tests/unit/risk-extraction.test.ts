@@ -73,6 +73,7 @@ describe('M2 risk and extraction flow', () => {
       targetsBreached: 0,
       creditsEarned: 0,
       creditsPenalized: 0,
+      wardenSignalDetected: false,
     });
     expect(complete.technologyDecision).toBeNull();
   });

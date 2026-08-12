@@ -15,7 +15,8 @@ export type ProgressionObjectiveKind =
   | 'construct-quarantine'
   | 'analyse-sample'
   | 'manufacture-adapted-weapon'
-  | 'equip-adapted-weapon';
+  | 'equip-adapted-weapon'
+  | 'await-warden-signal';
 
 export interface ProgressionDefinitions {
   readonly laboratoryId: string;
@@ -48,6 +49,9 @@ export function getProgressionObjective(
   }
   if (!state.base.constructedBuildingIds.includes(definitions.workshopId)) {
     return { kind: 'build-workshop', progress: null, requiredProgress: null };
+  }
+  if (!state.base.telemetryRecorded) {
+    return { kind: 'await-warden-signal', progress: null, requiredProgress: null };
   }
   if (!state.base.unlockedBlueprintIds.includes(definitions.blueprintId)) {
     const project = state.base.researchQueue.find(

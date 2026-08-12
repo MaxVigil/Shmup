@@ -35,6 +35,7 @@ describe('game store M3a cycle', () => {
         targetsBreached: 0,
         creditsEarned: 200,
         creditsPenalized: 0,
+        wardenSignalDetected: false,
       },
     });
     expect(store.getSnapshot().base.preservedTechnologyIds).toEqual([technology.id]);
@@ -78,6 +79,7 @@ describe('game store M3a cycle', () => {
       targetsBreached: 0,
       creditsEarned: 300,
       creditsPenalized: 0,
+      wardenSignalDetected: false,
     } as const;
 
     store.dispatch({ type: 'SETTLE_SORTIE', outcome });
@@ -140,6 +142,7 @@ describe('game store M3a cycle', () => {
       targetsBreached: 0,
       creditsEarned: 300,
       creditsPenalized: 0,
+      wardenSignalDetected: true,
     } as const;
 
     store.dispatch({ type: 'SETTLE_SORTIE', outcome });
@@ -192,5 +195,42 @@ describe('game store M3a cycle', () => {
 
     expect(store.getSnapshot().base.locallyProducedWeaponIds).toEqual([blueprint.weaponId]);
     expect(store.getSnapshot().base.manufacturedWeaponUpgradeIds).toEqual([upgrade.id]);
+  });
+
+  it('gates the Capturer project behind recorded Warden telemetry', () => {
+    const initial = createGameStore().getSnapshot();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 2_000, materials: 100 },
+    });
+    const laboratory = contentCatalog.buildings[0];
+    const scientist = contentCatalog.staffRoles[0];
+    const blueprint = contentCatalog.blueprints[0];
+
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
+    store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
+
+    expect(() =>
+      store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id }),
+    ).toThrow('requires Warden telemetry');
+
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 10,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 20,
+        targetsBreached: 0,
+        creditsEarned: 200,
+        creditsPenalized: 0,
+        wardenSignalDetected: true,
+      },
+    });
+    expect(store.getSnapshot().base.telemetryRecorded).toBe(true);
+
+    store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
+    expect(store.getSnapshot().base.researchQueue[0]?.blueprintId).toBe(blueprint.id);
   });
 });

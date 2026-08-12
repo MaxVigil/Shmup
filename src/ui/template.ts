@@ -276,6 +276,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <button id="toggle-special-equipment" class="base-action" type="button" hidden></button>
           </div>
           <p id="preflight-warning" class="preflight-warning" role="status"></p>
+        <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>
       </section>

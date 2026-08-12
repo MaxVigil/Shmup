@@ -7,6 +7,7 @@ import {
   LEGACY_V5_SAVE_KEY,
   LEGACY_V6_SAVE_KEY,
   LEGACY_V7_SAVE_KEY,
+  LEGACY_V8_SAVE_KEY,
   LEGACY_V1_SAVE_KEY,
   LEGACY_V2_SAVE_KEY,
   LEGACY_V3_SAVE_KEY,
@@ -61,7 +62,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         credits: contentCatalog.economy.startingCredits,
         materials: 23,
@@ -107,7 +108,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         constructedBuildingIds: [contentCatalog.buildings[0].id],
         staff: [{ roleId: contentCatalog.staffRoles[0].id }],
@@ -139,7 +140,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         credits: 275,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
@@ -171,7 +172,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         manufacturedEquipmentIds: [capturer.id],
         equippedEquipmentId: null,
@@ -198,7 +199,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, splitPulseId],
         equippedPrimaryWeaponIds: [splitPulseId, null],
@@ -223,7 +224,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         equippedPrimaryWeaponIds: [acceleratorId, null],
@@ -249,7 +250,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 8,
+      schemaVersion: 9,
       base: {
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         locallyProducedWeaponIds: [],
@@ -266,5 +267,38 @@ describe('save repository', () => {
     clearGame(storage);
 
     expect(loadGame(storage)).toBeNull();
+  });
+
+  it('migrates a v8 save and records telemetry from Capturer progress', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const v8Base: Record<string, unknown> = { ...initial.base };
+    delete v8Base.telemetryRecorded;
+    storage.setItem(LEGACY_V8_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 8,
+      base: {
+        ...v8Base,
+        unlockedBlueprintIds: [contentCatalog.blueprints[0].id],
+      },
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(9);
+    expect(loaded?.base.telemetryRecorded).toBe(true);
+  });
+
+  it('migrates a v8 save without Capturer progress to telemetry false', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const v8Base: Record<string, unknown> = { ...initial.base };
+    delete v8Base.telemetryRecorded;
+    storage.setItem(LEGACY_V8_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 8,
+      base: v8Base,
+    }));
+
+    expect(loadGame(storage)?.base.telemetryRecorded).toBe(false);
   });
 });

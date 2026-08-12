@@ -30,6 +30,7 @@ import {
   failRun,
   forceExtraction,
   offerExtraction,
+  recordWardenSignal,
   toSortieOutcome,
   type RiskExtractionState,
   type TechnologyDecision,
@@ -53,6 +54,7 @@ const M2_FAST_MODE = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('m2Fast') === 'true';
 const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
+const CONTROLS_HINT_DURATION_MS = 15_000;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
 const PRE_EXTRACTION_CLEARANCE_MS = M2_FAST_MODE ? 1_000 : 3_000;
 const BOSS_WARNING_DURATION_MS = M2_FAST_MODE ? 900 : 1_500;
@@ -156,6 +158,7 @@ export class CombatScene extends Phaser.Scene {
   private statusText!: Phaser.GameObjects.Text;
   private statusKey: TranslationKey = 'combat.controls';
   private statusParams: TranslationParams = {};
+  private controlsHintVisible = true;
   private endStatusKey: TranslationKey | null = null;
 
   constructor(
@@ -167,6 +170,7 @@ export class CombatScene extends Phaser.Scene {
     private readonly getEquippedEquipmentId: () => string | null = () => null,
     private readonly getAvailableCredits: () => number = () => 0,
     private readonly getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
+    private readonly getSortiesCompleted: () => number = () => 0,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
       weaponId: string,
@@ -269,6 +273,7 @@ export class CombatScene extends Phaser.Scene {
     this.publishActiveWeapon();
     this.statusKey = 'combat.controls';
     this.statusParams = {};
+    this.controlsHintVisible = true;
     this.endStatusKey = null;
     this.pauseState = EMPTY_PAUSE_STATE;
     this.tweens.resumeAll();
@@ -337,6 +342,15 @@ export class CombatScene extends Phaser.Scene {
     this.fireCooldownMs -= frameMs;
     this.spawnCooldownMs -= frameMs;
     this.invulnerableMs = Math.max(0, this.invulnerableMs - frameMs);
+    if (
+      this.controlsHintVisible &&
+      (this.elapsedMs > CONTROLS_HINT_DURATION_MS || this.isMovementInputActive())
+    ) {
+      this.controlsHintVisible = false;
+      if (this.statusKey === 'combat.controls') {
+        this.statusText.setText('');
+      }
+    }
 
     this.updatePlayer(frameMs);
     this.updateStarfield(frameMs);
@@ -429,10 +443,30 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private presentExtractionWindow(): void {
+    const signalPresent = this.getSortiesCompleted() >= 1;
     if (this.runState.phase === 'combat') {
       this.runState = offerExtraction(this.runState);
+      if (signalPresent) {
+        this.runState = recordWardenSignal(this.runState);
+      }
       this.clearRegularEnemies();
       this.clearShots();
+    }
+    if (!signalPresent) {
+      this.showDecision(
+        this.t('combat.extractionTitle'),
+        [
+          this.t('combat.haulDetails', {
+            salvage: this.runState.materialsFound,
+            research: this.runState.researchFound,
+          }),
+          this.t('combat.extractionNoSignal'),
+        ],
+        [
+          { label: this.t('combat.extractOption'), action: () => this.chooseExtraction('extract') },
+        ],
+      );
+      return;
     }
     this.showDecision(
       this.t('combat.extractionTitle'),
@@ -661,6 +695,20 @@ export class CombatScene extends Phaser.Scene {
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
       fontSize: '13px',
     }).setDepth(15);
+  }
+
+  private isMovementInputActive(): boolean {
+    return (
+      this.cursors.up.isDown ||
+      this.cursors.down.isDown ||
+      this.cursors.left.isDown ||
+      this.cursors.right.isDown ||
+      this.movementKeys.up.isDown ||
+      this.movementKeys.down.isDown ||
+      this.movementKeys.left.isDown ||
+      this.movementKeys.right.isDown ||
+      this.input.activePointer.isDown
+    );
   }
 
   private updatePlayer(deltaMs: number): void {
@@ -1238,7 +1286,11 @@ export class CombatScene extends Phaser.Scene {
           : this.t(this.ending?.survived ? 'combat.extractionSequence' : 'combat.failureSequence'),
       );
     } else {
-      this.statusText.setText(this.t(this.statusKey, this.statusParams));
+      this.statusText.setText(
+        this.statusKey === 'combat.controls' && !this.controlsHintVisible
+          ? ''
+          : this.t(this.statusKey, this.statusParams),
+      );
     }
   }
 

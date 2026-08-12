@@ -121,6 +121,7 @@ const specialEquipmentStatus = byId<HTMLElement>('special-equipment-status');
 const specialEquipmentNote = byId<HTMLElement>('special-equipment-note');
 const toggleSpecialEquipmentButton = byId<HTMLButtonElement>('toggle-special-equipment');
 const preflightWarning = byId<HTMLElement>('preflight-warning');
+const wardenSignalWarning = byId<HTMLElement>('warden-signal-warning');
 const launchSortieButton = byId<HTMLButtonElement>('launch-sortie');
 const returnToBaseButton = byId<HTMLButtonElement>('return-to-base');
 const settingsToggle = byId<HTMLButtonElement>('settings-toggle');
@@ -278,6 +279,11 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
       return {
         title: 'objective.equipAdapted',
         detail: 'objective.equipAdaptedDetail',
+      };
+    case 'await-warden-signal':
+      return {
+        title: 'objective.awaitSignal',
+        detail: 'objective.awaitSignalDetail',
       };
   }
 }
@@ -452,11 +458,14 @@ function renderBase(): void {
           progress: blueprintProject.progress,
           required: blueprintProject.requiredProgress,
         })
-      : researchReady ? t('programme.available') : t('programme.requiresLab');
+      : !state.base.telemetryRecorded
+        ? t('research.blueprintRequiresTelemetry')
+        : researchReady ? t('programme.available') : t('programme.requiresLab');
   blueprintContribution.textContent = blueprintProject === undefined
     ? ''
     : t('programme.contribution', { count: scientists });
-  startBlueprintResearchButton.hidden = blueprintUnlocked || blueprintProject !== undefined;
+  startBlueprintResearchButton.hidden =
+    blueprintUnlocked || blueprintProject !== undefined || !state.base.telemetryRecorded;
   startBlueprintResearchButton.disabled = bankrupt || !researchReady;
   capturerEquipmentStatus.textContent = capturerManufactured
     ? t('programme.manufactured')
@@ -685,6 +694,8 @@ function renderBase(): void {
     ? t('loadout.preflightReady')
     : t('loadout.preflightWarning');
   preflightWarning.classList.toggle('is-ready', capturerEquipped);
+  wardenSignalWarning.hidden = state.base.sortiesCompleted < 1;
+  wardenSignalWarning.textContent = t('base.wardenSignal');
   launchSortieButton.disabled = bankrupt;
   renderContainment();
 }
@@ -1120,6 +1131,7 @@ launchSortieButton.addEventListener('click', () => {
       () => store.getSnapshot().base.equippedEquipmentId,
       () => store.getSnapshot().base.credits,
       () => store.getSnapshot().base.manufacturedWeaponUpgradeIds,
+      () => store.getSnapshot().base.sortiesCompleted,
       () => getLocale(),
       (weaponId, canSwitch) => {
         activeCombatWeaponId = weaponId;

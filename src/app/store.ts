@@ -81,7 +81,11 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         case 'SETTLE_SORTIE':
           state = {
             ...state,
-            base: settleSortie(state.base, command.outcome),
+            base: {
+              ...settleSortie(state.base, command.outcome),
+              telemetryRecorded:
+                state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
+            },
             activeRun: null,
           };
           state = advanceBlueprintResearch(state, contentCatalog.staffRoles[0].id);
@@ -185,6 +189,12 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           );
           if (blueprint === undefined) {
             throw new Error(`Unknown blueprint ${command.blueprintId}.`);
+          }
+          if (
+            blueprint.id === contentCatalog.blueprints[0].id &&
+            !state.base.telemetryRecorded
+          ) {
+            throw new Error(`Blueprint ${blueprint.id} requires Warden telemetry.`);
           }
           state = startBlueprintResearch(state, blueprint);
           break;

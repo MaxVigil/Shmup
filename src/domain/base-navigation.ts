@@ -14,6 +14,7 @@ export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection
     case 'equip-equipment':
     case 'recover-artefact':
     case 'equip-adapted-weapon':
+    case 'await-warden-signal':
       return 'hangar';
     case 'build-laboratory':
     case 'hire-engineer':

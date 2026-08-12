@@ -2,7 +2,8 @@ import { contentCatalog } from '../content/catalog';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v8';
+export const SAVE_KEY = 'shmup.save.v9';
+export const LEGACY_V8_SAVE_KEY = 'shmup.save.v8';
 export const LEGACY_V7_SAVE_KEY = 'shmup.save.v7';
 export const LEGACY_V6_SAVE_KEY = 'shmup.save.v6';
 export const LEGACY_V5_SAVE_KEY = 'shmup.save.v5';
@@ -26,6 +27,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V8_SAVE_KEY, migrateV8Save],
     [LEGACY_V7_SAVE_KEY, migrateV7Save],
     [LEGACY_V6_SAVE_KEY, migrateV6Save],
     [LEGACY_V5_SAVE_KEY, migrateV5Save],
@@ -145,6 +147,25 @@ function normalizeResearchQueue(value: readonly unknown[]): BaseState['researchQ
   });
 }
 
+function hadCapturerProgress(base: Record<string, unknown>): boolean {
+  const capturerBlueprintId = contentCatalog.blueprints[0].id;
+  const capturerEquipmentId = contentCatalog.equipment[0].id;
+  const unlocked = Array.isArray(base.unlockedBlueprintIds)
+    ? (base.unlockedBlueprintIds as readonly unknown[])
+    : [];
+  const manufactured = Array.isArray(base.manufacturedEquipmentIds)
+    ? (base.manufacturedEquipmentIds as readonly unknown[])
+    : [];
+  const queue = Array.isArray(base.researchQueue)
+    ? (base.researchQueue as readonly unknown[])
+    : [];
+  return (
+    unlocked.includes(capturerBlueprintId) ||
+    manufactured.includes(capturerEquipmentId) ||
+    queue.some((entry) => isRecord(entry) && entry.blueprintId === capturerBlueprintId)
+  );
+}
+
 interface MigrationOptions {
   readonly credits: number;
   readonly constructedBuildingIds: readonly string[];
@@ -153,6 +174,7 @@ interface MigrationOptions {
   readonly manufacturedEquipmentIds: readonly string[];
   readonly equippedEquipmentId: string | null;
   readonly preservedTechnologyIds: readonly string[];
+  readonly telemetryRecorded: boolean;
 }
 
 function migratedState(
@@ -164,7 +186,7 @@ function migratedState(
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 8,
+    schemaVersion: 9,
     base: {
       credits: options.credits,
       materials: base.materials,
@@ -184,6 +206,7 @@ function migratedState(
       manufacturedWeaponUpgradeIds: [],
       manufacturedEquipmentIds: options.manufacturedEquipmentIds,
       equippedEquipmentId: options.equippedEquipmentId,
+      telemetryRecorded: options.telemetryRecorded,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -218,7 +241,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 8,
+    schemaVersion: 9,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -244,9 +267,27 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       manufacturedWeaponUpgradeIds: [],
       manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
       equippedEquipmentId: base.equippedEquipmentId as string | null,
+      telemetryRecorded: hadCapturerProgress(base),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
+  };
+  return isGameState(migrated) ? migrated : null;
+}
+
+function migrateV8Save(rawSave: string | null): GameState | null {
+  const legacy = parseLegacy(rawSave, 8);
+  if (legacy === null) {
+    return null;
+  }
+  const { parsed, base } = legacy;
+  const migrated: GameState = {
+    ...(parsed as unknown as GameState),
+    schemaVersion: 9,
+    base: {
+      ...(base as unknown as BaseState),
+      telemetryRecorded: hadCapturerProgress(base),
+    },
   };
   return isGameState(migrated) ? migrated : null;
 }
@@ -280,7 +321,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 8,
+    schemaVersion: 9,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -303,6 +344,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       manufacturedWeaponUpgradeIds: [],
       manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
       equippedEquipmentId: base.equippedEquipmentId as string | null,
+      telemetryRecorded: hadCapturerProgress(base),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -358,6 +400,7 @@ function migrateV5Save(rawSave: string | null): GameState | null {
     unlockedBlueprintIds: base.unlockedBlueprintIds as readonly string[],
     manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
     equippedEquipmentId: base.equippedEquipmentId as string | null,
+    telemetryRecorded: hadCapturerProgress(base),
   });
 }
 
@@ -385,6 +428,7 @@ function migrateV4Save(rawSave: string | null): GameState | null {
     unlockedBlueprintIds: base.unlockedBlueprintIds as readonly string[],
     manufacturedEquipmentIds: base.manufacturedEquipmentIds as readonly string[],
     equippedEquipmentId: null,
+    telemetryRecorded: false,
   });
 }
 
@@ -410,6 +454,7 @@ function migrateV3Save(rawSave: string | null): GameState | null {
     unlockedBlueprintIds: [],
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
+    telemetryRecorded: false,
   });
 }
 
@@ -433,6 +478,7 @@ function migrateV2Save(rawSave: string | null): GameState | null {
     unlockedBlueprintIds: [],
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
+    telemetryRecorded: false,
   });
 }
 
@@ -452,6 +498,7 @@ function migrateV1Save(rawSave: string | null): GameState | null {
     unlockedBlueprintIds: [],
     manufacturedEquipmentIds: [],
     equippedEquipmentId: null,
+    telemetryRecorded: false,
   });
 }
 
@@ -461,6 +508,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V8_SAVE_KEY);
   storage.removeItem(LEGACY_V7_SAVE_KEY);
   storage.removeItem(LEGACY_V6_SAVE_KEY);
   storage.removeItem(LEGACY_V5_SAVE_KEY);

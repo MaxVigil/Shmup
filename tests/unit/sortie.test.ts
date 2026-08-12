@@ -7,6 +7,7 @@ const emptyContract = {
   targetsBreached: 0,
   creditsEarned: 0,
   creditsPenalized: 0,
+  wardenSignalDetected: false,
 } as const;
 
 describe('settleSortie', () => {
@@ -87,6 +88,7 @@ describe('settleSortie', () => {
       targetsBreached: 1,
       creditsEarned: 28,
       creditsPenalized: 40,
+      wardenSignalDetected: false,
     });
 
     expect(base.credits).toBe(state.base.credits - 12);

@@ -25,6 +25,7 @@ export interface RiskExtractionState {
   readonly researchFound: number;
   readonly eliteDefeated: boolean;
   readonly extracted: boolean | null;
+  readonly wardenSignalDetected: boolean;
 }
 
 export function createRiskExtractionState(): RiskExtractionState {
@@ -38,6 +39,7 @@ export function createRiskExtractionState(): RiskExtractionState {
     researchFound: 0,
     eliteDefeated: false,
     extracted: null,
+    wardenSignalDetected: false,
   };
 }
 
@@ -85,6 +87,13 @@ export function addMaterials(
 export function offerExtraction(state: RiskExtractionState): RiskExtractionState {
   assertPhase(state, 'combat');
   return { ...state, phase: 'extraction-choice' };
+}
+
+export function recordWardenSignal(state: RiskExtractionState): RiskExtractionState {
+  if (state.wardenSignalDetected) {
+    return state;
+  }
+  return { ...state, wardenSignalDetected: true };
 }
 
 export function decideExtraction(
@@ -151,5 +160,6 @@ export function toSortieOutcome(
     targetsBreached: contract.targetsBreached,
     creditsEarned: contract.creditsEarned,
     creditsPenalized: contract.creditsPenalized,
+    wardenSignalDetected: state.wardenSignalDetected,
   };
 }
