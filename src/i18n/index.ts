@@ -1,4 +1,6 @@
-export type Locale = 'uk' | 'en';
+import { zh } from './translations-zh';
+
+export type Locale = 'uk' | 'en' | 'zh';
 
 export const DEFAULT_LOCALE: Locale = 'uk';
 export const LOCALE_STORAGE_KEY = 'shmup.locale';
@@ -17,6 +19,7 @@ const en = {
   'settings.language': 'Language',
   'locale.uk': 'Українська',
   'locale.en': 'English',
+  'locale.zh': '中文',
   'base.eyebrow': 'EARTH COMMAND // DIRECTORATE',
   'base.title': 'International Recovery Directorate',
   'base.lede': 'Protect the recovery corridor, develop terrestrial capability, and decide what humanity should learn from captured alien systems.',
@@ -333,6 +336,7 @@ const uk: Record<TranslationKey, string> = {
   'settings.language': 'Мова',
   'locale.uk': 'Українська',
   'locale.en': 'English',
+  'locale.zh': '中文',
   'base.eyebrow': 'ЗЕМНЕ КОМАНДУВАННЯ // УПРАВЛІННЯ',
   'base.title': 'Міжнародне управління відновлення',
   'base.lede': 'Захищайте коридор відновлення, розвивайте земні спроможності й вирішуйте, що людство має дізнатися із захоплених інопланетних систем.',
@@ -632,7 +636,7 @@ const uk: Record<TranslationKey, string> = {
   'combat.interceptOptionNoCapturer': '[C] ПЕРЕХОПИТИ // елітний ворог, лише вантаж',
 };
 
-const catalog: Record<Locale, Record<TranslationKey, string>> = { uk, en };
+const catalog: Record<Locale, Record<TranslationKey, string>> = { uk, en, zh };
 
 export interface LocaleStorage {
   getItem(key: string): string | null;
@@ -640,7 +644,7 @@ export interface LocaleStorage {
 }
 
 export function isLocale(value: unknown): value is Locale {
-  return value === 'uk' || value === 'en';
+  return value === 'uk' || value === 'en' || value === 'zh';
 }
 
 export function loadLocale(storage: LocaleStorage): Locale {

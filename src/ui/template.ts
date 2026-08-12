@@ -26,6 +26,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <select id="locale-select">
             <option id="locale-option-uk" value="uk"></option>
             <option id="locale-option-en" value="en"></option>
+            <option id="locale-option-zh" value="zh"></option>
           </select>
         </div>
       </div>

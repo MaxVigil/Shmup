@@ -941,6 +941,7 @@ function renderLocale(): void {
   setText('language-label', 'settings.language');
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
+  setText('locale-option-zh', 'locale.zh');
   setText('base-eyebrow', 'base.eyebrow');
   setText('base-title', 'base.title');
   setText('base-lede', 'base.lede');

@@ -42,4 +42,10 @@ describe('localization', () => {
     );
     expect(translate('en', 'upgrade.researched', {})).toContain('blueprint');
   });
+
+  it('translates the Chinese locale', () => {
+    expect(translate('zh', 'base.title', {})).toBe('国际回收总局');
+    expect(translate('zh', 'combat.armour', { value: '075' })).toBe('装甲 075');
+    expect(translate('zh', 'nav.hangar', {})).toBe('机库');
+  });
 });
