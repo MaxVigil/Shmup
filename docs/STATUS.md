@@ -4,7 +4,8 @@ Last updated: 2026-08-12
 
 ## Current milestone
 
-M3g.2a — Research and production staffing pass implemented locally; awaiting playtest.
+M3g.2a is implemented, playtested, and published on `main`. M3g.3 — alien containment
+and the Quarantine Centre — is the next planned stage.
 
 ## Completed
 
@@ -196,13 +197,24 @@ M3g.2a — Research and production staffing pass implemented locally; awaiting p
   unlocks it, and completing a weapon project explicitly creates its production
   blueprint.
 - All 96 unit tests, lint, typecheck, and the production build pass locally.
+- The M3g.2a staffing gate and the full terrestrial research → blueprint → production
+  pipeline were playtested in the local browser from a clean profile: sortie income,
+  scientist hiring inside Research, the Accelerator licence reveal after five sorties,
+  qualification production gated behind the lead engineer, both weapon development
+  projects, both manufacturing actions, upgraded Hangar roles, and dual-slot combat
+  launch all work without runtime errors.
+- The M2–M3g.2a change set is published on `main` (commits 9b1e40d, 5ec64fc). Lint,
+  typecheck, all 96 unit tests, the production build, and GitHub Actions CI pass.
 
 ## Next
 
-1. Playtest the M3g.2a staffing gate and the complete terrestrial research → blueprint
-   → production pipeline before further numerical tuning.
-2. Continue M3g with the alien-containment stage, using
-   the agreed 1–2, 5–7, 7–10, and 10–15-sortie progression beats.
+1. ~~Playtest the M3g.2a staffing gate and the complete terrestrial research → blueprint
+   → production pipeline before further numerical tuning.~~ Completed in the local
+   browser; recorded in the status history above.
+2. Continue M3g with the alien-containment stage (M3g.3): early Warden signal, Capturer
+   telemetry unlock, preserved-sample containment project, Quarantine Centre extension,
+   and adapted-blueprint manufacturing loop, using the agreed 1–2, 5–7, 7–10, and
+   10–15-sortie progression beats.
 3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
    hardpoint plus manually fired rocket pod cycles.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket

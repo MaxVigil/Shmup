@@ -35,7 +35,7 @@ damage feedback, two enemy types, simple patterns, and a readable HUD.
 
 ## M2 — Risk and extraction
 
-Status: implemented; draft publication in progress.
+Status: implemented, playtested, and published on `main`.
 
 Add artefact signals, install-or-preserve choice, one passive effect, one weapon
 transformation, an optional elite encounter, extraction, and partial loss on failure.
@@ -55,8 +55,9 @@ transformation, an optional elite encounter, extraction, and partial loss on fai
 ## M3 — Base loop
 
 Status: M3a, all four M3b stages, M3c guidance/payoff, M3d sortie flow, M3e operational
-economy plus contact hotfix, and the M3f base-information-architecture pass implemented
-locally; broader base progression remains staged.
+economy plus contact hotfix, M3f base information architecture, and the M3g.1–M3g.2a
+arsenal cycles are implemented, playtested, and published on `main`; broader base
+progression remains staged.
 
 Add the base UI, pilots, specialists, energy capacity, materials, research, loadout,
 research queue, technology catalogue, mission launch, results, and versioned save.
