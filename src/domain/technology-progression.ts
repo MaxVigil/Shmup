@@ -1,4 +1,8 @@
-import type { AlienTechnologyDefinition } from '../content/model';
+import type {
+  AdaptedWeaponBlueprintDefinition,
+  AlienTechnologyDefinition,
+  WeaponDefinition,
+} from '../content/model';
 import type { GameState } from './model';
 
 export function researchTechnology(
@@ -8,6 +12,7 @@ export function researchTechnology(
     readonly buildingId: string;
     readonly staffRoleId: string;
     readonly containmentBuildingId: string;
+    readonly adaptedBlueprintId: string;
   },
 ): GameState {
   if (!state.base.constructedBuildingIds.includes(requirements.buildingId)) {
@@ -38,9 +43,11 @@ export function researchTechnology(
       preservedTechnologyIds: state.base.preservedTechnologyIds.filter(
         (technologyId) => technologyId !== technology.id,
       ),
-      ownedPrimaryWeaponIds: state.base.ownedPrimaryWeaponIds.includes(weaponId)
-        ? state.base.ownedPrimaryWeaponIds
-        : [...state.base.ownedPrimaryWeaponIds, weaponId],
+      unlockedBlueprintIds: state.base.unlockedBlueprintIds.includes(
+        requirements.adaptedBlueprintId,
+      )
+        ? state.base.unlockedBlueprintIds
+        : [...state.base.unlockedBlueprintIds, requirements.adaptedBlueprintId],
     },
     technologyCatalog: existingKnowledge === undefined
       ? [
@@ -78,6 +85,51 @@ export function equipPrimaryWeapon(
     base: {
       ...state.base,
       equippedPrimaryWeaponIds,
+    },
+  };
+}
+
+export function manufactureAdaptedWeapon(
+  state: GameState,
+  blueprint: AdaptedWeaponBlueprintDefinition,
+  weapon: WeaponDefinition,
+): GameState {
+  if (!state.base.unlockedBlueprintIds.includes(blueprint.id)) {
+    throw new Error(`Adapted blueprint ${blueprint.id} is required for production.`);
+  }
+  if (
+    !state.base.constructedBuildingIds.includes(blueprint.requiredProductionBuildingId)
+  ) {
+    throw new Error(
+      `Building ${blueprint.requiredProductionBuildingId} is required for production.`,
+    );
+  }
+  if (
+    !state.base.staff.some(
+      (member) => member.roleId === blueprint.requiredProductionStaffRoleId,
+    )
+  ) {
+    throw new Error(
+      `Staff role ${blueprint.requiredProductionStaffRoleId} is required for production.`,
+    );
+  }
+  if (state.base.ownedPrimaryWeaponIds.includes(weapon.id)) {
+    throw new Error(`Weapon ${weapon.id} has already been manufactured.`);
+  }
+  if (
+    state.base.credits < blueprint.productionCreditCost ||
+    state.base.materials < blueprint.productionMaterialCost
+  ) {
+    throw new Error(`Insufficient resources to manufacture ${weapon.id}.`);
+  }
+
+  return {
+    ...state,
+    base: {
+      ...state.base,
+      credits: state.base.credits - blueprint.productionCreditCost,
+      materials: state.base.materials - blueprint.productionMaterialCost,
+      ownedPrimaryWeaponIds: [...state.base.ownedPrimaryWeaponIds, weapon.id],
     },
   };
 }

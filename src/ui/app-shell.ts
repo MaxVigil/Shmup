@@ -53,6 +53,7 @@ const machineGunUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
 const containmentBlueprint = contentCatalog.buildingBlueprints[0];
 const quarantine = contentCatalog.buildings[2];
+const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
   scientistRoleId: scientistRole.id,
@@ -62,6 +63,8 @@ const progressionDefinitions = {
   equipmentId: capturerEquipment.id,
   containmentBlueprintId: containmentBlueprint.id,
   quarantineId: quarantine.id,
+  adaptedBlueprintId: adaptedBlueprint.id,
+  adaptedWeaponId: splitPulseWeapon.id,
 };
 
 let game: ReturnType<typeof createGame> | null = null;
@@ -142,6 +145,10 @@ const quarantineRow = byId<HTMLElement>('quarantine-row');
 const quarantineStatus = byId<HTMLElement>('quarantine-status');
 const quarantineCost = byId<HTMLElement>('quarantine-cost');
 const constructQuarantineButton = byId<HTMLButtonElement>('construct-quarantine');
+const alienEmitterProductionRow = byId<HTMLElement>('alien-emitter-production-row');
+const alienEmitterProductionStatus = byId<HTMLElement>('alien-emitter-production-status');
+const alienEmitterProductionNote = byId<HTMLElement>('alien-emitter-production-note');
+const manufactureAlienEmitterButton = byId<HTMLButtonElement>('manufacture-alien-emitter');
 const blueprintStatus = byId<HTMLElement>('blueprint-status');
 const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
 const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
@@ -258,6 +265,16 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
       return { title: 'objective.constructQuarantine', detail: 'objective.constructQuarantineDetail' };
     case 'analyse-sample':
       return { title: 'objective.analyseSample', detail: 'objective.analyseSampleDetail' };
+    case 'manufacture-adapted-weapon':
+      return {
+        title: 'objective.manufactureAdapted',
+        detail: 'objective.manufactureAdaptedDetail',
+      };
+    case 'equip-adapted-weapon':
+      return {
+        title: 'objective.equipAdapted',
+        detail: 'objective.equipAdaptedDetail',
+      };
   }
 }
 
@@ -349,6 +366,11 @@ function renderBase(): void {
       state,
       quarantine.creditCost,
       quarantine.materialCost,
+    ),
+    adaptedWeaponResources: resourceShortfall(
+      state,
+      adaptedBlueprint.productionCreditCost,
+      adaptedBlueprint.productionMaterialCost,
     ),
   };
 
@@ -456,6 +478,8 @@ function renderBase(): void {
     state.base.materials < capturerEquipment.materialCost
   );
   const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
+  const emitterOwned = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeapon.id);
   technologyStatus.textContent = hasSample && !quarantineBuilt
     ? t('research.sampleSealed')
     : !labBuilt
@@ -468,7 +492,9 @@ function renderBase(): void {
             : t('lab.sampleReady', { technology: technologyName, module: moduleName })
           : splitPulseUnlocked
             ? t('lab.researchComplete', { module: moduleName })
-            : t('lab.noSample');
+            : adaptedUnlocked && !emitterOwned
+              ? t('lab.blueprintReady', { module: moduleName })
+              : t('lab.noSample');
   researchTechnologyButton.hidden = !hasSample;
   researchTechnologyButton.disabled = bankrupt || !researchReady || !quarantineBuilt;
   researchTechnologyButton.textContent = splitPulseUnlocked
@@ -676,6 +702,12 @@ function renderContainment(): void {
   ).length;
   const researchReady = labBuilt && scientists > 0;
   const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const engineers = state.base.staff.filter(
+    (member) => member.roleId === engineerRole.id,
+  ).length;
+  const productionReady = workshopBuilt && engineers > 0;
+  const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
+  const emitterOwned = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeapon.id);
 
   containmentProgramme.hidden = !hasSample;
   if (containmentUnlocked) {
@@ -724,6 +756,22 @@ function renderContainment(): void {
       !workshopBuilt ||
       state.base.credits < quarantine.creditCost ||
       state.base.materials < quarantine.materialCost;
+  }
+
+  alienEmitterProductionRow.hidden = !adaptedUnlocked || emitterOwned;
+  if (adaptedUnlocked && !emitterOwned) {
+    alienEmitterProductionStatus.textContent = productionReady
+      ? t('production.ready')
+      : t('production.requiresEngineer');
+    alienEmitterProductionNote.textContent = t('alienProduction.cost', {
+      credits: adaptedBlueprint.productionCreditCost,
+      materials: adaptedBlueprint.productionMaterialCost,
+    });
+    manufactureAlienEmitterButton.disabled =
+      bankrupt ||
+      !productionReady ||
+      state.base.credits < adaptedBlueprint.productionCreditCost ||
+      state.base.materials < adaptedBlueprint.productionMaterialCost;
   }
 }
 
@@ -819,6 +867,8 @@ function renderLocale(): void {
   setText('manufacture-capturer', 'programme.manufacture');
   setText('accelerator-production-label', 'production.acceleratorSample');
   setText('manufacture-accelerator', 'production.manufactureSample');
+  setText('alien-emitter-production-label', 'alienProduction.label');
+  setText('manufacture-alien-emitter', 'alienProduction.manufacture');
   setText('machine-upgrade-production-label', 'upgrade.machineName');
   setText('manufacture-machine-upgrade', 'production.manufactureUpgrade');
   setText('accelerator-upgrade-production-label', 'upgrade.acceleratorName');
@@ -1010,6 +1060,13 @@ startContainmentResearchButton.addEventListener('click', () => {
 
 constructQuarantineButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
+});
+
+manufactureAlienEmitterButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'MANUFACTURE_ADAPTED_WEAPON',
+    blueprintId: adaptedBlueprint.id,
+  });
 });
 
 manufactureCapturerButton.addEventListener('click', () => {

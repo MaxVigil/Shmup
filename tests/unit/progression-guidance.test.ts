@@ -15,6 +15,8 @@ const definitions: ProgressionDefinitions = {
   equipmentId: contentCatalog.equipment[0].id,
   containmentBlueprintId: contentCatalog.buildingBlueprints[0].id,
   quarantineId: contentCatalog.buildings[2].id,
+  adaptedBlueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
+  adaptedWeaponId: contentCatalog.weapons[2].id,
 };
 
 describe('progression guidance', () => {
@@ -155,5 +157,58 @@ describe('progression guidance', () => {
       },
     };
     expect(getProgressionObjective(quarantined, definitions).kind).toBe('analyse-sample');
+  });
+
+  it('guides manufacture and equipping of the adapted weapon before the next recover', () => {
+    const initial = createInitialGameState();
+    const baseReady = {
+      ...initial,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: [
+          definitions.laboratoryId,
+          definitions.workshopId,
+          definitions.quarantineId,
+        ],
+        staff: [
+          { id: 'scientist-1', roleId: definitions.scientistRoleId },
+          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+        ],
+        unlockedBlueprintIds: [
+          definitions.blueprintId,
+          definitions.containmentBlueprintId,
+          definitions.adaptedBlueprintId,
+        ],
+        manufacturedEquipmentIds: [definitions.equipmentId],
+        equippedEquipmentId: definitions.equipmentId,
+      },
+    };
+    expect(getProgressionObjective(baseReady, definitions).kind).toBe(
+      'manufacture-adapted-weapon',
+    );
+
+    const owned = {
+      ...baseReady,
+      base: {
+        ...baseReady.base,
+        ownedPrimaryWeaponIds: [
+          contentCatalog.weapons[0].id,
+          definitions.adaptedWeaponId,
+        ],
+      },
+    };
+    expect(getProgressionObjective(owned, definitions).kind).toBe('equip-adapted-weapon');
+
+    const equipped = {
+      ...owned,
+      base: {
+        ...owned.base,
+        equippedPrimaryWeaponIds: [
+          contentCatalog.weapons[0].id,
+          definitions.adaptedWeaponId,
+        ] as const,
+      },
+    };
+    expect(getProgressionObjective(equipped, definitions).kind).toBe('recover-artefact');
   });
 });

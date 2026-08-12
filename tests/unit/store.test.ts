@@ -3,7 +3,7 @@ import { createGameStore } from '../../src/app/store';
 import { contentCatalog } from '../../src/content/catalog';
 
 describe('game store M3a cycle', () => {
-  it('delivers, researches, and equips the preserved Prism', () => {
+  it('delivers, researches, manufactures, and equips the preserved Prism', () => {
     const initial = createGameStore().getSnapshot();
     const laboratory = contentCatalog.buildings[0];
     const quarantine = contentCatalog.buildings[2];
@@ -12,8 +12,13 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        constructedBuildingIds: [laboratory.id, quarantine.id],
-        staff: [{ id: 'staff-scientist-1', roleId: scientist.id }],
+        credits: 2_000,
+        materials: 100,
+        constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
+        staff: [
+          { id: 'staff-scientist-1', roleId: scientist.id },
+          { id: 'staff-engineer-1', roleId: contentCatalog.staffRoles[1].id },
+        ],
       },
     });
     const technology = contentCatalog.alienTechnologies[0];
@@ -36,10 +41,18 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id });
     expect(store.getSnapshot().base.research).toBe(technology.preservationResearch);
+    expect(store.getSnapshot().base.unlockedBlueprintIds).toEqual([
+      contentCatalog.adaptedWeaponBlueprints[0].id,
+    ]);
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toEqual([
       contentCatalog.weapons[0].id,
-      moduleId,
     ]);
+
+    store.dispatch({
+      type: 'MANUFACTURE_ADAPTED_WEAPON',
+      blueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
+    });
+    expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(moduleId);
 
     store.dispatch({ type: 'EQUIP_PRIMARY_WEAPON', weaponId: moduleId, slotIndex: 1 });
     expect(store.getSnapshot().base.equippedPrimaryWeaponIds).toEqual([
@@ -58,12 +71,12 @@ describe('game store M3a cycle', () => {
     const technology = contentCatalog.alienTechnologies[0];
     const outcome = {
       extracted: true,
-      materialsFound: 18,
+      materialsFound: 30,
       researchFound: 0,
       preservedTechnologyIds: [technology.id],
       targetsDestroyed: 25,
       targetsBreached: 0,
-      creditsEarned: 200,
+      creditsEarned: 300,
       creditsPenalized: 0,
     } as const;
 
@@ -93,6 +106,21 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id });
     expect(store.getSnapshot().base.preservedTechnologyIds).toEqual([]);
+    expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(
+      contentCatalog.adaptedWeaponBlueprints[0].id,
+    );
+    expect(store.getSnapshot().base.ownedPrimaryWeaponIds).not.toContain(
+      technology.weaponTransformation.id,
+    );
+
+    store.dispatch({ type: 'HIRE_STAFF', roleId: contentCatalog.staffRoles[1].id });
+    store.dispatch({
+      type: 'MANUFACTURE_ADAPTED_WEAPON',
+      blueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
+    });
+    expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(
+      technology.weaponTransformation.id,
+    );
   });
 
   it('researches, constructs, and manufactures the Capturer across sorties', () => {

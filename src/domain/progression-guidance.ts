@@ -13,7 +13,9 @@ export type ProgressionObjectiveKind =
   | 'start-containment'
   | 'advance-containment'
   | 'construct-quarantine'
-  | 'analyse-sample';
+  | 'analyse-sample'
+  | 'manufacture-adapted-weapon'
+  | 'equip-adapted-weapon';
 
 export interface ProgressionDefinitions {
   readonly laboratoryId: string;
@@ -24,6 +26,8 @@ export interface ProgressionDefinitions {
   readonly equipmentId: string;
   readonly containmentBlueprintId: string;
   readonly quarantineId: string;
+  readonly adaptedBlueprintId: string;
+  readonly adaptedWeaponId: string;
 }
 
 export interface ProgressionObjective {
@@ -66,23 +70,43 @@ export function getProgressionObjective(
   if (state.base.equippedEquipmentId !== definitions.equipmentId) {
     return { kind: 'equip-equipment', progress: null, requiredProgress: null };
   }
-  if (state.base.preservedTechnologyIds.length === 0) {
-    return { kind: 'recover-artefact', progress: null, requiredProgress: null };
+  const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(
+    definitions.adaptedBlueprintId,
+  );
+  const adaptedOwned = state.base.ownedPrimaryWeaponIds.includes(
+    definitions.adaptedWeaponId,
+  );
+  const adaptedEquipped = state.base.equippedPrimaryWeaponIds.includes(
+    definitions.adaptedWeaponId,
+  );
+
+  if (!adaptedUnlocked) {
+    if (state.base.preservedTechnologyIds.length === 0) {
+      return { kind: 'recover-artefact', progress: null, requiredProgress: null };
+    }
+    if (!state.base.unlockedBlueprintIds.includes(definitions.containmentBlueprintId)) {
+      const project = state.base.researchQueue.find(
+        (entry) => entry.blueprintId === definitions.containmentBlueprintId,
+      );
+      return project === undefined
+        ? { kind: 'start-containment', progress: null, requiredProgress: null }
+        : {
+            kind: 'advance-containment',
+            progress: project.progress,
+            requiredProgress: project.requiredProgress,
+          };
+    }
+    if (!state.base.constructedBuildingIds.includes(definitions.quarantineId)) {
+      return { kind: 'construct-quarantine', progress: null, requiredProgress: null };
+    }
+    return { kind: 'analyse-sample', progress: null, requiredProgress: null };
   }
-  if (!state.base.unlockedBlueprintIds.includes(definitions.containmentBlueprintId)) {
-    const project = state.base.researchQueue.find(
-      (entry) => entry.blueprintId === definitions.containmentBlueprintId,
-    );
-    return project === undefined
-      ? { kind: 'start-containment', progress: null, requiredProgress: null }
-      : {
-          kind: 'advance-containment',
-          progress: project.progress,
-          requiredProgress: project.requiredProgress,
-        };
+
+  if (!adaptedOwned) {
+    return { kind: 'manufacture-adapted-weapon', progress: null, requiredProgress: null };
   }
-  if (!state.base.constructedBuildingIds.includes(definitions.quarantineId)) {
-    return { kind: 'construct-quarantine', progress: null, requiredProgress: null };
+  if (!adaptedEquipped) {
+    return { kind: 'equip-adapted-weapon', progress: null, requiredProgress: null };
   }
-  return { kind: 'analyse-sample', progress: null, requiredProgress: null };
+  return { kind: 'recover-artefact', progress: null, requiredProgress: null };
 }

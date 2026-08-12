@@ -114,4 +114,32 @@ describe('validateContentCatalog', () => {
       'Building blueprint blueprint-safe-containment has invalid research requirements',
     );
   });
+
+  it('rejects adapted weapon blueprints whose output is not a known weapon', () => {
+    const invalidCatalog: ContentCatalog = {
+      ...contentCatalog,
+      adaptedWeaponBlueprints: [{
+        ...contentCatalog.adaptedWeaponBlueprints[0],
+        outputWeaponId: 'weapon-does-not-exist',
+      }],
+    };
+
+    expect(() => validateContentCatalog(invalidCatalog)).toThrow(
+      'Adapted weapon blueprint blueprint-split-pulse-adaptation has invalid production requirements',
+    );
+  });
+
+  it('balances the Split Pulse Emitter above the upgraded machine gun', () => {
+    const emitter = contentCatalog.weapons[2];
+    const machineUpgrade = contentCatalog.weaponUpgrades[0];
+    const emitterDps =
+      emitter.damage * emitter.projectileCount * emitter.shotsPerSecond;
+    const upgradedGunDps =
+      contentCatalog.weapons[0].damage *
+      machineUpgrade.damageMultiplier *
+      contentCatalog.weapons[0].shotsPerSecond;
+
+    expect(emitter.shotsPerSecond).toBe(6);
+    expect(emitterDps).toBeGreaterThan(upgradedGunDps);
+  });
 });

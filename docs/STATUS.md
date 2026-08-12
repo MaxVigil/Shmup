@@ -4,8 +4,8 @@ Last updated: 2026-08-12
 
 ## Current milestone
 
-M3g.3a — the safe-containment gate — is implemented and awaiting playtest. M3g.3b —
-adapted-blueprint analysis — is the next planned stage.
+M3g.3a — safe containment and the adapted Split Pulse Emitter loop — is implemented
+and awaiting playtest. M3g.3b (early Warden signal and Capturer telemetry) is next.
 
 ## Completed
 
@@ -222,6 +222,14 @@ adapted-blueprint analysis — is the next planned stage.
 - Development-only `?m3g3aReady=true` starts a profile with a delivered Prism, an
   operational Centre, a scientist, and the Works for immediate containment testing.
 - All 101 unit tests, lint, typecheck, and the production build pass locally.
+- Analysing the sealed Prism now unlocks an adapted blueprint instead of granting the
+  Split Pulse Emitter directly; the Emitter is manufactured in the Works (250 credits /
+  8 materials, lead engineer required) and only then equippable in the Hangar.
+- The next-objective chain extends through `manufacture-adapted-weapon` and
+  `equip-adapted-weapon` before returning to Warden recovery for further samples.
+- Playtest feedback rebalanced the Split Pulse Emitter to 6 volleys per second with
+  spread 12 (≈90 single-target DPS), beating the upgraded machine gun (≈80 DPS).
+- All 106 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 

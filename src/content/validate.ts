@@ -28,6 +28,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('staffRoles', catalog.staffRoles);
   assertUniqueIds('blueprints', catalog.blueprints);
   assertUniqueIds('buildingBlueprints', catalog.buildingBlueprints);
+  assertUniqueIds('adaptedWeaponBlueprints', catalog.adaptedWeaponBlueprints);
   assertUniqueIds('equipment', catalog.equipment);
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
@@ -80,6 +81,25 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     ) {
       throw new Error(
         `Building blueprint ${blueprint.id} has invalid research requirements.`,
+      );
+    }
+  }
+
+  for (const blueprint of catalog.adaptedWeaponBlueprints) {
+    if (
+      !['earth', 'alien'].includes(blueprint.researchDomain) ||
+      blueprint.productionCreditCost <= 0 ||
+      blueprint.productionMaterialCost < 0 ||
+      !catalog.weapons.some((weapon) => weapon.id === blueprint.outputWeaponId) ||
+      !catalog.buildings.some(
+        (building) => building.id === blueprint.requiredProductionBuildingId,
+      ) ||
+      !catalog.staffRoles.some(
+        (role) => role.id === blueprint.requiredProductionStaffRoleId,
+      )
+    ) {
+      throw new Error(
+        `Adapted weapon blueprint ${blueprint.id} has invalid production requirements.`,
       );
     }
   }

@@ -17,10 +17,20 @@ M3g.3b).
 4. The Quarantine Centre is a specialised extension of the Research and Development
    Centre, physically constructed by the Prototype and Production Works. Its
    construction action lives in Engineering; its analysis surface lives in Research.
-5. With the Quarantine Centre operational, the sealed sample can be analysed safely.
-   The existing lab analysis action (consume the sample for research and the stable
-   Split Pulse module) is re-enabled; the adapted-blueprint loop replaces it in
-   M3g.3b.
+5. With the Quarantine Centre operational, the sealed sample can be analysed. Analysis
+   consumes the sample, records its research value, and unlocks the adapted Split Pulse
+   Emitter blueprint. The Prototype and Production Works manufactures the Emitter
+   (requires the lead engineer), and only then can it be equipped in the Hangar.
+
+## Adapted Split Pulse Emitter loop
+
+Analysis never grants the Emitter directly. The complete loop is:
+
+1. Analyse the sealed Prism in Quarantine → research + adapted blueprint unlocked;
+2. Manufacture the Split Pulse Emitter in the Works (250 credits / 8 materials,
+   lead engineer required);
+3. Equip the manufactured Emitter in a primary slot from the Hangar;
+4. Recover further Wardens to analyse additional samples for research.
 
 ## Progression guidance
 
@@ -30,18 +40,29 @@ and an artefact is recovered, the next-objective chain extends through:
 1. `recover-artefact` — intercept a Warden while the Capturer is installed;
 2. `start-containment` / `advance-containment` — research safe-containment protocols;
 3. `construct-quarantine` — build the Quarantine Centre in Engineering;
-4. `analyse-sample` — analyse the sealed artefact in Quarantine (M3g.3b surface).
+4. `analyse-sample` — analyse the sealed artefact in Quarantine;
+5. `manufacture-adapted-weapon` — build the adapted Emitter in the Works;
+6. `equip-adapted-weapon` — install the Emitter in a primary slot;
+7. `recover-artefact` — repeat the loop for further samples.
 
 ## Content and persistence
 
 - New content: `blueprint-safe-containment` (a `BuildingBlueprintDefinition` whose
-  output is a building) and `building-quarantine-centre` (350 credits / 20 materials,
-  requires the containment blueprint and the Works).
-- The building-blueprint research reuses the existing sortie-driven research queue, so
-  no new persisted state is required.
-- Save schema remains **v8**: the sealed-sample state is derived from existing fields
-  (`preservedTechnologyIds`, `unlockedBlueprintIds`, `constructedBuildingIds`), and no
-  migration is needed.
+  output is a building), `building-quarantine-centre` (350 credits / 20 materials,
+  requires the containment blueprint and the Works), and
+  `blueprint-split-pulse-adaptation` (an `AdaptedWeaponBlueprintDefinition` that
+  produces the Split Pulse Emitter).
+- The building-blueprint and adapted-weapon research reuse the existing sortie-driven
+  research queue and the Works manufacturing surface, so no new persisted state is
+  required.
+- Save schema remains **v8**: blueprints live in `unlockedBlueprintIds` and ownership
+  in `ownedPrimaryWeaponIds`, both existing fields, and no migration is needed.
+
+## Emitter balance
+
+The Split Pulse Emitter fires 6 volleys per second (two pellets each, spread 12) for
+≈90 single-target DPS, which beats the upgraded machine gun (≈80 DPS). This is a
+playtest-driven tuning of the prototype values.
 
 ## Testability
 
@@ -54,5 +75,4 @@ and an artefact is recovered, the next-objective chain extends through:
 
 ## Deliberately deferred
 
-- Adapted-blueprint analysis (analyse → adapted blueprint → manufacture → equip),
-  Capturer telemetry unlock, and the early Warden signal remain in **M3g.3b**.
+- Early Warden signal and Capturer telemetry unlock remain in **M3g.3b**.

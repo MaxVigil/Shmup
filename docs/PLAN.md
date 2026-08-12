@@ -116,8 +116,8 @@ cycle at a time.
 - [x] M3g.3a: preserved-sample containment gate — safe-containment research project,
   Quarantine Centre extension constructed by the Works, and sealed samples that cannot
   be analysed before containment exists.
-- [ ] M3g.3b: early Warden signal, Capturer telemetry unlock, and the adapted-blueprint
-  manufacturing loop (analyse → adapted blueprint → Works → Hangar).
+- [ ] M3g.3b: early Warden signal and Capturer telemetry unlock (the adapted Split
+  Pulse Emitter manufacturing loop is already implemented in M3g.3a).
 - [ ] M3h: one readable ranged enemy and hostile-projectile lifecycle.
 - [ ] M3i: Canister Aircraft Cannon with short range, pellet spread, and capped
   knockback.

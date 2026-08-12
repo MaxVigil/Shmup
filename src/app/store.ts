@@ -16,7 +16,11 @@ import {
   purchaseMarketBlueprint,
   researchWeaponUpgrade,
 } from '../domain/terrestrial-production';
-import { equipPrimaryWeapon, researchTechnology } from '../domain/technology-progression';
+import {
+  equipPrimaryWeapon,
+  manufactureAdaptedWeapon,
+  researchTechnology,
+} from '../domain/technology-progression';
 
 export type GameCommand =
   | { readonly type: 'RESET' }
@@ -37,6 +41,10 @@ export type GameCommand =
   | { readonly type: 'START_BLUEPRINT_RESEARCH'; readonly blueprintId: string }
   | {
       readonly type: 'START_BUILDING_BLUEPRINT_RESEARCH';
+      readonly blueprintId: string;
+    }
+  | {
+      readonly type: 'MANUFACTURE_ADAPTED_WEAPON';
       readonly blueprintId: string;
     }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
@@ -93,10 +101,12 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (quarantine === undefined) {
             throw new Error('Quarantine Centre is not defined in the content catalogue.');
           }
+          const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
           state = researchTechnology(state, technology, {
             buildingId: laboratory.id,
             staffRoleId: scientistRole.id,
             containmentBuildingId: quarantine.id,
+            adaptedBlueprintId: adaptedBlueprint.id,
           });
           break;
         }
@@ -187,6 +197,22 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             throw new Error(`Unknown building blueprint ${command.blueprintId}.`);
           }
           state = startBlueprintResearch(state, blueprint);
+          break;
+        }
+        case 'MANUFACTURE_ADAPTED_WEAPON': {
+          const blueprint = contentCatalog.adaptedWeaponBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown adapted weapon blueprint ${command.blueprintId}.`);
+          }
+          const weapon = contentCatalog.weapons.find(
+            (entry) => entry.id === blueprint.outputWeaponId,
+          );
+          if (weapon === undefined) {
+            throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
+          }
+          state = manufactureAdaptedWeapon(state, blueprint, weapon);
           break;
         }
         case 'MANUFACTURE_EQUIPMENT': {

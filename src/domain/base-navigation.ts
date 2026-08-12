@@ -13,12 +13,14 @@ export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection
       return 'research';
     case 'equip-equipment':
     case 'recover-artefact':
+    case 'equip-adapted-weapon':
       return 'hangar';
     case 'build-laboratory':
     case 'hire-engineer':
     case 'build-workshop':
     case 'manufacture-equipment':
     case 'construct-quarantine':
+    case 'manufacture-adapted-weapon':
       return 'engineering';
   }
 }
