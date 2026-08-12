@@ -128,6 +128,14 @@ export function buildAppTemplate(initialState: GameState): string {
                 </div>
                 <button id="research-canister" class="base-action" type="button"></button>
               </article>
+              <article class="terrestrial-project" id="hardpoint-research-project">
+                <div>
+                  <span id="hardpoint-research-label" class="loadout-row__label"></span>
+                  <strong id="hardpoint-research-status"></strong>
+                  <small id="hardpoint-research-note"></small>
+                </div>
+                <button id="research-hardpoint" class="base-action" type="button"></button>
+              </article>
             </div>
             <div class="special-project">
               <p class="technology-lab__eyebrow" id="programme-eyebrow"></p>
@@ -201,6 +209,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="canister-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="canister-production-label"></span><strong id="canister-production-status"></strong><small id="canister-production-note"></small></div>
               <button id="manufacture-canister" class="base-action" type="button"></button>
+            </div>
+            <div id="hardpoint-production-row" class="facility-row programme-equipment" hidden>
+              <div><span class="loadout-row__label" id="hardpoint-production-label"></span><strong id="hardpoint-production-status"></strong><small id="hardpoint-production-note"></small></div>
+              <button id="manufacture-hardpoint" class="base-action" type="button"></button>
             </div>
             <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>
@@ -296,6 +308,7 @@ export function buildAppTemplate(initialState: GameState): string {
           </div>
           <p id="preflight-warning" class="preflight-warning" role="status"></p>
         <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
+        <p id="hardpoint-status" class="preflight-warning" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>
       </section>

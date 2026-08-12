@@ -198,6 +198,14 @@ export const contentCatalog = {
       requiredStaffRoleId: 'staff-scientist',
       outputEquipmentId: 'equipment-alien-technology-capturer',
     },
+    {
+      id: 'blueprint-auxiliary-hardpoint',
+      researchDomain: 'earth',
+      requiredProgress: 3,
+      requiredBuildingId: 'building-laboratory',
+      requiredStaffRoleId: 'staff-scientist',
+      outputEquipmentId: 'equipment-auxiliary-hardpoint',
+    },
   ],
   buildingBlueprints: [
     {
@@ -239,6 +247,13 @@ export const contentCatalog = {
       id: 'equipment-alien-technology-capturer',
       creditCost: 250,
       materialCost: 10,
+      requiredBuildingId: 'building-workshop',
+      requiredStaffRoleId: 'staff-engineer',
+    },
+    {
+      id: 'equipment-auxiliary-hardpoint',
+      creditCost: 320,
+      materialCost: 18,
       requiredBuildingId: 'building-workshop',
       requiredStaffRoleId: 'staff-engineer',
     },

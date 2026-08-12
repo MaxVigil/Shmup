@@ -55,6 +55,7 @@ const M2_FAST_MODE = import.meta.env.DEV &&
 const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
 const CONTROLS_HINT_DURATION_MS = 15_000;
+const ROCKET_CHARGES = 3;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
 const PRE_EXTRACTION_CLEARANCE_MS = M2_FAST_MODE ? 1_000 : 3_000;
 const BOSS_WARNING_DURATION_MS = M2_FAST_MODE ? 900 : 1_500;
@@ -113,6 +114,16 @@ interface HostileShot {
   readonly vy: number;
 }
 
+interface RocketActor {
+  readonly body: Phaser.GameObjects.Rectangle;
+  readonly targetId: number;
+  readonly damage: number;
+  readonly speed: number;
+  targetX: number;
+  targetY: number;
+  elapsedMs: number;
+}
+
 interface Star {
   readonly body: Phaser.GameObjects.Arc;
   readonly speed: number;
@@ -140,6 +151,7 @@ export class CombatScene extends Phaser.Scene {
   private movementKeys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private readonly shots: ShotActor[] = [];
   private readonly hostileShots: HostileShot[] = [];
+  private readonly rockets: RocketActor[] = [];
   private readonly enemies: EnemyActor[] = [];
   private readonly stars: Star[] = [];
   private rng!: RandomSource;
@@ -181,6 +193,8 @@ export class CombatScene extends Phaser.Scene {
   private statusKey: TranslationKey = 'combat.controls';
   private statusParams: TranslationParams = {};
   private controlsHintVisible = true;
+  private rocketsText: Phaser.GameObjects.Text | null = null;
+  private rocketCharges = 0;
   private endStatusKey: TranslationKey | null = null;
 
   constructor(
@@ -193,6 +207,7 @@ export class CombatScene extends Phaser.Scene {
     private readonly getAvailableCredits: () => number = () => 0,
     private readonly getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
     private readonly getSortiesCompleted: () => number = () => 0,
+    private readonly getAuxiliaryHardpointInstalled: () => boolean = () => false,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
       weaponId: string,
@@ -264,6 +279,20 @@ export class CombatScene extends Phaser.Scene {
         fontSize: '11px',
       })
       .setOrigin(0.5);
+
+    if (this.getAuxiliaryHardpointInstalled()) {
+      this.rocketsText = this.createHudText(
+        20,
+        66,
+        this.t('combat.rockets', { value: String(this.rocketCharges) }),
+      );
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireRocket());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireRocket();
+        }
+      });
+    }
   }
 
   private resetEncounterState(): void {
@@ -276,6 +305,8 @@ export class CombatScene extends Phaser.Scene {
     this.contractLedger = EMPTY_SORTIE_CONTRACT;
     this.nextEnemyActorId = 1;
     this.nextVolleyId = 1;
+    this.rockets.length = 0;
+    this.rocketCharges = this.getAuxiliaryHardpointInstalled() ? ROCKET_CHARGES : 0;
     this.elapsedMs = 0;
     this.fireCooldownMs = 0;
     this.spawnCooldownMs = 400;
@@ -380,6 +411,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateShots(frameMs);
     this.updateEnemies(frameMs);
     this.updateHostileShots(frameMs);
+    this.updateRockets(frameMs);
     this.resolveCollisions();
     if (this.ended) {
       return;
@@ -1105,6 +1137,163 @@ export class CombatScene extends Phaser.Scene {
     this.hostileShots.length = 0;
   }
 
+  private tryFireRocket(): void {
+    if (
+      this.ended ||
+      isPaused(this.pauseState) ||
+      this.rocketCharges <= 0 ||
+      this.runState.phase === 'technology-choice' ||
+      this.runState.phase === 'extraction-choice'
+    ) {
+      return;
+    }
+    const elite = this.enemies.find((enemy) => enemy.definition.kind === 'elite');
+    const target = elite ?? this.acquireRocketTarget();
+    if (target === undefined) {
+      return;
+    }
+    this.rocketCharges -= 1;
+    const body = this.add.rectangle(this.player.x, this.player.y - 28, 6, 16, 0xffd98a);
+    body.setStrokeStyle(1, 0xfff0b0, 0.85);
+    this.rockets.push({
+      body,
+      targetId: target.actorId,
+      damage: 90,
+      speed: 460,
+      targetX: target.body.x,
+      targetY: target.body.y,
+      elapsedMs: 0,
+    });
+    this.updateRocketHud();
+    this.cameras.main.shake(60, 0.003);
+  }
+
+  private acquireRocketTarget(): EnemyActor | undefined {
+    let best: EnemyActor | undefined;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (const enemy of this.enemies) {
+      if (enemy.body.y >= this.player.y - 20) {
+        continue;
+      }
+      const distance = Math.hypot(
+        enemy.body.x - this.player.x,
+        enemy.body.y - this.player.y,
+      );
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = enemy;
+      }
+    }
+    return best;
+  }
+
+  private updateRockets(deltaMs: number): void {
+    for (let index = this.rockets.length - 1; index >= 0; index -= 1) {
+      const rocket = this.rockets[index];
+      if (rocket === undefined) {
+        continue;
+      }
+      const target = this.enemies.find((enemy) => enemy.actorId === rocket.targetId);
+      if (target !== undefined) {
+        rocket.targetX = target.body.x;
+        rocket.targetY = target.body.y;
+      }
+      const dx = rocket.targetX - rocket.body.x;
+      const dy = rocket.targetY - rocket.body.y;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const step = Math.min(rocket.speed * (deltaMs / 1000), length);
+      rocket.body.x += (dx / length) * step;
+      rocket.body.y += (dy / length) * step;
+      rocket.elapsedMs += deltaMs;
+
+      if (
+        target !== undefined &&
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          rocket.body.getBounds(),
+          target.body.getBounds(),
+        )
+      ) {
+        this.explodeRocket(index, rocket, target);
+        continue;
+      }
+      if (rocket.elapsedMs >= 2600 || rocket.body.y < -60) {
+        this.explodeRocket(index, rocket, undefined);
+      }
+    }
+  }
+
+  private explodeRocket(
+    index: number,
+    rocket: RocketActor,
+    target: EnemyActor | undefined,
+  ): void {
+    const x = rocket.body.x;
+    const y = rocket.body.y;
+    rocket.body.destroy();
+    this.rockets.splice(index, 1);
+    this.createDestructionBurst(x, y, 0xffd98a);
+    this.cameras.main.shake(120, 0.006);
+    if (target !== undefined && target.armour > 0) {
+      target.armour -= rocket.damage;
+      target.body.setFillStyle(0xffffff);
+      this.time.delayedCall(45, () => target.body.active && target.body.setFillStyle(
+        target.definition.kind === 'elite'
+          ? 0x9368c7
+          : target.definition.movementPattern === 'sine' ? 0xd98ba1 : 0xd6b36a,
+      ));
+      this.updateEnemyArmourBar(target);
+      if (target.armour <= 0) {
+        const enemyIndex = this.enemies.indexOf(target);
+        if (enemyIndex !== -1) {
+          this.applyEnemyDefeat(enemyIndex);
+        }
+      }
+    }
+  }
+
+  private updateRocketHud(): void {
+    if (this.rocketsText !== null) {
+      this.rocketsText.setText(
+        this.t('combat.rockets', { value: String(this.rocketCharges) }),
+      );
+    }
+  }
+
+  private applyEnemyDefeat(enemyIndex: number): void {
+    const enemy = this.enemies[enemyIndex];
+    if (enemy === undefined || enemy.armour > 0) {
+      return;
+    }
+    const defeatedX = enemy.body.x;
+    const defeatedY = enemy.body.y;
+    this.score += enemy.definition.score;
+    this.contractLedger = recordTargetDestroyed(
+      this.contractLedger,
+      enemy.definition.creditReward,
+    );
+    this.showContractChange(defeatedX, defeatedY, enemy.definition.creditReward);
+    if (enemy.definition.kind === 'elite') {
+      this.runState = defeatElite(
+        this.runState,
+        enemy.definition.materialReward,
+        this.hasCapturerEquipped(),
+      );
+    } else {
+      this.runState = addMaterials(this.runState, enemy.definition.materialReward);
+    }
+    this.destroyEnemy(enemyIndex);
+    if (enemy.definition.kind === 'elite') {
+      this.createDestructionBurst(defeatedX, defeatedY, 0xd9a7ff);
+      if (this.hasCapturerEquipped()) {
+        this.setStatus('combat.wardenDestroyed');
+        this.clearCombatActors();
+        this.artifactRevealElapsedMs = 0;
+      } else {
+        this.beginEnding(true, 'combat.wardenDestroyedNoCapturer');
+      }
+    }
+  }
+
   private resolveCollisions(): void {
     for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
       const enemy = this.enemies[enemyIndex];
@@ -1153,33 +1342,8 @@ export class CombatScene extends Phaser.Scene {
         ));
 
         if (enemy.armour <= 0) {
-          const defeatedX = enemy.body.x;
-          const defeatedY = enemy.body.y;
-          this.score += enemy.definition.score;
-          this.contractLedger = recordTargetDestroyed(
-            this.contractLedger,
-            enemy.definition.creditReward,
-          );
-          this.showContractChange(defeatedX, defeatedY, enemy.definition.creditReward);
-          if (enemy.definition.kind === 'elite') {
-            this.runState = defeatElite(
-              this.runState,
-              enemy.definition.materialReward,
-              this.hasCapturerEquipped(),
-            );
-          } else {
-            this.runState = addMaterials(this.runState, enemy.definition.materialReward);
-          }
-          this.destroyEnemy(enemyIndex);
-          if (enemy.definition.kind === 'elite') {
-            this.createDestructionBurst(defeatedX, defeatedY, 0xd9a7ff);
-            if (this.hasCapturerEquipped()) {
-              this.setStatus('combat.wardenDestroyed');
-              this.clearCombatActors();
-              this.artifactRevealElapsedMs = 0;
-            } else {
-              this.beginEnding(true, 'combat.wardenDestroyedNoCapturer');
-            }
+          this.applyEnemyDefeat(enemyIndex);
+          if (this.artifactRevealElapsedMs !== null || this.ending !== null) {
             return;
           }
         }
@@ -1373,6 +1537,10 @@ export class CombatScene extends Phaser.Scene {
   private clearCombatActors(): void {
     this.clearShots();
     this.clearHostileShots();
+    for (const rocket of this.rockets) {
+      rocket.body.destroy();
+    }
+    this.rockets.length = 0;
     for (const enemy of this.enemies) {
       enemy.body.destroy();
       enemy.armourBarBackground?.destroy();
@@ -1433,6 +1601,7 @@ export class CombatScene extends Phaser.Scene {
       .setText(this.t('combat.reserve', { value: projectedCredits.toString() }))
       .setColor(projectedCredits <= 0 ? '#f39aaa' : '#b7d9d2');
     this.timeText.setText(`${minutes}:${seconds}`);
+    this.updateRocketHud();
   }
 
   public refreshLocale(): void {

@@ -16,6 +16,7 @@ export function createGame(
   getAvailableCredits: () => number = () => 0,
   getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
   getSortiesCompleted: () => number = () => 0,
+  getAuxiliaryHardpointInstalled: () => boolean = () => false,
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
 ): Phaser.Game {
@@ -40,6 +41,7 @@ export function createGame(
       getAvailableCredits,
       getManufacturedWeaponUpgradeIds,
       getSortiesCompleted,
+      getAuxiliaryHardpointInstalled,
       getLocale,
       onActiveWeaponChanged,
     )],

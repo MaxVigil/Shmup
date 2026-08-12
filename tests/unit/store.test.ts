@@ -277,4 +277,48 @@ describe('game store M3a cycle', () => {
     store.dispatch({ type: 'MANUFACTURE_RESEARCH_WEAPON', blueprintId: blueprint.id });
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(weaponId);
   });
+
+  it('researches and manufactures the auxiliary hardpoint', () => {
+    const initial = createGameStore().getSnapshot();
+    const laboratory = contentCatalog.buildings[0];
+    const workshop = contentCatalog.buildings[1];
+    const scientist = contentCatalog.staffRoles[0];
+    const engineer = contentCatalog.staffRoles[1];
+    const blueprint = contentCatalog.blueprints[1];
+    const equipment = contentCatalog.equipment[1];
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 2_000,
+        materials: 100,
+        telemetryRecorded: true,
+        constructedBuildingIds: [laboratory.id, workshop.id],
+        staff: [
+          { id: 'scientist-1', roleId: scientist.id },
+          { id: 'engineer-1', roleId: engineer.id },
+        ],
+      },
+    });
+    const outcome = {
+      extracted: true,
+      materialsFound: 10,
+      researchFound: 0,
+      preservedTechnologyIds: [],
+      targetsDestroyed: 25,
+      targetsBreached: 0,
+      creditsEarned: 300,
+      creditsPenalized: 0,
+      wardenSignalDetected: false,
+    } as const;
+
+    store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
+    for (let index = 0; index < blueprint.requiredProgress; index += 1) {
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
+    expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(blueprint.id);
+
+    store.dispatch({ type: 'MANUFACTURE_EQUIPMENT', equipmentId: equipment.id });
+    expect(store.getSnapshot().base.manufacturedEquipmentIds).toContain(equipment.id);
+  });
 });

@@ -56,6 +56,8 @@ const quarantine = contentCatalog.buildings[2];
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
 const canisterWeapon = contentCatalog.weapons[3];
+const hardpointBlueprint = contentCatalog.blueprints[1];
+const hardpointEquipment = contentCatalog.equipment[1];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
   scientistRoleId: scientistRole.id,
@@ -160,6 +162,14 @@ const canisterProductionRow = byId<HTMLElement>('canister-production-row');
 const canisterProductionStatus = byId<HTMLElement>('canister-production-status');
 const canisterProductionNote = byId<HTMLElement>('canister-production-note');
 const manufactureCanisterButton = byId<HTMLButtonElement>('manufacture-canister');
+const hardpointResearchStatus = byId<HTMLElement>('hardpoint-research-status');
+const hardpointResearchNote = byId<HTMLElement>('hardpoint-research-note');
+const researchHardpointButton = byId<HTMLButtonElement>('research-hardpoint');
+const hardpointProductionRow = byId<HTMLElement>('hardpoint-production-row');
+const hardpointProductionStatus = byId<HTMLElement>('hardpoint-production-status');
+const hardpointProductionNote = byId<HTMLElement>('hardpoint-production-note');
+const manufactureHardpointButton = byId<HTMLButtonElement>('manufacture-hardpoint');
+const hardpointStatus = byId<HTMLElement>('hardpoint-status');
 const blueprintStatus = byId<HTMLElement>('blueprint-status');
 const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
 const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
@@ -709,6 +719,67 @@ function renderBase(): void {
   launchSortieButton.disabled = bankrupt;
   renderContainment();
   renderCanister();
+  renderHardpoint();
+}
+
+function renderHardpoint(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const hardpointUnlocked = state.base.unlockedBlueprintIds.includes(hardpointBlueprint.id);
+  const hardpointInstalled = state.base.manufacturedEquipmentIds.includes(
+    hardpointEquipment.id,
+  );
+  const hardpointProject = state.base.researchQueue.find(
+    (project) => project.blueprintId === hardpointBlueprint.id,
+  );
+  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const scientists = state.base.staff.filter(
+    (member) => member.roleId === scientistRole.id,
+  ).length;
+  const researchReady = labBuilt && scientists > 0;
+  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const engineers = state.base.staff.filter(
+    (member) => member.roleId === engineerRole.id,
+  ).length;
+  const productionReady = workshopBuilt && engineers > 0;
+
+  hardpointResearchStatus.textContent = hardpointUnlocked
+    ? t('research.hardpointUnlocked')
+    : hardpointProject !== undefined
+      ? t('research.hardpointActive', {
+          progress: hardpointProject.progress,
+          required: hardpointProject.requiredProgress,
+        })
+      : researchReady
+        ? t('research.hardpointAvailable')
+        : t('research.hardpointRequiresTeam');
+  hardpointResearchNote.textContent = hardpointProject === undefined
+    ? ''
+    : t('programme.contribution', { count: scientists });
+  researchHardpointButton.hidden = hardpointUnlocked || hardpointProject !== undefined;
+  researchHardpointButton.disabled = bankrupt || !researchReady;
+
+  hardpointProductionRow.hidden = !hardpointUnlocked || hardpointInstalled;
+  if (hardpointUnlocked && !hardpointInstalled) {
+    hardpointProductionStatus.textContent = productionReady
+      ? t('production.ready')
+      : t('production.requiresEngineer');
+    hardpointProductionNote.textContent = t('production.cost', {
+      credits: hardpointEquipment.creditCost,
+      materials: hardpointEquipment.materialCost,
+    });
+    manufactureHardpointButton.disabled =
+      bankrupt ||
+      !productionReady ||
+      state.base.credits < hardpointEquipment.creditCost ||
+      state.base.materials < hardpointEquipment.materialCost;
+  }
+
+  hardpointStatus.hidden = false;
+  hardpointStatus.textContent = t(
+    hardpointInstalled ? 'hangar.hardpointInstalled' : 'hangar.hardpointMissing',
+  );
+  hardpointStatus.classList.toggle('is-ready', hardpointInstalled);
 }
 
 function renderCanister(): void {
@@ -968,6 +1039,10 @@ function renderLocale(): void {
   setText('research-canister', 'research.startCanister');
   setText('canister-production-label', 'production.canister');
   setText('manufacture-canister', 'production.canisterManufacture');
+  setText('hardpoint-research-label', 'research.hardpointLabel');
+  setText('research-hardpoint', 'research.startHardpoint');
+  setText('hardpoint-production-label', 'production.hardpoint');
+  setText('manufacture-hardpoint', 'production.hardpointManufacture');
   setText('special-equipment-label', 'loadout.specialEquipment');
   setText('launch-sortie', 'base.launch');
   setText('active-weapon-label', 'sortie.activeWeapon');
@@ -1164,6 +1239,20 @@ manufactureCanisterButton.addEventListener('click', () => {
   });
 });
 
+researchHardpointButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'START_BLUEPRINT_RESEARCH',
+    blueprintId: hardpointBlueprint.id,
+  });
+});
+
+manufactureHardpointButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'MANUFACTURE_EQUIPMENT',
+    equipmentId: hardpointEquipment.id,
+  });
+});
+
 manufactureCapturerButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_EQUIPMENT',
@@ -1215,6 +1304,9 @@ launchSortieButton.addEventListener('click', () => {
       () => store.getSnapshot().base.credits,
       () => store.getSnapshot().base.manufacturedWeaponUpgradeIds,
       () => store.getSnapshot().base.sortiesCompleted,
+      () => store.getSnapshot().base.manufacturedEquipmentIds.includes(
+        hardpointEquipment.id,
+      ),
       () => getLocale(),
       (weaponId, canSwitch) => {
         activeCombatWeaponId = weaponId;
