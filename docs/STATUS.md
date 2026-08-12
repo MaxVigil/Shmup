@@ -4,11 +4,10 @@ Last updated: 2026-08-13
 
 ## Current milestone
 
-The P0 (Chinese localization) and P1 (aircraft fleet, save schema v10) package is
-implemented on `test` and awaiting playtest before merging to `main`. The M3g.3b +
-M3h + M3i + M3j package (Warden signal gate, ranged Gunship, Canister Aircraft
-Cannon, auxiliary hardpoint with rocket pod) plus the controls-hint auto-hide
-remain part of the playtest batch on `test`.
+The P2 (Command Centre, month counter, fuel economy, threat map — save schema v11)
+package is implemented on `test` and awaiting playtest before merging to `main`. The
+P0 (Chinese localization) and P1 (aircraft fleet) packages from the previous session
+are also on `test` for the same playtest batch.
 
 ## Completed
 
@@ -258,16 +257,21 @@ remain part of the playtest batch on `test`.
   and per-sortie active-aircraft selection (save schema v10 with a v9 migration).
 - Combat reads the active aircraft's armour, speed multiplier, and damage multiplier
   instead of fixed constants.
-- All 127 unit tests, lint, typecheck, and the production build pass locally.
+- A Command tab now shows the sortie-counted month, a deterministic threat map of
+  Council states under attack (PRC, Ukraine, and two other founding states), and
+  fleet fuel readiness.
+- Sorties consume the active aircraft's fuel; launching requires a fueled aircraft
+  and the Hangar offers refuel at a per-aircraft credit cost (schema v11 with a v10
+  migration provisioning month one, full fuel, and the first threat map).
+- All 137 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
-1. Playtest the P0 Chinese locale and the P1 fleet economy (aircraft prices, slot
-   cost, and combat multipliers are prototypes) before merging to `main`.
-2. Continue M3g with the alien-containment stage. M3g.3a (safe containment and the
-   Quarantine Centre) is implemented and needs a playtest pass; M3g.3b adds the early
-   Warden signal, Capturer telemetry unlock, and the adapted-blueprint manufacturing
-   loop, using the agreed 1–2, 5–7, 7–10, and 10–15-sortie progression beats.
+1. Playtest the P0 Chinese locale, the P1 fleet economy, and the P2 fuel/month gate
+   (aircraft prices, slot cost, refuel costs, and combat multipliers are prototypes)
+   before merging to `main`.
+2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment
+   (schema v12) after the fleet and Command Centre land.
 3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
    hardpoint plus manually fired rocket pod cycles.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket

@@ -158,6 +158,23 @@ Status: implemented on `test`; awaiting playtest before merging to `main`.
 - [x] Add uk/en/zh translations and unit tests for content, domain, store, and
   migration; all numbers remain prototype values for playtest tuning.
 
+## P2 — Command Centre and fuel (save schema v11)
+
+Status: implemented on `test`; awaiting playtest before merging to `main`.
+
+- [x] Add a Command tab with the current month, the threat map of Council states under
+  attack, and fleet fuel readiness.
+- [x] Add the sortie-counted month (`MONTH_SORTIE_LENGTH = 6`) with a deterministic,
+  seeded threat map regenerated at each month boundary.
+- [x] Add per-aircraft refuel costs and a launch gate: a sortie consumes the active
+  aircraft's fuel, and launching requires a fueled aircraft.
+- [x] Persist `month`, `fueledAircraftIds`, and `threatMap` in schema v11 with a v10
+  migration that provisions month one, full fuel, and the first map.
+- [x] Add `REFUEL_AIRCRAFT` and extend `SETTLE_SORTIE` for fuel consumption and month
+  advancement in the store.
+- [x] Add uk/en/zh translations and unit tests for content, domain, store, and
+  migration; all numbers remain prototype values for playtest tuning.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

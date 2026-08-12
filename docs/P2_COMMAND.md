@@ -1,6 +1,6 @@
 # P2 — Command Centre and fuel (save schema v11)
 
-Status: contract; implementation follows on `test`.
+Status: implemented on `test` (2026-08-13); awaiting playtest before merging to `main`.
 
 ## Scope
 
