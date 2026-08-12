@@ -9,8 +9,10 @@ Extraction secures the haul; failure loses part of it.
 
 ## Status
 
-M0 Foundation is published for review. M1 combat prototyping is in progress with a
-playable greybox encounter, automatic fire, armour, two enemy types, and a HUD.
+M0 and M1 are merged. M2–M3g.2 form a playable risk-and-extraction prototype with a
+departmental Base, separated terrestrial and alien research, guided Capturer
+progression, bilingual UI, managed sortie endings, and an operational contract that
+rewards confirmed targets and penalizes breaches.
 
 ## Requirements
 
@@ -23,6 +25,43 @@ playable greybox encounter, automatic fire, armour, two enemy types, and a HUD.
 npm ci
 npm run dev
 ```
+
+The normal M2 encounter lasts three minutes. During local development, append
+`?m2Fast=true` to the URL to open the extraction window after 4.5 seconds and leave
+enough time to destroy the Warden for repeatable decision-flow checks. After choosing
+Install or Preserve, fast mode uses an 8-second escape instead of the normal 35 seconds.
+Preserve the Prism, survive the escape, then use the Technology Lab to research and
+equip Split Pulse before launching the next sortie.
+
+The application opens on the Base screen. Use the gear button in the shared top bar to
+switch between Ukrainian and English; Ukrainian is used when no preference is stored.
+New profiles must earn materials in sorties, construct the Research and Development Centre, and
+hire scientists from the Research tab before alien samples can be researched.
+The Prototype and Production Works then manufactures purchased and researched
+blueprints after a lead engineer is hired there. Scientists advance the Alien Technology Capturer blueprint on completed sorties. Once
+researched, manufacture the device in the Works and install it in
+Kestrel's special-equipment slot. The Warden can still be intercepted without it, but
+its alien artefact is recoverable only while the Capturer is equipped.
+The Base highlights the next prerequisite in this chain, shows exact resource
+shortfalls, warns about Capturer status before launch, and reports economy and research
+payoff separately after every sortie.
+
+The Recovery Council begins a new profile with a 500-credit defence reserve. Scouts
+pay 8 credits, Weavers 12, and the Warden 100 when destroyed. A regular enemy that
+reaches the protected corridor incurs a penalty equal to five times its bounty. A
+reserve of zero or less ends the campaign.
+
+During a sortie, use WASD, the arrow keys, or the pointer to move. Press `X` to switch
+between two equipped primary weapons and `P` to pause;
+opening Settings also pauses combat. At decision prompts use `E` to extract, `C` to
+continue, `1` to install an artefact, and `2` to preserve it.
+
+For a focused local stage 4 check, open
+`?m2Fast=true&stage4Ready=true`. This temporary playtest profile starts with a
+manufactured Capturer in storage and does not read or overwrite normal game progress.
+Use `?m3eBankrupt=true` to inspect the insolvency state without changing the normal save.
+Use `?m3g2Ready=true` for a temporary six-sortie industrial profile with the Centre,
+Works, credits, and materials ready for the complete blueprint and upgrade check.
 
 ## Validate
 
@@ -40,7 +79,12 @@ interface. Pure TypeScript domain rules sit between them, with typed content and
 versioned local save boundary.
 
 See [the game specification](docs/GAME_SPEC.md), [implementation plan](docs/PLAN.md),
-and [current status](docs/STATUS.md).
+and [current status](docs/STATUS.md). The current management-interface contract is
+documented in [M3f base information architecture](docs/M3F_BASE_INFORMATION_ARCHITECTURE.md).
+The terrestrial market and Impulse Accelerator are documented in
+[M3g.1 market and Accelerator](docs/M3G1_MARKET_ACCELERATOR.md); the blueprint,
+production, and first-upgrade pipeline is documented in
+[M3g.2 terrestrial industry](docs/M3G2_TERRESTRIAL_INDUSTRY.md).
 
 ## Project sources
 

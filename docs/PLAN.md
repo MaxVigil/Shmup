@@ -5,7 +5,7 @@ This file is the repository-resident execution contract.
 
 ## M0 — Foundation
 
-Status: complete; draft PR #1 awaiting review.
+Status: complete; merged in PR #1.
 
 - [x] Scaffold Phaser 4, TypeScript, and Vite.
 - [x] Add repository instructions and project documentation.
@@ -19,7 +19,7 @@ typecheck, unit tests, and production build.
 
 ## M1 — Combat feel prototype
 
-Status: in progress.
+Status: merged in PR #2; tuning follow-up remains open.
 
 Create a 3–5 minute greybox encounter with bounded movement, automatic fire, armour,
 damage feedback, two enemy types, simple patterns, and a readable HUD.
@@ -29,22 +29,66 @@ damage feedback, two enemy types, simple patterns, and a readable HUD.
 - [x] Add automatic fire, armour, damage feedback, scoring, and restart.
 - [x] Add straight and sine-wave enemy movement.
 - [x] Add a readable encounter HUD and three-minute survival target.
-- [ ] Playtest movement, spawn pressure, collision readability, and firing cadence.
-- [ ] Tune the encounter from playtest evidence.
+- [ ] Record repeatable playtest evidence for movement, spawn pressure, collision
+  readability, and firing cadence.
+- [x] Add local armour feedback and reset all encounter state on restart.
 
 ## M2 — Risk and extraction
 
-Status: planned.
+Status: implemented; draft publication in progress.
 
 Add artefact signals, install-or-preserve choice, one passive effect, one weapon
 transformation, an optional elite encounter, extraction, and partial loss on failure.
 
+- [x] Drop the Prism from the optional Warden and only then show its broad category,
+  glyphs, reliability, danger, and install-or-preserve choice.
+- [x] Install the Prism for Prismatic Sheath and the Split Pulse transformation.
+- [x] Preserve the Prism for recoverable research value.
+- [x] Require a post-choice escape where installed effects are playable and preserved
+  technology remains at risk.
+- [x] Offer a safe extraction window or an optional Warden intercept carrying the
+  artefact.
+- [x] Award deterministic salvage and retain only 50% after defeat.
+- [x] Persist recovered materials and research in the existing versioned local save.
+- [x] Add deterministic domain tests and a fast local playtest mode.
+
 ## M3 — Base loop
 
-Status: planned.
+Status: M3a, all four M3b stages, M3c guidance/payoff, M3d sortie flow, M3e operational
+economy plus contact hotfix, and the M3f base-information-architecture pass implemented
+locally; broader base progression remains staged.
 
 Add the base UI, pilots, specialists, energy capacity, materials, research, loadout,
 research queue, technology catalogue, mission launch, results, and versioned save.
+
+- [x] Deliver a preserved Prism to the base as an identified technology sample.
+- [x] Research the sample to unlock the stable Split Pulse Emitter.
+- [x] Equip or remove the unlocked weapon module for the next sortie.
+- [x] Start a new sortie with the equipped Split Pulse transformation active.
+- [x] Migrate browser saves from schema v1 to v2.
+- [x] Stage 1: separate the Base and Sortie screens, add a persistent settings top bar,
+  and localize all visible UI and Phaser text in Ukrainian and English.
+- [x] Stage 2: add credits, construction, the laboratory, and scientist hiring.
+- [x] Migrate v1/v2 progress to save schema v3 with infrastructure compatibility.
+- [x] Stage 3: research and manufacture the Alien Technology Capturer blueprint through
+  sortie-driven progress, a workshop, and explicit costs.
+- [x] Stage 4: add preflight special-equipment loadout and gate artefact recovery behind
+  an equipped Capturer.
+- [x] M3c: guide a clean profile through the Capturer chain, clarify preflight recovery,
+  and expose credits, materials, and research progress in the sortie payoff.
+- [x] M3d: centre the sortie below the top bar, add manual/settings pause, isolate the
+  Warden intercept, and replace abrupt mission stops with managed extraction/defeat
+  sequences.
+- [x] M3e: replace fixed sortie pay with target bounties and five-times breach
+  penalties, expose the live contract ledger, and end an insolvent campaign at a
+  reserve of zero or less.
+- [x] M3e contact hotfix: keep the Warden alive after ramming, separate both actors
+  along the actual contact axis, and preserve the result at every playfield edge.
+- [x] M3f: divide the Base into Overview, Research, Engineering, and Hangar departments
+  with persistent resource context and direct next-objective routing.
+- [x] M3f: classify the Capturer as a terrestrial blueprint and separate conventional
+  development lanes from quarantined alien artefact analysis.
+- [ ] Add the broader pilot, specialist, energy, and mission surfaces.
 
 ## M4 — Vertical slice
 
@@ -53,6 +97,32 @@ Status: planned.
 Expand only after the short loop is enjoyable. Build the 15–20 minute sector, target
 content set, extraction windows, final threat, audio, effects, onboarding, balance,
 and browser smoke flow.
+
+## Planned M3 arsenal sequence
+
+The agreed post-M3f sequence is specified in
+[M3g–M3j arsenal roadmap](M3G_M3J_ARSENAL_ROADMAP.md). Implement and playtest one
+cycle at a time.
+
+- [x] M3g.1: general primary-weapon slot, deterministic terrestrial market, purchasable
+  Impulse Accelerator, and combat-feedback pass.
+- [x] M3g.1 balance adaptation: two persistent primary-weapon slots with `X` and
+  pointer switching during a sortie.
+- [x] M3g.2: Research and Development Centre, Prototype and Production Works, market
+  blueprints, local manufacturing, and the first machine-gun/Accelerator improvements.
+- [x] M3g.2a: move scientist hiring into Research, add one lead engineer to the Works,
+  require production staffing, and clarify that completed research creates a blueprint.
+- [ ] M3g.3: early Warden signal, Capturer telemetry unlock, preserved-sample containment
+  project, Quarantine Centre extension, and adapted-blueprint manufacturing loop.
+- [ ] M3h: one readable ranged enemy and hostile-projectile lifecycle.
+- [ ] M3i: Canister Aircraft Cannon with short range, pellet spread, and capped
+  knockback.
+- [ ] M3j: permanent auxiliary hardpoint, manual auxiliary activation, and a limited-
+  charge rocket pod whose principal use case is engaging the Warden.
+- [ ] After M3j validation: consider a slowly ascending proximity mine as the next
+  auxiliary weapon.
+- [ ] Run 2D art search, selection, licence verification, and integration as a separate
+  later stage; none of the currently reviewed open-license sets has been selected.
 
 ## Stop-and-fix rule
 

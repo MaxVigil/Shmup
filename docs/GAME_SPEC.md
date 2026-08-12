@@ -64,7 +64,28 @@ properties over time.
 
 ## Base
 
-- Two currencies: materials and research.
+- Management is divided into Overview, Research, Engineering, and Hangar departments.
+- Terrestrial research covers understood airframe, survivability, repair, mobility, and
+  conventional weapons; alien research handles quarantined recovered artefacts.
+- Earth equipment may be bought as an expensive finished market item or produced more
+  cheaply after acquiring its blueprint and constructing the Prototype and Production
+  Works. Research creates designs, the Works manufactures physical upgrades, and the
+  Hangar installs them.
+- Primary weapons fire automatically, and only one is equipped at a time. Market and
+  Hangar surfaces communicate roles qualitatively; exact combat coefficients remain
+  hidden unless a later diagnostic interface gives the player a reason to need them.
+- The Quarantine Centre is a researched terrestrial safe-containment extension to the
+  Research and Development Centre. The Works constructs it after the first preserved
+  alien sample reveals the containment requirement.
+- A preserved artefact is analysed in Quarantine into an adapted blueprint, then built
+  in the Works and equipped in the Hangar. Field installation remains temporary and
+  does not advance permanent adaptation.
+- Purchased and manufactured weapons remain owned after defeat during the current
+  prototype phase.
+- The operating reserve is funded in credits; confirmed targets earn bounties and
+  hostile aircraft that breach the protected corridor incur larger penalties.
+- Reaching a zero or negative credit reserve ends the campaign.
+- Materials and research remain the recovered development resources.
 - Energy is capacity, not consumable currency.
 - Permanent specialists have roles and random traits.
 - Pilots have skills that modify combat statistics.
