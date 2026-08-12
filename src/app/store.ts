@@ -47,6 +47,14 @@ export type GameCommand =
       readonly type: 'MANUFACTURE_ADAPTED_WEAPON';
       readonly blueprintId: string;
     }
+  | {
+      readonly type: 'START_RESEARCH_WEAPON_BLUEPRINT';
+      readonly blueprintId: string;
+    }
+  | {
+      readonly type: 'MANUFACTURE_RESEARCH_WEAPON';
+      readonly blueprintId: string;
+    }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -215,6 +223,32 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           );
           if (blueprint === undefined) {
             throw new Error(`Unknown adapted weapon blueprint ${command.blueprintId}.`);
+          }
+          const weapon = contentCatalog.weapons.find(
+            (entry) => entry.id === blueprint.outputWeaponId,
+          );
+          if (weapon === undefined) {
+            throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
+          }
+          state = manufactureAdaptedWeapon(state, blueprint, weapon);
+          break;
+        }
+        case 'START_RESEARCH_WEAPON_BLUEPRINT': {
+          const blueprint = contentCatalog.researchWeaponBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown research weapon blueprint ${command.blueprintId}.`);
+          }
+          state = startBlueprintResearch(state, blueprint);
+          break;
+        }
+        case 'MANUFACTURE_RESEARCH_WEAPON': {
+          const blueprint = contentCatalog.researchWeaponBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown research weapon blueprint ${command.blueprintId}.`);
           }
           const weapon = contentCatalog.weapons.find(
             (entry) => entry.id === blueprint.outputWeaponId,

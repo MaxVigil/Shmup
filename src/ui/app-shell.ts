@@ -54,6 +54,8 @@ const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
 const containmentBlueprint = contentCatalog.buildingBlueprints[0];
 const quarantine = contentCatalog.buildings[2];
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
+const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
+const canisterWeapon = contentCatalog.weapons[3];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
   scientistRoleId: scientistRole.id,
@@ -151,6 +153,13 @@ const alienEmitterProductionRow = byId<HTMLElement>('alien-emitter-production-ro
 const alienEmitterProductionStatus = byId<HTMLElement>('alien-emitter-production-status');
 const alienEmitterProductionNote = byId<HTMLElement>('alien-emitter-production-note');
 const manufactureAlienEmitterButton = byId<HTMLButtonElement>('manufacture-alien-emitter');
+const canisterResearchStatus = byId<HTMLElement>('canister-research-status');
+const canisterResearchNote = byId<HTMLElement>('canister-research-note');
+const researchCanisterButton = byId<HTMLButtonElement>('research-canister');
+const canisterProductionRow = byId<HTMLElement>('canister-production-row');
+const canisterProductionStatus = byId<HTMLElement>('canister-production-status');
+const canisterProductionNote = byId<HTMLElement>('canister-production-note');
+const manufactureCanisterButton = byId<HTMLButtonElement>('manufacture-canister');
 const blueprintStatus = byId<HTMLElement>('blueprint-status');
 const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
 const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
@@ -679,6 +688,7 @@ function renderBase(): void {
       ? 'loadout.acceleratorRoleUpgraded'
       : 'loadout.acceleratorRole',
   );
+  byId<HTMLElement>('weapon-canister-role').textContent = t('loadout.canisterRole');
   specialEquipmentStatus.textContent = capturerEquipped
     ? t('loadout.capturerEquipped')
     : capturerManufactured ? t('loadout.capturerStored') : t('loadout.slotEmpty');
@@ -698,6 +708,59 @@ function renderBase(): void {
   wardenSignalWarning.textContent = t('base.wardenSignal');
   launchSortieButton.disabled = bankrupt;
   renderContainment();
+  renderCanister();
+}
+
+function renderCanister(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const canisterUnlocked = state.base.unlockedBlueprintIds.includes(canisterBlueprint.id);
+  const canisterOwned = state.base.ownedPrimaryWeaponIds.includes(canisterWeapon.id);
+  const canisterProject = state.base.researchQueue.find(
+    (project) => project.blueprintId === canisterBlueprint.id,
+  );
+  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const scientists = state.base.staff.filter(
+    (member) => member.roleId === scientistRole.id,
+  ).length;
+  const researchReady = labBuilt && scientists > 0;
+  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const engineers = state.base.staff.filter(
+    (member) => member.roleId === engineerRole.id,
+  ).length;
+  const productionReady = workshopBuilt && engineers > 0;
+
+  canisterResearchStatus.textContent = canisterUnlocked
+    ? t('research.canisterUnlocked')
+    : canisterProject !== undefined
+      ? t('research.canisterActive', {
+          progress: canisterProject.progress,
+          required: canisterProject.requiredProgress,
+        })
+      : researchReady
+        ? t('research.canisterAvailable')
+        : t('research.canisterRequiresTeam');
+  canisterResearchNote.textContent = canisterProject === undefined
+    ? ''
+    : t('programme.contribution', { count: scientists });
+  researchCanisterButton.hidden = canisterUnlocked || canisterProject !== undefined;
+  researchCanisterButton.disabled = bankrupt || !researchReady;
+
+  canisterProductionRow.hidden = !canisterUnlocked || canisterOwned;
+  if (canisterUnlocked && !canisterOwned) {
+    canisterProductionStatus.textContent = productionReady
+      ? t('production.ready')
+      : t('production.requiresEngineer');
+    canisterProductionNote.textContent = t('production.cost', {
+      credits: canisterBlueprint.productionCreditCost,
+      materials: canisterBlueprint.productionMaterialCost,
+    });
+    manufactureCanisterButton.disabled =
+      bankrupt ||
+      !productionReady ||
+      state.base.credits < canisterBlueprint.productionCreditCost ||
+      state.base.materials < canisterBlueprint.productionMaterialCost;
+  }
 }
 
 function renderContainment(): void {
@@ -899,6 +962,12 @@ function renderLocale(): void {
   setText('weapon-accelerator-role', 'loadout.acceleratorRole');
   setText('weapon-split-name', 'content.splitPulse');
   setText('weapon-split-role', 'loadout.splitRole');
+  setText('weapon-canister-name', 'content.canisterCannon');
+  setText('weapon-canister-role', 'loadout.canisterRole');
+  setText('canister-research-label', 'research.canisterLabel');
+  setText('research-canister', 'research.startCanister');
+  setText('canister-production-label', 'production.canister');
+  setText('manufacture-canister', 'production.canisterManufacture');
   setText('special-equipment-label', 'loadout.specialEquipment');
   setText('launch-sortie', 'base.launch');
   setText('active-weapon-label', 'sortie.activeWeapon');
@@ -1078,6 +1147,20 @@ manufactureAlienEmitterButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_ADAPTED_WEAPON',
     blueprintId: adaptedBlueprint.id,
+  });
+});
+
+researchCanisterButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'START_RESEARCH_WEAPON_BLUEPRINT',
+    blueprintId: canisterBlueprint.id,
+  });
+});
+
+manufactureCanisterButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'MANUFACTURE_RESEARCH_WEAPON',
+    blueprintId: canisterBlueprint.id,
   });
 });
 

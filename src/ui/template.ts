@@ -120,6 +120,14 @@ export function buildAppTemplate(initialState: GameState): string {
                 </div>
                 <button id="research-accelerator-upgrade" class="base-action" type="button"></button>
               </article>
+              <article class="terrestrial-project" id="canister-research-project">
+                <div>
+                  <span id="canister-research-label" class="loadout-row__label"></span>
+                  <strong id="canister-research-status"></strong>
+                  <small id="canister-research-note"></small>
+                </div>
+                <button id="research-canister" class="base-action" type="button"></button>
+              </article>
             </div>
             <div class="special-project">
               <p class="technology-lab__eyebrow" id="programme-eyebrow"></p>
@@ -189,6 +197,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="alien-emitter-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="alien-emitter-production-label"></span><strong id="alien-emitter-production-status"></strong><small id="alien-emitter-production-note"></small></div>
               <button id="manufacture-alien-emitter" class="base-action" type="button"></button>
+            </div>
+            <div id="canister-production-row" class="facility-row programme-equipment" hidden>
+              <div><span class="loadout-row__label" id="canister-production-label"></span><strong id="canister-production-status"></strong><small id="canister-production-note"></small></div>
+              <button id="manufacture-canister" class="base-action" type="button"></button>
             </div>
             <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>
@@ -264,6 +276,13 @@ export function buildAppTemplate(initialState: GameState): string {
               </article>
               <article id="weapon-option-split" class="weapon-option" data-weapon-id="weapon-split-pulse" hidden>
                 <div><strong id="weapon-split-name"></strong><small id="weapon-split-role"></small></div>
+                <div class="weapon-slot-actions">
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
+                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
+                </div>
+              </article>
+              <article id="weapon-option-canister" class="weapon-option" data-weapon-id="weapon-canister-cannon" hidden>
+                <div><strong id="weapon-canister-name"></strong><small id="weapon-canister-role"></small></div>
                 <div class="weapon-slot-actions">
                   <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
                   <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>

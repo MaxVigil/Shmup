@@ -77,6 +77,9 @@ interface ShotActor {
   readonly penetratesAllTargets: boolean;
   readonly hitEnemyIds: Set<number>;
   readonly visualProfile: WeaponDefinition['visualProfile'];
+  lifetimeMs: number | null;
+  readonly knockbackVolleyId: number | null;
+  readonly knockbackImpulse: number;
 }
 
 interface EnemyActor {
@@ -93,6 +96,7 @@ interface EnemyActor {
   knockbackY: number;
   nextShotAtMs: number;
   telegraph: EnemyTelegraph | null;
+  knockbackVolleyApplied: number | null;
 }
 
 interface EnemyTelegraph {
@@ -144,6 +148,7 @@ export class CombatScene extends Phaser.Scene {
   private startingCredits = 0;
   private contractLedger: SortieContractLedger = EMPTY_SORTIE_CONTRACT;
   private nextEnemyActorId = 1;
+  private nextVolleyId = 1;
   private elapsedMs = 0;
   private fireCooldownMs = 0;
   private spawnCooldownMs = 400;
@@ -270,6 +275,7 @@ export class CombatScene extends Phaser.Scene {
     this.startingCredits = this.getAvailableCredits();
     this.contractLedger = EMPTY_SORTIE_CONTRACT;
     this.nextEnemyActorId = 1;
+    this.nextVolleyId = 1;
     this.elapsedMs = 0;
     this.fireCooldownMs = 0;
     this.spawnCooldownMs = 400;
@@ -811,14 +817,22 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private fire(weapon: WeaponDefinition): void {
+    const canister = weapon.visualProfile === 'canister-cannon';
     const dimensions = weapon.visualProfile === 'impulse-accelerator'
       ? { width: 9, height: 30 }
       : weapon.visualProfile === 'split-pulse'
         ? { width: 5, height: 18 }
-        : { width: 3, height: 16 };
+        : canister
+          ? { width: 4, height: 4 }
+          : { width: 3, height: 16 };
     const colour = weapon.visualProfile === 'split-pulse'
       ? 0xc5a3ff
-      : weapon.visualProfile === 'impulse-accelerator' ? 0xffc15c : 0xffd98a;
+      : weapon.visualProfile === 'impulse-accelerator' ? 0xffc15c
+        : canister ? 0xffb46a : 0xffd98a;
+    const volleyId = canister ? this.nextVolleyId : null;
+    if (canister) {
+      this.nextVolleyId += 1;
+    }
     for (let index = 0; index < weapon.projectileCount; index += 1) {
       const offset = (index - (weapon.projectileCount - 1) / 2) * weapon.spread;
       const body = this.add.rectangle(
@@ -838,6 +852,9 @@ export class CombatScene extends Phaser.Scene {
         penetratesAllTargets: weapon.penetration === 'all-targets',
         hitEnemyIds: new Set<number>(),
         visualProfile: weapon.visualProfile,
+        lifetimeMs: canister ? 340 : null,
+        knockbackVolleyId: volleyId,
+        knockbackImpulse: canister ? 26 : 0,
       });
     }
     this.createMuzzleFlash(weapon.visualProfile, colour);
@@ -850,6 +867,14 @@ export class CombatScene extends Phaser.Scene {
         continue;
       }
       shot.body.y -= shot.projectileSpeed * (deltaMs / 1000);
+      if (shot.lifetimeMs !== null) {
+        shot.lifetimeMs -= deltaMs;
+        if (shot.lifetimeMs <= 0) {
+          shot.body.destroy();
+          this.shots.splice(index, 1);
+          continue;
+        }
+      }
       if (shot.body.y < -24) {
         shot.body.destroy();
         this.shots.splice(index, 1);
@@ -897,6 +922,7 @@ export class CombatScene extends Phaser.Scene {
         ? Number.POSITIVE_INFINITY
         : 1_400 + this.rng.integer(0, 1_200),
       telegraph: null,
+      knockbackVolleyApplied: null,
     });
     this.nextEnemyActorId += 1;
   }
@@ -949,7 +975,7 @@ export class CombatScene extends Phaser.Scene {
           this.scale.height - 72,
         );
       } else {
-        enemy.body.y += enemy.definition.speed * (deltaMs / 1000);
+        enemy.body.y += enemy.definition.speed * (deltaMs / 1000) + enemy.knockbackY;
       }
 
       if (enemy.definition.movementPattern === 'sine') {
@@ -957,6 +983,8 @@ export class CombatScene extends Phaser.Scene {
           Math.sin(enemy.livedMs / 430 + enemy.phase) * 72 +
           enemy.knockbackX;
         enemy.body.x = Phaser.Math.Clamp(enemy.body.x, 24, this.scale.width - 24);
+      } else {
+        enemy.body.x += enemy.knockbackX;
       }
 
       if (enemy.definition.ranged !== null) {
@@ -1100,6 +1128,15 @@ export class CombatScene extends Phaser.Scene {
         if (!shot.penetratesAllTargets) {
           shot.body.destroy();
           this.shots.splice(shotIndex, 1);
+        }
+        if (
+          shot.knockbackVolleyId !== null &&
+          enemy.knockbackVolleyApplied !== shot.knockbackVolleyId
+        ) {
+          enemy.knockbackVolleyApplied = shot.knockbackVolleyId;
+          const direction = enemy.body.x >= this.player.x ? 1 : -1;
+          enemy.knockbackX = direction * shot.knockbackImpulse;
+          enemy.knockbackY = -shot.knockbackImpulse * 0.5;
         }
         enemy.armour -= shot.damage;
         this.createProjectileImpact(
@@ -1250,7 +1287,7 @@ export class CombatScene extends Phaser.Scene {
     profile: WeaponDefinition['visualProfile'],
     colour: number,
   ): void {
-    const heavy = profile === 'impulse-accelerator';
+    const heavy = profile === 'impulse-accelerator' || profile === 'canister-cannon';
     const flash = this.add.circle(
       this.player.x,
       this.player.y - 25,

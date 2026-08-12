@@ -10,7 +10,7 @@ export interface WeaponDefinition {
   readonly projectileSpeed: number;
   readonly spread: number;
   readonly penetration: 'single-target' | 'all-targets';
-  readonly visualProfile: 'machine-gun' | 'impulse-accelerator' | 'split-pulse';
+  readonly visualProfile: 'machine-gun' | 'impulse-accelerator' | 'split-pulse' | 'canister-cannon';
   readonly marketPrice: {
     readonly minimum: number;
     readonly maximum: number;
@@ -117,6 +117,19 @@ export interface AdaptedWeaponBlueprintDefinition {
   readonly requiredProductionStaffRoleId: string;
 }
 
+export interface ResearchWeaponBlueprintDefinition {
+  readonly id: string;
+  readonly researchDomain: 'earth' | 'alien';
+  readonly requiredProgress: number;
+  readonly requiredBuildingId: string;
+  readonly requiredStaffRoleId: string;
+  readonly outputWeaponId: string;
+  readonly productionCreditCost: number;
+  readonly productionMaterialCost: number;
+  readonly requiredProductionBuildingId: string;
+  readonly requiredProductionStaffRoleId: string;
+}
+
 export interface EquipmentDefinition {
   readonly id: string;
   readonly creditCost: number;
@@ -166,6 +179,7 @@ export interface ContentCatalog {
   readonly blueprints: readonly BlueprintDefinition[];
   readonly buildingBlueprints: readonly BuildingBlueprintDefinition[];
   readonly adaptedWeaponBlueprints: readonly AdaptedWeaponBlueprintDefinition[];
+  readonly researchWeaponBlueprints: readonly ResearchWeaponBlueprintDefinition[];
   readonly equipment: readonly EquipmentDefinition[];
   readonly marketWeaponBlueprints: readonly MarketWeaponBlueprintDefinition[];
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];

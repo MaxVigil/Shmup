@@ -29,6 +29,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('blueprints', catalog.blueprints);
   assertUniqueIds('buildingBlueprints', catalog.buildingBlueprints);
   assertUniqueIds('adaptedWeaponBlueprints', catalog.adaptedWeaponBlueprints);
+  assertUniqueIds('researchWeaponBlueprints', catalog.researchWeaponBlueprints);
   assertUniqueIds('equipment', catalog.equipment);
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
@@ -100,6 +101,29 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     ) {
       throw new Error(
         `Adapted weapon blueprint ${blueprint.id} has invalid production requirements.`,
+      );
+    }
+  }
+
+  for (const blueprint of catalog.researchWeaponBlueprints) {
+    if (
+      !['earth', 'alien'].includes(blueprint.researchDomain) ||
+      !Number.isInteger(blueprint.requiredProgress) ||
+      blueprint.requiredProgress <= 0 ||
+      !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
+      !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId) ||
+      !catalog.weapons.some((weapon) => weapon.id === blueprint.outputWeaponId) ||
+      blueprint.productionCreditCost <= 0 ||
+      blueprint.productionMaterialCost < 0 ||
+      !catalog.buildings.some(
+        (building) => building.id === blueprint.requiredProductionBuildingId,
+      ) ||
+      !catalog.staffRoles.some(
+        (role) => role.id === blueprint.requiredProductionStaffRoleId,
+      )
+    ) {
+      throw new Error(
+        `Research weapon blueprint ${blueprint.id} has invalid requirements.`,
       );
     }
   }
@@ -179,7 +203,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       weapon.projectileSpeed <= 0 ||
       weapon.spread < 0 ||
       !['single-target', 'all-targets'].includes(weapon.penetration) ||
-      !['machine-gun', 'impulse-accelerator', 'split-pulse'].includes(
+      !['machine-gun', 'impulse-accelerator', 'split-pulse', 'canister-cannon'].includes(
         weapon.visualProfile,
       ) ||
       (weapon.marketPrice !== null && (

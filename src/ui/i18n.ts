@@ -33,5 +33,8 @@ export function localizedWeaponName(weaponId: string | null): string {
   if (weaponId === contentCatalog.weapons[2].id) {
     return t('content.splitPulse');
   }
+  if (weaponId === contentCatalog.weapons[3].id) {
+    return t('content.canisterCannon');
+  }
   return t('content.standardCannon');
 }
