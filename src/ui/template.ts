@@ -282,15 +282,12 @@ export function buildAppTemplate(initialState: GameState): string {
     </main>
 
     <main id="sortie-screen" class="screen sortie-screen" hidden>
-      <aside class="sortie-brief" aria-labelledby="sortie-title">
-        <p class="eyebrow" id="sortie-eyebrow"></p>
-        <h1 id="sortie-title"></h1>
-        <p class="lede" id="sortie-instructions"></p>
-        <p class="run-report" id="sortie-run-report" aria-live="polite"></p>
-        <button id="return-to-base" class="base-action return-action" type="button" hidden></button>
-      </aside>
       <section id="combat-frame" class="combat-frame">
         <div id="game-root"></div>
+        <div id="sortie-outcome" class="sortie-outcome" hidden>
+          <p class="run-report" id="sortie-run-report" aria-live="polite"></p>
+          <button id="return-to-base" class="base-action return-action" type="button"></button>
+        </div>
       </section>
       <aside class="sortie-controls" aria-live="polite">
         <span id="active-weapon-label"></span>

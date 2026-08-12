@@ -151,10 +151,7 @@ export class CombatScene extends Phaser.Scene {
   private endingText: Phaser.GameObjects.Text | null = null;
   private pauseState: PauseState = EMPTY_PAUSE_STATE;
   private armourText!: Phaser.GameObjects.Text;
-  private salvageText!: Phaser.GameObjects.Text;
-  private technologyText!: Phaser.GameObjects.Text;
   private reserveText!: Phaser.GameObjects.Text;
-  private contractText!: Phaser.GameObjects.Text;
   private timeText!: Phaser.GameObjects.Text;
   private statusText!: Phaser.GameObjects.Text;
   private statusKey: TranslationKey = 'combat.controls';
@@ -232,10 +229,7 @@ export class CombatScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.D,
     }) as Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
     this.armourText = this.createHudText(20, 18, this.t('combat.armour', { value: '100' }));
-    this.salvageText = this.createHudText(20, 42, this.t('combat.salvage', { value: '000' }));
     this.reserveText = this.createHudText(width - 20, 18, '').setOrigin(1, 0);
-    this.contractText = this.createHudText(width - 20, 42, '').setOrigin(1, 0);
-    this.technologyText = this.createHudText(width - 20, 66, this.t('combat.wardenSignal')).setOrigin(1, 0);
     this.timeText = this.createHudText(width / 2, 18, '03:00').setOrigin(0.5, 0);
     this.statusText = this.add
       .text(width / 2, height - 28, this.t('combat.controls'), {
@@ -1213,26 +1207,6 @@ export class CombatScene extends Phaser.Scene {
     this.reserveText
       .setText(this.t('combat.reserve', { value: projectedCredits.toString() }))
       .setColor(projectedCredits <= 0 ? '#f39aaa' : '#b7d9d2');
-    this.contractText.setText(this.t('combat.contractLedger', {
-      earned: this.contractLedger.creditsEarned,
-      penalty: this.contractLedger.creditsPenalized,
-    }));
-    this.salvageText.setText(this.t('combat.salvage', {
-      value: this.runState.materialsFound.toString().padStart(3, '0'),
-    }));
-    this.technologyText.setText(
-      this.runState.technologyDecision === 'install'
-        ? this.t('combat.prismInstalled')
-        : this.runState.technologyDecision === 'preserve'
-          ? this.t('combat.prismSealed', {
-              research: contentCatalog.alienTechnologies[0].preservationResearch,
-            })
-          : this.runState.phase === 'elite'
-            ? this.t('combat.wardenIntercept')
-            : this.hasCapturerEquipped()
-              ? this.t('combat.capturerOnline')
-              : this.t('combat.capturerOffline'),
-    );
     this.timeText.setText(`${minutes}:${seconds}`);
   }
 

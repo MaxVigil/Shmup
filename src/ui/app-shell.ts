@@ -104,6 +104,7 @@ const objectiveTitle = byId<HTMLElement>('objective-title');
 const objectiveDetail = byId<HTMLElement>('objective-detail');
 const objectiveOpenSectionButton = byId<HTMLButtonElement>('objective-open-section');
 const sortieRunReport = byId<HTMLElement>('sortie-run-report');
+const sortieOutcome = byId<HTMLElement>('sortie-outcome');
 const technologyStatus = byId<HTMLElement>('technology-status');
 const researchTechnologyButton = byId<HTMLButtonElement>('research-technology');
 const weaponOptions = Array.from(
@@ -226,12 +227,15 @@ function formatRunResult(
 
 function renderReports(): void {
   const bankrupt = isBankrupt(store.getSnapshot().base.credits);
-  baseRunReport.textContent = lastRunResult === null
+  const result = lastRunResult;
+  const hasResult = result !== null && !sortieInProgress;
+  baseRunReport.textContent = result === null
     ? t(bankrupt ? 'report.insolvent' : 'base.awaiting')
-    : formatRunResult(lastRunResult, lastSettlementSummary);
-  sortieRunReport.textContent = lastRunResult !== null && !sortieInProgress
-    ? formatRunResult(lastRunResult, lastSettlementSummary)
+    : formatRunResult(result, lastSettlementSummary);
+  sortieRunReport.textContent = hasResult
+    ? formatRunResult(result, lastSettlementSummary)
     : t('report.active');
+  sortieOutcome.hidden = !hasResult;
 }
 
 function objectiveKeys(kind: ProgressionObjectiveKind): {
@@ -886,9 +890,6 @@ function renderLocale(): void {
   setText('weapon-split-role', 'loadout.splitRole');
   setText('special-equipment-label', 'loadout.specialEquipment');
   setText('launch-sortie', 'base.launch');
-  setText('sortie-eyebrow', 'sortie.eyebrow');
-  setText('sortie-title', 'sortie.title');
-  setText('sortie-instructions', 'sortie.instructions');
   setText('active-weapon-label', 'sortie.activeWeapon');
   setText('switch-primary-weapon', 'sortie.switchWeapon');
   setText('return-to-base', 'sortie.return');
@@ -1093,7 +1094,6 @@ launchSortieButton.addEventListener('click', () => {
   lastSettlementSummary = null;
   sortieInProgress = true;
   combatWeaponSwitchAvailable = false;
-  returnToBaseButton.hidden = true;
   showScreen('sortie');
   renderReports();
 
@@ -1113,7 +1113,6 @@ launchSortieButton.addEventListener('click', () => {
           capturerBlueprint.id,
           result.outcome,
         );
-        returnToBaseButton.hidden = false;
         renderReports();
         renderCombatWeaponControl();
       },
