@@ -1,12 +1,14 @@
 # Project status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Current milestone
 
-The M3g.3b + M3h + M3i + M3j package (Warden signal gate, ranged Gunship, Canister
-Aircraft Cannon, auxiliary hardpoint with rocket pod) plus the controls-hint
-auto-hide are implemented on `test` and awaiting playtest before merging to `main`.
+The P0 (Chinese localization) and P1 (aircraft fleet, save schema v10) package is
+implemented on `test` and awaiting playtest before merging to `main`. The M3g.3b +
+M3h + M3i + M3j package (Warden signal gate, ranged Gunship, Canister Aircraft
+Cannon, auxiliary hardpoint with rocket pod) plus the controls-hint auto-hide
+remain part of the playtest batch on `test`.
 
 ## Completed
 
@@ -248,13 +250,20 @@ auto-hide are implemented on `test` and awaiting playtest before merging to `mai
   target, and expose a small per-sortie charge counter.
 - The controls hint auto-hides on first movement or after 15 seconds; phase warnings
   still appear in the bottom status line.
-- All 113 unit tests, lint, typecheck, and the production build pass locally.
+- A full Chinese (`zh`) locale now covers every typed translation key in the base and
+  sortie UIs, with the language selector, `isLocale('zh')`, persistence, and unit-test
+  coverage; Ukrainian remains the default.
+- The Hangar now manages a small fleet: typed `AircraftDefinition`s (Interceptor
+  starting, Gunship, Aegis), finite hangar slots, deterministic seeded market pricing,
+  and per-sortie active-aircraft selection (save schema v10 with a v9 migration).
+- Combat reads the active aircraft's armour, speed multiplier, and damage multiplier
+  instead of fixed constants.
+- All 127 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
-1. ~~Playtest the M3g.2a staffing gate and the complete terrestrial research → blueprint
-   → production pipeline before further numerical tuning.~~ Completed in the local
-   browser; recorded in the status history above.
+1. Playtest the P0 Chinese locale and the P1 fleet economy (aircraft prices, slot
+   cost, and combat multipliers are prototypes) before merging to `main`.
 2. Continue M3g with the alien-containment stage. M3g.3a (safe containment and the
    Quarantine Centre) is implemented and needs a playtest pass; M3g.3b adds the early
    Warden signal, Capturer telemetry unlock, and the adapted-blueprint manufacturing

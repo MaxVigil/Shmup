@@ -128,6 +128,36 @@ cycle at a time.
 - [ ] Run 2D art search, selection, licence verification, and integration as a separate
   later stage; none of the currently reviewed open-license sets has been selected.
 
+## P0 — Chinese localization
+
+Status: implemented on `test`; awaiting playtest before merging to `main`.
+
+- [x] Add a full `zh` locale to the typed catalogue (every `TranslationKey`, including
+  the fleet keys added by P1), so all base and sortie strings have a Chinese translation.
+- [x] Add the language-selector entry, `isLocale('zh')`, and the existing persistence
+  handling for the preference.
+- [x] Cover the Chinese locale in the localization unit tests.
+
+## P1 — Aircraft fleet (save schema v10)
+
+Status: implemented on `test`; awaiting playtest before merging to `main`.
+
+- [x] Define typed `AircraftDefinition`s: Interceptor (starting), Gunship, and Aegis,
+  with armour, speed multiplier, and damage multiplier plus deterministic seeded
+  market pricing.
+- [x] Persist `hangarSlots` and `activeAircraftId` in schema v10 with a v9 migration
+  that provisions the starting fleet.
+- [x] Add pure domain rules for aircraft purchase, hangar-slot expansion, and
+  active-aircraft selection.
+- [x] Add `PURCHASE_AIRCRAFT`, `PURCHASE_HANGAR_SLOT`, and `SET_ACTIVE_AIRCRAFT` store
+  commands.
+- [x] Drive combat from the active aircraft's armour, speed multiplier, and damage
+  multiplier instead of fixed constants.
+- [x] Add a fleet panel to the Hangar with occupied/empty slots, aircraft offers,
+  affordability notes, and hangar expansion.
+- [x] Add uk/en/zh translations and unit tests for content, domain, store, and
+  migration; all numbers remain prototype values for playtest tuning.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's
