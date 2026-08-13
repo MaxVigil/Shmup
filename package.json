@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "entities": "node scripts/export-entities.mjs"
   },
   "engines": {
     "node": ">=24.0.0"

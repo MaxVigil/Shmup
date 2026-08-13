@@ -39,6 +39,7 @@ body.is-sortie-active .top-bar {
   padding: 0.5rem;
   background: transparent;
   border-bottom: none;
+  backdrop-filter: none;
   pointer-events: none;
 }
 
