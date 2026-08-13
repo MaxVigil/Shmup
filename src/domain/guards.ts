@@ -31,6 +31,7 @@ export function isGameState(value: unknown): value is GameState {
     (value.base.sortiesCompleted as number) >= 0 &&
     Array.isArray(value.base.constructedBuildingIds) &&
     Array.isArray(value.base.staff) &&
+    value.base.staff.every(isStaffMember) &&
     Array.isArray(value.base.unlockedBlueprintIds) &&
     Array.isArray(value.base.locallyProducedWeaponIds) &&
     Array.isArray(value.base.researchedWeaponUpgradeIds) &&
@@ -69,8 +70,83 @@ export function isGameState(value: unknown): value is GameState {
         typeof loan.dueMonth === 'number' &&
         typeof loan.repaid === 'boolean',
     ) &&
+    isLoadoutRecord(value.base.aircraftLoadouts) &&
+    isCountRecord(value.base.weaponStock) &&
+    isCountRecord(value.base.consumableStock) &&
+    isNullableStringRecord(value.base.aircraftModules) &&
+    isRatioRecord(value.base.aircraftDamage) &&
+    isCountRecord(value.base.aircraftRepair) &&
+    Array.isArray(value.base.staffCandidates) &&
+    value.base.staffCandidates.every(isStaffCandidate) &&
+    isCountRecord(value.base.staffXp) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
+  );
+}
+
+function isLoadoutRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (loadout) =>
+        Array.isArray(loadout) &&
+        loadout.every((id) => id === null || typeof id === 'string'),
+    )
+  );
+}
+
+function isCountRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every((entry) => typeof entry === 'number')
+  );
+}
+
+function isNullableStringRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (entry) => entry === null || typeof entry === 'string',
+    )
+  );
+}
+
+function isRatioRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (entry) =>
+        typeof entry === 'number' && entry >= 0 && entry <= 1,
+    )
+  );
+}
+
+function isStaffMember(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.roleId === 'string' &&
+    typeof value.firstName === 'string' &&
+    typeof value.lastName === 'string' &&
+    typeof value.tier === 'number' &&
+    typeof value.progressMultiplier === 'number' &&
+    typeof value.salaryMultiplier === 'number'
+  );
+}
+
+function isStaffCandidate(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.roleId === 'string' &&
+    typeof value.firstName === 'string' &&
+    typeof value.lastName === 'string' &&
+    typeof value.tier === 'number' &&
+    typeof value.hireCreditCost === 'number' &&
+    typeof value.salaryCreditCost === 'number' &&
+    typeof value.progressMultiplier === 'number' &&
+    typeof value.salaryMultiplier === 'number' &&
+    typeof value.originCountryId === 'string'
   );
 }
 

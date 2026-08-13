@@ -2,9 +2,11 @@ import type { GameState } from './model';
 import { SAVE_SCHEMA_VERSION } from './model';
 import { contentCatalog } from '../content/catalog';
 import { generateThreatMap } from './command-centre';
+import { generateStaffCandidates } from './staff-market';
 
 export function createInitialGameState(): GameState {
   const startingWeapon = contentCatalog.weapons[0];
+  const startingAircraft = contentCatalog.aircraft[0];
   return {
     schemaVersion: SAVE_SCHEMA_VERSION,
     base: {
@@ -35,16 +37,36 @@ export function createInitialGameState(): GameState {
       manufacturedEquipmentIds: [],
       equippedEquipmentId: null,
       telemetryRecorded: false,
-      hangarSlots: ['aircraft-interceptor', null],
-      activeAircraftId: 'aircraft-interceptor',
+      hangarSlots: [startingAircraft.id, null],
+      activeAircraftId: startingAircraft.id,
       month: 1,
-      fueledAircraftIds: ['aircraft-interceptor'],
+      fueledAircraftIds: [startingAircraft.id],
       threatMap: generateThreatMap(
         contentCatalog.councilStates,
         0x3a7e2026,
         1,
       ),
       loans: [],
+      aircraftLoadouts: {
+        [startingAircraft.id]: [
+          startingWeapon.id,
+          ...Array.from(
+            { length: startingAircraft.weaponSlotCount - 1 },
+            () => null,
+          ),
+        ],
+      },
+      weaponStock: {},
+      consumableStock: {},
+      aircraftModules: { [startingAircraft.id]: null },
+      aircraftDamage: {},
+      aircraftRepair: {},
+      staffCandidates: generateStaffCandidates(
+        contentCatalog.staffRoles,
+        0x3a7e2026,
+        1,
+      ),
+      staffXp: {},
     },
     technologyCatalog: [],
     activeRun: null,

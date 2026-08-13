@@ -1,9 +1,11 @@
 import { contentCatalog } from '../content/catalog';
 import { generateThreatMap } from '../domain/command-centre';
+import { generateStaffCandidates } from '../domain/staff-market';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v12';
+export const SAVE_KEY = 'shmup.save.v13';
+export const LEGACY_V12_SAVE_KEY = 'shmup.save.v12';
 export const LEGACY_V11_SAVE_KEY = 'shmup.save.v11';
 export const LEGACY_V10_SAVE_KEY = 'shmup.save.v10';
 export const LEGACY_V9_SAVE_KEY = 'shmup.save.v9';
@@ -29,6 +31,104 @@ function startingFueledAircraftIds(
   return slots.filter((id): id is string => id !== null);
 }
 
+function migratedStaff(staff: readonly unknown[]): BaseState['staff'] {
+  return staff.map((member, index) => {
+    const record = (member ?? {}) as Record<string, unknown>;
+    const roleId = typeof record.roleId === 'string'
+      ? record.roleId
+      : contentCatalog.staffRoles[0].id;
+    const id = typeof record.id === 'string'
+      ? record.id
+      : `staff-migrated-${index + 1}`;
+    return {
+      id,
+      roleId,
+      firstName: 'Specialist',
+      lastName: 'Directorate',
+      tier: 1,
+      progressMultiplier: 1,
+      salaryMultiplier: 1,
+    };
+  });
+}
+
+function v13FleetFields(options: {
+  readonly marketSeed: number;
+  readonly aircraftIds: readonly string[];
+  readonly activeAircraftId: string;
+  readonly equippedLoadout: readonly (string | null)[];
+  readonly equippedModule: string | null;
+  readonly ownedWeapons: readonly string[];
+}): Pick<
+  BaseState,
+  | 'aircraftLoadouts'
+  | 'weaponStock'
+  | 'consumableStock'
+  | 'aircraftModules'
+  | 'aircraftDamage'
+  | 'aircraftRepair'
+  | 'staffCandidates'
+  | 'staffXp'
+> {
+  const loadouts: Record<string, (string | null)[]> = {};
+  const equippedLoadout = Array.isArray(options.equippedLoadout)
+    ? options.equippedLoadout
+    : [];
+  for (const aircraftId of options.aircraftIds) {
+    const definition = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+    const count = definition?.weaponSlotCount ?? 2;
+    const loadout: (string | null)[] = [];
+    for (let index = 0; index < count; index += 1) {
+      loadout.push(
+        aircraftId === options.activeAircraftId
+          ? (equippedLoadout[index] ?? null)
+          : null,
+      );
+    }
+    loadouts[aircraftId] = loadout;
+  }
+  if (options.aircraftIds.length === 0) {
+    loadouts[contentCatalog.aircraft[0].id] = Array.from(
+      { length: contentCatalog.aircraft[0].weaponSlotCount },
+      () => null,
+    );
+  }
+  const installed = new Set<string>();
+  for (const loadout of Object.values(loadouts)) {
+    for (const id of loadout) {
+      if (id !== null) {
+        installed.add(id);
+      }
+    }
+  }
+  const stock: Record<string, number> = {};
+  for (const weaponId of options.ownedWeapons) {
+    if (!installed.has(weaponId)) {
+      stock[weaponId] = 1;
+    }
+  }
+  const modules: Record<string, string | null> = {};
+  for (const aircraftId of Object.keys(loadouts)) {
+    modules[aircraftId] = aircraftId === options.activeAircraftId
+      ? options.equippedModule
+      : null;
+  }
+  return {
+    aircraftLoadouts: loadouts,
+    weaponStock: stock,
+    consumableStock: {},
+    aircraftModules: modules,
+    aircraftDamage: {},
+    aircraftRepair: {},
+    staffCandidates: generateStaffCandidates(
+      contentCatalog.staffRoles,
+      options.marketSeed,
+      1,
+    ),
+    staffXp: {},
+  };
+}
+
 export interface KeyValueStorage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
@@ -42,6 +142,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V12_SAVE_KEY, migrateV12Save],
     [LEGACY_V11_SAVE_KEY, migrateV11Save],
     [LEGACY_V10_SAVE_KEY, migrateV10Save],
     [LEGACY_V9_SAVE_KEY, migrateV9Save],
@@ -143,7 +244,9 @@ function legacyInfrastructure(hasTechnologyProgress: boolean): Pick<
   }
   return {
     constructedBuildingIds: [contentCatalog.buildings[0].id],
-    staff: [{ id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id }],
+    staff: migratedStaff([
+      { id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id },
+    ]),
   };
 }
 
@@ -209,8 +312,13 @@ function migratedState(
   if (!Array.isArray(parsed.technologyCatalog)) {
     return null;
   }
+  const primaryWeapons = primaryWeaponFields(base);
+  const aircraftIds = options.hangarSlots.filter(
+    (slot): slot is string => slot !== null,
+  );
+  const activeAircraftId = options.activeAircraftId ?? aircraftIds[0] ?? contentCatalog.aircraft[0].id;
   const migrated: GameState = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       credits: options.credits,
       materials: base.materials,
@@ -221,9 +329,9 @@ function migratedState(
       activePilotId: base.activePilotId,
       researchQueue: normalizeResearchQueue(base.researchQueue),
       preservedTechnologyIds: options.preservedTechnologyIds,
-      ...primaryWeaponFields(base),
+      ...primaryWeapons,
       constructedBuildingIds: options.constructedBuildingIds,
-      staff: options.staff,
+      staff: migratedStaff(options.staff),
       unlockedBlueprintIds: options.unlockedBlueprintIds,
       locallyProducedWeaponIds: [],
       researchedWeaponUpgradeIds: [],
@@ -232,11 +340,19 @@ function migratedState(
       equippedEquipmentId: options.equippedEquipmentId,
       telemetryRecorded: options.telemetryRecorded,
       hangarSlots: options.hangarSlots,
-      activeAircraftId: options.activeAircraftId,
+      activeAircraftId,
       month: options.month,
       fueledAircraftIds: options.fueledAircraftIds,
       threatMap: options.threatMap,
       loans: options.loans,
+      ...v13FleetFields({
+        marketSeed: primaryWeapons.marketSeed,
+        aircraftIds,
+        activeAircraftId,
+        equippedLoadout: primaryWeapons.equippedPrimaryWeaponIds,
+        equippedModule: options.equippedEquipmentId,
+        ownedWeapons: primaryWeapons.ownedPrimaryWeaponIds,
+      }),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -271,7 +387,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -290,7 +406,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       marketSeed: base.marketSeed as number,
       sortiesCompleted: base.sortiesCompleted as number,
       constructedBuildingIds: base.constructedBuildingIds as readonly string[],
-      staff: base.staff as BaseState['staff'],
+      staff: migratedStaff(base.staff as readonly unknown[]),
       unlockedBlueprintIds: base.unlockedBlueprintIds as readonly string[],
       locallyProducedWeaponIds: [],
       researchedWeaponUpgradeIds: [],
@@ -304,9 +420,58 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
       threatMap: startingThreatMap(base.marketSeed as number),
       loans: [],
+      ...v13FleetFields({
+        marketSeed: base.marketSeed as number,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: base.equippedPrimaryWeaponIds as (string | null)[],
+        equippedModule: base.equippedEquipmentId as string | null,
+        ownedWeapons: base.ownedPrimaryWeaponIds as string[],
+      }),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
+  };
+  return isGameState(migrated) ? migrated : null;
+}
+
+function migrateV12Save(rawSave: string | null): GameState | null {
+  const legacy = parseLegacy(rawSave, 12);
+  if (legacy === null) {
+    return null;
+  }
+  const { parsed, base } = legacy;
+  const aircraftIds = (Array.isArray(base.hangarSlots)
+    ? base.hangarSlots.filter((slot): slot is string => typeof slot === 'string')
+    : []) as readonly string[];
+  const activeAircraftId = (typeof base.activeAircraftId === 'string' &&
+    aircraftIds.includes(base.activeAircraftId))
+    ? base.activeAircraftId
+    : aircraftIds[0] ?? contentCatalog.aircraft[0].id;
+  const marketSeed = Number.isInteger(base.marketSeed)
+    ? (base.marketSeed as number)
+    : DEFAULT_MARKET_SEED;
+  const migrated: GameState = {
+    ...(parsed as unknown as GameState),
+    schemaVersion: 13,
+    base: {
+      ...(base as unknown as BaseState),
+      staff: migratedStaff(Array.isArray(base.staff) ? base.staff : []),
+      ...v13FleetFields({
+        marketSeed,
+        aircraftIds,
+        activeAircraftId,
+        equippedLoadout: Array.isArray(base.equippedPrimaryWeaponIds)
+          ? (base.equippedPrimaryWeaponIds as (string | null)[])
+          : [],
+        equippedModule: typeof base.equippedEquipmentId === 'string'
+          ? base.equippedEquipmentId
+          : null,
+        ownedWeapons: Array.isArray(base.ownedPrimaryWeaponIds)
+          ? (base.ownedPrimaryWeaponIds as string[])
+          : [],
+      }),
+    },
   };
   return isGameState(migrated) ? migrated : null;
 }
@@ -319,10 +484,27 @@ function migrateV11Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       ...(base as unknown as BaseState),
       loans: [],
+      staff: migratedStaff(Array.isArray(base.staff) ? base.staff : []),
+      ...v13FleetFields({
+        marketSeed: Number.isInteger(base.marketSeed)
+          ? (base.marketSeed as number)
+          : DEFAULT_MARKET_SEED,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: Array.isArray(base.equippedPrimaryWeaponIds)
+          ? (base.equippedPrimaryWeaponIds as (string | null)[])
+          : [],
+        equippedModule: typeof base.equippedEquipmentId === 'string'
+          ? base.equippedEquipmentId
+          : null,
+        ownedWeapons: Array.isArray(base.ownedPrimaryWeaponIds)
+          ? (base.ownedPrimaryWeaponIds as string[])
+          : [],
+      }),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -335,19 +517,35 @@ function migrateV10Save(rawSave: string | null): GameState | null {
   }
   const { parsed, base } = legacy;
   const slots = [STARTING_AIRCRAFT_ID, null];
+  const marketSeed = Number.isInteger(base.marketSeed)
+    ? (base.marketSeed as number)
+    : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       ...(base as unknown as BaseState),
       hangarSlots: slots,
       activeAircraftId: STARTING_AIRCRAFT_ID,
       month: 1,
       fueledAircraftIds: startingFueledAircraftIds(slots),
-      threatMap: startingThreatMap(
-        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
-      ),
+      threatMap: startingThreatMap(marketSeed),
       loans: [],
+      staff: migratedStaff(Array.isArray(base.staff) ? base.staff : []),
+      ...v13FleetFields({
+        marketSeed,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: Array.isArray(base.equippedPrimaryWeaponIds)
+          ? (base.equippedPrimaryWeaponIds as (string | null)[])
+          : [],
+        equippedModule: typeof base.equippedEquipmentId === 'string'
+          ? base.equippedEquipmentId
+          : null,
+        ownedWeapons: Array.isArray(base.ownedPrimaryWeaponIds)
+          ? (base.ownedPrimaryWeaponIds as string[])
+          : [],
+      }),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -359,19 +557,35 @@ function migrateV9Save(rawSave: string | null): GameState | null {
     return null;
   }
   const { parsed, base } = legacy;
+  const marketSeed = Number.isInteger(base.marketSeed)
+    ? (base.marketSeed as number)
+    : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       ...(base as unknown as BaseState),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
       activeAircraftId: STARTING_AIRCRAFT_ID,
       month: 1,
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
-      threatMap: startingThreatMap(
-        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
-      ),
+      threatMap: startingThreatMap(marketSeed),
       loans: [],
+      staff: migratedStaff(Array.isArray(base.staff) ? base.staff : []),
+      ...v13FleetFields({
+        marketSeed,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: Array.isArray(base.equippedPrimaryWeaponIds)
+          ? (base.equippedPrimaryWeaponIds as (string | null)[])
+          : [],
+        equippedModule: typeof base.equippedEquipmentId === 'string'
+          ? base.equippedEquipmentId
+          : null,
+        ownedWeapons: Array.isArray(base.ownedPrimaryWeaponIds)
+          ? (base.ownedPrimaryWeaponIds as string[])
+          : [],
+      }),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -383,9 +597,12 @@ function migrateV8Save(rawSave: string | null): GameState | null {
     return null;
   }
   const { parsed, base } = legacy;
+  const marketSeed = Number.isInteger(base.marketSeed)
+    ? (base.marketSeed as number)
+    : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       ...(base as unknown as BaseState),
       telemetryRecorded: hadCapturerProgress(base),
@@ -393,10 +610,23 @@ function migrateV8Save(rawSave: string | null): GameState | null {
       activeAircraftId: STARTING_AIRCRAFT_ID,
       month: 1,
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
-      threatMap: startingThreatMap(
-        Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
-      ),
+      threatMap: startingThreatMap(marketSeed),
       loans: [],
+      staff: migratedStaff(Array.isArray(base.staff) ? base.staff : []),
+      ...v13FleetFields({
+        marketSeed,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: Array.isArray(base.equippedPrimaryWeaponIds)
+          ? (base.equippedPrimaryWeaponIds as (string | null)[])
+          : [],
+        equippedModule: typeof base.equippedEquipmentId === 'string'
+          ? base.equippedEquipmentId
+          : null,
+        ownedWeapons: Array.isArray(base.ownedPrimaryWeaponIds)
+          ? (base.ownedPrimaryWeaponIds as string[])
+          : [],
+      }),
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -431,7 +661,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -447,7 +677,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       marketSeed: base.marketSeed as number,
       sortiesCompleted: base.sortiesCompleted as number,
       constructedBuildingIds: base.constructedBuildingIds as readonly string[],
-      staff: base.staff as BaseState['staff'],
+      staff: migratedStaff(base.staff as readonly unknown[]),
       unlockedBlueprintIds: base.unlockedBlueprintIds as readonly string[],
       locallyProducedWeaponIds: [],
       researchedWeaponUpgradeIds: [],
@@ -461,6 +691,14 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
       threatMap: startingThreatMap(base.marketSeed as number),
       loans: [],
+      ...v13FleetFields({
+        marketSeed: base.marketSeed as number,
+        aircraftIds: [STARTING_AIRCRAFT_ID],
+        activeAircraftId: STARTING_AIRCRAFT_ID,
+        equippedLoadout: base.equippedPrimaryWeaponIds as (string | null)[],
+        equippedModule: base.equippedEquipmentId as string | null,
+        ownedWeapons: base.ownedPrimaryWeaponIds as string[],
+      }),
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -654,6 +892,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V12_SAVE_KEY);
   storage.removeItem(LEGACY_V11_SAVE_KEY);
   storage.removeItem(LEGACY_V10_SAVE_KEY);
   storage.removeItem(LEGACY_V9_SAVE_KEY);

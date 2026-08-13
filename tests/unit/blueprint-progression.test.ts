@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { constructBuilding, hireStaff } from '../../src/domain/base-development';
 import {
@@ -25,7 +26,7 @@ function researchReadyState() {
       credits: 2_000,
       materials: 100,
       constructedBuildingIds: [laboratory.id],
-      staff: [{ id: 'staff-scientist-1', roleId: scientist.id }],
+      staff: [staffMember('staff-scientist-1', scientist.id)],
     },
   };
 }

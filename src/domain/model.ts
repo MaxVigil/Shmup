@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 12 as const;
+export const SAVE_SCHEMA_VERSION = 13 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -18,6 +18,24 @@ export interface ResearchProjectState {
 export interface StaffMemberState {
   readonly id: string;
   readonly roleId: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly tier: number;
+  readonly progressMultiplier: number;
+  readonly salaryMultiplier: number;
+}
+
+export interface StaffCandidateState {
+  readonly id: string;
+  readonly roleId: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly tier: number;
+  readonly hireCreditCost: number;
+  readonly salaryCreditCost: number;
+  readonly progressMultiplier: number;
+  readonly salaryMultiplier: number;
+  readonly originCountryId: string;
 }
 
 export interface LoanState {
@@ -58,6 +76,14 @@ export interface BaseState {
   readonly fueledAircraftIds: readonly string[];
   readonly threatMap: readonly MissionState[];
   readonly loans: readonly LoanState[];
+  readonly aircraftLoadouts: Readonly<Record<string, readonly (string | null)[]>>;
+  readonly weaponStock: Readonly<Record<string, number>>;
+  readonly consumableStock: Readonly<Record<string, number>>;
+  readonly aircraftModules: Readonly<Record<string, string | null>>;
+  readonly aircraftDamage: Readonly<Record<string, number>>;
+  readonly aircraftRepair: Readonly<Record<string, number>>;
+  readonly staffCandidates: readonly StaffCandidateState[];
+  readonly staffXp: Readonly<Record<string, number>>;
 }
 
 export interface TechnologyKnowledge {

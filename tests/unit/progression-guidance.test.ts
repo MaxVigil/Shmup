@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import {
@@ -34,7 +35,7 @@ describe('progression guidance', () => {
       ...withLaboratory,
       base: {
         ...withLaboratory.base,
-        staff: [{ id: 'scientist-1', roleId: definitions.scientistRoleId }],
+        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
       },
     };
     expect(getProgressionObjective(staffed, definitions).kind).toBe('build-workshop');
@@ -46,7 +47,7 @@ describe('progression guidance', () => {
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
         staff: [
           ...staffed.base.staff,
-          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+          staffMember('engineer-1', definitions.engineerRoleId),
         ],
         researchQueue: [{ blueprintId: definitions.blueprintId, progress: 1, requiredProgress: 3 }],
         telemetryRecorded: true,
@@ -67,8 +68,8 @@ describe('progression guidance', () => {
         ...initial.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
         staff: [
-          { id: 'scientist-1', roleId: definitions.scientistRoleId },
-          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+          staffMember('scientist-1', definitions.scientistRoleId),
+          staffMember('engineer-1', definitions.engineerRoleId),
         ],
         unlockedBlueprintIds: [definitions.blueprintId],
         manufacturedEquipmentIds: [definitions.equipmentId],
@@ -90,7 +91,7 @@ describe('progression guidance', () => {
       base: {
         ...initial.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [{ id: 'scientist-1', roleId: definitions.scientistRoleId }],
+        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
         unlockedBlueprintIds: [definitions.blueprintId],
         telemetryRecorded: true,
       },
@@ -107,8 +108,8 @@ describe('progression guidance', () => {
         ...initial.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
         staff: [
-          { id: 'scientist-1', roleId: definitions.scientistRoleId },
-          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+          staffMember('scientist-1', definitions.scientistRoleId),
+          staffMember('engineer-1', definitions.engineerRoleId),
         ],
         unlockedBlueprintIds: [definitions.blueprintId],
         manufacturedEquipmentIds: [definitions.equipmentId],
@@ -175,8 +176,8 @@ describe('progression guidance', () => {
           definitions.quarantineId,
         ],
         staff: [
-          { id: 'scientist-1', roleId: definitions.scientistRoleId },
-          { id: 'engineer-1', roleId: definitions.engineerRoleId },
+          staffMember('scientist-1', definitions.scientistRoleId),
+          staffMember('engineer-1', definitions.engineerRoleId),
         ],
         unlockedBlueprintIds: [
           definitions.blueprintId,
@@ -224,7 +225,7 @@ describe('progression guidance', () => {
       base: {
         ...initial.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [{ id: 'scientist-1', roleId: definitions.scientistRoleId }],
+        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
       },
     };
     expect(getProgressionObjective(staffed, definitions).kind).toBe('await-warden-signal');

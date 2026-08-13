@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { marketBlueprintPrice } from '../../src/domain/terrestrial-market';
@@ -29,8 +30,8 @@ function industrialState() {
       sortiesCompleted: blueprint.minimumSorties,
       constructedBuildingIds: [centreId, worksId],
       staff: [
-        { id: 'staff-scientist-1', roleId: scientistId },
-        { id: 'staff-engineer-1', roleId: engineerId },
+        staffMember('staff-scientist-1', scientistId),
+        staffMember('staff-engineer-1', engineerId),
       ],
     },
   };

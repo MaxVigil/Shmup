@@ -63,7 +63,15 @@ export function hireStaff(
       credits: state.base.credits - role.creditCost,
       staff: [
         ...state.base.staff,
-        { id: `${role.id}-${nextIndex}`, roleId: role.id },
+        {
+          id: `${role.id}-${nextIndex}`,
+          roleId: role.id,
+          firstName: 'Specialist',
+          lastName: 'Directorate',
+          tier: 1,
+          progressMultiplier: 1,
+          salaryMultiplier: 1,
+        },
       ],
     },
   };

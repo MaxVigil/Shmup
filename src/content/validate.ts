@@ -35,6 +35,7 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
   assertUniqueIds('aircraft', catalog.aircraft);
   assertUniqueIds('councilStates', catalog.councilStates);
+  assertUniqueIds('consumables', catalog.consumables);
 
   if (
     catalog.economy.startingCredits < 0 ||
@@ -273,6 +274,12 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       aircraft.damageMultiplier <= 0 ||
       !Number.isInteger(aircraft.refuelCreditCost) ||
       aircraft.refuelCreditCost <= 0 ||
+      !Number.isInteger(aircraft.weaponSlotCount) ||
+      aircraft.weaponSlotCount < 1 ||
+      aircraft.weaponSlotCount > 6 ||
+      !catalog.councilStates.some(
+        (state) => state.id === aircraft.supplierCountryId,
+      ) ||
       !Number.isInteger(aircraft.visual.hullColor) ||
       aircraft.visual.hullColor < 0 ||
       aircraft.visual.hullColor > 0xffffff ||
@@ -299,6 +306,21 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   for (const state of catalog.councilStates) {
     if (typeof state.nameKey !== 'string' || state.nameKey.length === 0) {
       throw new Error(`Council state ${state.id} must reference a localized name key.`);
+    }
+  }
+
+  for (const consumable of catalog.consumables) {
+    if (
+      consumable.creditCost <= 0 ||
+      consumable.materialCost < 0 ||
+      (consumable.marketPrice !== null && (
+        !Number.isInteger(consumable.marketPrice.minimum) ||
+        !Number.isInteger(consumable.marketPrice.maximum) ||
+        consumable.marketPrice.minimum <= 0 ||
+        consumable.marketPrice.maximum < consumable.marketPrice.minimum
+      ))
+    ) {
+      throw new Error(`Consumable ${consumable.id} must have positive production values.`);
     }
   }
 }

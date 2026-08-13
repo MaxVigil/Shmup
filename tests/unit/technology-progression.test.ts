@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import {
@@ -30,7 +31,7 @@ function stateWithPreservedPrism() {
       materials: 100,
       preservedTechnologyIds: [technology.id],
       constructedBuildingIds: [laboratory.id, quarantine.id],
-      staff: [{ id: 'staff-scientist-1', roleId: requirements.staffRoleId }],
+      staff: [staffMember('staff-scientist-1', requirements.staffRoleId)],
     },
   };
 }
@@ -43,8 +44,8 @@ function manufacturedEmitterState() {
       ...researched.base,
       constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
       staff: [
-        { id: 'staff-scientist-1', roleId: requirements.staffRoleId },
-        { id: 'staff-engineer-1', roleId: contentCatalog.staffRoles[1].id },
+        staffMember('staff-scientist-1', requirements.staffRoleId),
+        staffMember('staff-engineer-1', contentCatalog.staffRoles[1].id),
       ],
     },
   };

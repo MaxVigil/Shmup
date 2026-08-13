@@ -314,6 +314,8 @@ export const contentCatalog = {
       speedMultiplier: 1,
       damageMultiplier: 1,
       refuelCreditCost: 30,
+      weaponSlotCount: 2,
+      supplierCountryId: 'council-ukraine',
       visual: {
         hullColor: 0x9dd7c7,
         accentColor: 0x2f6f63,
@@ -330,6 +332,8 @@ export const contentCatalog = {
       speedMultiplier: 0.82,
       damageMultiplier: 1.15,
       refuelCreditCost: 45,
+      weaponSlotCount: 3,
+      supplierCountryId: 'council-ukraine',
       visual: {
         hullColor: 0xd7a86b,
         accentColor: 0x7a5a2e,
@@ -349,6 +353,8 @@ export const contentCatalog = {
       speedMultiplier: 0.68,
       damageMultiplier: 1.3,
       refuelCreditCost: 60,
+      weaponSlotCount: 4,
+      supplierCountryId: 'council-brazil',
       visual: {
         hullColor: 0xa9b7d7,
         accentColor: 0x4c5a78,
@@ -357,6 +363,27 @@ export const contentCatalog = {
       marketPrice: {
         minimum: 1300,
         maximum: 1600,
+      },
+    },
+    {
+      id: 'aircraft-yanlong',
+      name: 'Yanlong',
+      role: 'PRC-sourced striker // strong economy, four primary slots',
+      origin: 'earth',
+      armour: 180,
+      speedMultiplier: 0.9,
+      damageMultiplier: 1.2,
+      refuelCreditCost: 50,
+      weaponSlotCount: 4,
+      supplierCountryId: 'council-prc',
+      visual: {
+        hullColor: 0xe0b36a,
+        accentColor: 0x7a2e2e,
+        silhouette: [0, -16, 6, -6, 16, -2, 14, 10, 18, 18, -18, 18, -14, 10, -16, -2, -6, -6],
+      },
+      marketPrice: {
+        minimum: 1000,
+        maximum: 1300,
       },
     },
   ],
@@ -376,6 +403,18 @@ export const contentCatalog = {
     {
       id: 'council-india',
       nameKey: 'country.india',
+    },
+  ],
+  consumables: [
+    {
+      id: 'consumable-rockets',
+      nameKey: 'content.rocketAmmo',
+      creditCost: 40,
+      materialCost: 1,
+      marketPrice: {
+        minimum: 30,
+        maximum: 50,
+      },
     },
   ],
 } as const satisfies ContentCatalog;

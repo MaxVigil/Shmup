@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { contentCatalog } from '../../src/content/catalog';
 import { constructBuilding, hireStaff } from '../../src/domain/base-development';
 import { createInitialGameState } from '../../src/domain/initial-state';
+import { staffMember } from './test-state';
 
 const laboratory = contentCatalog.buildings[0];
 const scientist = contentCatalog.staffRoles[0];
@@ -41,7 +42,7 @@ describe('base development', () => {
     };
     const hired = hireStaff(ready, engineer);
 
-    expect(hired.base.staff).toEqual([{ id: 'staff-engineer-1', roleId: engineer.id }]);
+    expect(hired.base.staff).toEqual([staffMember('staff-engineer-1', engineer.id)]);
     expect(() => hireStaff(hired, engineer)).toThrow('headcount limit');
   });
 
@@ -62,7 +63,7 @@ describe('base development', () => {
     const constructed = constructBuilding(fundedState(), laboratory);
     const hired = hireStaff(constructed, scientist);
 
-    expect(hired.base.staff).toEqual([{ id: 'staff-scientist-1', roleId: scientist.id }]);
+    expect(hired.base.staff).toEqual([staffMember('staff-scientist-1', scientist.id)]);
     expect(hired.base.credits).toBe(constructed.base.credits - scientist.creditCost);
   });
 

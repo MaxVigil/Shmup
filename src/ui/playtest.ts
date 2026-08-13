@@ -23,7 +23,15 @@ function createStage4PlaytestState(): GameState {
       credits: 1_000,
       materials: 100,
       constructedBuildingIds: contentCatalog.buildings.map((building) => building.id),
-      staff: [{ id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id }],
+      staff: [{
+        id: 'staff-scientist-1',
+        roleId: contentCatalog.staffRoles[0].id,
+        firstName: 'Playtest',
+        lastName: 'Specialist',
+        tier: 1,
+        progressMultiplier: 1,
+        salaryMultiplier: 1,
+      }],
       unlockedBlueprintIds: [contentCatalog.blueprints[0].id],
       manufacturedEquipmentIds: [contentCatalog.equipment[0].id],
     },
@@ -48,7 +56,15 @@ function createM3g2PlaytestState(): GameState {
       materials: 200,
       sortiesCompleted: 6,
       constructedBuildingIds: contentCatalog.buildings.map((building) => building.id),
-      staff: [{ id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id }],
+      staff: [{
+        id: 'staff-scientist-1',
+        roleId: contentCatalog.staffRoles[0].id,
+        firstName: 'Playtest',
+        lastName: 'Specialist',
+        tier: 1,
+        progressMultiplier: 1,
+        salaryMultiplier: 1,
+      }],
     },
   };
 }
@@ -66,7 +82,15 @@ function createM3g3aPlaytestState(): GameState {
         contentCatalog.buildings[0].id,
         contentCatalog.buildings[1].id,
       ],
-      staff: [{ id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id }],
+      staff: [{
+        id: 'staff-scientist-1',
+        roleId: contentCatalog.staffRoles[0].id,
+        firstName: 'Playtest',
+        lastName: 'Specialist',
+        tier: 1,
+        progressMultiplier: 1,
+        salaryMultiplier: 1,
+      }],
     },
   };
 }

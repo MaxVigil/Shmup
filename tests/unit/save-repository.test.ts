@@ -11,6 +11,7 @@ import {
   LEGACY_V9_SAVE_KEY,
   LEGACY_V10_SAVE_KEY,
   LEGACY_V11_SAVE_KEY,
+  LEGACY_V12_SAVE_KEY,
   LEGACY_V1_SAVE_KEY,
   LEGACY_V2_SAVE_KEY,
   LEGACY_V3_SAVE_KEY,
@@ -65,7 +66,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         credits: contentCatalog.economy.startingCredits,
         materials: 23,
@@ -111,7 +112,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         constructedBuildingIds: [contentCatalog.buildings[0].id],
         staff: [{ roleId: contentCatalog.staffRoles[0].id }],
@@ -143,7 +144,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         credits: 275,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
@@ -175,7 +176,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         manufacturedEquipmentIds: [capturer.id],
         equippedEquipmentId: null,
@@ -202,7 +203,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, splitPulseId],
         equippedPrimaryWeaponIds: [splitPulseId, null],
@@ -227,7 +228,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         equippedPrimaryWeaponIds: [acceleratorId, null],
@@ -253,7 +254,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 12,
+      schemaVersion: 13,
       base: {
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         locallyProducedWeaponIds: [],
@@ -287,7 +288,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(12);
+    expect(loaded?.schemaVersion).toBe(13);
     expect(loaded?.base.telemetryRecorded).toBe(true);
   });
 
@@ -318,7 +319,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(12);
+    expect(loaded?.schemaVersion).toBe(13);
     expect(loaded?.base.hangarSlots).toEqual([
       contentCatalog.aircraft[0].id,
       null,
@@ -340,7 +341,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(12);
+    expect(loaded?.schemaVersion).toBe(13);
     expect(loaded?.base.month).toBe(1);
     expect(loaded?.base.fueledAircraftIds).toEqual([contentCatalog.aircraft[0].id]);
     expect(loaded?.base.threatMap).toHaveLength(3);
@@ -358,7 +359,34 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(12);
+    expect(loaded?.schemaVersion).toBe(13);
     expect(loaded?.base.loans).toEqual([]);
+  });
+
+  it('migrates a v12 save into per-aircraft loadouts and a warehouse', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const v12Base: Record<string, unknown> = { ...initial.base };
+    delete v12Base.aircraftLoadouts;
+    delete v12Base.weaponStock;
+    delete v12Base.consumableStock;
+    delete v12Base.aircraftModules;
+    delete v12Base.aircraftDamage;
+    delete v12Base.aircraftRepair;
+    delete v12Base.staffCandidates;
+    delete v12Base.staffXp;
+    storage.setItem(LEGACY_V12_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 12,
+      base: v12Base,
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(13);
+    expect(loaded?.base.aircraftLoadouts[contentCatalog.aircraft[0].id]).toContain(
+      contentCatalog.weapons[0].id,
+    );
+    expect(loaded?.base.weaponStock[contentCatalog.weapons[0].id]).toBeUndefined();
+    expect(loaded?.base.staffCandidates.length).toBeGreaterThan(0);
   });
 });

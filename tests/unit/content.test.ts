@@ -169,7 +169,7 @@ describe('validateContentCatalog', () => {
     const gunship = contentCatalog.aircraft[1];
     const aegis = contentCatalog.aircraft[2];
 
-    expect(contentCatalog.aircraft).toHaveLength(3);
+    expect(contentCatalog.aircraft).toHaveLength(4);
     expect(interceptor.marketPrice).toBeNull();
 
     expect(gunship.armour).toBeGreaterThan(interceptor.armour);

@@ -814,11 +814,13 @@ const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
   'aircraft-interceptor': 'content.interceptor',
   'aircraft-gunship': 'content.gunship',
   'aircraft-aegis': 'content.aegis',
+  'aircraft-yanlong': 'content.yanlong',
 };
 const aircraftRoleKey: Readonly<Record<string, TranslationKey>> = {
   'aircraft-interceptor': 'aircraft.interceptorRole',
   'aircraft-gunship': 'aircraft.gunshipRole',
   'aircraft-aegis': 'aircraft.aegisRole',
+  'aircraft-yanlong': 'aircraft.yanlongRole',
 };
 
 function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number; damageMultiplier: number }): string {

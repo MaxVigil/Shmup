@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { staffMember } from './test-state';
 import { createGameStore } from '../../src/app/store';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
@@ -17,8 +18,8 @@ describe('game store M3a cycle', () => {
         materials: 100,
         constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
         staff: [
-          { id: 'staff-scientist-1', roleId: scientist.id },
-          { id: 'staff-engineer-1', roleId: contentCatalog.staffRoles[1].id },
+          staffMember('staff-scientist-1', scientist.id),
+          staffMember('staff-engineer-1', contentCatalog.staffRoles[1].id),
         ],
       },
     });
@@ -183,8 +184,8 @@ describe('game store M3a cycle', () => {
         sortiesCompleted: blueprint.minimumSorties,
         constructedBuildingIds: [centre.id, works.id],
         staff: [
-          { id: 'scientist-1', roleId: scientist.id },
-          { id: 'engineer-1', roleId: engineer.id },
+          staffMember('scientist-1', scientist.id),
+          staffMember('engineer-1', engineer.id),
         ],
       },
     });
@@ -252,8 +253,8 @@ describe('game store M3a cycle', () => {
         telemetryRecorded: true,
         constructedBuildingIds: [laboratory.id, workshop.id],
         staff: [
-          { id: 'scientist-1', roleId: scientist.id },
-          { id: 'engineer-1', roleId: engineer.id },
+          staffMember('scientist-1', scientist.id),
+          staffMember('engineer-1', engineer.id),
         ],
       },
     });
@@ -296,8 +297,8 @@ describe('game store M3a cycle', () => {
         telemetryRecorded: true,
         constructedBuildingIds: [laboratory.id, workshop.id],
         staff: [
-          { id: 'scientist-1', roleId: scientist.id },
-          { id: 'engineer-1', roleId: engineer.id },
+          staffMember('scientist-1', scientist.id),
+          staffMember('engineer-1', engineer.id),
         ],
       },
     });
