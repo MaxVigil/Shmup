@@ -28,14 +28,25 @@ export function buildAppTemplate(initialState: GameState): string {
             <option id="locale-option-en" value="en"></option>
             <option id="locale-option-zh" value="zh"></option>
           </select>
+          <div class="system-check" role="status">
+            <span class="system-check__light" aria-hidden="true"></span>
+            <span id="prototype-status"></span>
+            <small><span id="save-schema-label"></span> v${initialState.schemaVersion}</small>
+          </div>
         </div>
       </div>
     </header>
 
     <main id="base-screen" class="screen base-screen">
+      <section id="insolvency-panel" class="insolvency-panel" hidden>
+        <span id="insolvency-label"></span>
+        <strong id="insolvency-title"></strong>
+        <p id="insolvency-detail"></p>
+        <button id="restart-programme" class="base-action" type="button"></button>
+      </section>
+
       <nav id="base-navigation" class="base-navigation" role="tablist">
-        <button id="base-tab-overview" type="button" role="tab" data-base-section="overview" aria-controls="base-panel-overview" aria-selected="true"></button>
-        <button id="base-tab-command" type="button" role="tab" data-base-section="command" aria-controls="base-panel-command" aria-selected="false"></button>
+        <button id="base-tab-command" type="button" role="tab" data-base-section="command" aria-controls="base-panel-command" aria-selected="true"></button>
         <button id="base-tab-research" type="button" role="tab" data-base-section="research" aria-controls="base-panel-research" aria-selected="false"></button>
         <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
         <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
@@ -47,45 +58,28 @@ export function buildAppTemplate(initialState: GameState): string {
         <div><dt id="research-label"></dt><dd id="research-total">${initialState.base.research}</dd></div>
       </dl>
 
-      <section id="base-panel-overview" class="base-panel base-overview" role="tabpanel" aria-labelledby="base-tab-overview">
-        <div class="base-hero" aria-labelledby="base-title">
-          <p class="eyebrow" id="base-eyebrow"></p>
-          <h1 id="base-title"></h1>
-          <p class="lede" id="base-lede"></p>
-
-          <div class="mandate-brief">
-            <span id="mandate-label"></span>
-            <p id="mandate-copy"></p>
-            <small id="mandate-terms"></small>
-          </div>
-
-          <div class="system-check" role="status">
-            <span class="system-check__light" aria-hidden="true"></span>
-            <span id="prototype-status"></span>
-            <small><span id="save-schema-label"></span> v${initialState.schemaVersion}</small>
-          </div>
-          <div class="progression-objective" aria-live="polite">
-            <span id="objective-label"></span>
-            <strong id="objective-title"></strong>
-            <p id="objective-detail"></p>
-            <button id="objective-open-section" class="text-action" type="button"></button>
-          </div>
-          <p class="run-report" id="base-run-report" aria-live="polite"></p>
-          <section id="insolvency-panel" class="insolvency-panel" hidden>
-            <span id="insolvency-label"></span>
-            <strong id="insolvency-title"></strong>
-            <p id="insolvency-detail"></p>
-            <button id="restart-programme" class="base-action" type="button"></button>
-          </section>
-        </div>
-      </section>
-
       <section id="base-panel-command" class="base-panel" role="tabpanel" aria-labelledby="base-tab-command" hidden>
         <header class="section-heading">
           <p class="eyebrow" id="command-section-eyebrow"></p>
           <h1 id="command-section-title"></h1>
           <p class="lede" id="command-section-lede"></p>
         </header>
+        <div class="progression-objective command-objective" aria-live="polite">
+          <span id="objective-label"></span>
+          <strong id="objective-title"></strong>
+          <p id="objective-detail"></p>
+          <button id="objective-open-section" class="text-action" type="button"></button>
+        </div>
+        <p class="run-report" id="base-run-report" aria-live="polite"></p>
+        <section class="technology-lab command-panel" aria-labelledby="command-mandate-title">
+          <p class="technology-lab__eyebrow" id="command-mandate-eyebrow"></p>
+          <h2 id="command-mandate-title"></h2>
+          <div class="mandate-brief">
+            <span id="mandate-label"></span>
+            <p id="mandate-copy"></p>
+            <small id="mandate-terms"></small>
+          </div>
+        </section>
         <section class="technology-lab command-panel" aria-labelledby="command-month-title">
           <p class="technology-lab__eyebrow" id="command-month-eyebrow"></p>
           <h2 id="command-month-title"></h2>

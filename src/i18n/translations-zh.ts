@@ -279,6 +279,8 @@ export const zh = {
   'command.eyebrow': '基地 // 作战指挥',
   'command.title': '指挥中心',
   'command.lede': '本月受攻击的回收理事会成员国及机队就绪状态。',
+  'command.mandateEyebrow': '基地 // 授权',
+  'command.mandateTitle': '行动授权',
   'command.monthEyebrow': '第 {month} 个月 // 作战窗口',
   'command.monthTitle': '威胁地图',
   'command.monthSummary': '本月有 {count} 个理事会成员国受到攻击。',

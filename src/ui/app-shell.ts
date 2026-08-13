@@ -4,6 +4,7 @@ import { validateContentCatalog } from '../content/validate';
 import { createGame } from '../game/create-game';
 import { CombatScene, type CombatRunResult } from '../game/scenes/CombatScene';
 import type { TranslationKey } from '../i18n';
+import { isLocale } from '../i18n';
 import { loadGame, saveGame } from '../persistence/save-repository';
 import type { GameState } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
@@ -75,7 +76,7 @@ const progressionDefinitions = {
 
 let game: ReturnType<typeof createGame> | null = null;
 let activeScreen: 'base' | 'sortie' = 'base';
-let activeBaseSection: BaseSection = 'overview';
+let activeBaseSection: BaseSection = 'command';
 let objectiveBaseSection: BaseSection = 'engineering';
 let lastRunResult: CombatRunResult | null = null;
 let lastSettlementSummary: SortiePayoffSummary | null = null;
@@ -1149,7 +1150,6 @@ function renderLocale(): void {
   setText('route-base', 'nav.base');
   setText('route-sortie', 'nav.sortie');
   baseNavigation.setAttribute('aria-label', t('baseNav.aria'));
-  setText('base-tab-overview', 'baseNav.overview');
   setText('base-tab-command', 'baseNav.command');
   setText('base-tab-research', 'baseNav.research');
   setText('base-tab-engineering', 'baseNav.engineering');
@@ -1159,14 +1159,13 @@ function renderLocale(): void {
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
   setText('locale-option-zh', 'locale.zh');
-  setText('base-eyebrow', 'base.eyebrow');
-  setText('base-title', 'base.title');
-  setText('base-lede', 'base.lede');
   setText('mandate-label', 'mandate.label');
   setText('mandate-copy', 'mandate.copy');
   setText('mandate-terms', 'mandate.terms', {
     multiplier: contentCatalog.economy.missedEnemyPenaltyMultiplier,
   });
+  setText('command-mandate-eyebrow', 'command.mandateEyebrow');
+  setText('command-mandate-title', 'command.mandateTitle');
   setText('save-schema-label', 'base.saveSchema');
   setText('credit-label', 'base.credits');
   setText('material-label', 'base.materials');
@@ -1603,7 +1602,7 @@ function closeSettingsMenu(): void {
 
 localeSelect.addEventListener('change', () => {
   const nextLocale = localeSelect.value;
-  if (nextLocale !== 'uk' && nextLocale !== 'en') {
+  if (!isLocale(nextLocale)) {
     return;
   }
   setLocale(nextLocale);
