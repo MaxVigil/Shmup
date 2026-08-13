@@ -331,12 +331,14 @@ export function buildAppTemplate(initialState: GameState): string {
           <p class="technology-lab__eyebrow" id="hangar-fleet-eyebrow"></p>
           <h2 id="hangar-fleet-title"></h2>
           <p class="lede" id="hangar-fleet-lede"></p>
+          <h3 class="hangar-subtitle" id="hangar-fleet-subtitle"></h3>
           <div class="fleet-slots" id="hangar-slots-list" aria-live="polite"></div>
-          <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
-          <div class="loadout-row">
+          <div class="loadout-row hangar-slot-expand">
             <div><span class="loadout-row__label" id="hangar-slot-label"></span><strong id="hangar-slot-cost"></strong><small id="hangar-slot-note"></small></div>
             <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
           </div>
+          <h3 class="hangar-subtitle" id="hangar-market-subtitle"></h3>
+          <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
         </section>
       </section>
     </main>

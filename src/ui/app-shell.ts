@@ -824,11 +824,42 @@ function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number
   ].join(' // ');
 }
 
+function signedDeltaText(value: number): string {
+  if (value > 0) {
+    return `+${value}`;
+  }
+  if (value < 0) {
+    return `−${Math.abs(value)}`;
+  }
+  return '0';
+}
+
+function aircraftDeltaText(
+  offer: { armour: number; speedMultiplier: number; damageMultiplier: number },
+  active: { armour: number; speedMultiplier: number; damageMultiplier: number },
+): string {
+  const armour = signedDeltaText(offer.armour - active.armour);
+  const speed = signedDeltaText(
+    Number((offer.speedMultiplier - active.speedMultiplier).toFixed(2)),
+  );
+  const damage = signedDeltaText(
+    Number((offer.damageMultiplier - active.damageMultiplier).toFixed(2)),
+  );
+  return [
+    t('combat.armour', { value: armour }),
+    t('aircraft.speed', { value: speed }),
+    t('aircraft.damage', { value: damage }),
+  ].join(' · ');
+}
+
 function renderFleet(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
   const slotsList = byId<HTMLElement>('hangar-slots-list');
   const marketList = byId<HTMLElement>('aircraft-market-list');
+  const activeAircraft = contentCatalog.aircraft.find(
+    (entry) => entry.id === state.base.activeAircraftId,
+  );
 
   slotsList.textContent = '';
   state.base.hangarSlots.forEach((aircraftId, index) => {
@@ -837,7 +868,8 @@ function renderFleet(): void {
     const header = document.createElement('div');
     header.className = 'fleet-slot__header';
     const slotLabel = document.createElement('span');
-    slotLabel.textContent = t('loadout.primarySlot', { slot: index + 1 });
+    slotLabel.className = 'fleet-slot__bay';
+    slotLabel.textContent = t('hangar.bayLabel', { slot: index + 1 });
     header.appendChild(slotLabel);
     if (aircraftId === null) {
       const empty = document.createElement('strong');
@@ -853,31 +885,37 @@ function renderFleet(): void {
         stats.textContent = aircraftStatSummary(aircraft);
         header.appendChild(stats);
         const fuel = document.createElement('span');
+        fuel.className = isAircraftFueled(state.base, aircraft.id)
+          ? 'status-chip is-fueled'
+          : 'status-chip is-unfueled';
         fuel.textContent = t(
           isAircraftFueled(state.base, aircraft.id)
             ? 'command.fueled'
             : 'command.unfueled',
         );
         header.appendChild(fuel);
+        if (state.base.activeAircraftId === aircraft.id) {
+          const active = document.createElement('em');
+          active.className = 'status-chip is-active';
+          active.textContent = t('hangar.activeAircraft');
+          header.appendChild(active);
+        }
+        const actions = document.createElement('div');
+        actions.className = 'fleet-slot__actions';
         if (!isAircraftFueled(state.base, aircraft.id)) {
           const refuel = document.createElement('button');
           refuel.className = 'base-action';
           refuel.type = 'button';
-          refuel.textContent = t('hangar.refuel');
-          refuel.title = t('command.refuelCost', {
+          refuel.textContent = t('hangar.refuelWithCost', {
             credits: aircraft.refuelCreditCost,
           });
           refuel.disabled = bankrupt || state.base.credits < aircraft.refuelCreditCost;
           refuel.addEventListener('click', () => {
             store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: aircraft.id });
           });
-          header.appendChild(refuel);
+          actions.appendChild(refuel);
         }
-        if (state.base.activeAircraftId === aircraft.id) {
-          const active = document.createElement('em');
-          active.textContent = t('hangar.activeAircraft');
-          header.appendChild(active);
-        } else {
+        if (state.base.activeAircraftId !== aircraft.id) {
           const activate = document.createElement('button');
           activate.className = 'base-action';
           activate.type = 'button';
@@ -886,8 +924,9 @@ function renderFleet(): void {
           activate.addEventListener('click', () => {
             store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
           });
-          header.appendChild(activate);
+          actions.appendChild(activate);
         }
+        header.appendChild(actions);
       }
     }
     slot.appendChild(header);
@@ -916,9 +955,18 @@ function renderFleet(): void {
     const stats = document.createElement('small');
     stats.textContent = aircraftStatSummary(aircraft);
     info.append(name, role, stats);
+    if (!owned && activeAircraft !== undefined) {
+      const delta = document.createElement('small');
+      delta.className = 'aircraft-delta';
+      delta.textContent = `${t('hangar.vsActive', {
+        aircraft: t(aircraftNameKey[activeAircraft.id] ?? 'content.interceptor'),
+      })} ${aircraftDeltaText(aircraft, activeAircraft)}`;
+      info.appendChild(delta);
+    }
     offer.appendChild(info);
     if (owned) {
       const badge = document.createElement('em');
+      badge.className = 'status-chip is-owned';
       badge.textContent = t('hangar.aircraftOwned');
       offer.appendChild(badge);
     } else {
@@ -1217,6 +1265,8 @@ function renderLocale(): void {
   setText('hangar-fleet-eyebrow', 'hangar.fleetEyebrow');
   setText('hangar-fleet-title', 'hangar.fleetTitle');
   setText('hangar-fleet-lede', 'hangar.fleetLede');
+  setText('hangar-fleet-subtitle', 'hangar.fleetSubtitle');
+  setText('hangar-market-subtitle', 'hangar.marketSubtitle');
   setText('hangar-slot-label', 'hangar.slotLabel');
   setText('hangar-slot-note', 'hangar.slotNote');
   setText('command-section-eyebrow', 'command.eyebrow');

@@ -385,6 +385,66 @@ select:focus-visible {
   gap: 0.4rem;
 }
 
+.fleet-slot__bay {
+  color: #6f8792;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.fleet-slot__actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.status-chip {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.status-chip.is-active {
+  color: #06120e;
+  background: #70d6b3;
+}
+
+.status-chip.is-fueled {
+  color: #b7e3d6;
+  background: rgba(112, 214, 179, 0.16);
+  border: 1px solid rgba(112, 214, 179, 0.45);
+}
+
+.status-chip.is-unfueled {
+  color: #f0c98a;
+  background: rgba(242, 198, 109, 0.14);
+  border: 1px solid rgba(242, 198, 109, 0.45);
+}
+
+.status-chip.is-owned {
+  color: #aab8d8;
+  background: rgba(169, 183, 215, 0.14);
+  border: 1px solid rgba(169, 183, 215, 0.45);
+}
+
+.aircraft-delta {
+  color: #8fa6b0;
+}
+
+.hangar-subtitle {
+  margin: 1rem 0 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #6f8792;
+}
+
+.hangar-slot-expand {
+  margin: 0.25rem 0 0.75rem;
+}
+
 .fleet-slot__header em,
 .aircraft-offer em {
   color: var(--accent, #70d6b3);
