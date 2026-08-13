@@ -302,6 +302,7 @@ export const zh = {
   'hangar.warehouseTitle': '仓库',
   'hangar.weaponStock': '库存武器',
   'hangar.rocketStock': '火箭弹',
+  'hangar.rocketLoaded': '下次出击装填：{value}',
   'hangar.moduleStock': '存储模块',
   'hangar.damage': '损伤 {value}%',
   'hangar.repair': '维修 · {credits}',

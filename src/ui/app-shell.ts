@@ -76,6 +76,7 @@ const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
 const canisterWeapon = contentCatalog.weapons[3];
 const hardpointBlueprint = contentCatalog.blueprints[1];
 const hardpointEquipment = contentCatalog.equipment[1];
+const rocketsConsumable = contentCatalog.consumables[0];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
   scientistRoleId: scientistRole.id,
@@ -1025,6 +1026,22 @@ function renderWarehouse(): void {
       const count = document.createElement('span');
       count.textContent = `×${stock}`;
       row.append(name, count);
+      list.appendChild(row);
+    }
+    const rocketStock = state.base.consumableStock[rocketsConsumable.id] ?? 0;
+    const hardpointInstalled = state.base.manufacturedEquipmentIds.includes(
+      hardpointEquipment.id,
+    );
+    const loadedCharges = Math.min(
+      rocketsConsumable.chargesPerSortie ?? 0,
+      rocketStock,
+    );
+    if (hardpointInstalled && loadedCharges > 0) {
+      const row = document.createElement('article');
+      row.className = 'threat-row rocket-loaded-note';
+      const name = document.createElement('strong');
+      name.textContent = t('hangar.rocketLoaded', { value: loadedCharges });
+      row.appendChild(name);
       list.appendChild(row);
     }
   }
@@ -2073,6 +2090,13 @@ launchSortieButton.addEventListener('click', () => {
         combatWeaponSwitchAvailable = false;
         const beforeSettlement = store.getSnapshot();
         store.dispatch({ type: 'SETTLE_SORTIE', outcome: result.outcome });
+        if (result.rocketsFired > 0) {
+          store.dispatch({
+            type: 'CONSUME_SORTIE_CONSUMABLES',
+            consumableId: rocketsConsumable.id,
+            count: result.rocketsFired,
+          });
+        }
         store.dispatch({
           type: 'APPLY_SORTIE_DAMAGE',
           aircraftId: beforeSettlement.base.activeAircraftId,
@@ -2110,6 +2134,7 @@ launchSortieButton.addEventListener('click', () => {
       () => store.getSnapshot().base.manufacturedEquipmentIds.includes(
         hardpointEquipment.id,
       ),
+      () => store.getSnapshot().base.consumableStock[rocketsConsumable.id] ?? 0,
       () => getLocale(),
       (weaponId, canSwitch) => {
         activeCombatWeaponId = weaponId;

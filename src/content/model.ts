@@ -181,6 +181,7 @@ export interface ConsumableDefinition {
   readonly nameKey: string;
   readonly creditCost: number;
   readonly materialCost: number;
+  readonly chargesPerSortie?: number;
   readonly marketPrice: {
     readonly minimum: number;
     readonly maximum: number;

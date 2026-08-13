@@ -313,6 +313,9 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     if (
       consumable.creditCost <= 0 ||
       consumable.materialCost < 0 ||
+      (consumable.chargesPerSortie !== undefined &&
+        (!Number.isInteger(consumable.chargesPerSortie) ||
+          consumable.chargesPerSortie <= 0)) ||
       (consumable.marketPrice !== null && (
         !Number.isInteger(consumable.marketPrice.minimum) ||
         !Number.isInteger(consumable.marketPrice.maximum) ||

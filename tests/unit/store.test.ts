@@ -460,3 +460,66 @@ describe('game store M3a cycle', () => {
     );
   });
 });
+
+describe('game store rocket ammunition', () => {
+  const rocketsId = contentCatalog.consumables[0].id;
+
+  it('purchases rockets into the warehouse and consumes the fired count', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 1_000 },
+    });
+
+    store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: rocketsId });
+    store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: rocketsId });
+    expect(store.getSnapshot().base.consumableStock[rocketsId]).toBe(2);
+
+    store.dispatch({
+      type: 'CONSUME_SORTIE_CONSUMABLES',
+      consumableId: rocketsId,
+      count: 1,
+    });
+    expect(store.getSnapshot().base.consumableStock[rocketsId]).toBe(1);
+  });
+
+  it('removes the stock entry entirely when the last rocket is consumed', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 1_000 },
+    });
+
+    store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: rocketsId });
+    store.dispatch({
+      type: 'CONSUME_SORTIE_CONSUMABLES',
+      consumableId: rocketsId,
+      count: 1,
+    });
+    expect(store.getSnapshot().base.consumableStock[rocketsId]).toBeUndefined();
+  });
+
+  it('treats a zero count as a no-op and throws when stock is insufficient', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 1_000 },
+    });
+
+    store.dispatch({
+      type: 'CONSUME_SORTIE_CONSUMABLES',
+      consumableId: rocketsId,
+      count: 0,
+    });
+    expect(store.getSnapshot().base.consumableStock[rocketsId]).toBeUndefined();
+
+    expect(() =>
+      store.dispatch({
+        type: 'CONSUME_SORTIE_CONSUMABLES',
+        consumableId: rocketsId,
+        count: 1,
+      }),
+    ).toThrow();
+  });
+});
+

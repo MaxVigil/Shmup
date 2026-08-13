@@ -216,3 +216,25 @@ describe('validateContentCatalog', () => {
     }
   });
 });
+
+describe('rocket consumable definition', () => {
+  it('defines a positive integer charge count for the hardpoint consumable', () => {
+    const rockets = contentCatalog.consumables[0];
+    expect(rockets.chargesPerSortie).toBeGreaterThan(0);
+    expect(Number.isInteger(rockets.chargesPerSortie)).toBe(true);
+  });
+
+  it('rejects a non-positive charge count during validation', () => {
+    const badCatalog = {
+      ...contentCatalog,
+      consumables: [
+        {
+          ...contentCatalog.consumables[0],
+          chargesPerSortie: 0,
+        },
+      ],
+    } as unknown as ContentCatalog;
+    expect(() => validateContentCatalog(badCatalog)).toThrow();
+  });
+});
+

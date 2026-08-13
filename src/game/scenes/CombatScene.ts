@@ -61,7 +61,7 @@ const M2_FAST_MODE = import.meta.env.DEV &&
 const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
 const CONTROLS_HINT_DURATION_MS = 15_000;
-const ROCKET_CHARGES = 3;
+const ROCKET_CHARGES_DEFAULT = 3;
 const ENEMY_BOUNCE_DAMPING = 0.5;
 const ENEMY_BOUND_MARGIN = 24;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
@@ -143,6 +143,7 @@ export interface CombatRunResult {
   readonly extractionDecision: RiskExtractionState['extractionDecision'];
   readonly eliteDefeated: boolean;
   readonly armourLostRatio: number;
+  readonly rocketsFired: number;
 }
 
 export interface AircraftCombatStats {
@@ -207,6 +208,7 @@ export class CombatScene extends Phaser.Scene {
   private controlsHintVisible = true;
   private rocketsText: Phaser.GameObjects.Text | null = null;
   private rocketCharges = 0;
+  private rocketsFired = 0;
   private endStatusKey: TranslationKey | null = null;
 
   constructor(
@@ -226,6 +228,7 @@ export class CombatScene extends Phaser.Scene {
     }),
     private readonly getActiveAircraftId: () => string | null = () => null,
     private readonly getAuxiliaryHardpointInstalled: () => boolean = () => false,
+    private readonly getRocketStock: () => number = () => 0,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
       weaponId: string,
@@ -355,7 +358,11 @@ export class CombatScene extends Phaser.Scene {
     this.nextEnemyActorId = 1;
     this.nextVolleyId = 1;
     this.rockets.length = 0;
-    this.rocketCharges = this.getAuxiliaryHardpointInstalled() ? ROCKET_CHARGES : 0;
+    this.rocketsFired = 0;
+    const chargesPerSortie = this.getRocketChargesPerSortie();
+    this.rocketCharges = this.getAuxiliaryHardpointInstalled()
+      ? Math.min(chargesPerSortie, Math.max(0, this.getRocketStock()))
+      : 0;
     this.elapsedMs = 0;
     this.fireCooldownMs = 0;
     this.spawnCooldownMs = 400;
@@ -1257,6 +1264,7 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
     this.rocketCharges -= 1;
+    this.rocketsFired += 1;
     const body = this.add.rectangle(this.player.x, this.player.y - 28, 6, 16, 0xffd98a);
     body.setStrokeStyle(1, 0xfff0b0, 0.85);
     this.rockets.push({
@@ -1270,6 +1278,13 @@ export class CombatScene extends Phaser.Scene {
     });
     this.updateRocketHud();
     this.cameras.main.shake(60, 0.003);
+  }
+
+  private getRocketChargesPerSortie(): number {
+    const loaded = contentCatalog.consumables.find(
+      (entry) => entry.chargesPerSortie !== undefined,
+    );
+    return loaded?.chargesPerSortie ?? ROCKET_CHARGES_DEFAULT;
   }
 
   private acquireRocketTarget(): EnemyActor | undefined {
@@ -1860,6 +1875,7 @@ export class CombatScene extends Phaser.Scene {
         extractionDecision: this.runState.extractionDecision,
         eliteDefeated: this.runState.eliteDefeated,
         armourLostRatio,
+        rocketsFired: this.rocketsFired,
       });
     }
   }

@@ -424,6 +424,7 @@ export const contentCatalog = {
       nameKey: 'content.rocketAmmo',
       creditCost: 40,
       materialCost: 1,
+      chargesPerSortie: 3,
       marketPrice: {
         minimum: 30,
         maximum: 50,

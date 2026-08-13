@@ -15,6 +15,7 @@ import {
 import { LOAN_OFFERS, settleDueLoans, takeLoan } from '../domain/credit';
 import {
   addConsumables,
+  consumeConsumables,
   installModule,
   removeModule,
   removeWeapon,
@@ -105,6 +106,11 @@ export type GameCommand =
       readonly armourLostRatio: number;
     }
   | { readonly type: 'PURCHASE_CONSUMABLE'; readonly consumableId: string }
+  | {
+      readonly type: 'CONSUME_SORTIE_CONSUMABLES';
+      readonly consumableId: string;
+      readonly count: number;
+    }
   | { readonly type: 'SELL_WEAPON'; readonly weaponId: string }
   | { readonly type: 'SELL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
@@ -419,6 +425,22 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               credits: state.base.credits - price,
             },
           };
+          break;
+        }
+        case 'CONSUME_SORTIE_CONSUMABLES': {
+          if (!Number.isInteger(command.count) || command.count < 0) {
+            throw new RangeError('Consumable count must be a non-negative integer.');
+          }
+          if (command.count > 0) {
+            state = {
+              ...state,
+              base: consumeConsumables(
+                state.base,
+                command.consumableId,
+                command.count,
+              ),
+            };
+          }
           break;
         }
         case 'SELL_WEAPON': {

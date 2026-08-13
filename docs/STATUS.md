@@ -307,9 +307,10 @@ packages from previous sessions are part of the same playtest batch.
    sell surplus stock, and take a loan — before merging to `main`.
 2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment, and
    per-pilot fatigue (schema v14) once the fleet-entity cycle lands.
-3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
-   hardpoint plus manually fired rocket pod cycles (wire rocket ammunition consumption
-   to `consumableStock`).
+3. Rocket ammunition is now wired to the warehouse: the hardpoint loads up to the
+   consumable's `chargesPerSortie` from `consumableStock`, and every rocket fired in a
+   sortie is consumed from stock on return. Remaining: balance the rocket economy
+   (price vs charge count) through playtest.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket
    controls are validated.
 
