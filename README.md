@@ -11,8 +11,11 @@ Extraction secures the haul; failure loses part of it.
 
 M0 and M1 are merged. M2–M3g.2 form a playable risk-and-extraction prototype with a
 departmental Base, separated terrestrial and alien research, guided Capturer
-progression, bilingual UI, managed sortie endings, and an operational contract that
-rewards confirmed targets and penalizes breaches.
+progression, trilingual UI (Ukrainian, English, Chinese), managed sortie endings,
+and an operational contract that rewards confirmed targets and penalizes breaches.
+The base has grown a fleet (three aircraft types, hangar bays, per-aircraft refuel),
+a Command Centre (sortie-counted months, deterministic threat map, credit line), and
+a loan system with month-boundary repayment.
 
 ## Requirements
 
@@ -33,8 +36,8 @@ Install or Preserve, fast mode uses an 8-second escape instead of the normal 35 
 Preserve the Prism, survive the escape, then use the Technology Lab to research and
 equip Split Pulse before launching the next sortie.
 
-The application opens on the Base screen. Use the gear button in the shared top bar to
-switch between Ukrainian and English; Ukrainian is used when no preference is stored.
+The application opens on the Command Centre. Use the gear button in the shared top bar to
+switch between Ukrainian, English, and Chinese; Ukrainian is used when no preference is stored.
 New profiles must earn materials in sorties, construct the Research and Development Centre, and
 hire scientists from the Research tab before alien samples can be researched.
 The Prototype and Production Works then manufactures purchased and researched
