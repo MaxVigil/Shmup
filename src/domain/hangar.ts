@@ -55,12 +55,24 @@ export function purchaseAircraft(
   }
   const hangarSlots = [...state.base.hangarSlots];
   hangarSlots[freeIndex] = aircraft.id;
+  const loadout = Array.from(
+    { length: aircraft.weaponSlotCount },
+    () => null,
+  );
   return {
     ...state,
     base: {
       ...state.base,
       credits: state.base.credits - price,
       hangarSlots,
+      aircraftLoadouts: {
+        ...state.base.aircraftLoadouts,
+        [aircraft.id]: loadout,
+      },
+      aircraftModules: {
+        ...state.base.aircraftModules,
+        [aircraft.id]: null,
+      },
     },
   };
 }
