@@ -164,21 +164,16 @@ describe('validateContentCatalog', () => {
     expect(gunship?.ranged?.shotIntervalMs).toBeGreaterThan(0);
   });
 
-  it('gives the Warden a modest ranged profile for a fair first elite', () => {
+  it('gives the Warden a fast but fair ranged profile', () => {
     const warden = contentCatalog.enemies.find((enemy) => enemy.kind === 'elite');
+    const gunship = contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship');
 
     expect(warden?.ranged).toBeDefined();
-    expect(warden?.ranged?.shotDamage).toBeLessThanOrEqual(
-      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
-        ?.shotDamage ?? 0,
-    );
-    expect(warden?.ranged?.shotSpeed).toBeLessThanOrEqual(
-      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
-        ?.shotSpeed ?? 0,
-    );
-    expect(warden?.ranged?.shotIntervalMs).toBeGreaterThanOrEqual(
-      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
-        ?.shotIntervalMs ?? 0,
+    expect(warden?.ranged?.shotDamage).toBeLessThanOrEqual(gunship?.ranged?.shotDamage ?? 0);
+    expect(warden?.ranged?.shotSpeed).toBeLessThanOrEqual(gunship?.ranged?.shotSpeed ?? 0);
+    // The Warden fires about three times more often than the Gunship.
+    expect(warden?.ranged?.shotIntervalMs).toBeLessThanOrEqual(
+      (gunship?.ranged?.shotIntervalMs ?? 0) / 2,
     );
   });
 

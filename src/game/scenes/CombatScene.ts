@@ -227,7 +227,6 @@ export class CombatScene extends Phaser.Scene {
       damageMultiplier: 1,
     }),
     private readonly getActiveAircraftId: () => string | null = () => null,
-    private readonly getAuxiliaryHardpointInstalled: () => boolean = () => false,
     private readonly getRocketStock: () => number = () => 0,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
@@ -293,7 +292,7 @@ export class CombatScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    if (this.getAuxiliaryHardpointInstalled()) {
+    if (this.isRocketPodEquipped()) {
       this.rocketsText = this.createHudText(
         20,
         66,
@@ -301,7 +300,7 @@ export class CombatScene extends Phaser.Scene {
       );
       this.input.keyboard?.on('keydown-SPACE', () => this.tryFireRocket());
       this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-        if (pointer.rightButtonDown()) {
+        if (pointer.leftButtonDown() || pointer.rightButtonDown()) {
           this.tryFireRocket();
         }
       });
@@ -360,7 +359,7 @@ export class CombatScene extends Phaser.Scene {
     this.rockets.length = 0;
     this.rocketsFired = 0;
     const chargesPerSortie = this.getRocketChargesPerSortie();
-    this.rocketCharges = this.getAuxiliaryHardpointInstalled()
+    this.rocketCharges = this.isRocketPodEquipped()
       ? Math.min(chargesPerSortie, Math.max(0, this.getRocketStock()))
       : 0;
     this.elapsedMs = 0;
@@ -488,8 +487,12 @@ export class CombatScene extends Phaser.Scene {
 
     if (this.fireCooldownMs <= 0) {
       const weapon = this.currentWeapon();
-      this.fire(weapon);
-      this.fireCooldownMs += 1000 / weapon.shotsPerSecond;
+      if (weapon.shotsPerSecond > 0) {
+        this.fire(weapon);
+        this.fireCooldownMs += 1000 / weapon.shotsPerSecond;
+      } else {
+        this.fireCooldownMs = 1000;
+      }
     }
 
     const canSpawnRegularEnemy = (
@@ -1271,13 +1274,21 @@ export class CombatScene extends Phaser.Scene {
       body,
       targetId: target.actorId,
       damage: 90,
-      speed: 460,
+      speed: 700,
       targetX: target.body.x,
       targetY: target.body.y,
       elapsedMs: 0,
     });
     this.updateRocketHud();
     this.cameras.main.shake(60, 0.003);
+  }
+
+  private isRocketPodEquipped(): boolean {
+    const rocketPod = contentCatalog.weapons.find(
+      (weapon) => weapon.visualProfile === 'rocket-pod',
+    );
+    return rocketPod !== undefined &&
+      this.equippedPrimaryWeaponIds.includes(rocketPod.id);
   }
 
   private getRocketChargesPerSortie(): number {

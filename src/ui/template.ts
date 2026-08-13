@@ -109,7 +109,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <p id="earth-research-intro" class="technology-lab__status"></p>
             <div class="facility-row research-staff-row">
               <div><span class="loadout-row__label" id="scientists-label"></span><strong id="scientist-count"></strong><small id="scientist-note"></small></div>
-              <button id="hire-scientist" class="base-action" type="button"></button>
             </div>
             <div id="scientist-candidates" class="candidate-list"></div>
             <div class="research-lane">
@@ -146,14 +145,6 @@ export function buildAppTemplate(initialState: GameState): string {
                   <small id="canister-research-note"></small>
                 </div>
                 <button id="research-canister" class="base-action" type="button"></button>
-              </article>
-              <article class="terrestrial-project" id="hardpoint-research-project">
-                <div>
-                  <span id="hardpoint-research-label" class="loadout-row__label"></span>
-                  <strong id="hardpoint-research-status"></strong>
-                  <small id="hardpoint-research-note"></small>
-                </div>
-                <button id="research-hardpoint" class="base-action" type="button"></button>
               </article>
             </div>
             <div class="special-project">
@@ -211,7 +202,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="manufacturing-title"></h2>
             <div class="facility-row production-staff-row">
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
-              <button id="hire-engineer" class="base-action" type="button"></button>
             </div>
             <div id="engineer-candidates" class="candidate-list"></div>
             <div class="facility-row programme-equipment">
@@ -230,10 +220,6 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="canister-production-label"></span><strong id="canister-production-status"></strong><small id="canister-production-note"></small></div>
               <button id="manufacture-canister" class="base-action" type="button"></button>
             </div>
-            <div id="hardpoint-production-row" class="facility-row programme-equipment" hidden>
-              <div><span class="loadout-row__label" id="hardpoint-production-label"></span><strong id="hardpoint-production-status"></strong><small id="hardpoint-production-note"></small></div>
-              <button id="manufacture-hardpoint" class="base-action" type="button"></button>
-            </div>
             <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>
               <button id="manufacture-machine-upgrade" class="base-action" type="button"></button>
@@ -242,36 +228,6 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="accelerator-upgrade-production-label"></span><strong id="accelerator-upgrade-production-status"></strong><small id="accelerator-upgrade-production-note"></small></div>
               <button id="manufacture-accelerator-upgrade" class="base-action" type="button"></button>
             </div>
-          </section>
-
-          <section class="market-panel" aria-labelledby="market-title">
-            <p class="technology-lab__eyebrow" id="market-eyebrow"></p>
-            <h2 id="market-title"></h2>
-            <p id="market-intro" class="domain-intro"></p>
-            <article id="market-offer" class="market-offer">
-              <div class="market-offer__copy">
-                <span id="market-offer-label" class="loadout-row__label"></span>
-                <strong id="market-weapon-name"></strong>
-                <p id="market-weapon-role"></p>
-                <small id="market-offer-status"></small>
-              </div>
-              <div class="market-offer__action">
-                <strong id="market-weapon-price"></strong>
-                <button id="purchase-market-weapon" class="base-action" type="button"></button>
-              </div>
-            </article>
-            <article id="market-blueprint-offer" class="market-offer" hidden>
-              <div class="market-offer__copy">
-                <span id="market-blueprint-label" class="loadout-row__label"></span>
-                <strong id="market-blueprint-name"></strong>
-                <p id="market-blueprint-role"></p>
-                <small id="market-blueprint-status"></small>
-              </div>
-              <div class="market-offer__action">
-                <strong id="market-blueprint-price"></strong>
-                <button id="purchase-market-blueprint" class="base-action" type="button"></button>
-              </div>
-            </article>
           </section>
         </div>
       </section>
@@ -292,7 +248,6 @@ export function buildAppTemplate(initialState: GameState): string {
           </div>
           <p id="preflight-warning" class="preflight-warning" role="status"></p>
         <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
-        <p id="hardpoint-status" class="preflight-warning" role="status" hidden></p>
         <p id="fuel-status" class="preflight-warning" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>

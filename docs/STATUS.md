@@ -297,7 +297,7 @@ packages from previous sessions are part of the same playtest batch.
 - A Trade Centre building gates a new Trade tab: procurement (weapons, rockets),
   surplus sales, and the relocated Council credit lines; a hireable trade manager adds
   up to 15% margin from level 2 onward.
-- All 158 unit tests, lint, typecheck, and the production build pass locally.
+- All 167 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Fixes landed on `test` (2026-08-13)
 
@@ -308,14 +308,36 @@ packages from previous sessions are part of the same playtest batch.
   combat armour (`maxArmour × (1 − damage)`), so a damaged aircraft is flyable but
   fragile. Standard and emergency repairs remain available to restore full armour;
   an in-progress standard repair only shows a countdown, never blocks flight.
-- The elite Warden now fires aimed shots with a modest, fair first-boss profile
-  (lower damage, slower bullets, longer interval than the Gunship), using the same
-  generic ranged path as the Gunship.
+- The elite Warden now fires aimed shots, using the same generic ranged path as the
+  Gunship.
 - Staff-candidate hiring now enforces the same building gate as direct hiring:
   `hireCandidate` requires the role's `requiredBuildingId` and respects
   `maximumHeadcount`; the candidate hire button is disabled until the facility is
   built. The Engineering Research Centre / Production Works build-first order is
   enforced on every path.
+
+## Playtest round 2 landed on `test` (2026-08-13)
+
+- **Button text root cause fixed**: `renderLocale` carried eleven stale `setText`
+  calls for removed loadout elements; the first missing id threw and aborted the
+  whole locale render before the action buttons were populated. The stale calls are
+  gone and a regression test now asserts every `byId`/`setText` id exists in the
+  template.
+- **Bigger sortie screen**: on a sortie the top bar collapses to just the settings
+  gear (no brand, no breadcrumb) and the combat field fills the viewport.
+- **Warden fires ~3× more often**: `shotIntervalMs` 3200 → 1050.
+- **Direct staff hiring removed**: only the monthly candidate pool hires scientists,
+  engineers, and the trade manager; counts and candidate cards remain.
+- **Research queue**: one blueprint project at a time; `advanceBlueprintResearch`
+  advances only the front project and the research start buttons are disabled while
+  the queue is busy.
+- **Accelerator moved to the Trade tab**: the Engineering procurement panel is gone;
+  the Impulse Accelerator (finished) and its production blueprint are now offered in
+  Trade.
+- **Rocket Pod is now a weapon**: the auxiliary hardpoint system is fully removed.
+  The Rocket Pod is a purchasable primary weapon (Trade → warehouse → weapon slot),
+  carries up to `chargesPerSortie` rockets from `consumableStock`, fires manually via
+  `Space` or left/right mouse click, and spent rockets are consumed on return.
 
 ## Next
 
@@ -325,10 +347,8 @@ packages from previous sessions are part of the same playtest batch.
    sell surplus stock, and take a loan — before merging to `main`.
 2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment, and
    per-pilot fatigue (schema v14) once the fleet-entity cycle lands.
-3. Rocket ammunition is now wired to the warehouse: the hardpoint loads up to the
-   consumable's `chargesPerSortie` from `consumableStock`, and every rocket fired in a
-   sortie is consumed from stock on return. Remaining: balance the rocket economy
-   (price vs charge count) through playtest.
+3. Balance the Rocket Pod economy (market price vs charge count) and the Warden's new
+   fire rate through playtest.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket
    controls are validated.
 

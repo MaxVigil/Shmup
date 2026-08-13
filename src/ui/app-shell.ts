@@ -74,8 +74,9 @@ const quarantine = contentCatalog.buildings[2];
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
 const canisterWeapon = contentCatalog.weapons[3];
-const hardpointBlueprint = contentCatalog.blueprints[1];
-const hardpointEquipment = contentCatalog.equipment[1];
+const rocketPodWeapon = contentCatalog.weapons.find(
+  (weapon) => weapon.visualProfile === 'rocket-pod',
+) ?? contentCatalog.weapons[4];
 const rocketsConsumable = contentCatalog.consumables[0];
 const progressionDefinitions = {
   laboratoryId: laboratory.id,
@@ -130,14 +131,6 @@ const sortieRunReport = byId<HTMLElement>('sortie-run-report');
 const sortieOutcome = byId<HTMLElement>('sortie-outcome');
 const technologyStatus = byId<HTMLElement>('technology-status');
 const researchTechnologyButton = byId<HTMLButtonElement>('research-technology');
-const purchaseMarketWeaponButton = byId<HTMLButtonElement>('purchase-market-weapon');
-const marketOffer = byId<HTMLElement>('market-offer');
-const marketOfferStatus = byId<HTMLElement>('market-offer-status');
-const marketWeaponPriceText = byId<HTMLElement>('market-weapon-price');
-const marketBlueprintOffer = byId<HTMLElement>('market-blueprint-offer');
-const marketBlueprintStatus = byId<HTMLElement>('market-blueprint-status');
-const marketBlueprintPriceText = byId<HTMLElement>('market-blueprint-price');
-const purchaseMarketBlueprintButton = byId<HTMLButtonElement>('purchase-market-blueprint');
 const specialEquipmentStatus = byId<HTMLElement>('special-equipment-status');
 const specialEquipmentNote = byId<HTMLElement>('special-equipment-note');
 const toggleSpecialEquipmentButton = byId<HTMLButtonElement>('toggle-special-equipment');
@@ -153,10 +146,8 @@ const laboratoryCost = byId<HTMLElement>('laboratory-cost');
 const constructLaboratoryButton = byId<HTMLButtonElement>('construct-laboratory');
 const scientistCount = byId<HTMLElement>('scientist-count');
 const scientistNote = byId<HTMLElement>('scientist-note');
-const hireScientistButton = byId<HTMLButtonElement>('hire-scientist');
 const engineerCount = byId<HTMLElement>('engineer-count');
 const engineerNote = byId<HTMLElement>('engineer-note');
-const hireEngineerButton = byId<HTMLButtonElement>('hire-engineer');
 const workshopStatus = byId<HTMLElement>('workshop-status');
 const workshopCost = byId<HTMLElement>('workshop-cost');
 const constructWorkshopButton = byId<HTMLButtonElement>('construct-workshop');
@@ -179,14 +170,6 @@ const canisterProductionRow = byId<HTMLElement>('canister-production-row');
 const canisterProductionStatus = byId<HTMLElement>('canister-production-status');
 const canisterProductionNote = byId<HTMLElement>('canister-production-note');
 const manufactureCanisterButton = byId<HTMLButtonElement>('manufacture-canister');
-const hardpointResearchStatus = byId<HTMLElement>('hardpoint-research-status');
-const hardpointResearchNote = byId<HTMLElement>('hardpoint-research-note');
-const researchHardpointButton = byId<HTMLButtonElement>('research-hardpoint');
-const hardpointProductionRow = byId<HTMLElement>('hardpoint-production-row');
-const hardpointProductionStatus = byId<HTMLElement>('hardpoint-production-status');
-const hardpointProductionNote = byId<HTMLElement>('hardpoint-production-note');
-const manufactureHardpointButton = byId<HTMLButtonElement>('manufacture-hardpoint');
-const hardpointStatus = byId<HTMLElement>('hardpoint-status');
 const blueprintStatus = byId<HTMLElement>('blueprint-status');
 const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
 const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
@@ -358,7 +341,6 @@ function renderBase(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
   const splitPulseUnlocked = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeaponId);
-  const acceleratorOwned = state.base.ownedPrimaryWeaponIds.includes(impulseAccelerator.id);
   const acceleratorBlueprintOwned = state.base.unlockedBlueprintIds.includes(
     acceleratorBlueprint.id,
   );
@@ -391,6 +373,7 @@ function renderBase(): void {
     capturerEquipment.id,
   );
   const capturerEquipped = state.base.equippedEquipmentId === capturerEquipment.id;
+  const researchBusy = state.base.researchQueue.length > 0;
   const technologyName = t('content.prism');
   const moduleName = t('content.splitPulse');
   const objective = getProgressionObjective(state, progressionDefinitions);
@@ -451,26 +434,15 @@ function renderBase(): void {
     state.base.materials < laboratory.materialCost
   );
   scientistCount.textContent = t('facility.scientistCount', { count: scientists });
-  scientistNote.textContent = !labBuilt
-    ? t('facility.requiresLab')
-    : state.base.credits < scientistRole.creditCost
-      ? t('facility.needsCredits')
-      : t('facility.hireCost', { credits: scientistRole.creditCost });
-  hireScientistButton.disabled = bankrupt || !labBuilt || state.base.credits < scientistRole.creditCost;
+  scientistNote.textContent = labBuilt
+    ? t('facility.candidatesHint')
+    : t('facility.requiresLab');
   engineerCount.textContent = t('facility.engineerCount', { count: engineers });
-  engineerNote.textContent = !workshopBuilt
-    ? t('facility.requiresWorks')
-    : engineers > 0
+  engineerNote.textContent = workshopBuilt
+    ? engineers > 0
       ? t('facility.engineerReady')
-      : state.base.credits < engineerRole.creditCost
-        ? t('facility.needsCredits')
-        : t('facility.hireCost', { credits: engineerRole.creditCost });
-  hireEngineerButton.hidden = engineers > 0;
-  hireEngineerButton.disabled = (
-    bankrupt ||
-    !workshopBuilt ||
-    state.base.credits < engineerRole.creditCost
-  );
+      : t('facility.candidatesHint')
+    : t('facility.requiresWorks');
   renderCandidates('scientist-candidates', scientistRole.id);
   renderCandidates('engineer-candidates', engineerRole.id);
   workshopStatus.textContent = workshopBuilt
@@ -504,7 +476,7 @@ function renderBase(): void {
     : t('programme.contribution', { count: scientists });
   startBlueprintResearchButton.hidden =
     blueprintUnlocked || blueprintProject !== undefined || !state.base.telemetryRecorded;
-  startBlueprintResearchButton.disabled = bankrupt || !researchReady;
+  startBlueprintResearchButton.disabled = bankrupt || !researchReady || researchBusy;
   capturerEquipmentStatus.textContent = capturerManufactured
     ? t('programme.manufactured')
     : !blueprintUnlocked
@@ -652,40 +624,6 @@ function renderBase(): void {
     state.base.credits < acceleratorUpgrade.productionCreditCost ||
     state.base.materials < acceleratorUpgrade.productionMaterialCost
   );
-  const offerPrice = marketWeaponPrice(
-    impulseAccelerator,
-    state.base.marketSeed,
-    state.base.sortiesCompleted,
-  );
-  marketOffer.hidden = acceleratorOwned;
-  marketWeaponPriceText.textContent = acceleratorOwned
-    ? ''
-    : t('market.price', { credits: offerPrice });
-  marketOfferStatus.textContent = acceleratorOwned
-    ? t('market.owned')
-    : state.base.credits >= offerPrice
-      ? t('market.available')
-      : t('market.shortfall', { credits: offerPrice - state.base.credits });
-  purchaseMarketWeaponButton.hidden = acceleratorOwned;
-  purchaseMarketWeaponButton.disabled = bankrupt || state.base.credits < offerPrice;
-  const blueprintOfferAvailable = state.base.sortiesCompleted >= acceleratorBlueprint.minimumSorties;
-  const blueprintPrice = marketBlueprintPrice(
-    acceleratorBlueprint,
-    state.base.marketSeed,
-    state.base.sortiesCompleted,
-  );
-  marketBlueprintOffer.hidden =
-    acceleratorBlueprintOwned || !blueprintOfferAvailable;
-  marketBlueprintPriceText.textContent = acceleratorBlueprintOwned
-    ? ''
-    : t('market.price', { credits: blueprintPrice });
-  marketBlueprintStatus.textContent = acceleratorBlueprintOwned
-    ? t('market.blueprintOwned')
-    : state.base.credits >= blueprintPrice
-      ? t('market.blueprintAvailable')
-      : t('market.shortfall', { credits: blueprintPrice - state.base.credits });
-  purchaseMarketBlueprintButton.hidden = acceleratorBlueprintOwned;
-  purchaseMarketBlueprintButton.disabled = bankrupt || state.base.credits < blueprintPrice;
   renderAircraftLoadout();
   specialEquipmentStatus.textContent = capturerEquipped
     ? t('loadout.capturerEquipped')
@@ -736,71 +674,10 @@ function renderBase(): void {
   setText('return-to-base', 'sortie.return');
   renderContainment();
   renderCanister();
-  renderHardpoint();
   renderFleet();
   renderWarehouse();
   renderTrade();
   renderCommand();
-}
-
-function renderHardpoint(): void {
-  const state = store.getSnapshot();
-  const bankrupt = isBankrupt(state.base.credits);
-  const hardpointUnlocked = state.base.unlockedBlueprintIds.includes(hardpointBlueprint.id);
-  const hardpointInstalled = state.base.manufacturedEquipmentIds.includes(
-    hardpointEquipment.id,
-  );
-  const hardpointProject = state.base.researchQueue.find(
-    (project) => project.blueprintId === hardpointBlueprint.id,
-  );
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
-  const scientists = state.base.staff.filter(
-    (member) => member.roleId === scientistRole.id,
-  ).length;
-  const researchReady = labBuilt && scientists > 0;
-  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
-  const engineers = state.base.staff.filter(
-    (member) => member.roleId === engineerRole.id,
-  ).length;
-  const productionReady = workshopBuilt && engineers > 0;
-
-  hardpointResearchStatus.textContent = hardpointUnlocked
-    ? t('research.hardpointUnlocked')
-    : hardpointProject !== undefined
-      ? t('research.hardpointActive', {
-          progress: hardpointProject.progress,
-          required: hardpointProject.requiredProgress,
-        })
-      : researchReady
-        ? t('research.hardpointAvailable')
-        : t('research.hardpointRequiresTeam');
-  hardpointResearchNote.textContent = hardpointProject === undefined
-    ? ''
-    : t('programme.contribution', { count: scientists });
-  researchHardpointButton.hidden = hardpointUnlocked || hardpointProject !== undefined;
-  researchHardpointButton.disabled = bankrupt || !researchReady;
-
-  hardpointProductionRow.hidden = !hardpointUnlocked || hardpointInstalled;
-  if (hardpointUnlocked && !hardpointInstalled) {
-    hardpointProductionStatus.textContent = productionReady
-      ? t('production.ready')
-      : t('production.requiresEngineer');
-    hardpointProductionNote.textContent = t('production.cost', {
-      credits: hardpointEquipment.creditCost,
-      materials: hardpointEquipment.materialCost,
-    });
-    manufactureHardpointButton.disabled =
-      bankrupt ||
-      !productionReady ||
-      state.base.credits < hardpointEquipment.creditCost ||
-      state.base.materials < hardpointEquipment.materialCost;
-  }
-
-  hardpointStatus.hidden = false;
-  hardpointStatus.textContent = t(
-    hardpointInstalled ? 'hangar.hardpointInstalled' : 'hangar.hardpointMissing',
-  );
-  hardpointStatus.classList.toggle('is-ready', hardpointInstalled);
 }
 
 const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
@@ -899,7 +776,6 @@ function renderCandidates(containerId: string, roleId: string): void {
 
 const moduleNameKey: Readonly<Record<string, TranslationKey>> = {
   'equipment-alien-technology-capturer': 'content.capturer',
-  'equipment-auxiliary-hardpoint': 'content.hardpoint',
 };
 
 function localizedModuleName(moduleId: string): string {
@@ -1043,14 +919,15 @@ function renderWarehouse(): void {
       list.appendChild(row);
     }
     const rocketStock = state.base.consumableStock[rocketsConsumable.id] ?? 0;
-    const hardpointInstalled = state.base.manufacturedEquipmentIds.includes(
-      hardpointEquipment.id,
-    );
+    const activeLoadout = state.base.activeAircraftId === null
+      ? []
+      : (state.base.aircraftLoadouts[state.base.activeAircraftId] ?? []);
+    const podEquipped = activeLoadout.includes(rocketPodWeapon.id);
     const loadedCharges = Math.min(
       rocketsConsumable.chargesPerSortie ?? 0,
       rocketStock,
     );
-    if (hardpointInstalled && loadedCharges > 0) {
+    if (podEquipped && loadedCharges > 0) {
       const row = document.createElement('article');
       row.className = 'threat-row rocket-loaded-note';
       const name = document.createElement('strong');
@@ -1183,6 +1060,44 @@ function renderTrade(): void {
       store.dispatch({ type: 'PURCHASE_MARKET_WEAPON', weaponId: weapon.id });
     });
     row.append(label, buy);
+    dynamic.appendChild(row);
+  }
+  for (const blueprint of contentCatalog.marketWeaponBlueprints) {
+    const owned = state.base.unlockedBlueprintIds.includes(blueprint.id);
+    const available = state.base.sortiesCompleted >= blueprint.minimumSorties;
+    if (!available) {
+      continue;
+    }
+    const price = marketBlueprintPrice(
+      blueprint,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t('trade.blueprintLabel', {
+      weapon: localizedWeaponName(blueprint.weaponId),
+    });
+    if (owned) {
+      const ownedNote = document.createElement('strong');
+      ownedNote.textContent = t('market.blueprintOwned');
+      row.append(label, ownedNote);
+    } else {
+      const buy = document.createElement('button');
+      buy.className = 'base-action';
+      buy.type = 'button';
+      buy.textContent = t('trade.buy', { credits: price });
+      buy.disabled = bankrupt || state.base.credits < price;
+      buy.addEventListener('click', () => {
+        store.dispatch({
+          type: 'PURCHASE_MARKET_BLUEPRINT',
+          blueprintId: blueprint.id,
+        });
+      });
+      row.append(label, buy);
+    }
     dynamic.appendChild(row);
   }
   for (const consumable of contentCatalog.consumables) {
@@ -1585,6 +1500,7 @@ function renderCredit(): void {
 function renderCanister(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
+  const researchBusy = state.base.researchQueue.length > 0;
   const canisterUnlocked = state.base.unlockedBlueprintIds.includes(canisterBlueprint.id);
   const canisterOwned = state.base.ownedPrimaryWeaponIds.includes(canisterWeapon.id);
   const canisterProject = state.base.researchQueue.find(
@@ -1615,7 +1531,7 @@ function renderCanister(): void {
     ? ''
     : t('programme.contribution', { count: scientists });
   researchCanisterButton.hidden = canisterUnlocked || canisterProject !== undefined;
-  researchCanisterButton.disabled = bankrupt || !researchReady;
+  researchCanisterButton.disabled = bankrupt || !researchReady || researchBusy;
 
   canisterProductionRow.hidden = !canisterUnlocked || canisterOwned;
   if (canisterUnlocked && !canisterOwned) {
@@ -1637,6 +1553,7 @@ function renderCanister(): void {
 function renderContainment(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
+  const researchBusy = state.base.researchQueue.length > 0;
   const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
   const containmentUnlocked = state.base.unlockedBlueprintIds.includes(
     containmentBlueprint.id,
@@ -1678,7 +1595,7 @@ function renderContainment(): void {
       : t('containment.requiresTeam');
     containmentNote.textContent = '';
     startContainmentResearchButton.hidden = false;
-    startContainmentResearchButton.disabled = bankrupt || !researchReady;
+    startContainmentResearchButton.disabled = bankrupt || !researchReady || researchBusy;
   }
 
   quarantineRow.hidden = !containmentUnlocked;
@@ -1780,17 +1697,6 @@ function renderLocale(): void {
   setText('engineering-section-lede', 'engineering.lede');
   setText('manufacturing-eyebrow', 'engineering.manufacturingEyebrow');
   setText('manufacturing-title', 'engineering.manufacturingTitle');
-  setText('market-eyebrow', 'market.eyebrow');
-  setText('market-title', 'market.title');
-  setText('market-intro', 'market.intro');
-  setText('market-offer-label', 'market.offerLabel');
-  setText('market-weapon-name', 'content.impulseAccelerator');
-  setText('market-weapon-role', 'market.acceleratorRole');
-  setText('purchase-market-weapon', 'market.purchase');
-  setText('market-blueprint-label', 'market.blueprintLabel');
-  setText('market-blueprint-name', 'market.blueprintName');
-  setText('market-blueprint-role', 'market.blueprintRole');
-  setText('purchase-market-blueprint', 'market.purchaseBlueprint');
   setText('hangar-section-eyebrow', 'hangar.eyebrow');
   setText('hangar-section-title', 'hangar.title');
   setText('hangar-section-lede', 'hangar.lede');
@@ -1822,9 +1728,7 @@ function renderLocale(): void {
   setText('laboratory-label', 'facility.laboratory');
   setText('construct-laboratory', 'facility.constructLab');
   setText('scientists-label', 'facility.scientists');
-  setText('hire-scientist', 'facility.hireScientist');
   setText('engineers-label', 'facility.engineers');
-  setText('hire-engineer', 'facility.hireEngineer');
   setText('workshop-label', 'facility.workshop');
   setText('construct-workshop', 'facility.constructWorkshop');
   setText('quarantine-label', 'facility.quarantine');
@@ -1847,25 +1751,10 @@ function renderLocale(): void {
   setText('manufacture-accelerator-upgrade', 'production.manufactureUpgrade');
   setText('technology-lab-eyebrow', 'lab.eyebrow');
   setText('technology-lab-title', 'lab.title');
-  setText('weapon-module-label', 'lab.weaponModule');
-  setText('weapon-slot-1-label', 'loadout.primarySlot', { slot: 'I' });
-  setText('weapon-slot-2-label', 'loadout.primarySlot', { slot: 'II' });
-  setText('weapon-standard-name', 'content.standardCannon');
-  setText('weapon-standard-role', 'loadout.standardRole');
-  setText('weapon-accelerator-name', 'content.impulseAccelerator');
-  setText('weapon-accelerator-role', 'loadout.acceleratorRole');
-  setText('weapon-split-name', 'content.splitPulse');
-  setText('weapon-split-role', 'loadout.splitRole');
-  setText('weapon-canister-name', 'content.canisterCannon');
-  setText('weapon-canister-role', 'loadout.canisterRole');
   setText('canister-research-label', 'research.canisterLabel');
   setText('research-canister', 'research.startCanister');
   setText('canister-production-label', 'production.canister');
   setText('manufacture-canister', 'production.canisterManufacture');
-  setText('hardpoint-research-label', 'research.hardpointLabel');
-  setText('research-hardpoint', 'research.startHardpoint');
-  setText('hardpoint-production-label', 'production.hardpoint');
-  setText('manufacture-hardpoint', 'production.hardpointManufacture');
   setText('special-equipment-label', 'loadout.specialEquipment');
   setText('launch-sortie', 'base.launch');
   setText('active-weapon-label', 'sortie.activeWeapon');
@@ -1940,20 +1829,6 @@ researchTechnologyButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: prism.id });
 });
 
-purchaseMarketWeaponButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'PURCHASE_MARKET_WEAPON',
-    weaponId: impulseAccelerator.id,
-  });
-});
-
-purchaseMarketBlueprintButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'PURCHASE_MARKET_BLUEPRINT',
-    blueprintId: acceleratorBlueprint.id,
-  });
-});
-
 manufactureAcceleratorButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_PRIMARY_WEAPON',
@@ -2003,14 +1878,6 @@ constructLaboratoryButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
 });
 
-hireScientistButton.addEventListener('click', () => {
-  store.dispatch({ type: 'HIRE_STAFF', roleId: scientistRole.id });
-});
-
-hireEngineerButton.addEventListener('click', () => {
-  store.dispatch({ type: 'HIRE_STAFF', roleId: engineerRole.id });
-});
-
 constructWorkshopButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
 });
@@ -2051,20 +1918,6 @@ manufactureCanisterButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_RESEARCH_WEAPON',
     blueprintId: canisterBlueprint.id,
-  });
-});
-
-researchHardpointButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'START_BLUEPRINT_RESEARCH',
-    blueprintId: hardpointBlueprint.id,
-  });
-});
-
-manufactureHardpointButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'MANUFACTURE_EQUIPMENT',
-    equipmentId: hardpointEquipment.id,
   });
 });
 
@@ -2149,9 +2002,6 @@ launchSortieButton.addEventListener('click', () => {
             };
       },
       () => store.getSnapshot().base.activeAircraftId,
-      () => store.getSnapshot().base.manufacturedEquipmentIds.includes(
-        hardpointEquipment.id,
-      ),
       () => store.getSnapshot().base.consumableStock[rocketsConsumable.id] ?? 0,
       () => getLocale(),
       (weaponId, canSwitch) => {

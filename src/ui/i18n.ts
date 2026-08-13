@@ -36,5 +36,8 @@ export function localizedWeaponName(weaponId: string | null): string {
   if (weaponId === contentCatalog.weapons[3].id) {
     return t('content.canisterCannon');
   }
+  if (weaponId === contentCatalog.weapons[4].id) {
+    return t('content.rocketPod');
+  }
   return t('content.standardCannon');
 }

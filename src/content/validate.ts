@@ -200,13 +200,19 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     if (
       !['earth', 'alien'].includes(weapon.origin) ||
       weapon.damage <= 0 ||
-      weapon.shotsPerSecond <= 0 ||
+      (weapon.shotsPerSecond <= 0 && weapon.visualProfile !== 'rocket-pod') ||
       !Number.isInteger(weapon.projectileCount) ||
       weapon.projectileCount <= 0 ||
       weapon.projectileSpeed <= 0 ||
       weapon.spread < 0 ||
       !['single-target', 'all-targets'].includes(weapon.penetration) ||
-      !['machine-gun', 'impulse-accelerator', 'split-pulse', 'canister-cannon'].includes(
+      ![
+        'machine-gun',
+        'impulse-accelerator',
+        'split-pulse',
+        'canister-cannon',
+        'rocket-pod',
+      ].includes(
         weapon.visualProfile,
       ) ||
       (weapon.marketPrice !== null && (

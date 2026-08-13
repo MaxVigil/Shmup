@@ -25,6 +25,9 @@ export function startBlueprintResearch(
   if (state.base.researchQueue.some((project) => project.blueprintId === blueprint.id)) {
     throw new Error(`Blueprint ${blueprint.id} is already being researched.`);
   }
+  if (state.base.researchQueue.length > 0) {
+    throw new Error('One research project can be active at a time.');
+  }
 
   return {
     ...state,
@@ -51,25 +54,23 @@ export function advanceBlueprintResearch(
     return state;
   }
 
-  const completedBlueprintIds: string[] = [];
-  const activeProjects: ResearchProjectState[] = [];
-  for (const project of state.base.researchQueue) {
-    const progress = Math.min(project.requiredProgress, project.progress + contribution);
-    if (progress >= project.requiredProgress) {
-      completedBlueprintIds.push(project.blueprintId);
-    } else {
-      activeProjects.push({ ...project, progress });
-    }
+  const [front, ...rest] = state.base.researchQueue;
+  if (front === undefined) {
+    return state;
   }
+  const progress = Math.min(front.requiredProgress, front.progress + contribution);
+  const activeProjects: ResearchProjectState[] = progress >= front.requiredProgress
+    ? rest
+    : [{ ...front, progress }, ...rest];
 
   return {
     ...state,
     base: {
       ...state.base,
       researchQueue: activeProjects,
-      unlockedBlueprintIds: [
-        ...new Set([...state.base.unlockedBlueprintIds, ...completedBlueprintIds]),
-      ],
+      unlockedBlueprintIds: progress >= front.requiredProgress
+        ? [...new Set([...state.base.unlockedBlueprintIds, front.blueprintId])]
+        : state.base.unlockedBlueprintIds,
     },
   };
 }

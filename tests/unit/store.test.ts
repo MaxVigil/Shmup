@@ -280,48 +280,31 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(weaponId);
   });
 
-  it('researches and manufactures the auxiliary hardpoint', () => {
+  it('purchases the Rocket Pod on the market and installs it into a weapon slot', () => {
     const initial = createGameStore().getSnapshot();
-    const laboratory = contentCatalog.buildings[0];
-    const workshop = contentCatalog.buildings[1];
-    const scientist = contentCatalog.staffRoles[0];
-    const engineer = contentCatalog.staffRoles[1];
-    const blueprint = contentCatalog.blueprints[1];
-    const equipment = contentCatalog.equipment[1];
+    const rocketPod = contentCatalog.weapons.find(
+      (weapon) => weapon.id === 'weapon-rocket-pod',
+    );
+    expect(rocketPod).toBeDefined();
     const store = createGameStore({
       ...initial,
-      base: {
-        ...initial.base,
-        credits: 2_000,
-        materials: 100,
-        telemetryRecorded: true,
-        constructedBuildingIds: [laboratory.id, workshop.id],
-        staff: [
-          staffMember('scientist-1', scientist.id),
-          staffMember('engineer-1', engineer.id),
-        ],
-      },
+      base: { ...initial.base, credits: 2_000 },
     });
-    const outcome = {
-      extracted: true,
-      materialsFound: 10,
-      researchFound: 0,
-      preservedTechnologyIds: [],
-      targetsDestroyed: 25,
-      targetsBreached: 0,
-      creditsEarned: 300,
-      creditsPenalized: 0,
-      wardenSignalDetected: false,
-    } as const;
 
-    store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
-    for (let index = 0; index < blueprint.requiredProgress; index += 1) {
-      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    }
-    expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(blueprint.id);
+    store.dispatch({ type: 'PURCHASE_MARKET_WEAPON', weaponId: rocketPod?.id ?? '' });
+    expect(store.getSnapshot().base.weaponStock[rocketPod?.id ?? '']).toBe(1);
 
-    store.dispatch({ type: 'MANUFACTURE_EQUIPMENT', equipmentId: equipment.id });
-    expect(store.getSnapshot().base.manufacturedEquipmentIds).toContain(equipment.id);
+    const aircraftId = store.getSnapshot().base.activeAircraftId;
+    expect(aircraftId).not.toBeNull();
+    store.dispatch({
+      type: 'EQUIP_PRIMARY_WEAPON',
+      weaponId: rocketPod?.id ?? '',
+      slotIndex: 0,
+    });
+    expect(store.getSnapshot().base.weaponStock[rocketPod?.id ?? '']).toBeUndefined();
+    expect(store.getSnapshot().base.aircraftLoadouts[aircraftId ?? '']?.[0]).toBe(
+      rocketPod?.id,
+    );
   });
 
   it('purchases aircraft, expands the hangar, and switches the active one', () => {
