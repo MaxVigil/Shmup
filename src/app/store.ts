@@ -27,7 +27,8 @@ import {
   startRepair,
 } from '../domain/aircraft-integrity';
 import { awardStaffXp, generateStaffCandidates, hireCandidate } from '../domain/staff-market';
-import { marketConsumablePrice } from '../domain/terrestrial-market';
+import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
+import { sellAircraft, sellWeapon } from '../domain/trade';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
 import {
@@ -104,6 +105,8 @@ export type GameCommand =
       readonly armourLostRatio: number;
     }
   | { readonly type: 'PURCHASE_CONSUMABLE'; readonly consumableId: string }
+  | { readonly type: 'SELL_WEAPON'; readonly weaponId: string }
+  | { readonly type: 'SELL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -415,6 +418,39 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               ...addConsumables(state.base, consumable.id, 1),
               credits: state.base.credits - price,
             },
+          };
+          break;
+        }
+        case 'SELL_WEAPON': {
+          const weapon = contentCatalog.weapons.find(
+            (entry) => entry.id === command.weaponId,
+          );
+          if (weapon === undefined || weapon.marketPrice === null) {
+            throw new Error(`Weapon ${command.weaponId} cannot be sold.`);
+          }
+          const basePrice = marketWeaponPrice(
+            weapon,
+            state.base.marketSeed,
+            state.base.sortiesCompleted,
+          );
+          state = { ...state, base: sellWeapon(state.base, weapon.id, basePrice) };
+          break;
+        }
+        case 'SELL_AIRCRAFT': {
+          const aircraft = contentCatalog.aircraft.find(
+            (entry) => entry.id === command.aircraftId,
+          );
+          if (aircraft === undefined || aircraft.marketPrice === null) {
+            throw new Error(`Aircraft ${command.aircraftId} cannot be sold.`);
+          }
+          const basePrice = marketAircraftPrice(
+            aircraft,
+            state.base.marketSeed,
+            state.base.sortiesCompleted,
+          );
+          state = {
+            ...state,
+            base: sellAircraft(state.base, aircraft.id, basePrice),
           };
           break;
         }

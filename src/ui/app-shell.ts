@@ -8,16 +8,20 @@ import { isLocale } from '../i18n';
 import { clearGame, loadGame, saveGame } from '../persistence/save-repository';
 import type { GameState } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
-import { marketWeaponPrice } from '../domain/terrestrial-market';
-import { marketBlueprintPrice } from '../domain/terrestrial-market';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled } from '../domain/command-centre';
+import {
+  marketBlueprintPrice,
+  marketConsumablePrice,
+  marketWeaponPrice,
+} from '../domain/terrestrial-market';
 import {
   aircraftDamageValue,
   emergencyRepairCost,
   isAircraftRepairing,
   standardRepairCost,
 } from '../domain/aircraft-integrity';
+import { tradeMargin } from '../domain/trade';
 import {
   hasOutstandingLoan,
   LOAN_OFFERS,
@@ -321,7 +325,7 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
 
 function isBaseSection(value: string | undefined): value is BaseSection {
   return value === 'command' || value === 'research' ||
-    value === 'engineering' || value === 'hangar';
+    value === 'engineering' || value === 'hangar' || value === 'trade';
 }
 
 function showBaseSection(section: BaseSection): void {
@@ -723,6 +727,7 @@ function renderBase(): void {
   renderHardpoint();
   renderFleet();
   renderWarehouse();
+  renderTrade();
   renderCommand();
 }
 
@@ -1046,6 +1051,175 @@ function renderWarehouse(): void {
   }
 }
 
+function renderTrade(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const tradeCentre = contentCatalog.buildings.find(
+    (entry) => entry.id === 'building-trade-centre',
+  );
+  const creditPanel = byId<HTMLElement>('credit-offers-list')
+    .closest('.command-panel') as HTMLElement | null;
+  const dynamic = byId<HTMLElement>('trade-dynamic');
+  dynamic.textContent = '';
+  if (tradeCentre === undefined) {
+    if (creditPanel !== null) {
+      creditPanel.hidden = true;
+    }
+    return;
+  }
+  const built = state.base.constructedBuildingIds.includes(tradeCentre.id);
+  if (creditPanel !== null) {
+    creditPanel.hidden = !built;
+  }
+  if (!built) {
+    const note = document.createElement('p');
+    note.className = 'preflight-warning';
+    note.textContent = t('trade.locked');
+    dynamic.appendChild(note);
+    const workshopBuilt = state.base.constructedBuildingIds.includes('building-workshop');
+    const construct = document.createElement('button');
+    construct.className = 'base-action';
+    construct.type = 'button';
+    construct.textContent = t('trade.construct', {
+      credits: tradeCentre.creditCost,
+    });
+    construct.disabled = bankrupt || !workshopBuilt || state.base.credits < tradeCentre.creditCost;
+    construct.addEventListener('click', () => {
+      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentre.id });
+    });
+    dynamic.appendChild(construct);
+    return;
+  }
+
+  const trader = state.base.staff.find(
+    (member) => member.roleId === 'staff-trader',
+  );
+  const managerHeading = document.createElement('h3');
+  managerHeading.className = 'hangar-subtitle';
+  managerHeading.textContent = t('trade.manager');
+  dynamic.appendChild(managerHeading);
+  if (trader === undefined) {
+    const note = document.createElement('p');
+    note.className = 'preflight-warning';
+    note.textContent = t('trade.noManager');
+    dynamic.appendChild(note);
+    const candidate = state.base.staffCandidates.find(
+      (entry) => entry.roleId === 'staff-trader',
+    );
+    if (candidate !== undefined) {
+      const hire = document.createElement('button');
+      hire.className = 'base-action';
+      hire.type = 'button';
+      hire.textContent = t('staff.hire', { credits: candidate.hireCreditCost });
+      hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
+      hire.addEventListener('click', () => {
+        store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
+      });
+      dynamic.appendChild(hire);
+    }
+  } else {
+    const margin = document.createElement('p');
+    margin.textContent = t('trade.margin', {
+      margin: Math.round(tradeMargin(state.base) * 100),
+    });
+    dynamic.appendChild(margin);
+  }
+
+  const buyHeading = document.createElement('h3');
+  buyHeading.className = 'hangar-subtitle';
+  buyHeading.textContent = t('trade.buyTitle');
+  dynamic.appendChild(buyHeading);
+  for (const weapon of contentCatalog.weapons) {
+    if (weapon.marketPrice === null || weapon.origin !== 'earth') {
+      continue;
+    }
+    const price = marketWeaponPrice(
+      weapon,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = localizedWeaponName(weapon.id);
+    const buy = document.createElement('button');
+    buy.className = 'base-action';
+    buy.type = 'button';
+    buy.textContent = t('trade.buy', { credits: price });
+    buy.disabled = bankrupt || state.base.credits < price;
+    buy.addEventListener('click', () => {
+      store.dispatch({ type: 'PURCHASE_MARKET_WEAPON', weaponId: weapon.id });
+    });
+    row.append(label, buy);
+    dynamic.appendChild(row);
+  }
+  for (const consumable of contentCatalog.consumables) {
+    const price = marketConsumablePrice(
+      consumable,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t(consumable.nameKey as TranslationKey);
+    const buy = document.createElement('button');
+    buy.className = 'base-action';
+    buy.type = 'button';
+    buy.textContent = t('trade.buy', { credits: price });
+    buy.disabled = bankrupt || state.base.credits < price;
+    buy.addEventListener('click', () => {
+      store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: consumable.id });
+    });
+    row.append(label, buy);
+    dynamic.appendChild(row);
+  }
+
+  const sellHeading = document.createElement('h3');
+  sellHeading.className = 'hangar-subtitle';
+  sellHeading.textContent = t('trade.sellTitle');
+  dynamic.appendChild(sellHeading);
+  const sellables = contentCatalog.weapons.filter(
+    (weapon) => (state.base.weaponStock[weapon.id] ?? 0) > 0,
+  );
+  if (sellables.length === 0) {
+    const note = document.createElement('p');
+    note.className = 'preflight-warning';
+    note.textContent = t('trade.noStock');
+    dynamic.appendChild(note);
+  } else {
+    for (const weapon of sellables) {
+      const basePrice = weapon.marketPrice === null
+        ? 100
+        : marketWeaponPrice(
+            weapon,
+            state.base.marketSeed,
+            state.base.sortiesCompleted,
+          );
+      const price = Math.round(basePrice * 0.5 * (1 + tradeMargin(state.base)));
+      const row = document.createElement('div');
+      row.className = 'loadout-row';
+      const label = document.createElement('span');
+      label.className = 'loadout-row__label';
+      label.textContent = localizedWeaponName(weapon.id);
+      const count = document.createElement('strong');
+      count.textContent = `×${state.base.weaponStock[weapon.id] ?? 0}`;
+      const sell = document.createElement('button');
+      sell.className = 'base-action';
+      sell.type = 'button';
+      sell.textContent = t('trade.sell', { credits: price });
+      sell.addEventListener('click', () => {
+        store.dispatch({ type: 'SELL_WEAPON', weaponId: weapon.id });
+      });
+      row.append(label, count, sell);
+      dynamic.appendChild(row);
+    }
+  }
+  renderCredit();
+}
+
 function renderFleet(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -1292,7 +1466,6 @@ function renderCommand(): void {
     row.append(name, fuel);
     fuelList.appendChild(row);
   }
-  renderCredit();
 }
 
 function renderCredit(): void {
@@ -1530,6 +1703,7 @@ function renderLocale(): void {
   setText('base-tab-research', 'baseNav.research');
   setText('base-tab-engineering', 'baseNav.engineering');
   setText('base-tab-hangar', 'baseNav.hangar');
+  setText('base-tab-trade', 'baseNav.trade');
   setText('settings-title', 'settings.title');
   setText('language-label', 'settings.language');
   setText('restart-mission', 'settings.restart');
@@ -1589,6 +1763,9 @@ function renderLocale(): void {
   setText('hangar-section-eyebrow', 'hangar.eyebrow');
   setText('hangar-section-title', 'hangar.title');
   setText('hangar-section-lede', 'hangar.lede');
+  setText('trade-section-eyebrow', 'trade.eyebrow');
+  setText('trade-section-title', 'trade.title');
+  setText('trade-section-lede', 'trade.lede');
   setText('hangar-loadout-eyebrow', 'hangar.loadoutEyebrow');
   setText('hangar-loadout-title', 'hangar.loadoutTitle');
   setText('hangar-fleet-eyebrow', 'hangar.fleetEyebrow');

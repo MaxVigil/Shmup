@@ -173,6 +173,13 @@ export const contentCatalog = {
       requiredBlueprintId: 'blueprint-safe-containment',
       requiredBuildingId: 'building-workshop',
     },
+    {
+      id: 'building-trade-centre',
+      creditCost: 350,
+      materialCost: 15,
+      requiredBlueprintId: null,
+      requiredBuildingId: 'building-workshop',
+    },
   ],
   staffRoles: [
     {
@@ -185,6 +192,12 @@ export const contentCatalog = {
       id: 'staff-engineer',
       creditCost: 180,
       requiredBuildingId: 'building-workshop',
+      maximumHeadcount: 1,
+    },
+    {
+      id: 'staff-trader',
+      creditCost: 200,
+      requiredBuildingId: 'building-trade-centre',
       maximumHeadcount: 1,
     },
   ],

@@ -51,6 +51,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <button id="base-tab-research" type="button" role="tab" data-base-section="research" aria-controls="base-panel-research" aria-selected="false"></button>
         <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
         <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
+        <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
       </nav>
 
       <dl class="base-resource-strip">
@@ -92,13 +93,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <h2 id="command-fuel-title"></h2>
           <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
         </section>
-        <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
-          <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
-          <h2 id="command-credit-title"></h2>
-          <p class="lede" id="command-credit-lede"></p>
-          <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
-          <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
-        </section>
+        <section class="technology-lab command-panel" aria-labelledby="command-credit-title" hidden></section>
       </section>
 
       <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>
@@ -319,6 +314,24 @@ export function buildAppTemplate(initialState: GameState): string {
           <h2 id="hangar-warehouse-title"></h2>
           <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
         </section>
+      </section>
+
+      <section id="base-panel-trade" class="base-panel" role="tabpanel" aria-labelledby="base-tab-trade" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="trade-section-eyebrow"></p>
+          <h1 id="trade-section-title"></h1>
+          <p class="lede" id="trade-section-lede"></p>
+        </header>
+        <div id="trade-content" class="trade-content">
+          <div id="trade-dynamic" class="trade-dynamic"></div>
+          <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
+            <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
+            <h2 id="command-credit-title"></h2>
+            <p class="lede" id="command-credit-lede"></p>
+            <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
+            <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
+          </section>
+        </div>
       </section>
     </main>
 
