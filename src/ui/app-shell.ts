@@ -119,9 +119,6 @@ const sortieRunReport = byId<HTMLElement>('sortie-run-report');
 const sortieOutcome = byId<HTMLElement>('sortie-outcome');
 const technologyStatus = byId<HTMLElement>('technology-status');
 const researchTechnologyButton = byId<HTMLButtonElement>('research-technology');
-const weaponOptions = Array.from(
-  document.querySelectorAll<HTMLElement>('[data-weapon-id]'),
-);
 const purchaseMarketWeaponButton = byId<HTMLButtonElement>('purchase-market-weapon');
 const marketOffer = byId<HTMLElement>('market-offer');
 const marketOfferStatus = byId<HTMLElement>('market-offer-status');
@@ -676,40 +673,7 @@ function renderBase(): void {
       : t('market.shortfall', { credits: blueprintPrice - state.base.credits });
   purchaseMarketBlueprintButton.hidden = acceleratorBlueprintOwned;
   purchaseMarketBlueprintButton.disabled = bankrupt || state.base.credits < blueprintPrice;
-  byId<HTMLElement>('weapon-slot-1-name').textContent = localizedWeaponName(
-    state.base.equippedPrimaryWeaponIds[0] ?? null,
-  );
-  byId<HTMLElement>('weapon-slot-2-name').textContent = localizedWeaponName(
-    state.base.equippedPrimaryWeaponIds[1] ?? null,
-  );
-  for (const option of weaponOptions) {
-    const weaponId = option.dataset.weaponId;
-    if (weaponId === undefined) {
-      continue;
-    }
-    const owned = state.base.ownedPrimaryWeaponIds.includes(weaponId);
-    const equipped = state.base.equippedPrimaryWeaponIds.includes(weaponId);
-    option.hidden = !owned;
-    option.classList.toggle('is-equipped', equipped);
-    for (const button of option.querySelectorAll<HTMLButtonElement>('.weapon-equip-action')) {
-      const slotIndex = button.dataset.slotIndex === '1' ? 1 : 0;
-      const equippedInSlot = state.base.equippedPrimaryWeaponIds[slotIndex] === weaponId;
-      button.disabled = bankrupt || equippedInSlot;
-      button.textContent = t(
-        equippedInSlot ? 'loadout.equippedInSlot' : 'loadout.equipInSlot',
-        { slot: slotIndex === 0 ? 'I' : 'II' },
-      );
-    }
-  }
-  byId<HTMLElement>('weapon-standard-role').textContent = t(
-    machineUpgradeManufactured ? 'loadout.standardRoleUpgraded' : 'loadout.standardRole',
-  );
-  byId<HTMLElement>('weapon-accelerator-role').textContent = t(
-    acceleratorUpgradeManufactured
-      ? 'loadout.acceleratorRoleUpgraded'
-      : 'loadout.acceleratorRole',
-  );
-  byId<HTMLElement>('weapon-canister-role').textContent = t('loadout.canisterRole');
+  renderAircraftLoadout();
   specialEquipmentStatus.textContent = capturerEquipped
     ? t('loadout.capturerEquipped')
     : capturerManufactured ? t('loadout.capturerStored') : t('loadout.slotEmpty');
@@ -747,6 +711,7 @@ function renderBase(): void {
   renderCanister();
   renderHardpoint();
   renderFleet();
+  renderWarehouse();
   renderCommand();
 }
 
@@ -857,6 +822,175 @@ function aircraftDeltaText(
     t('aircraft.speed', { value: speed }),
     t('aircraft.damage', { value: damage }),
   ].join(' · ');
+}
+
+const moduleNameKey: Readonly<Record<string, TranslationKey>> = {
+  'equipment-alien-technology-capturer': 'content.capturer',
+  'equipment-auxiliary-hardpoint': 'content.hardpoint',
+};
+
+function localizedModuleName(moduleId: string): string {
+  return t(moduleNameKey[moduleId] ?? 'content.capturer');
+}
+
+function renderAircraftLoadout(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const editor = byId<HTMLElement>('aircraft-loadout-editor');
+  editor.textContent = '';
+  const activeId = state.base.activeAircraftId;
+  if (activeId === null) {
+    return;
+  }
+  const aircraft = contentCatalog.aircraft.find((entry) => entry.id === activeId);
+  if (aircraft === undefined) {
+    return;
+  }
+  const loadout = state.base.aircraftLoadouts[activeId] ?? [];
+  const heading = document.createElement('strong');
+  heading.textContent = `${t('hangar.activeAircraftLabel')}: ${t(
+    aircraftNameKey[aircraft.id] ?? 'content.interceptor',
+  )}`;
+  editor.appendChild(heading);
+
+  const slots = document.createElement('div');
+  slots.className = 'loadout-slots';
+  loadout.forEach((weaponId, index) => {
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t('loadout.primarySlot', { slot: index + 1 });
+    const name = document.createElement('strong');
+    name.textContent = weaponId === null
+      ? t('loadout.slotEmpty')
+      : localizedWeaponName(weaponId);
+    row.appendChild(label);
+    row.appendChild(name);
+    if (weaponId !== null) {
+      const unequip = document.createElement('button');
+      unequip.className = 'base-action';
+      unequip.type = 'button';
+      unequip.textContent = t('lab.unequip');
+      unequip.disabled = bankrupt;
+      unequip.addEventListener('click', () => {
+        store.dispatch({ type: 'UNEQUIP_PRIMARY_WEAPON', slotIndex: index });
+      });
+      row.appendChild(unequip);
+    }
+    slots.appendChild(row);
+  });
+  editor.appendChild(slots);
+
+  const warehouse = document.createElement('div');
+  warehouse.className = 'warehouse-install';
+  for (const weapon of contentCatalog.weapons) {
+    const stock = state.base.weaponStock[weapon.id] ?? 0;
+    if (stock <= 0) {
+      continue;
+    }
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = localizedWeaponName(weapon.id);
+    const count = document.createElement('strong');
+    count.textContent = `×${stock}`;
+    row.appendChild(label);
+    row.appendChild(count);
+    for (let index = 0; index < loadout.length; index += 1) {
+      if (loadout[index] !== null) {
+        continue;
+      }
+      const install = document.createElement('button');
+      install.className = 'base-action';
+      install.type = 'button';
+      install.textContent = t('hangar.installInto', { slot: index + 1 });
+      install.disabled = bankrupt;
+      install.addEventListener('click', () => {
+        store.dispatch({
+          type: 'EQUIP_PRIMARY_WEAPON',
+          weaponId: weapon.id,
+          slotIndex: index,
+        });
+      });
+      row.appendChild(install);
+    }
+    warehouse.appendChild(row);
+  }
+  if (warehouse.children.length > 0) {
+    editor.appendChild(warehouse);
+  }
+}
+
+function renderWarehouse(): void {
+  const state = store.getSnapshot();
+  const list = byId<HTMLElement>('warehouse-stock-list');
+  list.textContent = '';
+
+  const weapons = contentCatalog.weapons
+    .map((weapon) => ({ weapon, stock: state.base.weaponStock[weapon.id] ?? 0 }))
+    .filter((entry) => entry.stock > 0);
+  if (weapons.length > 0) {
+    const heading = document.createElement('h3');
+    heading.className = 'hangar-subtitle';
+    heading.textContent = t('hangar.weaponStock');
+    list.appendChild(heading);
+    for (const { weapon, stock } of weapons) {
+      const row = document.createElement('article');
+      row.className = 'threat-row';
+      const name = document.createElement('strong');
+      name.textContent = localizedWeaponName(weapon.id);
+      const count = document.createElement('span');
+      count.textContent = `×${stock}`;
+      row.append(name, count);
+      list.appendChild(row);
+    }
+  }
+
+  const consumables = contentCatalog.consumables
+    .map((consumable) => ({
+      consumable,
+      stock: state.base.consumableStock[consumable.id] ?? 0,
+    }))
+    .filter((entry) => entry.stock > 0);
+  if (consumables.length > 0) {
+    const heading = document.createElement('h3');
+    heading.className = 'hangar-subtitle';
+    heading.textContent = t('hangar.rocketStock');
+    list.appendChild(heading);
+    for (const { consumable, stock } of consumables) {
+      const row = document.createElement('article');
+      row.className = 'threat-row';
+      const name = document.createElement('strong');
+      name.textContent = t(consumable.nameKey as TranslationKey);
+      const count = document.createElement('span');
+      count.textContent = `×${stock}`;
+      row.append(name, count);
+      list.appendChild(row);
+    }
+  }
+
+  const installedModules = new Set(Object.values(state.base.aircraftModules));
+  const modules = state.base.manufacturedEquipmentIds.filter(
+    (moduleId) => !installedModules.has(moduleId),
+  );
+  if (modules.length > 0) {
+    const heading = document.createElement('h3');
+    heading.className = 'hangar-subtitle';
+    heading.textContent = t('hangar.moduleStock');
+    list.appendChild(heading);
+    for (const moduleId of modules) {
+      const row = document.createElement('article');
+      row.className = 'threat-row';
+      const name = document.createElement('strong');
+      name.textContent = localizedModuleName(moduleId);
+      const count = document.createElement('span');
+      count.textContent = '×1';
+      row.append(name, count);
+      list.appendChild(row);
+    }
+  }
 }
 
 function renderFleet(): void {
@@ -1359,6 +1493,8 @@ function renderLocale(): void {
   setText('hangar-fleet-lede', 'hangar.fleetLede');
   setText('hangar-fleet-subtitle', 'hangar.fleetSubtitle');
   setText('hangar-market-subtitle', 'hangar.marketSubtitle');
+  setText('hangar-warehouse-eyebrow', 'hangar.warehouseEyebrow');
+  setText('hangar-warehouse-title', 'hangar.warehouseTitle');
   setText('hangar-slot-label', 'hangar.slotLabel');
   setText('hangar-slot-note', 'hangar.slotNote');
   setText('command-section-eyebrow', 'command.eyebrow');
@@ -1529,18 +1665,6 @@ manufactureMachineUpgradeButton.addEventListener('click', () => {
 manufactureAcceleratorUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'MANUFACTURE_WEAPON_UPGRADE', upgradeId: acceleratorUpgrade.id });
 });
-
-for (const option of weaponOptions) {
-  for (const button of option.querySelectorAll<HTMLButtonElement>('.weapon-equip-action')) {
-    button.addEventListener('click', () => {
-    const weaponId = option.dataset.weaponId;
-    const slotIndex = button.dataset.slotIndex === '1' ? 1 : 0;
-    if (weaponId !== undefined) {
-      store.dispatch({ type: 'EQUIP_PRIMARY_WEAPON', weaponId, slotIndex });
-    }
-    });
-  }
-}
 
 switchPrimaryWeaponButton.addEventListener('click', () => {
   if (game === null || activeScreen !== 'sortie') {

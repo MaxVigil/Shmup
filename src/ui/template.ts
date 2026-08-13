@@ -288,43 +288,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <section class="technology-lab hangar-panel" aria-labelledby="hangar-loadout-title">
           <p class="technology-lab__eyebrow" id="hangar-loadout-eyebrow"></p>
           <h2 id="hangar-loadout-title"></h2>
-          <div class="primary-loadout" aria-labelledby="weapon-module-label">
-            <span class="loadout-row__label" id="weapon-module-label"></span>
-            <div class="weapon-slot-summary" aria-live="polite">
-              <div><span id="weapon-slot-1-label"></span><strong id="weapon-slot-1-name"></strong></div>
-              <div><span id="weapon-slot-2-label"></span><strong id="weapon-slot-2-name"></strong></div>
-            </div>
-            <div class="weapon-options">
-              <article id="weapon-option-standard" class="weapon-option" data-weapon-id="weapon-pulse-cannon">
-                <div><strong id="weapon-standard-name"></strong><small id="weapon-standard-role"></small></div>
-                <div class="weapon-slot-actions">
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
-                </div>
-              </article>
-              <article id="weapon-option-accelerator" class="weapon-option" data-weapon-id="weapon-impulse-accelerator" hidden>
-                <div><strong id="weapon-accelerator-name"></strong><small id="weapon-accelerator-role"></small></div>
-                <div class="weapon-slot-actions">
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
-                </div>
-              </article>
-              <article id="weapon-option-split" class="weapon-option" data-weapon-id="weapon-split-pulse" hidden>
-                <div><strong id="weapon-split-name"></strong><small id="weapon-split-role"></small></div>
-                <div class="weapon-slot-actions">
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
-                </div>
-              </article>
-              <article id="weapon-option-canister" class="weapon-option" data-weapon-id="weapon-canister-cannon" hidden>
-                <div><strong id="weapon-canister-name"></strong><small id="weapon-canister-role"></small></div>
-                <div class="weapon-slot-actions">
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="0"></button>
-                  <button class="base-action weapon-equip-action" type="button" data-slot-index="1"></button>
-                </div>
-              </article>
-            </div>
-          </div>
+          <div id="aircraft-loadout-editor" class="aircraft-loadout-editor" aria-live="polite"></div>
           <div class="loadout-row">
             <div><span class="loadout-row__label" id="special-equipment-label"></span><strong id="special-equipment-status"></strong><small id="special-equipment-note"></small></div>
             <button id="toggle-special-equipment" class="base-action" type="button" hidden></button>
@@ -347,6 +311,11 @@ export function buildAppTemplate(initialState: GameState): string {
           </div>
           <h3 class="hangar-subtitle" id="hangar-market-subtitle"></h3>
           <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
+        </section>
+        <section class="technology-lab hangar-panel" aria-labelledby="hangar-warehouse-title">
+          <p class="technology-lab__eyebrow" id="hangar-warehouse-eyebrow"></p>
+          <h2 id="hangar-warehouse-title"></h2>
+          <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
         </section>
       </section>
     </main>

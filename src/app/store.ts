@@ -62,7 +62,7 @@ export type GameCommand =
   | {
       readonly type: 'EQUIP_PRIMARY_WEAPON';
       readonly weaponId: string;
-      readonly slotIndex: 0 | 1;
+      readonly slotIndex: number;
     }
   | { readonly type: 'CONSTRUCT_BUILDING'; readonly buildingId: string }
   | { readonly type: 'HIRE_STAFF'; readonly roleId: string }
