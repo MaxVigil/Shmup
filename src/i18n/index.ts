@@ -7,6 +7,7 @@ export const LOCALE_STORAGE_KEY = 'shmup.locale';
 
 const en = {
   'app.brand': 'INTERNATIONAL RECOVERY DIRECTORATE',
+  'debug.playtestBadge': 'PLAYTEST PROFILE — progress is not saved',
   'nav.base': 'Base',
   'nav.sortie': 'Sortie',
   'baseNav.aria': 'Base departments',
@@ -425,6 +426,7 @@ export type TranslationParams = Readonly<Record<string, string | number>>;
 
 const uk: Record<TranslationKey, string> = {
   'app.brand': 'МІЖНАРОДНЕ УПРАВЛІННЯ ВІДНОВЛЕННЯ',
+  'debug.playtestBadge': 'ТЕСТОВИЙ ПРОФІЛЬ — прогрес не зберігається',
   'nav.base': 'База',
   'nav.sortie': 'Виліт',
   'baseNav.aria': 'Відділи бази',

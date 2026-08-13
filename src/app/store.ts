@@ -114,7 +114,9 @@ export type GameCommand =
   | { readonly type: 'SELL_WEAPON'; readonly weaponId: string }
   | { readonly type: 'SELL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
-  | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
+  | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null }
+  | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
+  | { readonly type: 'DEBUG_COMPLETE_RESEARCH' };
 
 export type GameStateListener = (state: GameState) => void;
 
@@ -445,6 +447,34 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
                 command.consumableId,
                 command.count,
               ),
+            };
+          }
+          break;
+        }
+        case 'DEBUG_GRANT': {
+          state = {
+            ...state,
+            base: {
+              ...state.base,
+              credits: state.base.credits + (command.credits ?? 0),
+              materials: state.base.materials + (command.materials ?? 0),
+              research: state.base.research + (command.research ?? 0),
+            },
+          };
+          break;
+        }
+        case 'DEBUG_COMPLETE_RESEARCH': {
+          const front = state.base.researchQueue[0];
+          if (front !== undefined) {
+            state = {
+              ...state,
+              base: {
+                ...state.base,
+                researchQueue: state.base.researchQueue.slice(1),
+                unlockedBlueprintIds: [
+                  ...new Set([...state.base.unlockedBlueprintIds, front.blueprintId]),
+                ],
+              },
             };
           }
           break;

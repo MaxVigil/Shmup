@@ -1,5 +1,6 @@
 export const zh = {
   'app.brand': '国际回收总局',
+  'debug.playtestBadge': '测试档案 — 进度不会保存',
   'nav.base': '基地',
   'nav.sortie': '出击',
   'baseNav.aria': '基地部门',

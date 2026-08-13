@@ -42,6 +42,7 @@ import {
 import { byId, setText } from './dom';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
+import { installShmupDebugBridge } from '../debug/debug-mode';
 import { resolveInitialState, temporaryPlaytestMode } from './playtest';
 
 validateContentCatalog(contentCatalog);
@@ -55,6 +56,7 @@ if (app === null) {
 const store = createGameStore(
   resolveInitialState() ?? loadGame(window.localStorage) ?? undefined,
 );
+installShmupDebugBridge({ store, getGame: () => game });
 const initialState = store.getSnapshot();
 const prism = contentCatalog.alienTechnologies[0];
 const impulseAccelerator = contentCatalog.weapons[1];
@@ -104,6 +106,9 @@ if (!temporaryPlaytestMode) {
 }
 
 app.innerHTML = buildAppTemplate(initialState);
+const playtestBadge = byId<HTMLElement>("playtest-badge");
+playtestBadge.hidden = !temporaryPlaytestMode;
+playtestBadge.textContent = temporaryPlaytestMode ? t("debug.playtestBadge") : "";
 
 const baseScreen = byId<HTMLElement>('base-screen');
 const baseNavigation = byId<HTMLElement>('base-navigation');
@@ -1279,7 +1284,7 @@ function renderFleet(): void {
           });
           actions.appendChild(refuel);
         }
-        if (state.base.activeAircraftId !== aircraft.id && !repairing) {
+        if (state.base.activeAircraftId !== aircraft.id) {
           const activate = document.createElement('button');
           activate.className = 'base-action';
           activate.type = 'button';

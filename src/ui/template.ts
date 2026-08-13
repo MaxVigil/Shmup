@@ -3,6 +3,7 @@ import type { GameState } from '../domain/model';
 export function buildAppTemplate(initialState: GameState): string {
   return `
   <div class="app-frame">
+    <div id="playtest-badge" class="playtest-badge" role="status" hidden></div>
     <header class="top-bar">
       <div class="top-bar__brand" id="app-brand"></div>
       <div class="top-bar__route" aria-live="polite">

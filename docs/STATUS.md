@@ -369,3 +369,10 @@ packages from previous sessions are part of the same playtest batch.
   offers better conditions, technologies, and contracts; Ukraine is a technology-
   innovation leader whose best engineers, scientists, and pilots are often Ukrainian;
   Russia does not exist in the game's present-day world.
+
+## Playtest round 3 landed on test (2026-08-13)
+
+- SET ACTIVE now shows for any non-active aircraft, including damaged ones.
+- The combat field now fills the whole browser viewport on a sortie (top bar overlaid, combat-frame at 100dvh).
+- Persistence verified with a progressed round-trip test; a refresh reset is caused by a playtest URL parameter or private browsing, so a visible PLAYTEST PROFILE badge now appears whenever a playtest profile is active.
+- Debug mode v1 (?debug=true, dev builds only): F3 toggles a panel with economy grants, build-all, staff, fleet-ready, rockets, finish-research, combat invincibility, Warden spawn, skip-to-extraction, save-now, and a window.__shmup console bridge.

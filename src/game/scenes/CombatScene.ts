@@ -210,6 +210,7 @@ export class CombatScene extends Phaser.Scene {
   private rocketCharges = 0;
   private rocketsFired = 0;
   private endStatusKey: TranslationKey | null = null;
+  private debugInvincible = false;
 
   constructor(
     private readonly onRunComplete: (result: CombatRunResult) => void = () => {},
@@ -1222,7 +1223,9 @@ export class CombatScene extends Phaser.Scene {
         const impactY = shot.body.y;
         shot.body.destroy();
         this.hostileShots.splice(index, 1);
-        this.armour = Math.max(0, this.armour - shot.damage);
+        if (!this.debugInvincible) {
+          this.armour = Math.max(0, this.armour - shot.damage);
+        }
         this.invulnerableMs = 700;
         this.createContactBurst(impactX, impactY);
         this.cameras.main.shake(70, 0.004);
@@ -1492,7 +1495,9 @@ export class CombatScene extends Phaser.Scene {
           ? contentCatalog.alienTechnologies[0].passiveEffect.armourDamageMultiplier
           : 1;
         const contactDamage = Math.ceil(enemy.definition.contactDamage * passiveMultiplier);
-        this.armour = Math.max(0, this.armour - contactDamage);
+        if (!this.debugInvincible) {
+          this.armour = Math.max(0, this.armour - contactDamage);
+        }
         this.invulnerableMs = 700;
         const contact = resolveAircraftContact(enemy.definition.kind);
         if (contact.countsAsDestroyed) {
@@ -1889,5 +1894,24 @@ export class CombatScene extends Phaser.Scene {
         rocketsFired: this.rocketsFired,
       });
     }
+  }
+
+  public setDebugInvincible(flag: boolean): void {
+    this.debugInvincible = flag;
+  }
+
+  public debugSpawnElite(): void {
+    if (this.eliteSpawned) {
+      return;
+    }
+    const elite = contentCatalog.enemies.find((enemy) => enemy.kind === "elite");
+    if (elite !== undefined) {
+      this.spawnEnemy(elite);
+      this.eliteSpawned = true;
+    }
+  }
+
+  public debugSkipToExtraction(): void {
+    this.elapsedMs = Math.max(this.elapsedMs, EXTRACTION_WINDOW_MS);
   }
 }

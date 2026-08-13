@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
+import { createGameStore } from '../../src/app/store';
 import {
   clearGame,
   LEGACY_V4_SAVE_KEY,
@@ -388,5 +389,27 @@ describe('save repository', () => {
     );
     expect(loaded?.base.weaponStock[contentCatalog.weapons[0].id]).toBeUndefined();
     expect(loaded?.base.staffCandidates.length).toBeGreaterThan(0);
+  });
+
+
+  it('round-trips a progressed game state built through the store', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 5_000, materials: 100 },
+    });
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: contentCatalog.buildings[0].id });
+    store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: contentCatalog.aircraft[1].id });
+    const progressed = store.getSnapshot();
+    saveGame(storage, progressed);
+
+    const restored = loadGame(storage);
+    expect(restored).not.toBeNull();
+    expect(restored?.schemaVersion).toBe(progressed.schemaVersion);
+    expect(restored?.base.constructedBuildingIds).toEqual(progressed.base.constructedBuildingIds);
+    expect(restored?.base.hangarSlots).toEqual(progressed.base.hangarSlots);
+    expect(restored?.base.aircraftLoadouts).toEqual(progressed.base.aircraftLoadouts);
+    expect(restored?.base.credits).toBe(progressed.base.credits);
   });
 });
