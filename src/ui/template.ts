@@ -55,11 +55,15 @@ export function buildAppTemplate(initialState: GameState): string {
         <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
       </nav>
 
-      <dl class="base-resource-strip">
-        <div><dt id="credit-label"></dt><dd id="credit-total">${initialState.base.credits}</dd></div>
-        <div><dt id="material-label"></dt><dd id="material-total">${initialState.base.materials}</dd></div>
-        <div><dt id="research-label"></dt><dd id="research-total">${initialState.base.research}</dd></div>
-      </dl>
+      <div id="global-hud" class="global-hud">
+        <div class="global-hud__month"><span id="hud-month-label"></span><strong id="hud-month"></strong></div>
+        <div class="global-hud__resources">
+          <div><span id="credit-label"></span><strong id="credit-total"></strong></div>
+          <div><span id="material-label"></span><strong id="material-total"></strong></div>
+          <div><span id="research-label"></span><strong id="research-total"></strong></div>
+        </div>
+        <div class="global-hud__objective"><span id="hud-objective-label"></span><strong id="hud-objective"></strong></div>
+      </div>
 
       <section id="base-panel-command" class="base-panel" role="tabpanel" aria-labelledby="base-tab-command" hidden>
         <header class="section-heading">
@@ -104,6 +108,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <p class="lede" id="research-section-lede"></p>
         </header>
         <div class="research-grid">
+          <div id="research-card-grid" class="research-card-grid" aria-live="polite"></div>
           <section class="programme-panel research-domain is-earth" aria-labelledby="earth-research-title">
             <p class="technology-lab__eyebrow" id="earth-research-eyebrow"></p>
             <h2 id="earth-research-title"></h2>

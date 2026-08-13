@@ -43,6 +43,7 @@ import { byId, setText } from './dom';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
 import { installShmupDebugBridge } from '../debug/debug-mode';
+import { showToast } from './toast';
 import { resolveInitialState, temporaryPlaytestMode } from './playtest';
 
 validateContentCatalog(contentCatalog);
@@ -123,6 +124,8 @@ const activeWeaponName = byId<HTMLElement>('active-weapon-name');
 const switchPrimaryWeaponButton = byId<HTMLButtonElement>('switch-primary-weapon');
 const weaponSwitchNote = byId<HTMLElement>('weapon-switch-note');
 const creditTotal = byId<HTMLElement>('credit-total');
+const hudMonth = byId<HTMLElement>('hud-month');
+const hudObjective = byId<HTMLElement>('hud-objective');
 const materialTotal = byId<HTMLElement>('material-total');
 const researchTotal = byId<HTMLElement>('research-total');
 const baseRunReport = byId<HTMLElement>('base-run-report');
@@ -418,6 +421,10 @@ function renderBase(): void {
   objectiveDetail.textContent = bankrupt
     ? t('insolvency.objectiveDetail')
     : t(objectiveTranslationKeys.detail, objectiveParams);
+  hudMonth.textContent = t('hud.month', { month: state.base.month });
+  hudObjective.textContent = bankrupt
+    ? t('insolvency.objective')
+    : t(objectiveTranslationKeys.title, objectiveParams);
   objectiveOpenSectionButton.hidden = bankrupt;
   objectiveOpenSectionButton.textContent = t('objective.openSection', {
     section: t(`baseNav.${objectiveBaseSection}`),
@@ -678,6 +685,7 @@ function renderBase(): void {
   setText('launch-sortie', 'base.launch');
   setText('return-to-base', 'sortie.return');
   renderContainment();
+  renderResearchCards();
   renderCanister();
   renderFleet();
   renderWarehouse();
@@ -773,6 +781,7 @@ function renderCandidates(containerId: string, roleId: string): void {
     hire.disabled = bankrupt || !facilityBuilt || state.base.credits < candidate.hireCreditCost;
     hire.addEventListener('click', () => {
       store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
+      showToast(t('toast.candidateHired', { name: candidate.firstName + ' ' + candidate.lastName }));
     });
     row.appendChild(hire);
     container.appendChild(row);
@@ -999,6 +1008,7 @@ function renderTrade(): void {
     construct.disabled = bankrupt || !workshopBuilt || state.base.credits < tradeCentre.creditCost;
     construct.addEventListener('click', () => {
       store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentre.id });
+      showToast(t('toast.buildingConstructed'));
     });
     dynamic.appendChild(construct);
     return;
@@ -1027,6 +1037,7 @@ function renderTrade(): void {
       hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
       hire.addEventListener('click', () => {
         store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
+        showToast(t('toast.candidateHired', { name: candidate.firstName + ' ' + candidate.lastName }));
       });
       dynamic.appendChild(hire);
     }
@@ -1463,6 +1474,7 @@ function renderCredit(): void {
       take.disabled = bankrupt;
       take.addEventListener('click', () => {
         store.dispatch({ type: 'TAKE_LOAN', lenderId: offer.lenderId });
+        showToast(t('toast.loanTaken'));
       });
       row.appendChild(take);
     } else {
@@ -1672,6 +1684,8 @@ function renderLocale(): void {
   setText('command-mandate-title', 'command.mandateTitle');
   setText('save-schema-label', 'base.saveSchema');
   setText('credit-label', 'base.credits');
+  setText('hud-month-label', 'hud.monthLabel');
+  setText('hud-objective-label', 'hud.objectiveLabel');
   setText('material-label', 'base.materials');
   setText('research-label', 'base.research');
   setText('prototype-status', 'base.prototype');
@@ -1881,10 +1895,12 @@ byId<HTMLButtonElement>('purchase-hangar-slot').addEventListener('click', () => 
 
 constructLaboratoryButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
+  showToast(t('toast.buildingConstructed'));
 });
 
 constructWorkshopButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
+  showToast(t('toast.buildingConstructed'));
 });
 
 startBlueprintResearchButton.addEventListener('click', () => {
@@ -1903,6 +1919,7 @@ startContainmentResearchButton.addEventListener('click', () => {
 
 constructQuarantineButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
+  showToast(t('toast.buildingConstructed'));
 });
 
 manufactureAlienEmitterButton.addEventListener('click', () => {
@@ -1981,6 +1998,10 @@ launchSortieButton.addEventListener('click', () => {
           capturerBlueprint.id,
           result.outcome,
         );
+        showToast(t('toast.sortieComplete', {
+          credits: lastSettlementSummary.creditDelta,
+          materials: lastSettlementSummary.materialsReceived,
+        }));
         renderReports();
         renderCombatWeaponControl();
       },
@@ -2147,3 +2168,113 @@ renderLocale();
 window.addEventListener('beforeunload', () => {
   game?.destroy(true);
 });
+
+function renderResearchCards(): void {
+  const state = store.getSnapshot();
+  const container = byId<HTMLElement>('research-card-grid');
+  container.textContent = '';
+
+  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const hasScientist = state.base.staff.some((member) => member.roleId === scientistRole.id);
+  const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
+  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+
+  interface ResearchCard {
+    readonly title: string;
+    readonly domain: 'earth' | 'alien';
+    readonly status: 'done' | 'active' | 'locked';
+    readonly requirements: string;
+    readonly progress: string;
+    readonly outcome: string;
+  }
+  const cards: ResearchCard[] = [];
+
+  const pushBlueprint = (
+    blueprintId: string,
+    title: string,
+    domain: 'earth' | 'alien',
+    requirements: string,
+    outcome: string,
+  ): void => {
+    const done = state.base.unlockedBlueprintIds.includes(blueprintId);
+    const project = state.base.researchQueue.find((entry) => entry.blueprintId === blueprintId);
+    const status = done ? 'done' : project !== undefined ? 'active' : 'locked';
+    const progress = project === undefined
+      ? ''
+      : t('research.cardProgress', { progress: project.progress, required: project.requiredProgress });
+    cards.push({ title, domain, status, requirements, progress, outcome });
+  };
+
+  pushBlueprint(
+    capturerBlueprint.id,
+    t('programme.title'),
+    'earth',
+    state.base.telemetryRecorded === false
+      ? t('research.cardRequiresTelemetry')
+      : labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab'),
+    t('programme.equipment'),
+  );
+  pushBlueprint(
+    containmentBlueprint.id,
+    t('containment.title'),
+    'earth',
+    hasSample
+      ? labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab')
+      : t('research.cardRequiresSample'),
+    t('facility.quarantine'),
+  );
+  pushBlueprint(
+    canisterBlueprint.id,
+    t('research.canisterLabel'),
+    'earth',
+    labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab'),
+    t('content.canisterCannon'),
+  );
+  pushBlueprint(
+    adaptedBlueprint.id,
+    t('content.splitPulse'),
+    'alien',
+    quarantineBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresQuarantine'),
+    t('content.splitPulse'),
+  );
+
+  for (const upgrade of contentCatalog.weaponUpgrades) {
+    const researched = state.base.researchedWeaponUpgradeIds.includes(upgrade.id);
+    const manufactured = state.base.manufacturedWeaponUpgradeIds.includes(upgrade.id);
+    const title = upgrade.id.includes('machine')
+      ? t('upgrade.machineName')
+      : t('upgrade.acceleratorName');
+    cards.push({
+      title,
+      domain: 'earth',
+      status: manufactured ? 'done' : researched ? 'active' : 'locked',
+      requirements: t('upgrade.requiresCentre'),
+      progress: researched ? t('research.cardAwaitingProduction') : '',
+      outcome: t('upgrade.researchCost', { credits: upgrade.researchCreditCost }),
+    });
+  }
+
+  for (const card of cards) {
+    const article = document.createElement('article');
+    article.className = 'research-card is-' + card.status + (card.domain === 'alien' ? ' is-alien' : '');
+    const titleEl = document.createElement('strong');
+    titleEl.textContent = card.title;
+    const domainEl = document.createElement('span');
+    domainEl.className = 'research-card__domain';
+    domainEl.textContent = t(card.domain === 'alien' ? 'research.cardAlien' : 'research.cardEarth');
+    const statusEl = document.createElement('span');
+    statusEl.className = 'research-card__status';
+    statusEl.textContent = card.status === 'done'
+      ? t('research.cardDone')
+      : card.status === 'active' ? t('research.cardActive') : t('research.cardLocked');
+    const reqEl = document.createElement('small');
+    reqEl.textContent = card.requirements;
+    const outcomeEl = document.createElement('p');
+    outcomeEl.className = 'research-card__outcome';
+    outcomeEl.textContent = card.progress !== ''
+      ? card.progress
+      : t('research.cardOutcome', { outcome: card.outcome });
+    article.append(titleEl, domainEl, statusEl, reqEl, outcomeEl);
+    container.appendChild(article);
+  }
+}
