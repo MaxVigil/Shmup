@@ -183,11 +183,11 @@ export class CombatScene extends Phaser.Scene {
   private ending: EndingState | null = null;
   private bossWarningElapsedMs: number | null = null;
   private artifactRevealElapsedMs: number | null = null;
-  private equippedPrimaryWeaponIds: readonly [string | null, string | null] = [
+  private equippedPrimaryWeaponIds: readonly (string | null)[] = [
     STANDARD_WEAPON_ID,
     null,
   ];
-  private activePrimaryWeaponSlot: 0 | 1 = 0;
+  private activePrimaryWeaponSlot = 0;
   private manufacturedWeaponUpgradeIds: readonly string[] = [];
   private equippedEquipmentId: string | null = null;
   private runState = createRiskExtractionState();
@@ -210,10 +210,10 @@ export class CombatScene extends Phaser.Scene {
 
   constructor(
     private readonly onRunComplete: (result: CombatRunResult) => void = () => {},
-    private readonly getEquippedPrimaryWeaponIds: () => readonly [
-      string | null,
-      string | null,
-    ] = () => [STANDARD_WEAPON_ID, null],
+    private readonly getEquippedPrimaryWeaponIds: () => readonly (string | null)[] = () => [
+      STANDARD_WEAPON_ID,
+      null,
+    ],
     private readonly getEquippedEquipmentId: () => string | null = () => null,
     private readonly getAvailableCredits: () => number = () => 0,
     private readonly getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
@@ -752,8 +752,16 @@ export class CombatScene extends Phaser.Scene {
     ) {
       return;
     }
-    this.activePrimaryWeaponSlot = this.activePrimaryWeaponSlot === 0 ? 1 : 0;
-    this.publishActiveWeapon();
+    const count = this.equippedPrimaryWeaponIds.length;
+    for (let step = 1; step <= count; step += 1) {
+      const nextIndex = (this.activePrimaryWeaponSlot + step) % count;
+      const weaponId = this.equippedPrimaryWeaponIds[nextIndex];
+      if (weaponId !== null) {
+        this.activePrimaryWeaponSlot = nextIndex;
+        this.publishActiveWeapon();
+        return;
+      }
+    }
   }
 
   private renderPauseLayer(): void {
@@ -925,7 +933,9 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private canSwitchPrimaryWeapon(): boolean {
-    return this.equippedPrimaryWeaponIds.every((weaponId) => weaponId !== null);
+    return this.equippedPrimaryWeaponIds.filter(
+      (weaponId) => weaponId !== null,
+    ).length >= 2;
   }
 
   private publishActiveWeapon(): void {

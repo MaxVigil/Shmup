@@ -4,6 +4,7 @@ import type {
 } from '../content/model';
 import type { GameState } from './model';
 import { marketBlueprintPrice } from './terrestrial-market';
+import { addWeaponStock } from './armory';
 
 export function purchaseMarketBlueprint(
   state: GameState,
@@ -58,7 +59,7 @@ export function manufacturePrimaryWeapon(
   return {
     ...state,
     base: {
-      ...state.base,
+      ...addWeaponStock(state.base, blueprint.weaponId, 1),
       credits: state.base.credits - blueprint.productionCreditCost,
       materials: state.base.materials - blueprint.productionMaterialCost,
       locallyProducedWeaponIds: [

@@ -4,6 +4,7 @@ import type {
   WeaponDefinition,
 } from '../content/model';
 import type { GameState } from './model';
+import { installWeapon, addWeaponStock, isWeaponOwned, syncActiveLoadout } from './armory';
 
 export function researchTechnology(
   state: GameState,
@@ -64,29 +65,17 @@ export function researchTechnology(
 export function equipPrimaryWeapon(
   state: GameState,
   weaponId: string,
-  slotIndex: 0 | 1,
+  slotIndex: number,
 ): GameState {
-  if (!state.base.ownedPrimaryWeaponIds.includes(weaponId)) {
+  if (!isWeaponOwned(state.base, weaponId)) {
     throw new Error(`Primary weapon ${weaponId} is not owned.`);
   }
-
-  const otherSlotIndex = slotIndex === 0 ? 1 : 0;
-  const equippedPrimaryWeaponIds: [string | null, string | null] = [
-    state.base.equippedPrimaryWeaponIds[0],
-    state.base.equippedPrimaryWeaponIds[1],
-  ];
-  if (equippedPrimaryWeaponIds[otherSlotIndex] === weaponId) {
-    equippedPrimaryWeaponIds[otherSlotIndex] = null;
+  const aircraftId = state.base.activeAircraftId;
+  if (aircraftId === null) {
+    throw new Error('No active aircraft to equip.');
   }
-  equippedPrimaryWeaponIds[slotIndex] = weaponId;
-
-  return {
-    ...state,
-    base: {
-      ...state.base,
-      equippedPrimaryWeaponIds,
-    },
-  };
+  const base = installWeapon(state.base, aircraftId, slotIndex, weaponId);
+  return { ...state, base: syncActiveLoadout(base) };
 }
 
 export function manufactureAdaptedWeapon(
@@ -126,7 +115,7 @@ export function manufactureAdaptedWeapon(
   return {
     ...state,
     base: {
-      ...state.base,
+      ...addWeaponStock(state.base, weapon.id, 1),
       credits: state.base.credits - blueprint.productionCreditCost,
       materials: state.base.materials - blueprint.productionMaterialCost,
       ownedPrimaryWeaponIds: [...state.base.ownedPrimaryWeaponIds, weapon.id],

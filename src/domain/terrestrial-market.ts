@@ -3,7 +3,9 @@ import type {
   WeaponDefinition,
 } from '../content/model';
 import type { GameState } from './model';
+import type { ConsumableDefinition } from '../content/model';
 import { createSeededRng } from './rng';
+import { addWeaponStock } from './armory';
 
 function stableIdHash(value: string): number {
   let hash = 0x811c9dc5;
@@ -29,6 +31,25 @@ export function marketWeaponPrice(
   return deterministicMarketPrice(
     weapon.id,
     weapon.marketPrice,
+    marketSeed,
+    sortiesCompleted,
+  );
+}
+
+export function marketConsumablePrice(
+  consumable: ConsumableDefinition,
+  marketSeed: number,
+  sortiesCompleted: number,
+): number {
+  if (consumable.marketPrice === null) {
+    throw new Error(`Consumable ${consumable.id} is not offered on the terrestrial market.`);
+  }
+  if (!Number.isInteger(marketSeed) || !Number.isInteger(sortiesCompleted) || sortiesCompleted < 0) {
+    throw new RangeError('Market seed and completed-sortie count must be valid integers.');
+  }
+  return deterministicMarketPrice(
+    consumable.id,
+    consumable.marketPrice,
     marketSeed,
     sortiesCompleted,
   );
@@ -72,9 +93,6 @@ export function purchaseMarketWeapon(
   if (weapon.origin !== 'earth' || weapon.marketPrice === null) {
     throw new Error(`Weapon ${weapon.id} is not available for terrestrial procurement.`);
   }
-  if (state.base.ownedPrimaryWeaponIds.includes(weapon.id)) {
-    throw new Error(`Weapon ${weapon.id} is already owned.`);
-  }
 
   const price = marketWeaponPrice(
     weapon,
@@ -85,12 +103,15 @@ export function purchaseMarketWeapon(
     throw new Error(`Weapon ${weapon.id} requires ${price} credits.`);
   }
 
+  const owned = state.base.ownedPrimaryWeaponIds.includes(weapon.id)
+    ? state.base.ownedPrimaryWeaponIds
+    : [...state.base.ownedPrimaryWeaponIds, weapon.id];
   return {
     ...state,
     base: {
-      ...state.base,
+      ...addWeaponStock(state.base, weapon.id, 1),
+      ownedPrimaryWeaponIds: owned,
       credits: state.base.credits - price,
-      ownedPrimaryWeaponIds: [...state.base.ownedPrimaryWeaponIds, weapon.id],
     },
   };
 }

@@ -46,14 +46,29 @@ export function installWeapon(
   if (slotIndex < 0 || slotIndex >= loadout.length) {
     throw new RangeError(`Slot ${slotIndex} is out of range for ${aircraftId}.`);
   }
-  if (loadout[slotIndex] !== null) {
-    throw new Error(`Slot ${slotIndex} of ${aircraftId} is occupied.`);
+  if (loadout[slotIndex] === weaponId) {
+    return base;
   }
-  if (weaponStockCount(base, weaponId) <= 0) {
+  const stock = { ...base.weaponStock };
+  const displaced = loadout[slotIndex];
+  if (typeof displaced === 'string') {
+    stock[displaced] = (stock[displaced] ?? 0) + 1;
+  }
+  loadout[slotIndex] = null;
+  const existingSlot = loadout.indexOf(weaponId);
+  if (existingSlot !== -1) {
+    loadout[existingSlot] = null;
+    loadout[slotIndex] = weaponId;
+    return {
+      ...base,
+      aircraftLoadouts: { ...base.aircraftLoadouts, [aircraftId]: loadout },
+      weaponStock: stock,
+    };
+  }
+  if ((stock[weaponId] ?? 0) <= 0) {
     throw new Error(`No ${weaponId} is available in the warehouse.`);
   }
   loadout[slotIndex] = weaponId;
-  const stock = { ...base.weaponStock };
   stock[weaponId] = (stock[weaponId] ?? 0) - 1;
   if (stock[weaponId] === 0) {
     delete stock[weaponId];
@@ -111,6 +126,19 @@ export function installModule(
   return {
     ...base,
     aircraftModules: { ...base.aircraftModules, [aircraftId]: moduleId },
+  };
+}
+
+export function syncActiveLoadout(base: BaseState): BaseState {
+  const activeId = base.activeAircraftId;
+  return {
+    ...base,
+    equippedPrimaryWeaponIds: activeId === null
+      ? []
+      : [...(base.aircraftLoadouts[activeId] ?? [])],
+    equippedEquipmentId: activeId === null
+      ? null
+      : (base.aircraftModules[activeId] ?? null),
   };
 }
 

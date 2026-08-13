@@ -58,7 +58,7 @@ export interface BaseState {
   readonly researchQueue: readonly ResearchProjectState[];
   readonly preservedTechnologyIds: readonly string[];
   readonly ownedPrimaryWeaponIds: readonly string[];
-  readonly equippedPrimaryWeaponIds: readonly [string | null, string | null];
+  readonly equippedPrimaryWeaponIds: readonly (string | null)[];
   readonly marketSeed: number;
   readonly sortiesCompleted: number;
   readonly constructedBuildingIds: readonly string[];

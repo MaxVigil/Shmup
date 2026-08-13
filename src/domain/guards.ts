@@ -150,14 +150,11 @@ function isStaffCandidate(value: unknown): boolean {
   );
 }
 
-function isPrimaryWeaponLoadout(
-  value: unknown,
-): value is readonly [string | null, string | null] {
+function isPrimaryWeaponLoadout(value: unknown): boolean {
   return (
     Array.isArray(value) &&
-    value.length === 2 &&
+    value.length >= 1 &&
     value.every((weaponId) => weaponId === null || typeof weaponId === 'string') &&
-    value.some((weaponId) => typeof weaponId === 'string') &&
-    (value[0] === null || value[1] === null || value[0] !== value[1])
+    value.some((weaponId) => typeof weaponId === 'string')
   );
 }

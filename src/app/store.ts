@@ -13,6 +13,21 @@ import {
   refuelAircraft,
 } from '../domain/command-centre';
 import { LOAN_OFFERS, settleDueLoans, takeLoan } from '../domain/credit';
+import {
+  addConsumables,
+  installModule,
+  removeModule,
+  removeWeapon,
+  syncActiveLoadout,
+} from '../domain/armory';
+import {
+  advanceRepairs,
+  applySortieDamage,
+  isAircraftRepairing,
+  startRepair,
+} from '../domain/aircraft-integrity';
+import { awardStaffXp, hireCandidate } from '../domain/staff-market';
+import { marketConsumablePrice } from '../domain/terrestrial-market';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
 import {
@@ -21,7 +36,6 @@ import {
   startBlueprintResearch,
 } from '../domain/blueprint-progression';
 import type { GameState, SortieOutcome } from '../domain/model';
-import { equipSpecialEquipment } from '../domain/equipment-loadout';
 import { settleSortie } from '../domain/sortie';
 import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
@@ -74,6 +88,22 @@ export type GameCommand =
   | { readonly type: 'SET_ACTIVE_AIRCRAFT'; readonly aircraftId: string | null }
   | { readonly type: 'REFUEL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'TAKE_LOAN'; readonly lenderId: string }
+  | {
+      readonly type: 'UNEQUIP_PRIMARY_WEAPON';
+      readonly slotIndex: number;
+    }
+  | { readonly type: 'HIRE_CANDIDATE'; readonly candidateId: string }
+  | {
+      readonly type: 'REPAIR_AIRCRAFT';
+      readonly aircraftId: string;
+      readonly emergency: boolean;
+    }
+  | {
+      readonly type: 'APPLY_SORTIE_DAMAGE';
+      readonly aircraftId: string | null;
+      readonly armourLostRatio: number;
+    }
+  | { readonly type: 'PURCHASE_CONSUMABLE'; readonly consumableId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -110,10 +140,12 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const nextMonth = monthForSorties(settled.sortiesCompleted);
           const afterFuel = consumeAircraftFuel(settled, state.base.activeAircraftId);
           const afterLoans = settleDueLoans({ ...afterFuel, month: nextMonth });
+          const afterRepairs = advanceRepairs({ ...afterLoans, month: nextMonth });
+          const afterStaffXp = awardStaffXp(afterRepairs);
           state = {
             ...state,
             base: {
-              ...afterLoans,
+              ...afterStaffXp,
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
               month: nextMonth,
@@ -309,9 +341,76 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         case 'PURCHASE_HANGAR_SLOT':
           state = purchaseHangarSlot(state, HANGAR_SLOT_COST);
           break;
-        case 'SET_ACTIVE_AIRCRAFT':
-          state = setActiveAircraft(state, command.aircraftId);
+        case 'SET_ACTIVE_AIRCRAFT': {
+          const nextId = command.aircraftId;
+          if (nextId !== null && isAircraftRepairing(state.base, nextId)) {
+            throw new Error(`Aircraft ${nextId} is being repaired and cannot fly.`);
+          }
+          state = setActiveAircraft(state, nextId);
+          state = { ...state, base: syncActiveLoadout(state.base) };
           break;
+        }
+        case 'UNEQUIP_PRIMARY_WEAPON': {
+          const aircraftId = state.base.activeAircraftId;
+          if (aircraftId === null) {
+            throw new Error('No active aircraft.');
+          }
+          const base = removeWeapon(state.base, aircraftId, command.slotIndex);
+          state = { ...state, base: syncActiveLoadout(base) };
+          break;
+        }
+        case 'HIRE_CANDIDATE': {
+          const candidate = state.base.staffCandidates.find(
+            (entry) => entry.id === command.candidateId,
+          );
+          if (candidate === undefined) {
+            throw new Error(`Unknown candidate ${command.candidateId}.`);
+          }
+          state = { ...state, base: hireCandidate(state.base, candidate) };
+          break;
+        }
+        case 'REPAIR_AIRCRAFT': {
+          state = {
+            ...state,
+            base: startRepair(state.base, command.aircraftId, command.emergency),
+          };
+          break;
+        }
+        case 'APPLY_SORTIE_DAMAGE': {
+          state = {
+            ...state,
+            base: applySortieDamage(
+              state.base,
+              command.aircraftId,
+              command.armourLostRatio,
+            ),
+          };
+          break;
+        }
+        case 'PURCHASE_CONSUMABLE': {
+          const consumable = contentCatalog.consumables.find(
+            (entry) => entry.id === command.consumableId,
+          );
+          if (consumable === undefined) {
+            throw new Error(`Unknown consumable ${command.consumableId}.`);
+          }
+          const price = marketConsumablePrice(
+            consumable,
+            state.base.marketSeed,
+            state.base.sortiesCompleted,
+          );
+          if (state.base.credits < price) {
+            throw new Error(`Consumable ${consumable.id} requires ${price} credits.`);
+          }
+          state = {
+            ...state,
+            base: {
+              ...addConsumables(state.base, consumable.id, 1),
+              credits: state.base.credits - price,
+            },
+          };
+          break;
+        }
         case 'REFUEL_AIRCRAFT': {
           const aircraft = contentCatalog.aircraft.find(
             (entry) => entry.id === command.aircraftId,
@@ -345,9 +444,17 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = manufactureEquipment(state, blueprint, equipment);
           break;
         }
-        case 'EQUIP_SPECIAL_EQUIPMENT':
-          state = equipSpecialEquipment(state, command.equipmentId);
+        case 'EQUIP_SPECIAL_EQUIPMENT': {
+          const aircraftId = state.base.activeAircraftId;
+          if (aircraftId === null) {
+            throw new Error('No active aircraft.');
+          }
+          const base = command.equipmentId === null
+            ? removeModule(state.base, aircraftId)
+            : installModule(state.base, aircraftId, command.equipmentId);
+          state = { ...state, base: syncActiveLoadout(base) };
           break;
+        }
       }
 
       emit();

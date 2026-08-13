@@ -8,7 +8,7 @@ export const LOGICAL_HEIGHT = 960;
 export function createGame(
   parent: HTMLElement,
   onRunComplete: (result: CombatRunResult) => void = () => {},
-  getEquippedPrimaryWeaponIds: () => readonly [string | null, string | null] = () => [
+  getEquippedPrimaryWeaponIds: () => readonly (string | null)[] = () => [
     'weapon-pulse-cannon',
     null,
   ],

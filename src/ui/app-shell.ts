@@ -677,10 +677,10 @@ function renderBase(): void {
   purchaseMarketBlueprintButton.hidden = acceleratorBlueprintOwned;
   purchaseMarketBlueprintButton.disabled = bankrupt || state.base.credits < blueprintPrice;
   byId<HTMLElement>('weapon-slot-1-name').textContent = localizedWeaponName(
-    state.base.equippedPrimaryWeaponIds[0],
+    state.base.equippedPrimaryWeaponIds[0] ?? null,
   );
   byId<HTMLElement>('weapon-slot-2-name').textContent = localizedWeaponName(
-    state.base.equippedPrimaryWeaponIds[1],
+    state.base.equippedPrimaryWeaponIds[1] ?? null,
   );
   for (const option of weaponOptions) {
     const weaponId = option.dataset.weaponId;

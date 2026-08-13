@@ -50,7 +50,12 @@ describe('terrestrial market', () => {
     const price = marketWeaponPrice(accelerator, initial.base.marketSeed, 0);
     const ready = { ...initial, base: { ...initial.base, credits: price } };
     const purchased = purchaseMarketWeapon(ready, accelerator);
-    expect(() => purchaseMarketWeapon(purchased, accelerator)).toThrow('already owned');
+    const repurchaseReady = {
+      ...purchased,
+      base: { ...purchased.base, credits: price },
+    };
+    const repurchased = purchaseMarketWeapon(repurchaseReady, accelerator);
+    expect(repurchased.base.weaponStock[accelerator.id]).toBe(2);
     expect(() => purchaseMarketWeapon(ready, contentCatalog.weapons[0])).toThrow(
       'not available',
     );
