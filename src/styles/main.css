@@ -430,6 +430,12 @@ select:focus-visible {
   border: 1px solid rgba(169, 183, 215, 0.45);
 }
 
+.status-chip.is-damaged {
+  color: #ffb3bd;
+  background: rgba(240, 113, 133, 0.14);
+  border: 1px solid rgba(240, 113, 133, 0.5);
+}
+
 .aircraft-delta {
   color: #8fa6b0;
 }

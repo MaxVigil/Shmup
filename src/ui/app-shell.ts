@@ -13,6 +13,12 @@ import { marketBlueprintPrice } from '../domain/terrestrial-market';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled } from '../domain/command-centre';
 import {
+  aircraftDamageValue,
+  emergencyRepairCost,
+  isAircraftRepairing,
+  standardRepairCost,
+} from '../domain/aircraft-integrity';
+import {
   hasOutstandingLoan,
   LOAN_OFFERS,
   loanRepayment,
@@ -699,14 +705,17 @@ function renderBase(): void {
     aircraftNameKey[activeAircraft?.id ?? ''] ?? 'content.interceptor',
   );
   const activeFueled = activeAircraftId !== null && isAircraftFueled(state.base, activeAircraftId);
+  const activeRepairing = activeAircraftId !== null && isAircraftRepairing(state.base, activeAircraftId);
   const fuelStatus = byId<HTMLElement>('fuel-status');
   fuelStatus.hidden = false;
-  fuelStatus.classList.toggle('is-ready', activeFueled);
-  fuelStatus.textContent = t(
-    activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
-    { aircraft: activeAircraftName },
-  );
-  launchSortieButton.disabled = bankrupt || !activeFueled;
+  fuelStatus.classList.toggle('is-ready', activeFueled && !activeRepairing);
+  fuelStatus.textContent = activeRepairing
+    ? t('hangar.preflightRepairWarning', { aircraft: activeAircraftName })
+    : t(
+        activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
+        { aircraft: activeAircraftName },
+      );
+  launchSortieButton.disabled = bankrupt || !activeFueled || activeRepairing;
   renderContainment();
   renderCanister();
   renderHardpoint();
@@ -1035,6 +1044,15 @@ function renderFleet(): void {
             : 'command.unfueled',
         );
         header.appendChild(fuel);
+        const repairing = isAircraftRepairing(state.base, aircraft.id);
+        if (repairing) {
+          const damage = document.createElement('span');
+          damage.className = 'status-chip is-damaged';
+          damage.textContent = t('hangar.damage', {
+            value: Math.round(aircraftDamageValue(state.base, aircraft.id) * 100),
+          });
+          header.appendChild(damage);
+        }
         if (state.base.activeAircraftId === aircraft.id) {
           const active = document.createElement('em');
           active.className = 'status-chip is-active';
@@ -1043,6 +1061,47 @@ function renderFleet(): void {
         }
         const actions = document.createElement('div');
         actions.className = 'fleet-slot__actions';
+        if (repairing) {
+          const repairLeft = state.base.aircraftRepair[aircraft.id];
+          if ((repairLeft ?? 0) > 0) {
+            const note = document.createElement('small');
+            note.textContent = t('hangar.repairInProgress', {
+              sorties: repairLeft ?? 0,
+            });
+            actions.appendChild(note);
+          } else {
+            const standardCost = standardRepairCost(state.base, aircraft.id);
+            const standard = document.createElement('button');
+            standard.className = 'base-action';
+            standard.type = 'button';
+            standard.textContent = t('hangar.repair', { credits: standardCost });
+            standard.disabled = bankrupt || state.base.credits < standardCost;
+            standard.addEventListener('click', () => {
+              store.dispatch({
+                type: 'REPAIR_AIRCRAFT',
+                aircraftId: aircraft.id,
+                emergency: false,
+              });
+            });
+            actions.appendChild(standard);
+            const emergencyCost = emergencyRepairCost(state.base, aircraft.id);
+            const emergency = document.createElement('button');
+            emergency.className = 'base-action';
+            emergency.type = 'button';
+            emergency.textContent = t('hangar.emergencyRepair', {
+              credits: emergencyCost,
+            });
+            emergency.disabled = bankrupt || state.base.credits < emergencyCost;
+            emergency.addEventListener('click', () => {
+              store.dispatch({
+                type: 'REPAIR_AIRCRAFT',
+                aircraftId: aircraft.id,
+                emergency: true,
+              });
+            });
+            actions.appendChild(emergency);
+          }
+        }
         if (!isAircraftFueled(state.base, aircraft.id)) {
           const refuel = document.createElement('button');
           refuel.className = 'base-action';
@@ -1056,7 +1115,7 @@ function renderFleet(): void {
           });
           actions.appendChild(refuel);
         }
-        if (state.base.activeAircraftId !== aircraft.id) {
+        if (state.base.activeAircraftId !== aircraft.id && !repairing) {
           const activate = document.createElement('button');
           activate.className = 'base-action';
           activate.type = 'button';
@@ -1793,6 +1852,11 @@ launchSortieButton.addEventListener('click', () => {
         combatWeaponSwitchAvailable = false;
         const beforeSettlement = store.getSnapshot();
         store.dispatch({ type: 'SETTLE_SORTIE', outcome: result.outcome });
+        store.dispatch({
+          type: 'APPLY_SORTIE_DAMAGE',
+          aircraftId: beforeSettlement.base.activeAircraftId,
+          armourLostRatio: result.armourLostRatio,
+        });
         const afterSettlement = store.getSnapshot();
         lastSettlementSummary = summarizeSortiePayoff(
           beforeSettlement,

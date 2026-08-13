@@ -142,6 +142,7 @@ export interface CombatRunResult {
   readonly technologyDecision: RiskExtractionState['technologyDecision'];
   readonly extractionDecision: RiskExtractionState['extractionDecision'];
   readonly eliteDefeated: boolean;
+  readonly armourLostRatio: number;
 }
 
 export interface AircraftCombatStats {
@@ -1849,11 +1850,16 @@ export class CombatScene extends Phaser.Scene {
     }));
     if (!this.completionPublished) {
       this.completionPublished = true;
+      const armourLostRatio = Math.max(
+        0,
+        Math.min(1, 1 - this.armour / this.maxArmour),
+      );
       this.onRunComplete({
         outcome: toSortieOutcome(this.runState, this.contractLedger),
         technologyDecision: this.runState.technologyDecision,
         extractionDecision: this.runState.extractionDecision,
         eliteDefeated: this.runState.eliteDefeated,
+        armourLostRatio,
       });
     }
   }
