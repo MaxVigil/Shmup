@@ -164,6 +164,24 @@ describe('validateContentCatalog', () => {
     expect(gunship?.ranged?.shotIntervalMs).toBeGreaterThan(0);
   });
 
+  it('gives the Warden a modest ranged profile for a fair first elite', () => {
+    const warden = contentCatalog.enemies.find((enemy) => enemy.kind === 'elite');
+
+    expect(warden?.ranged).toBeDefined();
+    expect(warden?.ranged?.shotDamage).toBeLessThanOrEqual(
+      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
+        ?.shotDamage ?? 0,
+    );
+    expect(warden?.ranged?.shotSpeed).toBeLessThanOrEqual(
+      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
+        ?.shotSpeed ?? 0,
+    );
+    expect(warden?.ranged?.shotIntervalMs).toBeGreaterThanOrEqual(
+      contentCatalog.enemies.find((enemy) => enemy.id === 'enemy-gunship')?.ranged
+        ?.shotIntervalMs ?? 0,
+    );
+  });
+
   it('balances the aircraft fleet across armour, speed, and damage', () => {
     const interceptor = contentCatalog.aircraft[0];
     const gunship = contentCatalog.aircraft[1];

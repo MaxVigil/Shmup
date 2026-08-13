@@ -127,7 +127,11 @@ export const contentCatalog = {
       kind: 'elite',
       materialReward: 18,
       creditReward: 100,
-      ranged: null,
+      ranged: {
+        shotDamage: 6,
+        shotSpeed: 240,
+        shotIntervalMs: 3200,
+      },
     },
     {
       id: 'enemy-gunship',

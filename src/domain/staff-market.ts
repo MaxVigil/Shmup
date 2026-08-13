@@ -97,14 +97,26 @@ export function generateStaffCandidates(
 export function hireCandidate(
   base: BaseState,
   candidate: StaffCandidateState,
+  role: {
+    readonly id: string;
+    readonly requiredBuildingId: string;
+    readonly maximumHeadcount: number | null;
+  },
 ): BaseState {
   if (!base.staffCandidates.some((entry) => entry.id === candidate.id)) {
     throw new Error(`Candidate ${candidate.id} is not available.`);
+  }
+  if (!base.constructedBuildingIds.includes(role.requiredBuildingId)) {
+    throw new Error(`Building ${role.requiredBuildingId} is required to hire ${role.id}.`);
   }
   if (base.credits < candidate.hireCreditCost) {
     throw new Error(
       `Hiring ${candidate.firstName} ${candidate.lastName} requires ${candidate.hireCreditCost} credits.`,
     );
+  }
+  const currentHeadcount = base.staff.filter((member) => member.roleId === role.id).length;
+  if (role.maximumHeadcount !== null && currentHeadcount >= role.maximumHeadcount) {
+    throw new Error(`Staff role ${role.id} has reached its current headcount limit.`);
   }
   const staffMember: StaffMemberState = {
     id: candidate.id,

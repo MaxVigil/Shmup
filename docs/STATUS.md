@@ -299,6 +299,24 @@ packages from previous sessions are part of the same playtest batch.
   up to 15% margin from level 2 onward.
 - All 158 unit tests, lint, typecheck, and the production build pass locally.
 
+## Fixes landed on `test` (2026-08-13)
+
+- Action-button text (`launch-sortie`, `return-to-base`) is now re-applied on every
+  base render, not only on locale change, and disabled-button text contrast was
+  raised so an inactive launch button stays readable.
+- Soft-lock removal: a damaged aircraft no longer grounds the fleet. Damage scales
+  combat armour (`maxArmour × (1 − damage)`), so a damaged aircraft is flyable but
+  fragile. Standard and emergency repairs remain available to restore full armour;
+  an in-progress standard repair only shows a countdown, never blocks flight.
+- The elite Warden now fires aimed shots with a modest, fair first-boss profile
+  (lower damage, slower bullets, longer interval than the Gunship), using the same
+  generic ranged path as the Gunship.
+- Staff-candidate hiring now enforces the same building gate as direct hiring:
+  `hireCandidate` requires the role's `requiredBuildingId` and respects
+  `maximumHeadcount`; the candidate hire button is disabled until the facility is
+  built. The Engineering Research Centre / Production Works build-first order is
+  enforced on every path.
+
 ## Next
 
 1. Playtest the full fleet/inventory cycle end-to-end on a fresh profile: buy an

@@ -1013,8 +1013,8 @@ h1 {
 }
 
 .base-action:disabled {
-  border-color: #25373e;
-  color: #53676e;
+  border-color: #2a3f48;
+  color: #8aa2ac;
   background: #0c171c;
   cursor: not-allowed;
 }

@@ -308,6 +308,7 @@ export const zh = {
   'hangar.repair': '维修 · {credits}',
   'hangar.emergencyRepair': '紧急 · {credits}',
   'hangar.repairInProgress': '维修：还剩 {sorties} 次出击',
+  'hangar.damagedWarning': '机体受损（{value}%）：装甲降低，仍可出击',
   'hangar.preflightRepairWarning': '起飞前警告：{aircraft} 正在维修中。',
   'staff.candidates': '可用候选人',
   'staff.tier': '等级 {tier}',

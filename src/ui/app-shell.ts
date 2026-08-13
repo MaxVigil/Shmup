@@ -712,17 +712,28 @@ function renderBase(): void {
     aircraftNameKey[activeAircraft?.id ?? ''] ?? 'content.interceptor',
   );
   const activeFueled = activeAircraftId !== null && isAircraftFueled(state.base, activeAircraftId);
-  const activeRepairing = activeAircraftId !== null && isAircraftRepairing(state.base, activeAircraftId);
+  const activeDamage = activeAircraftId === null
+    ? 0
+    : aircraftDamageValue(state.base, activeAircraftId);
+  const activeRepairLeft = activeAircraftId === null
+    ? 0
+    : (state.base.aircraftRepair[activeAircraftId] ?? 0);
   const fuelStatus = byId<HTMLElement>('fuel-status');
   fuelStatus.hidden = false;
-  fuelStatus.classList.toggle('is-ready', activeFueled && !activeRepairing);
-  fuelStatus.textContent = activeRepairing
-    ? t('hangar.preflightRepairWarning', { aircraft: activeAircraftName })
-    : t(
-        activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
-        { aircraft: activeAircraftName },
-      );
-  launchSortieButton.disabled = bankrupt || !activeFueled || activeRepairing;
+  fuelStatus.classList.toggle('is-ready', activeFueled && activeDamage <= 0);
+  fuelStatus.textContent = activeRepairLeft > 0
+    ? t('hangar.repairInProgress', { sorties: activeRepairLeft })
+    : activeDamage > 0
+      ? t('hangar.damagedWarning', {
+          value: Math.round(activeDamage * 100),
+        })
+      : t(
+          activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
+          { aircraft: activeAircraftName },
+        );
+  launchSortieButton.disabled = bankrupt || !activeFueled;
+  setText('launch-sortie', 'base.launch');
+  setText('return-to-base', 'sortie.return');
   renderContainment();
   renderCanister();
   renderHardpoint();
@@ -852,6 +863,9 @@ function renderCandidates(containerId: string, roleId: string): void {
   if (candidates.length === 0) {
     return;
   }
+  const role = contentCatalog.staffRoles.find((entry) => entry.id === roleId);
+  const facilityBuilt = role !== undefined &&
+    state.base.constructedBuildingIds.includes(role.requiredBuildingId);
   const heading = document.createElement('h3');
   heading.className = 'hangar-subtitle';
   heading.textContent = t('staff.candidates');
@@ -874,7 +888,7 @@ function renderCandidates(containerId: string, roleId: string): void {
     hire.className = 'base-action';
     hire.type = 'button';
     hire.textContent = t('staff.hire', { credits: candidate.hireCreditCost });
-    hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
+    hire.disabled = bankrupt || !facilityBuilt || state.base.credits < candidate.hireCreditCost;
     hire.addEventListener('click', () => {
       store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
     });
@@ -2118,14 +2132,18 @@ launchSortieButton.addEventListener('click', () => {
       () => store.getSnapshot().base.manufacturedWeaponUpgradeIds,
       () => store.getSnapshot().base.sortiesCompleted,
       () => {
-        const aircraftId = store.getSnapshot().base.activeAircraftId;
+        const snapshot = store.getSnapshot();
+        const aircraftId = snapshot.base.activeAircraftId;
         const definition = contentCatalog.aircraft.find(
           (entry) => entry.id === aircraftId,
         );
+        const damage = aircraftId === null
+          ? 0
+          : aircraftDamageValue(snapshot.base, aircraftId);
         return definition === undefined
           ? { armour: 100, speedMultiplier: 1, damageMultiplier: 1 }
           : {
-              armour: definition.armour,
+              armour: Math.max(1, Math.round(definition.armour * (1 - damage))),
               speedMultiplier: definition.speedMultiplier,
               damageMultiplier: definition.damageMultiplier,
             };

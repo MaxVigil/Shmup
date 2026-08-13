@@ -138,8 +138,16 @@ describe('staff market', () => {
       (entry) => entry.roleId === contentCatalog.staffRoles[0].id,
     );
     expect(candidate).toBeDefined();
-    const funded = { ...initial, base: { ...initial.base, credits: 1_000 } };
-    const hired = hireCandidate(funded.base, candidate as never);
+    const role = contentCatalog.staffRoles[0];
+    const funded = {
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 1_000,
+        constructedBuildingIds: [role.requiredBuildingId],
+      },
+    };
+    const hired = hireCandidate(funded.base, candidate as never, role);
     expect(hired.staff).toHaveLength(1);
     expect(hired.staffCandidates).not.toContain(candidate);
     expect(staffContribution(hired, contentCatalog.staffRoles[0].id)).toBeGreaterThan(0);
@@ -147,6 +155,17 @@ describe('staff market', () => {
     expect(xpGained.staffXp[hired.staff[0]?.id ?? '']).toBe(1);
     expect(staffLevel(0)).toBe(1);
     expect(staffLevel(3)).toBe(2);
+  });
+
+  it('refuses to hire a candidate until the required building is constructed', () => {
+    const initial = createInitialGameState();
+    const candidate = initial.base.staffCandidates.find(
+      (entry) => entry.roleId === contentCatalog.staffRoles[0].id,
+    );
+    expect(candidate).toBeDefined();
+    const role = contentCatalog.staffRoles[0];
+    const funded = { ...initial, base: { ...initial.base, credits: 1_000 } };
+    expect(() => hireCandidate(funded.base, candidate as never, role)).toThrow();
   });
 });
 

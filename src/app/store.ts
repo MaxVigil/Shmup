@@ -382,7 +382,13 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (candidate === undefined) {
             throw new Error(`Unknown candidate ${command.candidateId}.`);
           }
-          state = { ...state, base: hireCandidate(state.base, candidate) };
+          const role = contentCatalog.staffRoles.find(
+            (entry) => entry.id === candidate.roleId,
+          );
+          if (role === undefined) {
+            throw new Error(`Unknown staff role ${candidate.roleId}.`);
+          }
+          state = { ...state, base: hireCandidate(state.base, candidate, role) };
           break;
         }
         case 'REPAIR_AIRCRAFT': {
