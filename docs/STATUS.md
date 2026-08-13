@@ -4,10 +4,9 @@ Last updated: 2026-08-13
 
 ## Current milestone
 
-The P2 (Command Centre, month counter, fuel economy, threat map — save schema v11)
-package is implemented on `test` and awaiting playtest before merging to `main`. The
-P0 (Chinese localization) and P1 (aircraft fleet) packages from the previous session
-are also on `test` for the same playtest batch.
+The UI polish batch and the P2a credit line (Command Centre loans, save schema v12)
+are implemented on `test` and awaiting playtest before merging to `main`. The P0/P1/P2
+packages from previous sessions are part of the same playtest batch.
 
 ## Completed
 
@@ -264,14 +263,27 @@ are also on `test` for the same playtest batch.
   and the Hangar offers refuel at a per-aircraft credit cost (schema v11 with a v10
   migration provisioning month one, full fuel, and the first threat map).
 - All 137 unit tests, lint, typecheck, and the production build pass locally.
+- Selecting Chinese in Settings now re-renders the whole interface immediately; the
+  Overview tab is gone and Command is the landing page (objective, post-sortie
+  report, mandate, month, threat map, fleet fuel, credit line), with the save-schema
+  status in Settings and the insolvency modal as a global overlay.
+- Each aircraft now has a distinct combat silhouette and hull colour (Interceptor
+  dart, Gunship wings, Aegis hexagon), and the Hangar uses fleet bay cards with
+  ACTIVE/FUELED/UNFUELED status chips, visible refuel costs, and market offers with
+  deltas against the active aircraft.
+- A deterministic credit line (Recovery Commission 200/+10%/2m, PRC 300/+5%/3m,
+  Ukraine 250/+8%/2m) lives in the Command Centre; repayment falls due at the month
+  boundary and cascades into insolvency when the reserve cannot cover it
+  (schema v12 with a v11 migration).
+- All 145 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
-1. Playtest the P0 Chinese locale, the P1 fleet economy, and the P2 fuel/month gate
-   (aircraft prices, slot cost, refuel costs, and combat multipliers are prototypes)
-   before merging to `main`.
+1. Playtest the P0 Chinese locale, the P1 fleet economy, the P2 fuel/month gate, and
+   the P2a credit line (aircraft prices, slot cost, refuel costs, loan terms, and
+   combat multipliers are prototypes) before merging to `main`.
 2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment
-   (schema v12) after the fleet and Command Centre land.
+   (schema v13) after the fleet and Command Centre land.
 3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
    hardpoint plus manually fired rocket pod cycles.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket

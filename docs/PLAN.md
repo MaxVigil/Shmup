@@ -175,6 +175,30 @@ Status: implemented on `test`; awaiting playtest before merging to `main`.
 - [x] Add uk/en/zh translations and unit tests for content, domain, store, and
   migration; all numbers remain prototype values for playtest tuning.
 
+## P2a — Credit line (save schema v12)
+
+Status: implemented on `test`; awaiting playtest before merging to `main`.
+
+- [x] Add a deterministic credit line in the Command Centre with three lenders:
+  Recovery Commission, PRC (best terms), and Ukraine.
+- [x] Persist `loans` in schema v12 with a v11 migration that starts loan-free.
+- [x] Add `TAKE_LOAN` and month-boundary repayment in `SETTLE_SORTIE`; an uncovered
+  repayment cascades into the existing insolvency rule.
+- [x] Add the Credit line UI (offers + active loans) and uk/en/zh translations.
+- [x] Cover the credit domain, store, and migration with unit tests.
+
+## UI polish batch
+
+Status: implemented on `test`; awaiting playtest before merging to `main`.
+
+- [x] Fix the locale switch so selecting Chinese re-renders the whole interface.
+- [x] Remove the Overview tab: the Command tab is now the landing page with the next
+  objective, post-sortie report, and operating mandate; the save-schema status moves
+  to Settings; the insolvency modal becomes a global overlay.
+- [x] Give each aircraft a distinct combat silhouette and hull colour.
+- [x] Rework the Hangar: fleet bay cards with status chips (ACTIVE/FUELED/UNFUELED),
+  visible refuel costs, and market offers with deltas against the active aircraft.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's
