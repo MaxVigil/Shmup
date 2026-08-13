@@ -5,7 +5,7 @@ import { createGame } from '../game/create-game';
 import { CombatScene, type CombatRunResult } from '../game/scenes/CombatScene';
 import type { TranslationKey } from '../i18n';
 import { isLocale } from '../i18n';
-import { loadGame, saveGame } from '../persistence/save-repository';
+import { clearGame, loadGame, saveGame } from '../persistence/save-repository';
 import type { GameState } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
 import { marketWeaponPrice } from '../domain/terrestrial-market';
@@ -317,7 +317,7 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
 }
 
 function isBaseSection(value: string | undefined): value is BaseSection {
-  return value === 'overview' || value === 'research' ||
+  return value === 'command' || value === 'research' ||
     value === 'engineering' || value === 'hangar';
 }
 
@@ -1293,6 +1293,7 @@ function renderLocale(): void {
   setText('base-tab-hangar', 'baseNav.hangar');
   setText('settings-title', 'settings.title');
   setText('language-label', 'settings.language');
+  setText('restart-mission', 'settings.restart');
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
   setText('locale-option-zh', 'locale.zh');
@@ -1643,7 +1644,7 @@ restartProgrammeButton.addEventListener('click', () => {
   sortieInProgress = false;
   store.dispatch({ type: 'RESET' });
   showScreen('base');
-  showBaseSection('overview');
+  showBaseSection('command');
   renderReports();
 });
 
@@ -1712,7 +1713,7 @@ launchSortieButton.addEventListener('click', () => {
 
 returnToBaseButton.addEventListener('click', () => {
   showScreen('base');
-  showBaseSection('overview');
+  showBaseSection('command');
   renderBase();
   renderReports();
 });
@@ -1750,6 +1751,42 @@ localeSelect.addEventListener('change', () => {
   }
   setLocale(nextLocale);
   renderLocale();
+});
+
+const restartMissionButton = byId<HTMLButtonElement>('restart-mission');
+let restartMissionArmed = false;
+let restartMissionTimer: number | null = null;
+
+function disarmRestartMission(): void {
+  restartMissionArmed = false;
+  if (restartMissionTimer !== null) {
+    window.clearTimeout(restartMissionTimer);
+    restartMissionTimer = null;
+  }
+  restartMissionButton.textContent = t('settings.restart');
+  restartMissionButton.classList.remove('is-armed');
+}
+
+restartMissionButton.addEventListener('click', () => {
+  if (!restartMissionArmed) {
+    restartMissionArmed = true;
+    restartMissionButton.textContent = t('settings.confirmRestart');
+    restartMissionButton.classList.add('is-armed');
+    if (restartMissionTimer !== null) {
+      window.clearTimeout(restartMissionTimer);
+    }
+    restartMissionTimer = window.setTimeout(disarmRestartMission, 5000);
+    return;
+  }
+  disarmRestartMission();
+  clearGame(window.localStorage);
+  window.location.reload();
+});
+
+document.addEventListener('click', (event) => {
+  if (restartMissionArmed && !restartMissionButton.contains(event.target as Node)) {
+    disarmRestartMission();
+  }
 });
 
 document.addEventListener('click', (event) => {

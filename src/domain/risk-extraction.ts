@@ -143,6 +143,13 @@ export function failRun(state: RiskExtractionState): RiskExtractionState {
   return { ...state, phase: 'complete', extracted: false };
 }
 
+export function abortRun(state: RiskExtractionState): RiskExtractionState {
+  if (state.phase !== 'combat') {
+    throw new Error('A run can only be aborted during combat.');
+  }
+  return { ...state, phase: 'complete', extracted: true };
+}
+
 export function toSortieOutcome(
   state: RiskExtractionState,
   contract: SortieContractLedger = EMPTY_SORTIE_CONTRACT,

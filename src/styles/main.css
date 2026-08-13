@@ -662,6 +662,16 @@ h1 {
   box-shadow: 0 0 1rem rgb(239 113 133 / 75%);
 }
 
+.settings-restart {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.settings-restart.is-armed {
+  background: #a0343f;
+  color: #ffd7dd;
+}
+
 .run-report {
   max-width: 38rem;
   margin: 1rem 0 0;

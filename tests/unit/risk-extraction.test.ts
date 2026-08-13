@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { contentCatalog } from '../../src/content/catalog';
 import {
+  abortRun,
   addMaterials,
   completeEscape,
   createRiskExtractionState,
@@ -136,6 +137,16 @@ describe('M2 risk and extraction flow', () => {
     );
     expect(() => completeEscape(createRiskExtractionState())).toThrow(
       'Expected run phase escape',
+    );
+  });
+
+  it('aborts only during combat and keeps the collected haul', () => {
+    const aborted = abortRun(addMaterials(createRiskExtractionState(), 7));
+    expect(aborted.phase).toBe('complete');
+    expect(aborted.extracted).toBe(true);
+    expect(toSortieOutcome(aborted).materialsFound).toBe(7);
+    expect(() => abortRun(offerExtraction(addMaterials(createRiskExtractionState(), 1)))).toThrow(
+      /combat/i,
     );
   });
 });

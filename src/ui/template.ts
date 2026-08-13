@@ -33,6 +33,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <span id="prototype-status"></span>
             <small><span id="save-schema-label"></span> v${initialState.schemaVersion}</small>
           </div>
+          <button id="restart-mission" class="base-action settings-restart" type="button"></button>
         </div>
       </div>
     </header>

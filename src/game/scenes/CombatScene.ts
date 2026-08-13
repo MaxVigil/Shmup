@@ -25,6 +25,7 @@ import {
   type PauseState,
 } from '../../domain/pause-state';
 import {
+  abortRun,
   addMaterials,
   completeEscape,
   createRiskExtractionState,
@@ -195,6 +196,7 @@ export class CombatScene extends Phaser.Scene {
   private bossWarningLayer: Phaser.GameObjects.Container | null = null;
   private endingText: Phaser.GameObjects.Text | null = null;
   private pauseState: PauseState = EMPTY_PAUSE_STATE;
+  private abortArmed = false;
   private armourText!: Phaser.GameObjects.Text;
   private reserveText!: Phaser.GameObjects.Text;
   private timeText!: Phaser.GameObjects.Text;
@@ -759,9 +761,15 @@ export class CombatScene extends Phaser.Scene {
     const { width, height } = this.scale;
     const blocker = this.add.rectangle(width / 2, height / 2, width, height, 0x020407, 0.72)
       .setInteractive();
-    const panel = this.add.rectangle(width / 2, height / 2, width - 112, 170, 0x091218, 0.98)
+    blocker.on('pointerdown', () => {
+      if (this.abortArmed) {
+        this.abortArmed = false;
+        this.renderPauseLayer();
+      }
+    });
+    const panel = this.add.rectangle(width / 2, height / 2, width - 112, 220, 0x091218, 0.98)
       .setStrokeStyle(1, 0x70a897, 0.8);
-    const heading = this.add.text(width / 2, height / 2 - 34, this.t('combat.paused'), {
+    const heading = this.add.text(width / 2, height / 2 - 44, this.t('combat.paused'), {
       color: '#dceff0',
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
       fontSize: '24px',
@@ -770,13 +778,48 @@ export class CombatScene extends Phaser.Scene {
     const detailKey = this.pauseState.reasons.includes('settings')
       ? 'combat.pausedSettings'
       : 'combat.pausedManual';
-    const detail = this.add.text(width / 2, height / 2 + 24, this.t(detailKey), {
+    const detail = this.add.text(width / 2, height / 2 + 6, this.t(detailKey), {
       align: 'center',
       color: '#87a8b0',
       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
       fontSize: '13px',
     }).setOrigin(0.5);
-    this.pauseLayer = this.add.container(0, 0, [blocker, panel, heading, detail]).setDepth(50);
+    const abortAvailable = this.runState.phase === 'combat';
+    const abortButton = this.add.text(
+      width / 2,
+      height / 2 + 64,
+      this.t(this.abortArmed ? 'combat.confirmAbort' : 'combat.abort'),
+      {
+        align: 'center',
+        color: this.abortArmed ? '#ffd7dd' : '#d78795',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+        fontSize: '13px',
+        fontStyle: 'bold',
+      },
+    ).setOrigin(0.5);
+    if (abortAvailable) {
+      abortButton.setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+        if (!this.abortArmed) {
+          this.abortArmed = true;
+          this.renderPauseLayer();
+          return;
+        }
+        this.abortArmed = false;
+        this.abortSortie();
+      });
+    } else {
+      abortButton.setAlpha(0.4);
+    }
+    this.pauseLayer = this.add.container(0, 0, [blocker, panel, heading, detail, abortButton]).setDepth(50);
+  }
+
+  public abortSortie(): void {
+    if (this.ended || this.ending !== null || this.runState.phase !== 'combat') {
+      return;
+    }
+    this.runState = abortRun(this.runState);
+    this.setPauseReason('manual', false);
+    this.beginEnding(true, 'combat.aborted');
   }
 
   private createStarfield(width: number, height: number): void {
