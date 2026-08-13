@@ -91,6 +91,13 @@ export function buildAppTemplate(initialState: GameState): string {
           <h2 id="command-fuel-title"></h2>
           <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
         </section>
+        <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
+          <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
+          <h2 id="command-credit-title"></h2>
+          <p class="lede" id="command-credit-lede"></p>
+          <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
+          <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
+        </section>
       </section>
 
       <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>

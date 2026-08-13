@@ -44,6 +44,7 @@ export function createInitialGameState(): GameState {
         0x3a7e2026,
         1,
       ),
+      loans: [],
     },
     technologyCatalog: [],
     activeRun: null,

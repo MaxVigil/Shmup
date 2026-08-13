@@ -415,4 +415,47 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.month).toBe(2);
     expect(store.getSnapshot().base.threatMap).not.toEqual(threatMap);
   });
+
+  it('takes a loan and repays it when it falls due at a month boundary', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, fueledAircraftIds: [] },
+    });
+    const lenderId = 'lender-commission';
+    const creditsBefore = store.getSnapshot().base.credits;
+
+    store.dispatch({ type: 'TAKE_LOAN', lenderId });
+    const withLoan = store.getSnapshot();
+    expect(withLoan.base.credits).toBe(creditsBefore + 200);
+    expect(withLoan.base.loans[0]?.dueMonth).toBe(3);
+    expect(withLoan.base.loans[0]?.repaid).toBe(false);
+
+    const outcome = {
+      extracted: true,
+      materialsFound: 10,
+      researchFound: 0,
+      preservedTechnologyIds: [],
+      targetsDestroyed: 20,
+      targetsBreached: 0,
+      creditsEarned: 200,
+      creditsPenalized: 0,
+      wardenSignalDetected: false,
+    } as const;
+    const refuel = () =>
+      store.dispatch({
+        type: 'REFUEL_AIRCRAFT',
+        aircraftId: contentCatalog.aircraft[0].id,
+      });
+
+    for (let index = 0; index < 12; index += 1) {
+      refuel();
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
+    expect(store.getSnapshot().base.month).toBe(3);
+    expect(store.getSnapshot().base.loans[0]?.repaid).toBe(true);
+    expect(store.getSnapshot().base.credits).toBe(
+      creditsBefore + 200 + 200 * 12 - 220 - contentCatalog.aircraft[0].refuelCreditCost * 12,
+    );
+  });
 });

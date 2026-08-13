@@ -12,6 +12,7 @@ import {
   monthForSorties,
   refuelAircraft,
 } from '../domain/command-centre';
+import { LOAN_OFFERS, settleDueLoans, takeLoan } from '../domain/credit';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
 import {
@@ -72,6 +73,7 @@ export type GameCommand =
   | { readonly type: 'PURCHASE_HANGAR_SLOT' }
   | { readonly type: 'SET_ACTIVE_AIRCRAFT'; readonly aircraftId: string | null }
   | { readonly type: 'REFUEL_AIRCRAFT'; readonly aircraftId: string }
+  | { readonly type: 'TAKE_LOAN'; readonly lenderId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null };
 
@@ -107,10 +109,11 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const settled = settleSortie(state.base, command.outcome);
           const nextMonth = monthForSorties(settled.sortiesCompleted);
           const afterFuel = consumeAircraftFuel(settled, state.base.activeAircraftId);
+          const afterLoans = settleDueLoans({ ...afterFuel, month: nextMonth });
           state = {
             ...state,
             base: {
-              ...afterFuel,
+              ...afterLoans,
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
               month: nextMonth,
@@ -317,6 +320,16 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             throw new Error(`Unknown aircraft ${command.aircraftId}.`);
           }
           state = refuelAircraft(state, aircraft, aircraft.refuelCreditCost);
+          break;
+        }
+        case 'TAKE_LOAN': {
+          const offer = LOAN_OFFERS.find(
+            (entry) => entry.lenderId === command.lenderId,
+          );
+          if (offer === undefined) {
+            throw new Error(`Unknown lender ${command.lenderId}.`);
+          }
+          state = takeLoan(state, offer);
           break;
         }
         case 'MANUFACTURE_EQUIPMENT': {

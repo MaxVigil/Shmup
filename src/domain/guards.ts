@@ -59,6 +59,16 @@ export function isGameState(value: unknown): value is GameState {
         Number.isInteger(mission.threatLevel) &&
         mission.threatLevel >= 1,
     ) &&
+    Array.isArray(value.base.loans) &&
+    value.base.loans.every(
+      (loan) =>
+        typeof loan.id === 'string' &&
+        typeof loan.lenderId === 'string' &&
+        typeof loan.principal === 'number' &&
+        typeof loan.repaymentDue === 'number' &&
+        typeof loan.dueMonth === 'number' &&
+        typeof loan.repaid === 'boolean',
+    ) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 11 as const;
+export const SAVE_SCHEMA_VERSION = 12 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -18,6 +18,15 @@ export interface ResearchProjectState {
 export interface StaffMemberState {
   readonly id: string;
   readonly roleId: string;
+}
+
+export interface LoanState {
+  readonly id: string;
+  readonly lenderId: string;
+  readonly principal: number;
+  readonly repaymentDue: number;
+  readonly dueMonth: number;
+  readonly repaid: boolean;
 }
 
 export interface BaseState {
@@ -48,6 +57,7 @@ export interface BaseState {
   readonly month: number;
   readonly fueledAircraftIds: readonly string[];
   readonly threatMap: readonly MissionState[];
+  readonly loans: readonly LoanState[];
 }
 
 export interface TechnologyKnowledge {

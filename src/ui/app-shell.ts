@@ -13,6 +13,11 @@ import { marketBlueprintPrice } from '../domain/terrestrial-market';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled } from '../domain/command-centre';
 import {
+  hasOutstandingLoan,
+  LOAN_OFFERS,
+  loanRepayment,
+} from '../domain/credit';
+import {
   sectionForObjective,
   type BaseSection,
 } from '../domain/base-navigation';
@@ -1048,6 +1053,90 @@ function renderCommand(): void {
     row.append(name, fuel);
     fuelList.appendChild(row);
   }
+  renderCredit();
+}
+
+function renderCredit(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const offersList = byId<HTMLElement>('credit-offers-list');
+  const loansList = byId<HTMLElement>('active-loans-list');
+  const lenderName = (lenderId: string): string => {
+    if (lenderId === 'lender-commission') {
+      return t('credit.lenderCommission');
+    }
+    if (lenderId === 'lender-prc') {
+      return t('country.prc');
+    }
+    return t('country.ukraine');
+  };
+
+  offersList.textContent = '';
+  for (const offer of LOAN_OFFERS) {
+    const available = !hasOutstandingLoan(state.base, offer.lenderId);
+    const row = document.createElement('article');
+    row.className = 'threat-row';
+    const info = document.createElement('div');
+    const name = document.createElement('strong');
+    name.textContent = lenderName(offer.lenderId);
+    const terms = document.createElement('small');
+    terms.textContent = [
+      t('credit.offerRepay', {
+        principal: offer.principal,
+        repayment: loanRepayment(offer),
+      }),
+      t('credit.offerTerms', {
+        interest: offer.interestRate * 100,
+        months: offer.termMonths,
+      }),
+    ].join(' · ');
+    info.append(name, terms);
+    row.appendChild(info);
+    if (available) {
+      const take = document.createElement('button');
+      take.className = 'base-action';
+      take.type = 'button';
+      take.textContent = t('credit.takeLoan');
+      take.disabled = bankrupt;
+      take.addEventListener('click', () => {
+        store.dispatch({ type: 'TAKE_LOAN', lenderId: offer.lenderId });
+      });
+      row.appendChild(take);
+    } else {
+      const badge = document.createElement('em');
+      badge.className = 'status-chip is-owned';
+      badge.textContent = t('credit.outstanding');
+      row.appendChild(badge);
+    }
+    offersList.appendChild(row);
+  }
+
+  loansList.textContent = '';
+  const activeLoans = state.base.loans.filter((loan) => !loan.repaid);
+  if (activeLoans.length > 0) {
+    const header = document.createElement('h3');
+    header.className = 'hangar-subtitle';
+    header.textContent = t('credit.activeLoans');
+    loansList.appendChild(header);
+  }
+  for (const loan of state.base.loans) {
+    const row = document.createElement('article');
+    row.className = 'threat-row';
+    const name = document.createElement('strong');
+    name.textContent = lenderName(loan.lenderId);
+    const info = document.createElement('small');
+    info.textContent = loan.repaid
+      ? t('credit.repaid')
+      : [
+          t('credit.offerRepay', {
+            principal: loan.principal,
+            repayment: loan.repaymentDue,
+          }),
+          t('credit.loanDue', { month: loan.dueMonth }),
+        ].join(' · ');
+    row.append(name, info);
+    loansList.appendChild(row);
+  }
 }
 
 function renderCanister(): void {
@@ -1275,6 +1364,9 @@ function renderLocale(): void {
   setText('command-month-title', 'command.monthTitle');
   setText('command-fuel-eyebrow', 'command.fuelEyebrow');
   setText('command-fuel-title', 'command.fuelTitle');
+  setText('command-credit-eyebrow', 'credit.eyebrow');
+  setText('command-credit-title', 'credit.title');
+  setText('command-credit-lede', 'credit.lede');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');
   setText('laboratory-label', 'facility.laboratory');

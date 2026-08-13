@@ -3,7 +3,8 @@ import { generateThreatMap } from '../domain/command-centre';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v11';
+export const SAVE_KEY = 'shmup.save.v12';
+export const LEGACY_V11_SAVE_KEY = 'shmup.save.v11';
 export const LEGACY_V10_SAVE_KEY = 'shmup.save.v10';
 export const LEGACY_V9_SAVE_KEY = 'shmup.save.v9';
 export const LEGACY_V8_SAVE_KEY = 'shmup.save.v8';
@@ -41,6 +42,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V11_SAVE_KEY, migrateV11Save],
     [LEGACY_V10_SAVE_KEY, migrateV10Save],
     [LEGACY_V9_SAVE_KEY, migrateV9Save],
     [LEGACY_V8_SAVE_KEY, migrateV8Save],
@@ -196,6 +198,7 @@ interface MigrationOptions {
   readonly month: number;
   readonly fueledAircraftIds: readonly string[];
   readonly threatMap: GameState['base']['threatMap'];
+  readonly loans: BaseState['loans'];
 }
 
 function migratedState(
@@ -207,7 +210,7 @@ function migratedState(
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       credits: options.credits,
       materials: base.materials,
@@ -233,6 +236,7 @@ function migratedState(
       month: options.month,
       fueledAircraftIds: options.fueledAircraftIds,
       threatMap: options.threatMap,
+      loans: options.loans,
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -267,7 +271,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -299,9 +303,27 @@ function migrateV7Save(rawSave: string | null): GameState | null {
       month: 1,
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
       threatMap: startingThreatMap(base.marketSeed as number),
+      loans: [],
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
+  };
+  return isGameState(migrated) ? migrated : null;
+}
+
+function migrateV11Save(rawSave: string | null): GameState | null {
+  const legacy = parseLegacy(rawSave, 11);
+  if (legacy === null) {
+    return null;
+  }
+  const { parsed, base } = legacy;
+  const migrated: GameState = {
+    ...(parsed as unknown as GameState),
+    schemaVersion: 12,
+    base: {
+      ...(base as unknown as BaseState),
+      loans: [],
+    },
   };
   return isGameState(migrated) ? migrated : null;
 }
@@ -315,7 +337,7 @@ function migrateV10Save(rawSave: string | null): GameState | null {
   const slots = [STARTING_AIRCRAFT_ID, null];
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       ...(base as unknown as BaseState),
       hangarSlots: slots,
@@ -325,6 +347,7 @@ function migrateV10Save(rawSave: string | null): GameState | null {
       threatMap: startingThreatMap(
         Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
       ),
+      loans: [],
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -338,7 +361,7 @@ function migrateV9Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       ...(base as unknown as BaseState),
       hangarSlots: [STARTING_AIRCRAFT_ID, null],
@@ -348,6 +371,7 @@ function migrateV9Save(rawSave: string | null): GameState | null {
       threatMap: startingThreatMap(
         Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
       ),
+      loans: [],
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -361,7 +385,7 @@ function migrateV8Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       ...(base as unknown as BaseState),
       telemetryRecorded: hadCapturerProgress(base),
@@ -372,6 +396,7 @@ function migrateV8Save(rawSave: string | null): GameState | null {
       threatMap: startingThreatMap(
         Number.isInteger(base.marketSeed) ? (base.marketSeed as number) : DEFAULT_MARKET_SEED,
       ),
+      loans: [],
     },
   };
   return isGameState(migrated) ? migrated : null;
@@ -406,7 +431,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     base: {
       credits: base.credits,
       materials: base.materials,
@@ -435,6 +460,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
       month: 1,
       fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
       threatMap: startingThreatMap(base.marketSeed as number),
+      loans: [],
     },
     technologyCatalog: parsed.technologyCatalog as GameState['technologyCatalog'],
     activeRun: null,
@@ -496,6 +522,7 @@ function migrateV5Save(rawSave: string | null): GameState | null {
     month: 1,
     fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
     threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
+    loans: [],
   });
 }
 
@@ -529,6 +556,7 @@ function migrateV4Save(rawSave: string | null): GameState | null {
     month: 1,
     fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
     threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
+    loans: [],
   });
 }
 
@@ -560,6 +588,7 @@ function migrateV3Save(rawSave: string | null): GameState | null {
     month: 1,
     fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
     threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
+    loans: [],
   });
 }
 
@@ -589,6 +618,7 @@ function migrateV2Save(rawSave: string | null): GameState | null {
     month: 1,
     fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
     threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
+    loans: [],
   });
 }
 
@@ -614,6 +644,7 @@ function migrateV1Save(rawSave: string | null): GameState | null {
     month: 1,
     fueledAircraftIds: startingFueledAircraftIds([STARTING_AIRCRAFT_ID, null]),
     threatMap: startingThreatMap(DEFAULT_MARKET_SEED),
+    loans: [],
   });
 }
 
@@ -623,6 +654,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V11_SAVE_KEY);
   storage.removeItem(LEGACY_V10_SAVE_KEY);
   storage.removeItem(LEGACY_V9_SAVE_KEY);
   storage.removeItem(LEGACY_V8_SAVE_KEY);
