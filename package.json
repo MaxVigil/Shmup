@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "entities": "node scripts/export-entities.mjs"
+    "entities": "node scripts/export-entities.mjs && node scripts/export-entities-xlsx.mjs"
   },
   "engines": {
     "node": ">=24.0.0"
