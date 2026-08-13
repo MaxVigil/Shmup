@@ -26,7 +26,7 @@ import {
   isAircraftRepairing,
   startRepair,
 } from '../domain/aircraft-integrity';
-import { awardStaffXp, hireCandidate } from '../domain/staff-market';
+import { awardStaffXp, generateStaffCandidates, hireCandidate } from '../domain/staff-market';
 import { marketConsumablePrice } from '../domain/terrestrial-market';
 import { contentCatalog } from '../content/catalog';
 import { constructBuilding, hireStaff } from '../domain/base-development';
@@ -156,6 +156,13 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
                     nextMonth,
                   )
                 : state.base.threatMap,
+              staffCandidates: nextMonth > state.base.month
+                ? generateStaffCandidates(
+                    contentCatalog.staffRoles,
+                    state.base.marketSeed,
+                    nextMonth,
+                  )
+                : state.base.staffCandidates,
             },
             activeRun: null,
           };

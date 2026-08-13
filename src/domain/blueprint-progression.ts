@@ -1,5 +1,6 @@
 import type { BlueprintDefinition, EquipmentDefinition } from '../content/model';
 import type { GameState, ResearchProjectState } from './model';
+import { staffContribution } from './staff-market';
 
 export interface ResearchBlueprint {
   readonly id: string;
@@ -45,9 +46,7 @@ export function advanceBlueprintResearch(
   state: GameState,
   staffRoleId: string,
 ): GameState {
-  const contribution = state.base.staff.filter(
-    (member) => member.roleId === staffRoleId,
-  ).length;
+  const contribution = staffContribution(state.base, staffRoleId);
   if (contribution === 0 || state.base.researchQueue.length === 0) {
     return state;
   }

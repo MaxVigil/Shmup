@@ -116,6 +116,7 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="scientists-label"></span><strong id="scientist-count"></strong><small id="scientist-note"></small></div>
               <button id="hire-scientist" class="base-action" type="button"></button>
             </div>
+            <div id="scientist-candidates" class="candidate-list"></div>
             <div class="research-lane">
               <span id="earth-airframe-label"></span>
               <strong id="earth-airframe-status"></strong>
@@ -217,6 +218,7 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
               <button id="hire-engineer" class="base-action" type="button"></button>
             </div>
+            <div id="engineer-candidates" class="candidate-list"></div>
             <div class="facility-row programme-equipment">
               <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
               <button id="manufacture-capturer" class="base-action" type="button"></button>

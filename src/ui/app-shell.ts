@@ -466,6 +466,8 @@ function renderBase(): void {
     !workshopBuilt ||
     state.base.credits < engineerRole.creditCost
   );
+  renderCandidates('scientist-candidates', scientistRole.id);
+  renderCandidates('engineer-candidates', engineerRole.id);
   workshopStatus.textContent = workshopBuilt
     ? t('facility.workshopBuilt')
     : labBuilt ? t('facility.workshopUnbuilt') : t('facility.workshopLocked');
@@ -831,6 +833,48 @@ function aircraftDeltaText(
     t('aircraft.speed', { value: speed }),
     t('aircraft.damage', { value: damage }),
   ].join(' · ');
+}
+
+function renderCandidates(containerId: string, roleId: string): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const container = byId<HTMLElement>(containerId);
+  container.textContent = '';
+  const candidates = state.base.staffCandidates.filter(
+    (candidate) => candidate.roleId === roleId,
+  );
+  if (candidates.length === 0) {
+    return;
+  }
+  const heading = document.createElement('h3');
+  heading.className = 'hangar-subtitle';
+  heading.textContent = t('staff.candidates');
+  container.appendChild(heading);
+  for (const candidate of candidates) {
+    const row = document.createElement('article');
+    row.className = 'threat-row candidate-row';
+    const info = document.createElement('div');
+    const name = document.createElement('strong');
+    name.textContent = `${candidate.firstName} ${candidate.lastName}`;
+    const details = document.createElement('small');
+    details.textContent = [
+      t('staff.tier', { tier: candidate.tier }),
+      t('staff.efficiency', { value: candidate.progressMultiplier }),
+      t('staff.salary', { credits: candidate.salaryCreditCost }),
+    ].join(' · ');
+    info.append(name, details);
+    row.appendChild(info);
+    const hire = document.createElement('button');
+    hire.className = 'base-action';
+    hire.type = 'button';
+    hire.textContent = t('staff.hire', { credits: candidate.hireCreditCost });
+    hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
+    hire.addEventListener('click', () => {
+      store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
+    });
+    row.appendChild(hire);
+    container.appendChild(row);
+  }
 }
 
 const moduleNameKey: Readonly<Record<string, TranslationKey>> = {

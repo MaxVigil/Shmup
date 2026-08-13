@@ -451,6 +451,12 @@ select:focus-visible {
   margin: 0.25rem 0 0.75rem;
 }
 
+.candidate-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .fleet-slot__header em,
 .aircraft-offer em {
   color: var(--accent, #70d6b3);
