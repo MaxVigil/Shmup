@@ -1552,6 +1552,7 @@ launchSortieButton.addEventListener('click', () => {
               damageMultiplier: definition.damageMultiplier,
             };
       },
+      () => store.getSnapshot().base.activeAircraftId,
       () => store.getSnapshot().base.manufacturedEquipmentIds.includes(
         hardpointEquipment.id,
       ),

@@ -273,6 +273,17 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       aircraft.damageMultiplier <= 0 ||
       !Number.isInteger(aircraft.refuelCreditCost) ||
       aircraft.refuelCreditCost <= 0 ||
+      !Number.isInteger(aircraft.visual.hullColor) ||
+      aircraft.visual.hullColor < 0 ||
+      aircraft.visual.hullColor > 0xffffff ||
+      !Number.isInteger(aircraft.visual.accentColor) ||
+      aircraft.visual.accentColor < 0 ||
+      aircraft.visual.accentColor > 0xffffff ||
+      aircraft.visual.silhouette.length < 6 ||
+      aircraft.visual.silhouette.length % 2 !== 0 ||
+      aircraft.visual.silhouette.some(
+        (coordinate) => !Number.isFinite(coordinate) || Math.abs(coordinate) > 24,
+      ) ||
       !['earth', 'alien', 'hybrid'].includes(aircraft.origin) ||
       (aircraft.marketPrice !== null && (
         !Number.isInteger(aircraft.marketPrice.minimum) ||

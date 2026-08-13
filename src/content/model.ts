@@ -151,6 +151,13 @@ export interface MarketWeaponBlueprintDefinition {
   readonly requiredStaffRoleId: string;
 }
 
+export interface AircraftVisualDefinition {
+  readonly hullColor: number;
+  readonly accentColor: number;
+  /** Centered polygon points [x0,y0,x1,y1,…] in a 40-unit box, nose pointing up (−y). */
+  readonly silhouette: readonly number[];
+}
+
 export interface AircraftDefinition {
   readonly id: string;
   readonly name: string;
@@ -160,6 +167,7 @@ export interface AircraftDefinition {
   readonly speedMultiplier: number;
   readonly damageMultiplier: number;
   readonly refuelCreditCost: number;
+  readonly visual: AircraftVisualDefinition;
   readonly marketPrice: {
     readonly minimum: number;
     readonly maximum: number;

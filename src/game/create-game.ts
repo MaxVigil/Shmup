@@ -21,6 +21,7 @@ export function createGame(
     readonly speedMultiplier: number;
     readonly damageMultiplier: number;
   }> = () => ({ armour: 100, speedMultiplier: 1, damageMultiplier: 1 }),
+  getActiveAircraftId: () => string | null = () => null,
   getAuxiliaryHardpointInstalled: () => boolean = () => false,
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
@@ -47,6 +48,7 @@ export function createGame(
       getManufacturedWeaponUpgradeIds,
       getSortiesCompleted,
       getAircraftStats,
+      getActiveAircraftId,
       getAuxiliaryHardpointInstalled,
       getLocale,
       onActiveWeaponChanged,

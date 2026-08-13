@@ -314,6 +314,11 @@ export const contentCatalog = {
       speedMultiplier: 1,
       damageMultiplier: 1,
       refuelCreditCost: 30,
+      visual: {
+        hullColor: 0x9dd7c7,
+        accentColor: 0x2f6f63,
+        silhouette: [0, -18, 10, 4, 4, 10, -4, 10, -10, 4],
+      },
       marketPrice: null,
     },
     {
@@ -325,6 +330,11 @@ export const contentCatalog = {
       speedMultiplier: 0.82,
       damageMultiplier: 1.15,
       refuelCreditCost: 45,
+      visual: {
+        hullColor: 0xd7a86b,
+        accentColor: 0x7a5a2e,
+        silhouette: [0, -14, 14, 0, 18, 6, 12, 12, 14, 20, -14, 20, -12, 12, -18, 6, -14, 0],
+      },
       marketPrice: {
         minimum: 900,
         maximum: 1100,
@@ -339,6 +349,11 @@ export const contentCatalog = {
       speedMultiplier: 0.68,
       damageMultiplier: 1.3,
       refuelCreditCost: 60,
+      visual: {
+        hullColor: 0xa9b7d7,
+        accentColor: 0x4c5a78,
+        silhouette: [0, -16, 12, -6, 12, 12, 0, 20, -12, 12, -12, -6],
+      },
       marketPrice: {
         minimum: 1300,
         maximum: 1600,

@@ -200,4 +200,19 @@ describe('validateContentCatalog', () => {
       expect(state.nameKey).toMatch(/^country\./);
     }
   });
+
+  it('gives every aircraft a distinct visual silhouette', () => {
+    const aircraft = contentCatalog.aircraft;
+    const hullColors = new Set(aircraft.map((entry) => entry.visual.hullColor));
+    const silhouettes = new Set(
+      aircraft.map((entry) => entry.visual.silhouette.join(';')),
+    );
+
+    expect(hullColors.size).toBe(aircraft.length);
+    expect(silhouettes.size).toBe(aircraft.length);
+    for (const entry of aircraft) {
+      expect(entry.visual.silhouette.length).toBeGreaterThanOrEqual(6);
+      expect(entry.visual.silhouette.length % 2).toBe(0);
+    }
+  });
 });

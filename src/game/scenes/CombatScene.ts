@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import { contentCatalog } from '../../content/catalog';
-import type { EnemyDefinition, WeaponDefinition } from '../../content/model';
+import type {
+  AircraftDefinition,
+  EnemyDefinition,
+  WeaponDefinition,
+} from '../../content/model';
 import type { SortieOutcome } from '../../domain/model';
 import {
   calculateMutualKnockback,
@@ -47,6 +51,7 @@ import {
 const PLAYER_BASE_SPEED = 330;
 const DEFAULT_PLAYER_ARMOUR = 100;
 const PLAYER_MARGIN = 28;
+const PLAYER_COLLISION_HALF_SIZE = 18;
 const ARMOUR_BAR_WIDTH = 44;
 const ARMOUR_BAR_HEIGHT = 6;
 const ARMOUR_BAR_OFFSET_Y = 27;
@@ -145,7 +150,7 @@ export interface AircraftCombatStats {
 }
 
 export class CombatScene extends Phaser.Scene {
-  private player!: Phaser.GameObjects.Triangle;
+  private player!: Phaser.GameObjects.Graphics;
   private playerArmourBarBackground!: Phaser.GameObjects.Rectangle;
   private playerArmourBarFill!: Phaser.GameObjects.Rectangle;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -216,6 +221,7 @@ export class CombatScene extends Phaser.Scene {
       speedMultiplier: 1,
       damageMultiplier: 1,
     }),
+    private readonly getActiveAircraftId: () => string | null = () => null,
     private readonly getAuxiliaryHardpointInstalled: () => boolean = () => false,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
@@ -235,17 +241,9 @@ export class CombatScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, 0x05080d);
     this.createStarfield(width, height);
 
-    this.player = this.add.triangle(
-      width / 2,
-      height * 0.78,
-      0,
-      36,
-      18,
-      0,
-      36,
-      36,
-      0x9dd7c7,
-    );
+    this.player = this.add.graphics();
+    this.player.setPosition(width / 2, height * 0.78);
+    this.drawPlayerShip();
     this.playerArmourBarBackground = this.add
       .rectangle(
         this.player.x,
@@ -302,6 +300,41 @@ export class CombatScene extends Phaser.Scene {
         }
       });
     }
+  }
+
+  private playerCollisionBounds(): Phaser.Geom.Rectangle {
+    return new Phaser.Geom.Rectangle(
+      this.player.x - PLAYER_COLLISION_HALF_SIZE,
+      this.player.y - PLAYER_COLLISION_HALF_SIZE,
+      PLAYER_COLLISION_HALF_SIZE * 2,
+      PLAYER_COLLISION_HALF_SIZE * 2,
+    );
+  }
+
+  private activeAircraftVisual(): AircraftDefinition['visual'] {
+    const aircraftId = this.getActiveAircraftId();
+    const definition = aircraftId === null
+      ? undefined
+      : contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+    return definition?.visual ?? contentCatalog.aircraft[0].visual;
+  }
+
+  private drawPlayerShip(): void {
+    const visual = this.activeAircraftVisual();
+    const points: Phaser.Math.Vector2[] = [];
+    for (let index = 0; index < visual.silhouette.length; index += 2) {
+      points.push(
+        new Phaser.Math.Vector2(
+          visual.silhouette[index] ?? 0,
+          visual.silhouette[index + 1] ?? 0,
+        ),
+      );
+    }
+    this.player.clear();
+    this.player.fillStyle(visual.hullColor, 1);
+    this.player.fillPoints(points, true);
+    this.player.fillStyle(visual.accentColor, 1);
+    this.player.fillCircle(0, -4, 3);
   }
 
   private resetEncounterState(): void {
@@ -1116,7 +1149,10 @@ export class CombatScene extends Phaser.Scene {
       shot.body.y += shot.vy * (deltaMs / 1000);
       const hitPlayer =
         this.invulnerableMs <= 0 &&
-        Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), shot.body.getBounds());
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          this.playerCollisionBounds(),
+          shot.body.getBounds(),
+        );
       if (hitPlayer) {
         const impactX = shot.body.x;
         const impactY = shot.body.y;
@@ -1367,7 +1403,10 @@ export class CombatScene extends Phaser.Scene {
       if (
         this.enemies[enemyIndex] === enemy &&
         this.invulnerableMs <= 0 &&
-        Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), enemy.body.getBounds())
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          this.playerCollisionBounds(),
+          enemy.body.getBounds(),
+        )
       ) {
         const passiveMultiplier = this.runState.technologyDecision === 'install'
           ? contentCatalog.alienTechnologies[0].passiveEffect.armourDamageMultiplier
