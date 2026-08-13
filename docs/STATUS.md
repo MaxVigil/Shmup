@@ -276,16 +276,40 @@ packages from previous sessions are part of the same playtest batch.
   boundary and cascades into insolvency when the reserve cannot cover it
   (schema v12 with a v11 migration).
 - All 145 unit tests, lint, typecheck, and the production build pass locally.
+- Command navigation is fixed (`command` is the landing tab, no `overview` remnants), a
+  Settings "Restart mission" button clears the save with a two-step confirmation, and the
+  pause menu offers an armed two-step "Abort sortie" that keeps the collected haul
+  (schema v13 foundation shipped together with the fleet cycle).
+- Aircraft are now individual fleet entities: each has its own weapon slots
+  (Interceptor 2, Gunship 3, Aegis 4) and loadout, warehouse counts physical weapons
+  (`weaponStock`), rockets (`consumableStock`), and modules (`aircraftModules`), and the
+  active aircraft's loadout mirrors the combat weapon switcher across N slots.
+- A fourth PRC-sourced aircraft, the Yanlong (four primary slots, competitive economy),
+  joins the market, and a warehouse panel in the Hangar lists all stock with
+  install/unequip actions from the per-aircraft loadout editor.
+- Aircraft now take damage from sorties, grounded until repaired; standard repairs cost
+  credits plus sortie-time, emergency repairs cost 2× and are instant, and repairing
+  aircraft cannot be activated or launched.
+- A monthly staff market offers deterministic named candidates (Ukrainian, Chinese, and
+  other Council pools) with tiers, efficiency and salary multipliers; hiring consumes
+  the candidate, staff gain XP per sortie (levels raise contribution), and blueprint
+  research uses the summed staff contribution.
+- A Trade Centre building gates a new Trade tab: procurement (weapons, rockets),
+  surplus sales, and the relocated Council credit lines; a hireable trade manager adds
+  up to 15% margin from level 2 onward.
+- All 158 unit tests, lint, typecheck, and the production build pass locally.
 
 ## Next
 
-1. Playtest the P0 Chinese locale, the P1 fleet economy, the P2 fuel/month gate, and
-   the P2a credit line (aircraft prices, slot cost, refuel costs, loan terms, and
-   combat multipliers are prototypes) before merging to `main`.
-2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment
-   (schema v13) after the fleet and Command Centre land.
+1. Playtest the full fleet/inventory cycle end-to-end on a fresh profile: buy an
+   aircraft, move weapons between the warehouse and slots, take damage, repair
+   (standard and emergency), hire staff from the monthly pool, build the Trade Centre,
+   sell surplus stock, and take a loan — before merging to `main`.
+2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment, and
+   per-pilot fatigue (schema v14) once the fleet-entity cycle lands.
 3. Preserve M3h–M3j as the ranged enemy, Canister Aircraft Cannon, and auxiliary
-   hardpoint plus manually fired rocket pod cycles.
+   hardpoint plus manually fired rocket pod cycles (wire rocket ammunition consumption
+   to `consumableStock`).
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket
    controls are validated.
 
@@ -298,7 +322,7 @@ packages from previous sessions are part of the same playtest batch.
 - The reviewed open-license shmup art sets were not selected. Asset search, visual
   comparison, licence verification, and integration are deferred to a separate stage.
 - Defeat currently returns every purchased or manufactured weapon safely to Base;
-  equipment loss, durability, repair, and insurance remain deliberately deferred.
+  pilot equipment loss, insurance, and pilot casualties remain deliberately deferred.
 - Phaser currently forms one large production chunk; defer code splitting until the
   combat and base routes are separated in M1–M3.
 - Standing product constraints are recorded in `AGENTS.md`, `docs/GAME_SPEC.md`, and

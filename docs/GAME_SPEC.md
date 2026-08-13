@@ -95,6 +95,33 @@ properties over time.
 - Pilots have skills that modify combat statistics.
 - Research progresses through game events, never real-world timers.
 
+## Fleet, warehouse, personnel, and trade (prototype layer)
+
+- Aircraft are individual fleet entities. Each has its own primary weapon slots
+  (Interceptor 2, Gunship 3, Aegis 4, Yanlong 4), its own loadout, and its own
+  damage state. The active aircraft's loadout drives the combat weapon switcher.
+- The warehouse counts physical items: weapons, one-use rocket ammunition, and
+  manufactured modules. Installing moves an item from storage onto one aircraft;
+  unequipping and replacing return it to storage; a module can exist on at most one
+  aircraft at a time.
+- Sorties damage the flown aircraft. A damaged aircraft is grounded until repaired:
+  standard repair costs credits and completes after a number of completed sorties,
+  emergency repair costs 2× and is instant. Repair only requires credits, so the
+  fleet can never soft-lock.
+- Staff arrive as a limited, deterministic monthly candidate pool with tiers and
+  efficiency/salary multipliers. Names come from Ukrainian, Chinese, Indian, and
+  Brazilian pools; the best hires are frequently Ukrainian, and Chinese candidates
+  sometimes lead. Staff gain XP per sortie and their levels raise their
+  contribution.
+- The Trade Centre building gates a Trade tab: procurement (finished weapons and
+  rocket ammunition), surplus sales of warehouse stock, and the Council credit
+  lines. A hired trade manager improves every buy and sell price by up to 15%.
+- The PRC supplies the Yanlong market aircraft, holds the best loan terms, and
+  sometimes offers the best candidates — positive and unobtrusive, never constant.
+- Aborting a sortie from the pause menu ends the run successfully with whatever was
+  already collected; the Settings panel can restart the whole mission after an
+  explicit two-step confirmation.
+
 ## Recovery Council composition
 
 - The Recovery Council is an international body founded after the First Breach. The

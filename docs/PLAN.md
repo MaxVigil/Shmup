@@ -199,6 +199,26 @@ Status: implemented on `test`; awaiting playtest before merging to `main`.
 - [x] Rework the Hangar: fleet bay cards with status chips (ACTIVE/FUELED/UNFUELED),
   visible refuel costs, and market offers with deltas against the active aircraft.
 
+## P3 — Fleet entities, inventory, damage/repair, staff, and trade (schema v13)
+
+Status: implemented on `test`; awaiting playtest before merging to `main`. See
+`docs/P3_FLEET_INVENTORY.md` and `docs/DECISIONS.md`.
+
+- [x] C1: fix Command tab navigation, add restart-mission with confirmation, and
+  abort sortie from the pause menu.
+- [x] Schema v13: single 12→13 migration with `aircraftLoadouts`, `weaponStock`,
+  `consumableStock`, `aircraftModules`, `aircraftDamage`, `aircraftRepair`,
+  `staffCandidates`, `staffXp`; guards and initial state updated.
+- [x] C2: fleet entities with per-aircraft loadouts and N-slot combat switching,
+  warehouse stock, module install/unequip, the PRC Yanlong, loadout editor and
+  warehouse panel.
+- [x] C3: sortie damage, grounded repairs (standard + emergency), repair launch gate.
+- [x] C4: deterministic monthly staff candidate pool, hire, XP levels, and staff
+  contribution in blueprint research.
+- [x] C5: Trade Centre building and Trade tab (procurement, surplus sales, relocated
+  credit lines), trader manager margin.
+- [x] 158 unit tests, lint, typecheck, and the production build pass locally.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's
