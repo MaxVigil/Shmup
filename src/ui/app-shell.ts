@@ -6,7 +6,11 @@ import { CombatScene, type CombatRunResult } from '../game/scenes/CombatScene';
 import type { TranslationKey } from '../i18n';
 import { isLocale } from '../i18n';
 import { clearGame, loadGame, saveGame } from '../persistence/save-repository';
-import type { GameState } from '../domain/model';
+import type {
+  ConstructionJobState,
+  GameState,
+  ProductionJobState,
+} from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
@@ -347,6 +351,20 @@ function resourceShortfall(
     : t('objective.resourcesMissing', { credits, materials });
 }
 
+function constructionJob(
+  state: GameState,
+  buildingId: string,
+): ConstructionJobState | undefined {
+  return state.base.constructionQueue.find((job) => job.buildingId === buildingId);
+}
+
+function productionJob(
+  state: GameState,
+  projectId: string,
+): ProductionJobState | undefined {
+  return state.base.productionQueue.find((job) => job.projectId === projectId);
+}
+
 function renderBase(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -436,7 +454,13 @@ function renderBase(): void {
   insolvencyPanel.hidden = !bankrupt;
   baseScreen.classList.toggle('is-insolvent', bankrupt);
   systemCheck?.classList.toggle('is-critical', bankrupt);
-  laboratoryStatus.textContent = t(labBuilt ? 'facility.labBuilt' : 'facility.labUnbuilt');
+  const labJob = constructionJob(state, laboratory.id);
+  laboratoryStatus.textContent = labJob !== undefined
+    ? t('facility.constructing', {
+        progress: labJob.progress,
+        required: labJob.requiredProgress,
+      })
+    : t(labBuilt ? 'facility.labBuilt' : 'facility.labUnbuilt');
   laboratoryCost.textContent = labBuilt
     ? ''
     : t('facility.buildCost', {
@@ -446,6 +470,7 @@ function renderBase(): void {
   constructLaboratoryButton.hidden = labBuilt;
   constructLaboratoryButton.disabled = (
     bankrupt ||
+    labJob !== undefined ||
     state.base.credits < laboratory.creditCost ||
     state.base.materials < laboratory.materialCost
   );
@@ -461,9 +486,15 @@ function renderBase(): void {
     : t('facility.requiresWorks');
   renderCandidates('scientist-candidates', scientistRole.id);
   renderCandidates('engineer-candidates', engineerRole.id);
-  workshopStatus.textContent = workshopBuilt
-    ? t('facility.workshopBuilt')
-    : labBuilt ? t('facility.workshopUnbuilt') : t('facility.workshopLocked');
+  const workshopJob = constructionJob(state, workshop.id);
+  workshopStatus.textContent = workshopJob !== undefined
+    ? t('facility.constructing', {
+        progress: workshopJob.progress,
+        required: workshopJob.requiredProgress,
+      })
+    : workshopBuilt
+      ? t('facility.workshopBuilt')
+      : labBuilt ? t('facility.workshopUnbuilt') : t('facility.workshopLocked');
   workshopCost.textContent = workshopBuilt || !labBuilt
     ? ''
     : t('facility.buildCost', {
@@ -474,6 +505,7 @@ function renderBase(): void {
   constructWorkshopButton.disabled = (
     bankrupt ||
     !labBuilt ||
+    workshopJob !== undefined ||
     state.base.credits < workshop.creditCost ||
     state.base.materials < workshop.materialCost
   );
@@ -492,14 +524,22 @@ function renderBase(): void {
     : t('programme.contribution', { count: scientists });
   startBlueprintResearchButton.hidden =
     blueprintUnlocked || blueprintProject !== undefined || !state.base.telemetryRecorded;
-  startBlueprintResearchButton.disabled = bankrupt || !researchReady || researchBusy;
-  capturerEquipmentStatus.textContent = capturerManufactured
-    ? t('programme.manufactured')
-    : !blueprintUnlocked
-      ? t('programme.needsBlueprint')
-      : !workshopBuilt
-        ? t('programme.needsWorkshop')
-        : !productionReady ? t('production.requiresEngineer') : t('programme.ready');
+  startBlueprintResearchButton.disabled =
+    bankrupt || !researchReady || researchBusy ||
+    state.base.credits < capturerBlueprint.researchCreditCost;
+  const capturerJob = productionJob(state, capturerBlueprint.id);
+  capturerEquipmentStatus.textContent = capturerJob !== undefined
+    ? t('production.inProgress', {
+        progress: capturerJob.progress,
+        required: capturerJob.requiredProgress,
+      })
+    : capturerManufactured
+      ? t('programme.manufactured')
+      : !blueprintUnlocked
+        ? t('programme.needsBlueprint')
+        : !workshopBuilt
+          ? t('programme.needsWorkshop')
+          : !productionReady ? t('production.requiresEngineer') : t('programme.ready');
   capturerEquipmentNote.textContent = capturerManufactured
     ? t(capturerEquipped ? 'programme.equippedNote' : 'programme.loadoutNote')
     : blueprintUnlocked && workshopBuilt
@@ -511,6 +551,7 @@ function renderBase(): void {
   manufactureCapturerButton.hidden = capturerManufactured;
   manufactureCapturerButton.disabled = (
     bankrupt ||
+    capturerJob !== undefined ||
     !blueprintUnlocked ||
     !productionReady ||
     state.base.credits < capturerEquipment.creditCost ||
@@ -582,11 +623,17 @@ function renderBase(): void {
   );
 
   acceleratorProductionRow.hidden = !acceleratorBlueprintOwned;
-  acceleratorProductionStatus.textContent = t(
-    acceleratorLocallyProduced
-      ? 'production.mastered'
-      : productionReady ? 'production.ready' : 'production.requiresEngineer',
-  );
+  const acceleratorJob = productionJob(state, acceleratorBlueprint.id);
+  acceleratorProductionStatus.textContent = acceleratorJob !== undefined
+    ? t('production.inProgress', {
+        progress: acceleratorJob.progress,
+        required: acceleratorJob.requiredProgress,
+      })
+    : t(
+        acceleratorLocallyProduced
+          ? 'production.mastered'
+          : productionReady ? 'production.ready' : 'production.requiresEngineer',
+      );
   acceleratorProductionNote.textContent = acceleratorLocallyProduced
     ? t('production.branchUnlocked')
     : t('production.cost', {
@@ -596,17 +643,24 @@ function renderBase(): void {
   manufactureAcceleratorButton.hidden = acceleratorLocallyProduced;
   manufactureAcceleratorButton.disabled = (
     bankrupt ||
+    acceleratorJob !== undefined ||
     !productionReady ||
     state.base.credits < acceleratorBlueprint.productionCreditCost ||
     state.base.materials < acceleratorBlueprint.productionMaterialCost
   );
 
   machineUpgradeProductionRow.hidden = !machineUpgradeResearched;
-  machineUpgradeProductionStatus.textContent = t(
-    machineUpgradeManufactured
-      ? 'production.installed'
-      : productionReady ? 'production.ready' : 'production.requiresEngineer',
-  );
+  const machineUpgradeJob = productionJob(state, machineGunUpgrade.id);
+  machineUpgradeProductionStatus.textContent = machineUpgradeJob !== undefined
+    ? t('production.inProgress', {
+        progress: machineUpgradeJob.progress,
+        required: machineUpgradeJob.requiredProgress,
+      })
+    : t(
+        machineUpgradeManufactured
+          ? 'production.installed'
+          : productionReady ? 'production.ready' : 'production.requiresEngineer',
+      );
   machineUpgradeProductionNote.textContent = machineUpgradeManufactured
     ? t('upgrade.machineEffect')
     : t('production.cost', {
@@ -616,17 +670,24 @@ function renderBase(): void {
   manufactureMachineUpgradeButton.hidden = machineUpgradeManufactured;
   manufactureMachineUpgradeButton.disabled = (
     bankrupt ||
+    machineUpgradeJob !== undefined ||
     !productionReady ||
     state.base.credits < machineGunUpgrade.productionCreditCost ||
     state.base.materials < machineGunUpgrade.productionMaterialCost
   );
 
   acceleratorUpgradeProductionRow.hidden = !acceleratorUpgradeResearched;
-  acceleratorUpgradeProductionStatus.textContent = t(
-    acceleratorUpgradeManufactured
-      ? 'production.installed'
-      : productionReady ? 'production.ready' : 'production.requiresEngineer',
-  );
+  const acceleratorUpgradeJob = productionJob(state, acceleratorUpgrade.id);
+  acceleratorUpgradeProductionStatus.textContent = acceleratorUpgradeJob !== undefined
+    ? t('production.inProgress', {
+        progress: acceleratorUpgradeJob.progress,
+        required: acceleratorUpgradeJob.requiredProgress,
+      })
+    : t(
+        acceleratorUpgradeManufactured
+          ? 'production.installed'
+          : productionReady ? 'production.ready' : 'production.requiresEngineer',
+      );
   acceleratorUpgradeProductionNote.textContent = acceleratorUpgradeManufactured
     ? t('upgrade.acceleratorEffect')
     : t('production.cost', {
@@ -636,6 +697,7 @@ function renderBase(): void {
   manufactureAcceleratorUpgradeButton.hidden = acceleratorUpgradeManufactured;
   manufactureAcceleratorUpgradeButton.disabled = (
     bankrupt ||
+    acceleratorUpgradeJob !== undefined ||
     !productionReady ||
     state.base.credits < acceleratorUpgrade.productionCreditCost ||
     state.base.materials < acceleratorUpgrade.productionMaterialCost
@@ -1770,7 +1832,8 @@ function renderCredit(): void {
   }
   for (const loan of state.base.loans) {
     const row = document.createElement('article');
-    row.className = 'threat-row';
+    row.className = 'threat-row loan-row';
+    const left = document.createElement('div');
     const name = document.createElement('strong');
     name.textContent = lenderName(loan.lenderId);
     const info = document.createElement('small');
@@ -1783,7 +1846,35 @@ function renderCredit(): void {
           }),
           t('credit.loanDue', { month: loan.dueMonth }),
         ].join(' · ');
-    row.append(name, info);
+    left.append(name, info);
+    row.appendChild(left);
+    if (!loan.repaid) {
+      const repay = document.createElement('div');
+      repay.className = 'loan-repay';
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '1';
+      input.max = String(loan.repaymentDue);
+      input.value = String(Math.min(loan.repaymentDue, state.base.credits));
+      input.className = 'loan-repay__input';
+      input.setAttribute('aria-label', t('credit.repayAmount'));
+      const button = document.createElement('button');
+      button.className = 'base-action';
+      button.type = 'button';
+      button.textContent = t('credit.repay');
+      button.disabled = bankrupt;
+      button.addEventListener('click', () => {
+        const amount = Math.max(1, Number.parseInt(input.value, 10) || 0);
+        try {
+          store.dispatch({ type: 'REPAY_LOAN', loanId: loan.id, amount });
+          showToast(t('toast.loanRepaid'));
+        } catch {
+          showToast(t('credit.repayShortfall'));
+        }
+      });
+      repay.append(input, button);
+      row.appendChild(repay);
+    }
     loansList.appendChild(row);
   }
 }
@@ -1822,19 +1913,28 @@ function renderCanister(): void {
     ? ''
     : t('programme.contribution', { count: scientists });
   researchCanisterButton.hidden = canisterUnlocked || canisterProject !== undefined;
-  researchCanisterButton.disabled = bankrupt || !researchReady || researchBusy;
+  researchCanisterButton.disabled =
+    bankrupt || !researchReady || researchBusy ||
+    state.base.credits < canisterBlueprint.researchCreditCost;
 
+  const canisterJob = productionJob(state, canisterBlueprint.id);
   canisterProductionRow.hidden = !canisterUnlocked || canisterOwned;
   if (canisterUnlocked && !canisterOwned) {
-    canisterProductionStatus.textContent = productionReady
-      ? t('production.ready')
-      : t('production.requiresEngineer');
+    canisterProductionStatus.textContent = canisterJob !== undefined
+      ? t('production.inProgress', {
+          progress: canisterJob.progress,
+          required: canisterJob.requiredProgress,
+        })
+      : productionReady
+        ? t('production.ready')
+        : t('production.requiresEngineer');
     canisterProductionNote.textContent = t('production.cost', {
       credits: canisterBlueprint.productionCreditCost,
       materials: canisterBlueprint.productionMaterialCost,
     });
     manufactureCanisterButton.disabled =
       bankrupt ||
+      canisterJob !== undefined ||
       !productionReady ||
       state.base.credits < canisterBlueprint.productionCreditCost ||
       state.base.materials < canisterBlueprint.productionMaterialCost;
@@ -1886,12 +1986,22 @@ function renderContainment(): void {
       : t('containment.requiresTeam');
     containmentNote.textContent = '';
     startContainmentResearchButton.hidden = false;
-    startContainmentResearchButton.disabled = bankrupt || !researchReady || researchBusy;
+    startContainmentResearchButton.disabled =
+      bankrupt || !researchReady || researchBusy ||
+      state.base.credits < containmentBlueprint.researchCreditCost;
   }
 
   quarantineRow.hidden = !containmentUnlocked;
+  const quarantineJob = constructionJob(state, quarantine.id);
   if (quarantineBuilt) {
     quarantineStatus.textContent = t('facility.quarantineBuilt');
+    quarantineCost.textContent = '';
+    constructQuarantineButton.hidden = true;
+  } else if (quarantineJob !== undefined) {
+    quarantineStatus.textContent = t('facility.constructing', {
+      progress: quarantineJob.progress,
+      required: quarantineJob.requiredProgress,
+    });
     quarantineCost.textContent = '';
     constructQuarantineButton.hidden = true;
   } else {
@@ -1916,16 +2026,23 @@ function renderContainment(): void {
   }
 
   alienEmitterProductionRow.hidden = !adaptedUnlocked || emitterOwned;
+  const emitterJob = productionJob(state, adaptedBlueprint.id);
   if (adaptedUnlocked && !emitterOwned) {
-    alienEmitterProductionStatus.textContent = productionReady
-      ? t('production.ready')
-      : t('production.requiresEngineer');
+    alienEmitterProductionStatus.textContent = emitterJob !== undefined
+      ? t('production.inProgress', {
+          progress: emitterJob.progress,
+          required: emitterJob.requiredProgress,
+        })
+      : productionReady
+        ? t('production.ready')
+        : t('production.requiresEngineer');
     alienEmitterProductionNote.textContent = t('alienProduction.cost', {
       credits: adaptedBlueprint.productionCreditCost,
       materials: adaptedBlueprint.productionMaterialCost,
     });
     manufactureAlienEmitterButton.disabled =
       bankrupt ||
+      emitterJob !== undefined ||
       !productionReady ||
       state.base.credits < adaptedBlueprint.productionCreditCost ||
       state.base.materials < adaptedBlueprint.productionMaterialCost;
