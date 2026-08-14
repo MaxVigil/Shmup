@@ -48,11 +48,12 @@ export function buildAppTemplate(initialState: GameState): string {
       </section>
 
       <nav id="base-navigation" class="base-navigation" role="tablist">
-        <button id="base-tab-command" type="button" role="tab" data-base-section="command" aria-controls="base-panel-command" aria-selected="true"></button>
-        <button id="base-tab-research" type="button" role="tab" data-base-section="research" aria-controls="base-panel-research" aria-selected="false"></button>
-        <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
-        <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
-        <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
+        <button id="base-tab-command" type="button" role="tab" data-base-section="command" data-nav-glyph="command" aria-controls="base-panel-command" aria-selected="true"></button>
+        <button id="base-tab-research" type="button" role="tab" data-base-section="research" data-nav-glyph="research" aria-controls="base-panel-research" aria-selected="false"></button>
+        <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" data-nav-glyph="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
+        <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" data-nav-glyph="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
+        <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" data-nav-glyph="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
+        <button id="base-tab-databank" type="button" role="tab" data-base-section="databank" data-nav-glyph="databank" aria-controls="base-panel-databank" aria-selected="false"></button>
       </nav>
 
       <div id="global-hud" class="global-hud">
@@ -293,6 +294,15 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
           </section>
         </div>
+      </section>
+
+      <section id="base-panel-databank" class="base-panel" role="tabpanel" aria-labelledby="base-tab-databank" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="databank-section-eyebrow"></p>
+          <h1 id="databank-section-title"></h1>
+          <p class="lede" id="databank-section-lede"></p>
+        </header>
+        <p id="databank-note" class="preflight-warning"></p>
       </section>
     </main>
 

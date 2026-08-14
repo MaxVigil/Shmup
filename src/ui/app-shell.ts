@@ -317,7 +317,8 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
 
 function isBaseSection(value: string | undefined): value is BaseSection {
   return value === 'command' || value === 'research' ||
-    value === 'engineering' || value === 'hangar' || value === 'trade';
+    value === 'engineering' || value === 'hangar' || value === 'trade' ||
+    value === 'databank';
 }
 
 function showBaseSection(section: BaseSection): void {
@@ -422,6 +423,7 @@ function renderBase(): void {
     ? t('insolvency.objectiveDetail')
     : t(objectiveTranslationKeys.detail, objectiveParams);
   hudMonth.textContent = t('hud.month', { month: state.base.month });
+  byId<HTMLElement>('databank-note').textContent = t('databank.note');
   hudObjective.textContent = bankrupt
     ? t('insolvency.objective')
     : t(objectiveTranslationKeys.title, objectiveParams);
@@ -1669,6 +1671,10 @@ function renderLocale(): void {
   setText('base-tab-engineering', 'baseNav.engineering');
   setText('base-tab-hangar', 'baseNav.hangar');
   setText('base-tab-trade', 'baseNav.trade');
+  setText('base-tab-databank', 'baseNav.databank');
+  setText('databank-section-eyebrow', 'databank.eyebrow');
+  setText('databank-section-title', 'databank.title');
+  setText('databank-section-lede', 'databank.lede');
   setText('settings-title', 'settings.title');
   setText('language-label', 'settings.language');
   setText('restart-mission', 'settings.restart');
