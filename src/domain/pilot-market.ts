@@ -45,6 +45,8 @@ const NAME_POOLS: Readonly<Record<string, { readonly first: readonly string[]; r
 };
 
 export const PILOT_FATIGUE_PER_SORTIE = 0.15;
+export const PILOT_FATIGUE_RECOVERY_PER_SORTIE = 0.05;
+export const PILOT_FATIGUE_RECOVERY_PER_MONTH = 0.25;
 export const PILOT_FATIGUE_LIMIT = 0.75;
 export const STARTER_PILOT_ID = 'pilot-kestrel';
 
@@ -154,6 +156,9 @@ export function assignPilot(base: BaseState, pilotId: string): BaseState {
   if (!base.pilots.some((pilot) => pilot.id === pilotId)) {
     throw new Error(`Pilot ${pilotId} is not on the roster.`);
   }
+  if (isPilotFatigued(base.pilotFatigue[pilotId] ?? 0)) {
+    throw new Error(`Pilot ${pilotId} is too fatigued to fly.`);
+  }
   return { ...base, activePilotId: pilotId };
 }
 
@@ -161,7 +166,16 @@ export function restPilot(base: BaseState, pilotId: string): BaseState {
   if (!base.pilots.some((pilot) => pilot.id === pilotId)) {
     throw new Error(`Pilot ${pilotId} is not on the roster.`);
   }
-  return { ...base, pilotFatigue: { ...base.pilotFatigue, [pilotId]: 0 } };
+  if (base.activePilotId !== pilotId) {
+    throw new Error(`Pilot ${pilotId} is not the active pilot.`);
+  }
+  const replacement = base.pilots.find(
+    (pilot) => pilot.id !== pilotId && !isPilotFatigued(base.pilotFatigue[pilot.id] ?? 0),
+  );
+  if (replacement === undefined) {
+    throw new Error('No rested pilot is available to replace the fatigued pilot.');
+  }
+  return { ...base, activePilotId: replacement.id };
 }
 
 export function pilotLevel(xp: number): number {
@@ -172,20 +186,42 @@ export function isPilotFatigued(fatigue: number): boolean {
   return fatigue >= PILOT_FATIGUE_LIMIT;
 }
 
-/** Grants the active pilot XP and fatigue after a completed sortie. */
+/** Grants the active pilot XP and fatigue after a completed sortie; other
+ *  pilots recover a little while they stand down. */
 export function awardPilotProgress(base: BaseState): BaseState {
   const id = base.activePilotId;
   if (id === null || !base.pilots.some((pilot) => pilot.id === id)) {
     return base;
   }
+  const pilotFatigue: Record<string, number> = { ...base.pilotFatigue };
+  for (const pilot of base.pilots) {
+    const current = pilotFatigue[pilot.id] ?? 0;
+    pilotFatigue[pilot.id] = pilot.id === id
+      ? Math.min(1, current + PILOT_FATIGUE_PER_SORTIE)
+      : Math.max(0, current - PILOT_FATIGUE_RECOVERY_PER_SORTIE);
+  }
   return {
     ...base,
     pilotXp: { ...base.pilotXp, [id]: (base.pilotXp[id] ?? 0) + 1 },
-    pilotFatigue: {
-      ...base.pilotFatigue,
-      [id]: Math.min(1, (base.pilotFatigue[id] ?? 0) + PILOT_FATIGUE_PER_SORTIE),
-    },
+    pilotFatigue,
   };
+}
+
+/** Pilots recover fatigue during the month-end stand-down. */
+export function recoverMonthlyPilotFatigue(base: BaseState): BaseState {
+  const pilotFatigue: Record<string, number> = { ...base.pilotFatigue };
+  let changed = false;
+  for (const pilot of base.pilots) {
+    const current = pilotFatigue[pilot.id] ?? 0;
+    if (current > 0) {
+      pilotFatigue[pilot.id] = Math.max(
+        0,
+        current - PILOT_FATIGUE_RECOVERY_PER_MONTH,
+      );
+      changed = true;
+    }
+  }
+  return changed ? { ...base, pilotFatigue } : base;
 }
 
 /** The active pilot's level and specialization boost for aircraft stats. */

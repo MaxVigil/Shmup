@@ -207,3 +207,17 @@ export function awardStaffXp(base: BaseState): BaseState {
   }
   return { ...base, staffXp: next };
 }
+
+/** Removes a staff member from the roster; no refund is granted. */
+export function dismissStaff(base: BaseState, staffId: string): BaseState {
+  if (!base.staff.some((member) => member.id === staffId)) {
+    throw new Error(`Staff member ${staffId} is not on the roster.`);
+  }
+  const staffXp = { ...base.staffXp };
+  delete staffXp[staffId];
+  return {
+    ...base,
+    staff: base.staff.filter((member) => member.id !== staffId),
+    staffXp,
+  };
+}

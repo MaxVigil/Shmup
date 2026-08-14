@@ -5,6 +5,7 @@ import type {
   EnemyDefinition,
   WeaponDefinition,
 } from '../../content/model';
+import { formatCredits } from '../../ui/credits';
 import type { SortieOutcome } from '../../domain/model';
 import {
   calculateMutualKnockback,
@@ -62,6 +63,10 @@ const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
 const CONTROLS_HINT_DURATION_MS = 15_000;
 const ROCKET_CHARGES_DEFAULT = 3;
+const ROCKET_DAMAGE = 200;
+const ROCKET_SPEED = 820;
+/** Blast radius as a fraction of the larger screen dimension. */
+const ROCKET_BLAST_RADIUS_FRACTION = 0.4;
 const ENEMY_BOUNCE_DAMPING = 0.5;
 const ENEMY_BOUND_MARGIN = 24;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
@@ -209,6 +214,7 @@ export class CombatScene extends Phaser.Scene {
   private rocketsText: Phaser.GameObjects.Text | null = null;
   private rocketCharges = 0;
   private rocketsFired = 0;
+  private pointerFollowLock = false;
   private endStatusKey: TranslationKey | null = null;
   private debugInvincible = false;
   private threatLevel = 1;
@@ -289,11 +295,16 @@ export class CombatScene extends Phaser.Scene {
     this.reserveText = this.createHudText(width - 20, 18, '').setOrigin(1, 0);
     this.timeText = this.createHudText(width / 2, 18, '03:00').setOrigin(0.5, 0);
     this.statusText = this.add
-      .text(width / 2, height - 28, this.t('combat.controls'), {
-        color: '#6f8792',
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-        fontSize: '11px',
-      })
+      .text(
+        width / 2,
+        height - 28,
+        this.t(this.isRocketPodEquipped() ? 'combat.controlsRockets' : 'combat.controls'),
+        {
+          color: '#6f8792',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          fontSize: '11px',
+        },
+      )
       .setOrigin(0.5);
 
     if (this.isRocketPodEquipped()) {
@@ -303,12 +314,26 @@ export class CombatScene extends Phaser.Scene {
         this.t('combat.rockets', { value: String(this.rocketCharges) }),
       );
       this.input.keyboard?.on('keydown-SPACE', () => this.tryFireRocket());
+      // Right-click fires a rocket; the left button is reserved for movement.
       this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-        if (pointer.leftButtonDown() || pointer.rightButtonDown()) {
+        if (pointer.rightButtonDown()) {
           this.tryFireRocket();
         }
       });
+      this.input.keyboard?.on('keydown-F', () => this.togglePointerFollow());
     }
+  }
+
+  public setPointerFollowLock(locked: boolean): void {
+    this.pointerFollowLock = locked;
+  }
+
+  public getPointerFollowLock(): boolean {
+    return this.pointerFollowLock;
+  }
+
+  private togglePointerFollow(): void {
+    this.pointerFollowLock = !this.pointerFollowLock;
   }
 
   private playerCollisionBounds(): Phaser.Geom.Rectangle {
@@ -811,6 +836,21 @@ export class CombatScene extends Phaser.Scene {
       fontSize: '13px',
     }).setOrigin(0.5);
     const abortAvailable = this.runState.phase === 'combat';
+    let warning: Phaser.GameObjects.Text | null = null;
+    if (abortAvailable) {
+      warning = this.add.text(
+        width / 2,
+        height / 2 + 88,
+        this.t(this.abortArmed ? 'combat.abortWarning' : 'combat.abortHint'),
+        {
+          align: 'center',
+          color: this.abortArmed ? '#ffd7dd' : '#87a8b0',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          fontSize: '11px',
+          wordWrap: { width: width - 150 },
+        },
+      ).setOrigin(0.5, 0);
+    }
     const abortButton = this.add.text(
       width / 2,
       height / 2 + 64,
@@ -836,7 +876,16 @@ export class CombatScene extends Phaser.Scene {
     } else {
       abortButton.setAlpha(0.4);
     }
-    this.pauseLayer = this.add.container(0, 0, [blocker, panel, heading, detail, abortButton]).setDepth(50);
+    const panelHeight = warning === null ? 220 : 268;
+    panel.setSize(width - 112, panelHeight);
+    this.pauseLayer = this.add.container(
+      0,
+      0,
+      [blocker, panel, heading, detail, abortButton],
+    ).setDepth(50);
+    if (warning !== null) {
+      this.pauseLayer.add(warning);
+    }
   }
 
   public abortSortie(): void {
@@ -896,10 +945,25 @@ export class CombatScene extends Phaser.Scene {
     this.player.y += (vertical / length) * distance;
 
     const pointer = this.input.activePointer;
-    if (pointer.isDown) {
-      const follow = Math.min(1, deltaMs / 70);
-      this.player.x = Phaser.Math.Linear(this.player.x, pointer.x, follow);
-      this.player.y = Phaser.Math.Linear(this.player.y, pointer.y, follow);
+    const pointerInBounds = pointer.x >= 0 &&
+      pointer.x <= this.scale.width &&
+      pointer.y >= 0 &&
+      pointer.y <= this.scale.height;
+    const followPointer = this.pointerFollowLock
+      ? pointerInBounds
+      : pointer.isDown;
+    if (followPointer) {
+      const dx = pointer.x - this.player.x;
+      const dy = pointer.y - this.player.y;
+      const pointerDistance = Math.hypot(dx, dy);
+      if (pointerDistance > 1) {
+        const step = Math.min(
+          this.aircraftSpeed * (deltaMs / 1000),
+          pointerDistance,
+        );
+        this.player.x += (dx / pointerDistance) * step;
+        this.player.y += (dy / pointerDistance) * step;
+      }
     }
 
     this.player.x = Phaser.Math.Clamp(this.player.x, PLAYER_MARGIN, this.scale.width - PLAYER_MARGIN);
@@ -1284,8 +1348,8 @@ export class CombatScene extends Phaser.Scene {
     this.rockets.push({
       body,
       targetId: target.actorId,
-      damage: 90,
-      speed: 700,
+      damage: ROCKET_DAMAGE,
+      speed: ROCKET_SPEED,
       targetX: target.body.x,
       targetY: target.body.y,
       elapsedMs: 0,
@@ -1354,11 +1418,11 @@ export class CombatScene extends Phaser.Scene {
           target.body.getBounds(),
         )
       ) {
-        this.explodeRocket(index, rocket, target);
+        this.explodeRocket(index, rocket);
         continue;
       }
       if (rocket.elapsedMs >= 2600 || rocket.body.y < -60) {
-        this.explodeRocket(index, rocket, undefined);
+        this.explodeRocket(index, rocket);
       }
     }
   }
@@ -1366,28 +1430,36 @@ export class CombatScene extends Phaser.Scene {
   private explodeRocket(
     index: number,
     rocket: RocketActor,
-    target: EnemyActor | undefined,
   ): void {
     const x = rocket.body.x;
     const y = rocket.body.y;
     rocket.body.destroy();
     this.rockets.splice(index, 1);
     this.createDestructionBurst(x, y, 0xffd98a);
-    this.cameras.main.shake(120, 0.006);
-    if (target !== undefined && target.armour > 0) {
-      target.armour -= rocket.damage;
-      target.body.setFillStyle(0xffffff);
-      this.time.delayedCall(45, () => target.body.active && target.body.setFillStyle(
-        target.definition.kind === 'elite'
+    this.cameras.main.shake(140, 0.008);
+    // The warhead blasts every enemy within a wide radius; the player's own
+    // aircraft is never damaged by its own rockets.
+    const blastRadius = Math.max(this.scale.width, this.scale.height) *
+      ROCKET_BLAST_RADIUS_FRACTION;
+    for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
+      const enemy = this.enemies[enemyIndex];
+      if (enemy === undefined) {
+        continue;
+      }
+      const distance = Math.hypot(enemy.body.x - x, enemy.body.y - y);
+      if (distance > blastRadius) {
+        continue;
+      }
+      enemy.armour -= rocket.damage;
+      enemy.body.setFillStyle(0xffffff);
+      this.time.delayedCall(45, () => enemy.body.active && enemy.body.setFillStyle(
+        enemy.definition.kind === 'elite'
           ? 0x9368c7
-          : target.definition.movementPattern === 'sine' ? 0xd98ba1 : 0xd6b36a,
+          : enemy.definition.movementPattern === 'sine' ? 0xd98ba1 : 0xd6b36a,
       ));
-      this.updateEnemyArmourBar(target);
-      if (target.armour <= 0) {
-        const enemyIndex = this.enemies.indexOf(target);
-        if (enemyIndex !== -1) {
-          this.applyEnemyDefeat(enemyIndex);
-        }
+      this.updateEnemyArmourBar(enemy);
+      if (enemy.armour <= 0) {
+        this.applyEnemyDefeat(enemyIndex);
       }
     }
   }
@@ -1713,12 +1785,17 @@ export class CombatScene extends Phaser.Scene {
 
   private showContractChange(x: number, y: number, amount: number): void {
     const positive = amount >= 0;
-    const text = this.add.text(x, y, `${positive ? '+' : '−'}${Math.abs(amount)}`, {
-      color: positive ? '#70d6b3' : '#f39aaa',
-      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-      fontSize: '16px',
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(24);
+    const text = this.add.text(
+      x,
+      y,
+      `${positive ? '+' : '−'}${formatCredits(Math.abs(amount))}`,
+      {
+        color: positive ? '#70d6b3' : '#f39aaa',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+        fontSize: '16px',
+        fontStyle: 'bold',
+      },
+    ).setOrigin(0.5).setDepth(24);
     this.tweens.add({
       targets: text,
       y: y - 34,
@@ -1742,7 +1819,7 @@ export class CombatScene extends Phaser.Scene {
     }));
     const projectedCredits = this.startingCredits + contractCreditDelta(this.contractLedger);
     this.reserveText
-      .setText(this.t('combat.reserve', { value: projectedCredits.toString() }))
+      .setText(this.t('combat.reserve', { value: formatCredits(projectedCredits) }))
       .setColor(projectedCredits <= 0 ? '#f39aaa' : '#b7d9d2');
     this.timeText.setText(`${minutes}:${seconds}`);
     this.updateRocketHud();

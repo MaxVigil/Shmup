@@ -27,9 +27,27 @@ are untouched; all 168 unit tests, lint, typecheck, and the production build pas
 
 ## Current milestone
 
-The UI polish batch and the P2a credit line (Command Centre loans, save schema v12)
-are implemented on `test` and awaiting playtest before merging to `main`. The P0/P1/P2
-packages from previous sessions are part of the same playtest batch.
+The funding-nations expansion and the round-4 playtest fixes are implemented on
+`test` (schema v14). Round-4 playtest feedback was triaged and fixed:
+
+- Finance tab now opens (`isBaseSection` guard omitted `finance`).
+- Aborted sorties no longer resolve the mission or grant the nation gift
+  (`abortRun` yields `extracted: false`; `SETTLE_SORTIE` resolves + thanks only on
+  `extracted`). The abort confirmation now spells out the consequences.
+- Rocket fire no longer conflicts with mouse-drag movement (Space / right-click
+  fire; left drag moves); the Rocket Pod gained a large splash warhead.
+- Pointer-follow is speed-capped (no teleporting) with an `F` cursor-lock toggle.
+- Pilot fatigue is now a real rotation mechanic: +0.15/sortie for the active
+  pilot, passive recovery for the rest, monthly recovery, fatigued pilots cannot
+  fly, and REST stands the active pilot down to a rested replacement.
+- Staff management: hired-staff roster in Command with DISMISS, plus Operations
+  Director and Trade Manager candidate pools (previously generated but hidden);
+  engineer headcount raised 1 → 3.
+- Repaid loans no longer linger in Trade; combat HUD and kill rewards use compact
+  credit formatting; debug grants are rescaled (+100k/+1M).
+- Sortie result window now includes the nation's gratitude line (single summary);
+  upgraded (reinforced-ammo) machine gun shows a badge; "New Game" relabeled in
+  Settings (2-step confirm, full wipe).
 
 ## Completed
 
@@ -364,14 +382,13 @@ packages from previous sessions are part of the same playtest batch.
 
 ## Next
 
-1. Playtest the full fleet/inventory cycle end-to-end on a fresh profile: buy an
-   aircraft, move weapons between the warehouse and slots, take damage, repair
-   (standard and emergency), hire staff from the monthly pool, build the Trade Centre,
-   sell surplus stock, and take a loan — before merging to `main`.
-2. P3 pilots: hire, specialisations, XP/levels → aircraft boosts, assignment, and
-   per-pilot fatigue (schema v14) once the fleet-entity cycle lands.
-3. Balance the Rocket Pod economy (market price vs charge count) and the Warden's new
-   fire rate through playtest.
+1. Playtest round 4 on `test` (fresh profile via Settings → NEW GAME): staff roster
+   + dismiss, manager/trader hiring, engineer cap, pilot fatigue rotation, aborted
+   sortie consequences, rocket splash + Space/right-click, pointer-follow, Finance
+   tab, combined sortie report, repaid-loan cleanup, debug grants.
+2. Adjust balance from the round-4 evidence (rocket damage/radius, engineer cap,
+   fatigue recovery, loan terms) and confirm the 9-nation threat/gift economy.
+3. Merge `test` → `main` once the playtest batch is green.
 4. Keep the slowly ascending proximity mine as an auxiliary follow-up after rocket
    controls are validated.
 

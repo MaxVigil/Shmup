@@ -8,6 +8,7 @@ import {
   isPilotFatigued,
   pilotAircraftMultipliers,
   pilotLevel,
+  recoverMonthlyPilotFatigue,
   restPilot,
 } from '../../src/domain/pilot-market';
 import { operationsSpeedMultiplier } from '../../src/domain/staff-market';
@@ -36,7 +37,7 @@ describe('pilot market', () => {
     expect(hired.credits).toBe(initial.base.credits - (candidate as { hireCreditCost: number }).hireCreditCost);
   });
 
-  it('assigns a pilot, accrues XP and fatigue per sortie, and rest resets fatigue', () => {
+  it('assigns a pilot, accrues XP and fatigue per sortie, and stands the active pilot down on rest', () => {
     const initial = createInitialGameState();
     const pilot = initial.base.pilots[0];
     expect(pilot).toBeDefined();
@@ -44,8 +45,52 @@ describe('pilot market', () => {
     const afterSortie = awardPilotProgress(assigned);
     expect(afterSortie.pilotXp[pilot?.id ?? '']).toBe(1);
     expect(afterSortie.pilotFatigue[pilot?.id ?? '']).toBeGreaterThan(0);
-    const rested = restPilot(afterSortie, pilot?.id ?? '');
-    expect(rested.pilotFatigue[pilot?.id ?? '']).toBe(0);
+    // A rested replacement is required to stand the active pilot down.
+    const withSecond = {
+      ...afterSortie,
+      pilots: [
+        ...afterSortie.pilots,
+        {
+          id: 'pilot-2',
+          unlocked: true,
+          firstName: 'Second',
+          lastName: 'Pilot',
+          specialization: 'speed' as const,
+          salaryCreditCost: 60_000,
+        },
+      ],
+    };
+    const rested = restPilot(withSecond, pilot?.id ?? '');
+    expect(rested.activePilotId).toBe('pilot-2');
+    expect(rested.pilotFatigue[pilot?.id ?? '']).toBeGreaterThan(0);
+    // Fatigue recovers passively while the other pilot flies.
+    const recovered = awardPilotProgress({ ...rested, activePilotId: 'pilot-2' });
+    expect(recovered.pilotFatigue[pilot?.id ?? ''] ?? 0).toBeLessThan(
+      rested.pilotFatigue[pilot?.id ?? ''] ?? 0,
+    );
+    expect(() => restPilot(withSecond, 'pilot-2')).toThrow('not the active pilot');
+  });
+
+  it('rejects assigning a fatigued pilot', () => {
+    const initial = createInitialGameState();
+    const id = initial.base.activePilotId;
+    const fatigued = {
+      ...initial.base,
+      pilotFatigue: { ...initial.base.pilotFatigue, [id]: 0.8 },
+    };
+    expect(() => assignPilot(fatigued, id)).toThrow('too fatigued');
+  });
+
+  it('recovers fatigue at the month boundary', () => {
+    const initial = createInitialGameState();
+    const id = initial.base.activePilotId;
+    const tired = {
+      ...initial.base,
+      pilotFatigue: { ...initial.base.pilotFatigue, [id]: 0.5 },
+    };
+    const recovered = recoverMonthlyPilotFatigue(tired);
+    expect(recovered.pilotFatigue[id]).toBeCloseTo(0.25);
+    expect(recoverMonthlyPilotFatigue({ ...recovered }).pilotFatigue[id]).toBe(0);
   });
 
   it('levels pilots and applies specialization and fatigue to aircraft multipliers', () => {

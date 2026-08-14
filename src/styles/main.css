@@ -1699,6 +1699,7 @@ h1 {
 .status-chip.is-unfueled { color: #f0c98a; background: rgb(242 198 109 / 14%); border: 1px solid rgb(242 198 109 / 45%); }
 .status-chip.is-owned { color: #aab8d8; background: rgb(169 183 215 / 14%); border: 1px solid rgb(169 183 215 / 45%); }
 .status-chip.is-damaged { color: #ffb3bd; background: rgb(240 113 133 / 14%); border: 1px solid rgb(240 113 133 / 50%); }
+.status-chip.is-resting { color: #8fd0b8; background: rgb(112 214 179 / 10%); border: 1px solid rgb(112 214 179 / 30%); }
 .facility-row { border-radius: var(--radius-m); }
 .fleet-slot:hover { border-color: var(--border-accent); background: var(--surface-strong); }
 .fleet-slot.is-active { border-color: var(--accent-dim); box-shadow: inset 3px 0 var(--accent); }

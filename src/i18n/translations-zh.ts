@@ -34,7 +34,7 @@ export const zh = {
   'settings.open': '打开设置',
   'settings.title': '设置',
   'settings.language': '语言',
-  'settings.restart': '重启任务',
+  'settings.restart': '新游戏',
   'settings.debug': '调试控制',
   'settings.theme': '主题',
   'theme.industrial': '工业',
@@ -42,7 +42,7 @@ export const zh = {
 
   'toast.debugEnabled': '已启用调试模式 — 按 F3',
   'toast.debugDisabled': '已禁用调试模式',
-  'settings.confirmRestart': '确认重启？所有进度将丢失',
+  'settings.confirmRestart': '确认新游戏？所有进度将丢失',
   'locale.uk': 'Українська',
   'locale.en': 'English',
   'locale.zh': '中文',
@@ -169,6 +169,10 @@ export const zh = {
   'pilot.specDamage': '伤害',
   'pilot.specRecovery': '恢复',
 
+  'pilot.recovering': '恢复中',
+  'pilot.fatiguedTag': '疲劳',
+
+
   'hangar.lede': '配置飞机，检查回收能力，并授权下一次出击。',
   'hangar.loadoutEyebrow': '机库 // 起飞前配置',
   'hangar.loadoutTitle': '飞机配置',
@@ -292,6 +296,9 @@ export const zh = {
   'report.blueprintProgress': '“捕获者”研究推进 +{progress}。',
   'report.blueprintCompleted': '“捕获者”研究完成——其生产蓝图已就绪。',
   'report.noBlueprintProgress': '没有活跃的“捕获者”研究项目推进。',
+
+  'report.nationThanks': '{country} 感谢你：+{credits} 信用点 / +{materials} 材料',
+
   'content.prism': '未分类棱镜',
   'content.splitPulse': '分裂脉冲发射器',
   'content.standardCannon': '飞机机枪',
@@ -367,6 +374,20 @@ export const zh = {
   'staff.efficiency': '效率 ×{value}',
   'staff.salary': '薪水 {credits}',
   'staff.hire': '雇佣 · {credits}',
+
+  'staff.roster': '员工名册',
+  'staff.noStaff': '尚未雇用专家。',
+  'staff.dismiss': '解雇',
+  'staff.manager': '运营总监',
+  'staff.rosterEyebrow': '基地 // 人员',
+  'staff.rosterTitle': '已雇专家',
+  'staff.managerEyebrow': '基地 // 运营总监',
+  'staff.managerTitle': '运营总监',
+  'staff.managerLede': '使所有研究及生产流程提速10%。',
+  'staff.traderEyebrow': '贸易 // 贸易经理',
+  'staff.traderTitle': '贸易经理',
+  'staff.traderLede': '出售库存时提高市场利润率。',
+
   'trade.eyebrow': '国际重建总局 // 贸易中心',
   'trade.title': '贸易中心',
   'trade.lede': '理事会采购、盈余销售和信贷额度。',
@@ -505,12 +526,22 @@ export const zh = {
   'hangar.refuelShortfall': '加注燃料需要 {credits} 资金。',
   'hangar.preflightFuelReady': '起飞前：{aircraft} 已加注燃料，随时可出击。',
   'hangar.preflightFuelWarning': '起飞前警告：{aircraft} 未加注燃料——出击前请加注。',
+
+  'hangar.pilotFatiguedWarning': '起飞前：飞行员 {pilot} 疲劳——请指派休息的飞行员。',
+  'hangar.rocketsHint': '已装备火箭发射器——请在贸易站购买火箭以装填。',
+  'hangar.upgradeBadge': '强化弹药',
+
   'combat.armour': '装甲 {value}',
   'combat.reserve': '储备 {value}',
   'combat.score': '得分 {value}',
   'combat.splitPulseEquipped': '分裂脉冲已装备',
   'combat.acceleratorEquipped': '脉冲加速器已装备',
   'combat.controls': '移动：WASD / 方向键 / 按住指针 // X：武器 // P：暂停',
+
+  'combat.controlsRockets': '移动：WASD / 方向键 / 按住鼠标 // 火箭：空格 / 右键 // F：锁定光标 // P：暂停',
+  'combat.abortHint': '中断将失去赏金和国家馈赠，威胁仍将保留。',
+  'combat.abortWarning': '确认——将失去赏金与馈赠；威胁仍将保留。',
+
   'combat.paused': '已暂停',
   'combat.pausedManual': '按 P 继续。',
   'combat.pausedSettings': '设置打开时战斗暂停。',

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { contentCatalog } from '../../src/content/catalog';
 import { constructBuilding, hireStaff } from '../../src/domain/base-development';
 import { createInitialGameState } from '../../src/domain/initial-state';
+import { dismissStaff } from '../../src/domain/staff-market';
 import { staffMember } from './test-state';
 
 const laboratory = contentCatalog.buildings[0];
@@ -30,20 +31,46 @@ describe('base development', () => {
     expect(constructed.base.constructedBuildingIds).toEqual([laboratory.id]);
   });
 
-  it('hires only one lead engineer into the Production Works', () => {
+  it('caps production engineers at the workshop headcount limit', () => {
     const initial = createInitialGameState();
     const ready = {
       ...initial,
       base: {
         ...initial.base,
-        credits: 500_000,
+        credits: 1_500_000,
         constructedBuildingIds: [laboratory.id, workshop.id],
       },
     };
-    const hired = hireStaff(ready, engineer);
+    const first = hireStaff(ready, engineer);
+    expect(first.base.staff).toEqual([staffMember('staff-engineer-1', engineer.id)]);
+    const second = hireStaff(first, engineer);
+    expect(second.base.staff).toHaveLength(2);
+    const third = hireStaff(second, engineer);
+    expect(third.base.staff).toHaveLength(3);
+    expect(() => hireStaff(third, engineer)).toThrow('headcount limit');
+  });
 
-    expect(hired.base.staff).toEqual([staffMember('staff-engineer-1', engineer.id)]);
-    expect(() => hireStaff(hired, engineer)).toThrow('headcount limit');
+  it('dismisses a hired staff member and removes their XP', () => {
+    const initial = createInitialGameState();
+    const ready = {
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 1_000_000,
+        constructedBuildingIds: [laboratory.id],
+      },
+    };
+    const hired = hireStaff(ready, scientist);
+    const member = hired.base.staff[0];
+    expect(member).toBeDefined();
+    const withXp = {
+      ...hired,
+      base: { ...hired.base, staffXp: { [member?.id ?? '']: 4 } },
+    };
+    const dismissed = dismissStaff(withXp.base, member?.id ?? '');
+    expect(dismissed.staff).toHaveLength(0);
+    expect(dismissed.staffXp[member?.id ?? '']).toBeUndefined();
+    expect(() => dismissStaff(withXp.base, 'staff-missing')).toThrow('not on the roster');
   });
 
   it('requires resources and prevents duplicate construction', () => {

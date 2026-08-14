@@ -99,7 +99,8 @@ function buildPanel(): HTMLElement {
     element.appendChild(button);
   };
 
-  add('+1000 CR', () => dispatch({ type: 'DEBUG_GRANT', credits: 1_000 }));
+  add('+100k CR', () => dispatch({ type: 'DEBUG_GRANT', credits: 100_000 }));
+  add('+1M CR', () => dispatch({ type: 'DEBUG_GRANT', credits: 1_000_000 }));
   add('+100 MAT', () => dispatch({ type: 'DEBUG_GRANT', materials: 100 }));
   add('+100 RES', () => dispatch({ type: 'DEBUG_GRANT', research: 100 }));
   add('BUILD ALL', () => {

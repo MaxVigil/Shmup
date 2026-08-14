@@ -147,7 +147,7 @@ export function abortRun(state: RiskExtractionState): RiskExtractionState {
   if (state.phase !== 'combat') {
     throw new Error('A run can only be aborted during combat.');
   }
-  return { ...state, phase: 'complete', extracted: true };
+  return { ...state, phase: 'complete', extracted: false };
 }
 
 export function toSortieOutcome(

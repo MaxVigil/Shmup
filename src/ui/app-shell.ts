@@ -75,6 +75,14 @@ const laboratory = contentCatalog.buildings[0];
 const workshop = contentCatalog.buildings[1];
 const scientistRole = contentCatalog.staffRoles[0];
 const engineerRole = contentCatalog.staffRoles[1];
+const traderRoleId = 'staff-trader';
+const managerRoleId = 'staff-manager';
+const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
+  'staff-scientist': 'staff.scientist',
+  'staff-engineer': 'staff.engineer',
+  'staff-trader': 'staff.trader',
+  'staff-manager': 'staff.manager',
+};
 const capturerBlueprint = contentCatalog.blueprints[0];
 const capturerEquipment = contentCatalog.equipment[0];
 const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
@@ -108,6 +116,7 @@ let activeBaseSection: BaseSection = 'command';
 let objectiveBaseSection: BaseSection = 'engineering';
 let lastRunResult: CombatRunResult | null = null;
 let lastSettlementSummary: SortiePayoffSummary | null = null;
+let lastThanksLine: string | null = null;
 let sortieInProgress = false;
 
 if (!temporaryPlaytestMode) {
@@ -235,6 +244,7 @@ function renderCombatWeaponControl(): void {
 function formatRunResult(
   result: CombatRunResult,
   summary: SortiePayoffSummary | null,
+  thanksLine: string | null,
 ): string {
   const retention = result.outcome.extracted ? t('report.fullHaul') : t('report.partialHaul');
   const technology = result.technologyDecision === 'install'
@@ -265,7 +275,8 @@ function formatRunResult(
       ? t('report.blueprintProgress', { progress: summary.blueprintProgress })
       : t('report.noBlueprintProgress');
   const insolvency = summary.bankrupt ? `\n${t('report.insolvent')}` : '';
-  return `${resultLine}\n${contract}\n${rewards}\n${research}${insolvency}`;
+  const thanks = thanksLine === null ? '' : `\n${thanksLine}`;
+  return `${resultLine}\n${contract}\n${rewards}\n${research}${insolvency}${thanks}`;
 }
 
 function renderReports(): void {
@@ -274,9 +285,9 @@ function renderReports(): void {
   const hasResult = result !== null && !sortieInProgress;
   baseRunReport.textContent = result === null
     ? t(bankrupt ? 'report.insolvent' : 'base.awaiting')
-    : formatRunResult(result, lastSettlementSummary);
+    : formatRunResult(result, lastSettlementSummary, lastThanksLine);
   sortieRunReport.textContent = hasResult
-    ? formatRunResult(result, lastSettlementSummary)
+    ? formatRunResult(result, lastSettlementSummary, lastThanksLine)
     : t('report.active');
   sortieOutcome.hidden = !hasResult;
 }
@@ -333,7 +344,7 @@ function objectiveKeys(kind: ProgressionObjectiveKind): {
 function isBaseSection(value: string | undefined): value is BaseSection {
   return value === 'command' || value === 'research' ||
     value === 'engineering' || value === 'hangar' || value === 'trade' ||
-    value === 'databank';
+    value === 'finance' || value === 'databank';
 }
 
 function showBaseSection(section: BaseSection): void {
@@ -495,6 +506,9 @@ function renderBase(): void {
     : t('facility.requiresWorks');
   renderCandidates('scientist-candidates', scientistRole.id);
   renderCandidates('engineer-candidates', engineerRole.id);
+  renderCandidates('manager-candidates', managerRoleId);
+  renderCandidates('trader-candidates', traderRoleId);
+  renderStaffRoster();
   const workshopJob = constructionJob(state, workshop.id);
   workshopStatus.textContent = workshopJob !== undefined
     ? t('facility.constructing', {
@@ -743,20 +757,29 @@ function renderBase(): void {
   const activeRepairLeft = activeAircraftId === null
     ? 0
     : (state.base.aircraftRepair[activeAircraftId] ?? 0);
+  const activePilot = state.base.activePilotId === null
+    ? undefined
+    : state.base.pilots.find((pilot) => pilot.id === state.base.activePilotId);
+  const activePilotFatigued = activePilot !== undefined &&
+    isPilotFatigued(state.base.pilotFatigue[activePilot.id] ?? 0);
+  const activePilotName = `${activePilot?.firstName ?? 'Pilot'} ${activePilot?.lastName ?? ''}`.trim();
   const fuelStatus = byId<HTMLElement>('fuel-status');
   fuelStatus.hidden = false;
   fuelStatus.classList.toggle('is-ready', activeFueled && activeDamage <= 0);
-  fuelStatus.textContent = activeRepairLeft > 0
-    ? t('hangar.repairInProgress', { sorties: activeRepairLeft })
-    : activeDamage > 0
-      ? t('hangar.damagedWarning', {
-          value: Math.round(activeDamage * 100),
-        })
-      : t(
-          activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
-          { aircraft: activeAircraftName },
-        );
-  launchSortieButton.disabled = bankrupt || !activeFueled || state.base.activeMissionId === null;
+  fuelStatus.textContent = activePilotFatigued
+    ? t('hangar.pilotFatiguedWarning', { pilot: activePilotName })
+    : activeRepairLeft > 0
+      ? t('hangar.repairInProgress', { sorties: activeRepairLeft })
+      : activeDamage > 0
+        ? t('hangar.damagedWarning', {
+            value: Math.round(activeDamage * 100),
+          })
+        : t(
+            activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
+            { aircraft: activeAircraftName },
+          );
+  launchSortieButton.disabled =
+    bankrupt || !activeFueled || state.base.activeMissionId === null || activePilotFatigued;
   const activeMission = state.base.activeMissionId === null
     ? undefined
     : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
@@ -903,6 +926,43 @@ function renderCandidates(containerId: string, roleId: string): void {
   }
 }
 
+function renderStaffRoster(): void {
+  const state = store.getSnapshot();
+  const container = byId<HTMLElement>('staff-roster');
+  container.textContent = '';
+  container.append(h('h3', { class: 'hangar-subtitle' }, t('staff.roster')));
+  if (state.base.staff.length === 0) {
+    container.append(h('p', { class: 'empty-note' }, t('staff.noStaff')));
+    return;
+  }
+  for (const member of state.base.staff) {
+    const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
+    const salary = Math.round((role?.creditCost ?? 0) * 0.4 * member.salaryMultiplier);
+    const row = h('article', { class: 'threat-row staff-roster-row' });
+    const info = h('div', null);
+    info.append(
+      h('strong', null, `${member.firstName} ${member.lastName}`),
+      h('small', null, [
+        t(staffRoleNameKey[member.roleId] ?? 'staff.scientist'),
+        t('staff.tier', { tier: member.tier }),
+        t('staff.efficiency', { value: member.progressMultiplier }),
+        t('staff.salary', { credits: salary }),
+      ].join(' · ')),
+    );
+    row.append(info);
+    const dismiss = h(
+      'button',
+      { class: 'base-action is-danger', type: 'button' },
+      t('staff.dismiss'),
+    );
+    dismiss.addEventListener('click', () => {
+      store.dispatch({ type: 'DISMISS_STAFF', staffId: member.id });
+    });
+    row.append(dismiss);
+    container.append(row);
+  }
+}
+
 const moduleNameKey: Readonly<Record<string, TranslationKey>> = {
   'equipment-alien-technology-capturer': 'content.capturer',
 };
@@ -946,6 +1006,15 @@ function renderAircraftLoadout(): void {
     row.appendChild(label);
     row.appendChild(name);
     if (weaponId !== null) {
+      if (
+        weaponId === machineGunUpgrade.weaponId &&
+        state.base.manufacturedWeaponUpgradeIds.includes(machineGunUpgrade.id)
+      ) {
+        const badge = document.createElement('em');
+        badge.className = 'status-chip is-owned';
+        badge.textContent = t('hangar.upgradeBadge');
+        row.appendChild(badge);
+      }
       const unequip = document.createElement('button');
       unequip.className = 'base-action';
       unequip.type = 'button';
@@ -1066,6 +1135,20 @@ function renderWarehouse(): void {
     }
   }
 
+  const rocketStockAll = state.base.consumableStock[rocketsConsumable.id] ?? 0;
+  const rocketPodEquipped = (state.base.activeAircraftId === null
+    ? []
+    : (state.base.aircraftLoadouts[state.base.activeAircraftId] ?? [])
+  ).includes(rocketPodWeapon.id);
+  if (rocketPodEquipped && rocketStockAll === 0) {
+    const row = document.createElement('article');
+    row.className = 'threat-row rocket-loaded-note';
+    const name = document.createElement('strong');
+    name.textContent = t('hangar.rocketsHint');
+    row.appendChild(name);
+    list.appendChild(row);
+  }
+
   const installedModules = new Set(Object.values(state.base.aircraftModules));
   const modules = state.base.manufacturedEquipmentIds.filter(
     (moduleId) => !installedModules.has(moduleId),
@@ -1172,23 +1255,30 @@ function renderPilots(): void {
           t('pilot.fatigue', { value: Math.round(fatigue * 100) }),
         ].join(' · ')),
       );
+      if (isPilotFatigued(fatigue)) {
+        head.append(h('em', { class: 'status-chip is-damaged' }, t('pilot.fatiguedTag')));
+      }
       card.append(head);
       const actions = h('div', { class: 'pilot-card__actions' });
       if (active) {
         actions.append(h('em', { class: 'status-chip is-active' }, t('pilot.active')));
       } else {
         const assign = h('button', { class: 'base-action', type: 'button' }, t('pilot.assign'));
+        assign.disabled = isPilotFatigued(fatigue);
         assign.addEventListener('click', () => {
           store.dispatch({ type: 'ASSIGN_PILOT', pilotId: pilot.id });
         });
         actions.append(assign);
       }
-      if (fatigue > 0) {
+      if (fatigue > 0 && active) {
         const rest = h('button', { class: 'base-action', type: 'button' }, t('pilot.rest'));
         rest.addEventListener('click', () => {
           store.dispatch({ type: 'REST_PILOT', pilotId: pilot.id });
         });
         actions.append(rest);
+      }
+      if (fatigue > 0 && !active) {
+        actions.append(h('em', { class: 'status-chip is-resting' }, t('pilot.recovering')));
       }
       card.append(actions);
       roster.append(card);
@@ -1947,9 +2037,18 @@ function renderCommand(): void {
   const timeline = byId<HTMLElement>('month-timeline');
   timeline.textContent = '';
   const phases = [
-    { key: 'command.phasePlan', active: monthProgress === 0 },
-    { key: 'command.phaseExecute', active: monthProgress > 0 },
-    { key: 'command.phaseSettle', active: false },
+    {
+      key: 'command.phasePlan',
+      active: monthProgress === 0 && state.base.monthReport === null,
+    },
+    {
+      key: 'command.phaseExecute',
+      active: monthProgress > 0 && state.base.monthReport === null,
+    },
+    {
+      key: 'command.phaseSettle',
+      active: state.base.monthReport !== null,
+    },
   ] as const;
   for (const phase of phases) {
     const segment = document.createElement('span');
@@ -2141,7 +2240,7 @@ function renderCredit(): void {
     header.textContent = t('credit.activeLoans');
     loansList.appendChild(header);
   }
-  for (const loan of state.base.loans) {
+  for (const loan of state.base.loans.filter((entry) => !entry.repaid)) {
     const row = document.createElement('article');
     row.className = 'threat-row loan-row';
     const left = document.createElement('div');
@@ -2459,6 +2558,14 @@ function renderLocale(): void {
   setText('command-credit-eyebrow', 'credit.eyebrow');
   setText('command-credit-title', 'credit.title');
   setText('command-credit-lede', 'credit.lede');
+  setText('staff-roster-eyebrow', 'staff.rosterEyebrow');
+  setText('staff-roster-title', 'staff.rosterTitle');
+  setText('manager-candidates-eyebrow', 'staff.managerEyebrow');
+  setText('manager-candidates-title', 'staff.managerTitle');
+  setText('manager-candidates-lede', 'staff.managerLede');
+  setText('trader-candidates-eyebrow', 'staff.traderEyebrow');
+  setText('trader-candidates-title', 'staff.traderTitle');
+  setText('trader-candidates-lede', 'staff.traderLede');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');
   setText('laboratory-label', 'facility.laboratory');
@@ -2682,6 +2789,7 @@ launchSortieButton.addEventListener('click', () => {
   settingsToggle.setAttribute('aria-expanded', 'false');
   lastRunResult = null;
   lastSettlementSummary = null;
+  lastThanksLine = null;
   sortieInProgress = true;
   combatWeaponSwitchAvailable = false;
   showScreen('sortie');
@@ -2715,12 +2823,16 @@ launchSortieButton.addEventListener('click', () => {
             beforeSettlement.base.nationThanks[state.id] !== true,
         );
         if (giftedNation !== undefined) {
-          const gift = contentCatalog.nationGifts[giftedNation.id];
-          showToast(t('toast.nationThanks', {
+          const gift = (contentCatalog.nationGifts as Readonly<
+            Record<string, { readonly credits: number; readonly materials: number }>
+          >)[giftedNation.id];
+          lastThanksLine = t('report.nationThanks', {
             country: t(giftedNation.nameKey as TranslationKey),
             credits: gift?.credits ?? 0,
             materials: gift?.materials ?? 0,
-          }));
+          });
+        } else {
+          lastThanksLine = null;
         }
         lastSettlementSummary = summarizeSortiePayoff(
           beforeSettlement,

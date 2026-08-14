@@ -220,7 +220,7 @@ export const contentCatalog = {
       id: 'staff-engineer',
       creditCost: 180_000,
       requiredBuildingId: 'building-workshop',
-      maximumHeadcount: 1,
+      maximumHeadcount: 3,
     },
     {
       id: 'staff-trader',

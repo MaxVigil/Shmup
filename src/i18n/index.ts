@@ -41,7 +41,7 @@ const en = {
   'settings.open': 'Open settings',
   'settings.title': 'Settings',
   'settings.language': 'Language',
-  'settings.restart': 'RESTART MISSION',
+  'settings.restart': 'NEW GAME',
   'settings.debug': 'DEBUG CONTROLS',
   'settings.theme': 'Theme',
   'theme.industrial': 'Industrial',
@@ -49,7 +49,7 @@ const en = {
 
   'toast.debugEnabled': 'Debug mode enabled - press F3',
   'toast.debugDisabled': 'Debug mode disabled',
-  'settings.confirmRestart': 'CONFIRM RESTART? ALL PROGRESS IS LOST',
+  'settings.confirmRestart': 'CONFIRM NEW GAME? ALL PROGRESS IS LOST',
   'locale.uk': 'Українська',
   'locale.en': 'English',
   'locale.zh': '中文',
@@ -176,6 +176,10 @@ const en = {
   'pilot.specDamage': 'damage',
   'pilot.specRecovery': 'recovery',
 
+  'pilot.recovering': 'RECOVERING',
+  'pilot.fatiguedTag': 'FATIGUED',
+
+
   'hangar.lede': 'Configure the aircraft, review recovery capability, and authorize the next sortie.',
   'hangar.loadoutEyebrow': 'HANGAR // PREFLIGHT LOADOUT',
   'hangar.loadoutTitle': 'Aircraft configuration',
@@ -299,6 +303,9 @@ const en = {
   'report.blueprintProgress': 'Capturer research advanced by +{progress}.',
   'report.blueprintCompleted': 'Capturer research completed — its production blueprint is ready.',
   'report.noBlueprintProgress': 'No active Capturer research project advanced.',
+
+  'report.nationThanks': '{country} thanks you: +{credits} cr / +{materials} materials',
+
   'content.prism': 'Unclassified Prism',
   'content.splitPulse': 'Split Pulse Emitter',
   'content.standardCannon': 'Aircraft Machine Gun',
@@ -374,6 +381,20 @@ const en = {
   'staff.efficiency': 'Efficiency ×{value}',
   'staff.salary': 'Salary {credits}',
   'staff.hire': 'HIRE · {credits}',
+
+  'staff.roster': 'STAFF ROSTER',
+  'staff.noStaff': 'No specialists are employed yet.',
+  'staff.dismiss': 'DISMISS',
+  'staff.manager': 'Operations Director',
+  'staff.rosterEyebrow': 'BASE // STAFF',
+  'staff.rosterTitle': 'Hired specialists',
+  'staff.managerEyebrow': 'BASE // OPERATIONS DIRECTOR',
+  'staff.managerTitle': 'Operations director',
+  'staff.managerLede': 'Speeds up every research and production process by 10%.',
+  'staff.traderEyebrow': 'TRADE // TRADE MANAGER',
+  'staff.traderTitle': 'Trade manager',
+  'staff.traderLede': 'Improves market margins when selling stock.',
+
   'trade.eyebrow': 'RECOVERY DIRECTORATE // TRADE CENTRE',
   'trade.title': 'Trade Centre',
   'trade.lede': 'Council procurement, surplus sales, and credit lines.',
@@ -512,12 +533,22 @@ const en = {
   'hangar.refuelShortfall': 'Refueling requires {credits} credits.',
   'hangar.preflightFuelReady': 'PREFLIGHT: {aircraft} is fueled and ready.',
   'hangar.preflightFuelWarning': 'PREFLIGHT WARNING: {aircraft} is unfueled — refuel before launching.',
+
+  'hangar.pilotFatiguedWarning': 'PREFLIGHT: pilot {pilot} is fatigued — assign a rested pilot or stand down.',
+  'hangar.rocketsHint': 'Rocket pod equipped — buy rockets in Trade to load it.',
+  'hangar.upgradeBadge': 'REINFORCED AMMO',
+
   'combat.armour': 'ARMOUR {value}',
   'combat.reserve': 'RESERVE {value}',
   'combat.score': 'SCORE {value}',
   'combat.splitPulseEquipped': 'SPLIT PULSE EQUIPPED',
   'combat.acceleratorEquipped': 'IMPULSE ACCELERATOR EQUIPPED',
   'combat.controls': 'MOVE: WASD / ARROWS / HOLD POINTER // X: WEAPON // P: PAUSE',
+
+  'combat.controlsRockets': 'MOVE: WASD / ARROWS / HOLD POINTER // ROCKET: SPACE / RIGHT-CLICK // F: CURSOR LOCK // P: PAUSE',
+  'combat.abortHint': "Aborting forfeits the bounty and the nation's gratitude, and leaves the threat active.",
+  'combat.abortWarning': 'CONFIRM — reward and gratitude are lost; the threat remains active.',
+
   'combat.paused': 'PAUSED',
   'combat.pausedManual': 'Press P to resume.',
   'combat.pausedSettings': 'Combat is paused while settings are open.',
@@ -611,7 +642,7 @@ const uk: Record<TranslationKey, string> = {
   'settings.open': 'Відкрити налаштування',
   'settings.title': 'Налаштування',
   'settings.language': 'Мова',
-  'settings.restart': 'ПЕРЕЗАПУСТИТИ МІСІЮ',
+  'settings.restart': 'НОВА ГРА',
   'settings.debug': 'ДЕБАГ-КОНТРОЛЬ',
   'settings.theme': 'Тема',
   'theme.industrial': 'Індустріальна',
@@ -619,7 +650,7 @@ const uk: Record<TranslationKey, string> = {
 
   'toast.debugEnabled': 'Дебаг-режим увімкнено — натисніть F3',
   'toast.debugDisabled': 'Дебаг-режим вимкнено',
-  'settings.confirmRestart': 'ПІДТВЕРДИТИ? ВЕСЬ ПРОГРЕС БУДЕ ВТРАЧЕНО',
+  'settings.confirmRestart': 'ПІДТВЕРДИТИ НОВУ ГРУ? ВЕСЬ ПРОГРЕС БУДЕ ВТРАЧЕНО',
   'locale.uk': 'Українська',
   'locale.en': 'English',
   'locale.zh': '中文',
@@ -746,6 +777,10 @@ const uk: Record<TranslationKey, string> = {
   'pilot.specDamage': 'урон',
   'pilot.specRecovery': 'відновлення',
 
+  'pilot.recovering': 'ВІДНОВЛЮЄТЬСЯ',
+  'pilot.fatiguedTag': 'ВТОМЛЕНИЙ',
+
+
   'hangar.lede': 'Налаштуйте літак, перевірте можливість захоплення артефактів і санкціонуйте наступний виліт.',
   'hangar.loadoutEyebrow': 'АНГАР // ПЕРЕДПОЛЬОТНЕ СПОРЯДЖЕННЯ',
   'hangar.loadoutTitle': 'Конфігурація літака',
@@ -869,6 +904,9 @@ const uk: Record<TranslationKey, string> = {
   'report.blueprintProgress': 'Дослідження Захоплювача просунулося на +{progress}.',
   'report.blueprintCompleted': 'Дослідження Захоплювача завершено — виробничий блупринт готовий.',
   'report.noBlueprintProgress': 'Активного дослідження Захоплювача немає.',
+
+  'report.nationThanks': '{country} дякує вам: +{credits} кр / +{materials} матеріалів',
+
   'content.prism': 'Некласифікована призма',
   'content.splitPulse': 'Емітер розщепленого імпульсу',
   'content.standardCannon': 'Авіаційний кулемет',
@@ -944,6 +982,20 @@ const uk: Record<TranslationKey, string> = {
   'staff.efficiency': 'Ефективність ×{value}',
   'staff.salary': 'Зарплата {credits}',
   'staff.hire': 'НАЙНЯТИ · {credits}',
+
+  'staff.roster': 'ШТАТ',
+  'staff.noStaff': 'Найнятих спеціалістів ще немає.',
+  'staff.dismiss': 'ЗВІЛЬНИТИ',
+  'staff.manager': 'Операційний директор',
+  'staff.rosterEyebrow': 'БАЗА // ШТАТ',
+  'staff.rosterTitle': 'Найняті спеціалісти',
+  'staff.managerEyebrow': 'БАЗА // ОПЕРАЦІЙНИЙ ДИРЕКТОР',
+  'staff.managerTitle': 'Операційний директор',
+  'staff.managerLede': 'Прискорює всі дослідницькі та виробничі процеси на 10%.',
+  'staff.traderEyebrow': 'ТОРГІВЛЯ // ТОРГОВИЙ КЕРІВНИК',
+  'staff.traderTitle': 'Торговий керівник',
+  'staff.traderLede': 'Покращує ринкову маржу під час продажу складу.',
+
   'trade.eyebrow': 'МІЖНАРОДНЕ УПРАВЛІННЯ // ТОРГІВЕЛЬНИЙ ЦЕНТР',
   'trade.title': 'Торгівельний центр',
   'trade.lede': 'Закупівлі Ради, продаж надлишків та кредитні лінії.',
@@ -1082,12 +1134,22 @@ const uk: Record<TranslationKey, string> = {
   'hangar.refuelShortfall': 'Заправка потребує {credits} кредитів.',
   'hangar.preflightFuelReady': 'ПЕРЕД ВИЛЬОТОМ: {aircraft} заправлений і готовий.',
   'hangar.preflightFuelWarning': 'ПОПЕРЕДЖЕННЯ: {aircraft} не заправлений — заправте перед вильотом.',
+
+  'hangar.pilotFatiguedWarning': 'ПЕРЕД ВИЛЬОТОМ: пілот {pilot} втомлений — признач відпочилого пілота або відправ у відпочинок.',
+  'hangar.rocketsHint': 'Ракетниця споряджена — купи ракети в Торгівлі, щоб завантажити її.',
+  'hangar.upgradeBadge': 'ПОСИЛЕНІ БОЄПРИПАСИ',
+
   'combat.armour': 'БРОНЯ {value}',
   'combat.reserve': 'РЕЗЕРВ {value}',
   'combat.score': 'РАХУНОК {value}',
   'combat.splitPulseEquipped': 'РОЗЩЕПЛЕНИЙ ІМПУЛЬС СПОРЯДЖЕНО',
   'combat.acceleratorEquipped': 'ІМПУЛЬСНИЙ ПРИСКОРЮВАЧ СПОРЯДЖЕНО',
   'combat.controls': 'РУХ: WASD / СТРІЛКИ / ВКАЗІВНИК // X: ЗБРОЯ // P: ПАУЗА',
+
+  'combat.controlsRockets': "РУХ: WASD / СТРІЛКИ / ЗАТРИМАТИ ВКАЗІВНИК // РАКЕТА: SPACE / ПРАВА КНОПКА // F: ПРИВ'ЯЗКА ДО КУРСОРА // P: ПАУЗА",
+  'combat.abortHint': 'Переривання позбавляє винагороди та подяки нації; загроза лишається активною.',
+  'combat.abortWarning': 'ПІДТВЕРДИ — винагороду й подяку втрачено; загроза лишається активною.',
+
   'combat.paused': 'ПАУЗА',
   'combat.pausedManual': 'Натисніть P, щоб продовжити.',
   'combat.pausedSettings': 'Бій призупинено, доки відкриті налаштування.',

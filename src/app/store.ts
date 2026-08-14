@@ -28,12 +28,13 @@ import {
   isAircraftRepairing,
   startRepair,
 } from '../domain/aircraft-integrity';
-import { awardStaffXp, generateStaffCandidates, hireCandidate } from '../domain/staff-market';
+import { awardStaffXp, dismissStaff, generateStaffCandidates, hireCandidate } from '../domain/staff-market';
 import {
   assignPilot,
   awardPilotProgress,
   generatePilotCandidates,
   hirePilotCandidate,
+  recoverMonthlyPilotFatigue,
   restPilot,
 } from '../domain/pilot-market';
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
@@ -85,6 +86,7 @@ export type GameCommand =
     }
   | { readonly type: 'CONSTRUCT_BUILDING'; readonly buildingId: string }
   | { readonly type: 'HIRE_STAFF'; readonly roleId: string }
+  | { readonly type: 'DISMISS_STAFF'; readonly staffId: string }
   | { readonly type: 'START_BLUEPRINT_RESEARCH'; readonly blueprintId: string }
   | {
       readonly type: 'START_BUILDING_BLUEPRINT_RESEARCH';
@@ -183,8 +185,8 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             : state.base.threatMap.find(
                 (mission) => mission.id === state.base.activeMissionId,
               );
-          const afterMission = activeMission === undefined
-            ? afterProjects
+          const afterMission = activeMission === undefined || !command.outcome.extracted
+            ? { ...afterProjects, activeMissionId: null }
             : grantNationThanks(
                 {
                   ...afterProjects,
@@ -227,6 +229,10 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = { ...state, base: { ...state.base, activeMissionId: mission.id } };
           break;
         }
+        case 'DISMISS_STAFF': {
+          state = { ...state, base: dismissStaff(state.base, command.staffId) };
+          break;
+        }
         case 'END_MONTH': {
           const base = state.base;
           const unresolved = base.threatMap.filter(
@@ -249,6 +255,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const afterExpenses = chargeMonthlyExpenses(afterBreaches);
           const nextMonth = base.month + 1;
           const afterLoans = settleDueLoans({ ...afterExpenses, month: nextMonth });
+          const afterPilotRecovery = recoverMonthlyPilotFatigue(afterLoans);
           const expenses = monthlyExpenses(base).total + loanPayments;
           const monthReport = {
             month: base.month,
@@ -262,7 +269,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = {
             ...state,
             base: {
-              ...afterLoans,
+              ...afterPilotRecovery,
               month: nextMonth,
               threatMap: generateThreatMap(
                 contentCatalog.councilStates,

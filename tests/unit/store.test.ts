@@ -626,6 +626,51 @@ describe('game store month cycle', () => {
     );
     expect(store.getSnapshot().base.nationThanks[mission?.targetCountryId ?? '']).toBe(true);
   });
+
+  it('keeps an aborted sortie unresolved and withholds the nation gift', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, fueledAircraftIds: [] },
+    });
+    const mission = store.getSnapshot().base.threatMap[0];
+    expect(mission).toBeDefined();
+    const creditsBefore = store.getSnapshot().base.credits;
+    store.dispatch({ type: 'SELECT_MISSION', missionId: mission?.id ?? '' });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: false,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 2,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
+    const state = store.getSnapshot();
+    expect(state.base.resolvedThreatIds).not.toContain(mission?.id);
+    expect(state.base.nationThanks[mission?.targetCountryId ?? '']).toBeUndefined();
+    expect(state.base.activeMissionId).toBeNull();
+    expect(state.base.credits).toBe(creditsBefore);
+  });
+
+  it('dismisses a staff member through the store', () => {
+    const initial = createGameStore().getSnapshot();
+    const role = contentCatalog.staffRoles[0];
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        staff: [staffMember('staff-scientist-1', role.id)],
+      },
+    });
+    store.dispatch({ type: 'DISMISS_STAFF', staffId: 'staff-scientist-1' });
+    expect(store.getSnapshot().base.staff).toHaveLength(0);
+  });
 });
 
 describe('game store rocket ammunition', () => {

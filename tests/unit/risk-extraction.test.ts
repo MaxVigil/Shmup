@@ -140,10 +140,10 @@ describe('M2 risk and extraction flow', () => {
     );
   });
 
-  it('aborts only during combat and keeps the collected haul', () => {
+  it('aborts only during combat and forfeits the collected haul', () => {
     const aborted = abortRun(addMaterials(createRiskExtractionState(), 7));
     expect(aborted.phase).toBe('complete');
-    expect(aborted.extracted).toBe(true);
+    expect(aborted.extracted).toBe(false);
     expect(toSortieOutcome(aborted).materialsFound).toBe(7);
     expect(() => abortRun(offerExtraction(addMaterials(createRiskExtractionState(), 1)))).toThrow(
       /combat/i,

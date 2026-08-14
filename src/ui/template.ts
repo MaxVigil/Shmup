@@ -114,6 +114,17 @@ export function buildAppTemplate(initialState: GameState): string {
                 <small id="mandate-terms"></small>
               </div>
             </section>
+            <section class="technology-lab command-panel" aria-labelledby="staff-roster-title">
+              <p class="technology-lab__eyebrow" id="staff-roster-eyebrow"></p>
+              <h2 id="staff-roster-title"></h2>
+              <div id="staff-roster" class="candidate-list" aria-live="polite"></div>
+            </section>
+            <section class="technology-lab command-panel" aria-labelledby="manager-candidates-title">
+              <p class="technology-lab__eyebrow" id="manager-candidates-eyebrow"></p>
+              <h2 id="manager-candidates-title"></h2>
+              <p class="lede" id="manager-candidates-lede"></p>
+              <div id="manager-candidates" class="candidate-list" aria-live="polite"></div>
+            </section>
             <section class="technology-lab command-panel" aria-labelledby="command-credit-title" hidden></section>
           </div>
         </div>
@@ -318,6 +329,12 @@ export function buildAppTemplate(initialState: GameState): string {
             <p class="lede" id="command-credit-lede"></p>
             <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
             <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
+          </section>
+          <section class="technology-lab command-panel" aria-labelledby="trader-candidates-title">
+            <p class="technology-lab__eyebrow" id="trader-candidates-eyebrow"></p>
+            <h2 id="trader-candidates-title"></h2>
+            <p class="lede" id="trader-candidates-lede"></p>
+            <div id="trader-candidates" class="candidate-list" aria-live="polite"></div>
           </section>
         </div>
       </section>

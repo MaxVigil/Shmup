@@ -219,6 +219,25 @@ Status: implemented on `test`; awaiting playtest before merging to `main`. See
   credit lines), trader manager margin.
 - [x] 158 unit tests, lint, typecheck, and the production build pass locally.
 
+## Round-4 playtest fixes (schema v14)
+
+Status: implemented on `test`, awaiting playtest before merging to `main`.
+
+- [x] Finance tab opens (the local `isBaseSection` guard omitted `finance`).
+- [x] Abort semantics: `abortRun` yields `extracted: false`; `SETTLE_SORTIE`
+  resolves the mission and grants the nation gift only on `extracted`. Abort
+  confirmation states the consequences (no reward, no gratitude, threat remains).
+- [x] Rocket fire decoupled from movement: Space / right-click fire, left drag
+  moves; splash warhead (damage 200, radius 40% of the larger dimension, no
+  self-damage); pointer-follow is speed-capped with an F cursor-lock toggle.
+- [x] Pilot fatigue rotation: +0.15/sortie active, passive recovery for others,
+  monthly recovery, fatigued pilots cannot fly, REST stands down to a rested pilot.
+- [x] Staff management: Command roster with dismiss; Operations Director and Trade
+  Manager candidate pools rendered; engineer headcount 1 → 3.
+- [x] Repaid loans hidden; compact credit formatting in combat HUD and kill
+  rewards; debug grants rescaled (+100k/+1M); gratitude folded into the sortie
+  result report; reinforced-ammo badge; Settings → NEW GAME.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's
