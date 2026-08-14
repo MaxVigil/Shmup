@@ -2364,6 +2364,9 @@ function renderLocale(): void {
   setText('settings-title', 'settings.title');
   setText('language-label', 'settings.language');
   setText('debug-label', 'settings.debug');
+  setText('theme-label', 'settings.theme');
+  setText('theme-option-industrial', 'theme.industrial');
+  setText('theme-option-terminal', 'theme.terminal');
   setText('restart-mission', 'settings.restart');
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
@@ -2789,6 +2792,23 @@ debugToggle.checked = isDebugEnabled(window.localStorage);
 debugToggle.addEventListener('change', () => {
   setDebugEnabled(window.localStorage, debugToggle.checked);
   showToast(t(debugToggle.checked ? 'toast.debugEnabled' : 'toast.debugDisabled'));
+});
+
+const THEME_STORAGE_KEY = 'shmup.theme';
+type ThemeName = 'industrial' | 'terminal';
+
+function applyTheme(theme: ThemeName): void {
+  document.documentElement.dataset.theme = theme;
+  window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+}
+
+const themeSelect = byId<HTMLSelectElement>('theme-select');
+const storedTheme: ThemeName =
+  window.localStorage.getItem(THEME_STORAGE_KEY) === 'terminal' ? 'terminal' : 'industrial';
+themeSelect.value = storedTheme;
+applyTheme(storedTheme);
+themeSelect.addEventListener('change', () => {
+  applyTheme(themeSelect.value === 'terminal' ? 'terminal' : 'industrial');
 });
 
 endMonthButton.addEventListener('click', () => {

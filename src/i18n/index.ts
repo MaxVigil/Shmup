@@ -43,6 +43,10 @@ const en = {
   'settings.language': 'Language',
   'settings.restart': 'RESTART MISSION',
   'settings.debug': 'DEBUG CONTROLS',
+  'settings.theme': 'Theme',
+  'theme.industrial': 'Industrial',
+  'theme.terminal': 'Terminal',
+
   'toast.debugEnabled': 'Debug mode enabled - press F3',
   'toast.debugDisabled': 'Debug mode disabled',
   'settings.confirmRestart': 'CONFIRM RESTART? ALL PROGRESS IS LOST',
@@ -601,6 +605,10 @@ const uk: Record<TranslationKey, string> = {
   'settings.language': 'Мова',
   'settings.restart': 'ПЕРЕЗАПУСТИТИ МІСІЮ',
   'settings.debug': 'ДЕБАГ-КОНТРОЛЬ',
+  'settings.theme': 'Тема',
+  'theme.industrial': 'Індустріальна',
+  'theme.terminal': 'Термінал',
+
   'toast.debugEnabled': 'Дебаг-режим увімкнено — натисніть F3',
   'toast.debugDisabled': 'Дебаг-режим вимкнено',
   'settings.confirmRestart': 'ПІДТВЕРДИТИ? ВЕСЬ ПРОГРЕС БУДЕ ВТРАЧЕНО',

@@ -33,6 +33,11 @@ export function buildAppTemplate(initialState: GameState): string {
             <label for="debug-toggle" id="debug-label"></label>
             <input id="debug-toggle" type="checkbox" />
           </div>
+          <label for="theme-select" id="theme-label"></label>
+          <select id="theme-select">
+            <option id="theme-option-industrial" value="industrial"></option>
+            <option id="theme-option-terminal" value="terminal"></option>
+          </select>
           <div class="system-check" role="status">
             <span class="system-check__light" aria-hidden="true"></span>
             <span id="prototype-status"></span>

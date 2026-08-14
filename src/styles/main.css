@@ -2058,3 +2058,82 @@ h1 {
 .candidate-origin { color: var(--accent-strong); font-family: var(--font-mono); font-size: 0.6rem; font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; }
 .candidate-row__actions { display: flex; gap: 0.4rem; align-items: center; }
 .status-chip.is-top { color: #06120e; background: var(--warn); }
+
+/* =====================================================================
+   THEME A — TACTICAL TERMINAL
+   Phosphor green on near-black, dense monospace, military console.
+   Activated via <html data-theme="terminal">.
+   ===================================================================== */
+html[data-theme="terminal"] {
+  --bg-0: #030604;
+  --bg-1: #061008;
+  --bg-2: #0a1710;
+  --bg-3: #0f2016;
+  --bg-4: #14291c;
+  --surface: rgb(9 26 16 / 62%);
+  --surface-strong: rgb(12 34 21 / 78%);
+  --border-subtle: #15331f;
+  --border: #1c4028;
+  --border-strong: #265235;
+  --border-accent: #3faf5f;
+  --text-hi: #d8ffe4;
+  --text: #a9e6b8;
+  --text-mid: #6f9e7d;
+  --text-low: #4a6b54;
+  --text-faint: #2b3f30;
+  --accent: #7fff9e;
+  --accent-strong: #b6ffcc;
+  --accent-dim: #1e5c33;
+  --warn: #ffd27a;
+  --danger: #ff6b5a;
+  --danger-strong: #ff8a7a;
+  --info: #7fd4ff;
+  --neutral: #3f6b4c;
+}
+
+html[data-theme="terminal"] body {
+  background:
+    radial-gradient(circle at 18% 20%, rgb(16 74 40 / 30%), transparent 34rem),
+    linear-gradient(135deg, #020504, #05100a 55%, #020504);
+}
+
+html[data-theme="terminal"] .technology-lab,
+html[data-theme="terminal"] .facility-panel,
+html[data-theme="terminal"] .programme-panel,
+html[data-theme="terminal"] .market-panel,
+html[data-theme="terminal"] .command-panel {
+  background:
+    linear-gradient(150deg, rgb(6 18 12 / 94%), rgb(3 9 6 / 94%)),
+    var(--bg-2);
+}
+
+html[data-theme="terminal"] .base-action {
+  letter-spacing: 0.1em;
+}
+html[data-theme="terminal"] .base-action.is-primary {
+  background: linear-gradient(180deg, #0e3d22, #092b18);
+}
+html[data-theme="terminal"] .section-heading h1,
+html[data-theme="terminal"] .section-heading .lede,
+html[data-theme="terminal"] .technology-lab h2,
+html[data-theme="terminal"] .facility-panel h2,
+html[data-theme="terminal"] .programme-panel h2,
+html[data-theme="terminal"] .market-panel h2 {
+  font-family: var(--font-mono);
+}
+html[data-theme="terminal"] .section-heading h1 { letter-spacing: -0.04em; }
+html[data-theme="terminal"] .geo-map {
+  background:
+    radial-gradient(circle at 50% 42%, rgb(16 84 46 / 32%), transparent 56%),
+    repeating-linear-gradient(0deg, rgb(127 255 158 / 5%) 0 1px, transparent 1px 2rem),
+    repeating-linear-gradient(90deg, rgb(127 255 158 / 5%) 0 1px, transparent 1px 2rem),
+    linear-gradient(160deg, #041008, #06160d 55%, #030a06);
+}
+html[data-theme="terminal"] .geo-map::after {
+  background: linear-gradient(105deg, transparent 44%, rgb(127 255 158 / 10%) 50%, transparent 56%);
+}
+html[data-theme="terminal"] .global-hud {
+  background: linear-gradient(180deg, rgb(6 18 12 / 94%), rgb(3 9 6 / 94%));
+}
+html[data-theme="terminal"] .status-chip.is-active { color: #03120a; background: var(--accent); }
+html[data-theme="terminal"] .status-chip.is-top { color: #1a1206; background: var(--warn); }

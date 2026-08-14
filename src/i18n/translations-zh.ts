@@ -36,6 +36,10 @@ export const zh = {
   'settings.language': '语言',
   'settings.restart': '重启任务',
   'settings.debug': '调试控制',
+  'settings.theme': '主题',
+  'theme.industrial': '工业',
+  'theme.terminal': '终端',
+
   'toast.debugEnabled': '已启用调试模式 — 按 F3',
   'toast.debugDisabled': '已禁用调试模式',
   'settings.confirmRestart': '确认重启？所有进度将丢失',
