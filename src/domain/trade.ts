@@ -11,14 +11,25 @@ import { staffLevel, tradeManagerMargin } from './staff-market';
 export const SELL_WEAPON_RATE = 0.5;
 export const SELL_AIRCRAFT_RATE = 0.6;
 export const TRADER_ROLE_ID = 'staff-trader';
+export const TRADER_BASE_MARGIN = 0.05;
+export const TRADER_MARGIN_CAP = 0.15;
 
+/**
+ * Sell margin granted by the trade manager: a flat +5% at hire, +2% per level,
+ * plus +2% while an operations manager is employed, capped at +15%. The sell
+ * haircut (SELL_*_RATE) is kept strictly below the buy price so reselling
+ * market purchases can never turn a profit.
+ */
 export function tradeMargin(base: BaseState): number {
   const trader = base.staff.find((member) => member.roleId === TRADER_ROLE_ID);
   if (trader === undefined) {
     return 0;
   }
   const level = staffLevel(base.staffXp[trader.id] ?? 0);
-  return Math.min(0.15, (level - 1) * 0.03 + tradeManagerMargin(base));
+  return Math.min(
+    TRADER_MARGIN_CAP,
+    TRADER_BASE_MARGIN + (level - 1) * 0.02 + tradeManagerMargin(base),
+  );
 }
 
 export function sellWeapon(

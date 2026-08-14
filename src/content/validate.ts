@@ -366,4 +366,57 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       throw new Error(`Consumable ${consumable.id} must have positive production values.`);
     }
   }
+
+  assertScaledCredit('economy.startingCredits', catalog.economy.startingCredits);
+  for (const building of catalog.buildings) {
+    assertScaledCredit(`building ${building.id} creditCost`, building.creditCost);
+    assertScaledCredit(`building ${building.id} maintenance`, building.maintenanceCreditCost);
+  }
+  for (const role of catalog.staffRoles) {
+    assertScaledCredit(`staff role ${role.id}`, role.creditCost);
+  }
+  for (const blueprint of catalog.blueprints) {
+    assertScaledCredit(`blueprint ${blueprint.id}`, blueprint.researchCreditCost);
+  }
+  for (const blueprint of catalog.buildingBlueprints) {
+    assertScaledCredit(`building blueprint ${blueprint.id}`, blueprint.researchCreditCost);
+  }
+  for (const blueprint of catalog.adaptedWeaponBlueprints) {
+    assertScaledCredit(`adapted blueprint ${blueprint.id}`, blueprint.productionCreditCost);
+  }
+  for (const blueprint of catalog.researchWeaponBlueprints) {
+    assertScaledCredit(`research weapon blueprint ${blueprint.id}`, blueprint.researchCreditCost);
+  }
+  for (const equipment of catalog.equipment) {
+    assertScaledCredit(`equipment ${equipment.id}`, equipment.creditCost);
+  }
+  for (const blueprint of catalog.marketWeaponBlueprints) {
+    assertScaledCredit(`market blueprint ${blueprint.id}`, blueprint.productionCreditCost);
+    assertScaledCredit(`market blueprint ${blueprint.id} min`, blueprint.marketPrice.minimum);
+    assertScaledCredit(`market blueprint ${blueprint.id} max`, blueprint.marketPrice.maximum);
+  }
+  for (const upgrade of catalog.weaponUpgrades) {
+    assertScaledCredit(`upgrade ${upgrade.id} research`, upgrade.researchCreditCost);
+    assertScaledCredit(`upgrade ${upgrade.id} production`, upgrade.productionCreditCost);
+  }
+  for (const weapon of catalog.weapons) {
+    if (weapon.marketPrice !== null) {
+      assertScaledCredit(`weapon ${weapon.id} min`, weapon.marketPrice.minimum);
+      assertScaledCredit(`weapon ${weapon.id} max`, weapon.marketPrice.maximum);
+    }
+  }
+  for (const aircraft of catalog.aircraft) {
+    if (aircraft.marketPrice !== null) {
+      assertScaledCredit(`aircraft ${aircraft.id} min`, aircraft.marketPrice.minimum);
+      assertScaledCredit(`aircraft ${aircraft.id} max`, aircraft.marketPrice.maximum);
+    }
+  }
+}
+
+function assertScaledCredit(label: string, value: number): void {
+  if (!Number.isInteger(value) || value < 1000) {
+    throw new Error(
+      `${label} must be expressed in the scaled credit economy (an integer of at least 1000).`,
+    );
+  }
 }

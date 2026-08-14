@@ -201,10 +201,10 @@ export const contentCatalog = {
     },
     {
       id: 'building-trade-centre',
-      creditCost: 350,
+      creditCost: 350_000,
       materialCost: 15,
       constructionSorties: 1,
-      maintenanceCreditCost: 6,
+      maintenanceCreditCost: 6_000,
       requiredBlueprintId: null,
       requiredBuildingId: 'building-workshop',
     },
@@ -315,7 +315,7 @@ export const contentCatalog = {
     {
       id: 'upgrade-machine-gun-reinforced-ammunition',
       weaponId: 'weapon-pulse-cannon',
-      researchCreditCost: 140,
+      researchCreditCost: 140_000,
       productionCreditCost: 90_000,
       productionMaterialCost: 4,
       productionSorties: 1,
@@ -331,7 +331,7 @@ export const contentCatalog = {
     {
       id: 'upgrade-impulse-accelerator-accumulator',
       weaponId: 'weapon-impulse-accelerator',
-      researchCreditCost: 180,
+      researchCreditCost: 180_000,
       productionCreditCost: 120_000,
       productionMaterialCost: 6,
       productionSorties: 1,
@@ -481,7 +481,7 @@ export const contentCatalog = {
     {
       id: 'consumable-rockets',
       nameKey: 'content.rocketAmmo',
-      creditCost: 40,
+      creditCost: 40_000,
       materialCost: 1,
       chargesPerSortie: 3,
       marketPrice: {

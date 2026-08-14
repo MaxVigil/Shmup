@@ -206,7 +206,49 @@ describe('trade centre', () => {
         staffXp: { 'staff-trader-1': 3 },
       },
     };
-    expect(tradeMargin(withTrader.base)).toBe(0.03);
+    // A fresh hire already grants the flat +5% sell margin; it grows with level.
+    expect(tradeMargin({
+      ...withTrader,
+      base: { ...withTrader.base, staffXp: {} },
+    }.base)).toBe(0.05);
+    expect(tradeMargin(withTrader.base)).toBe(0.07);
+  });
+
+  it('keeps the sell haircut below the buy price even at the maximum margin', () => {
+    const initial = createInitialGameState();
+    const maxed = {
+      ...initial,
+      base: {
+        ...initial.base,
+        staff: [
+          ...initial.base.staff,
+          {
+            id: 'staff-trader-1',
+            roleId: 'staff-trader',
+            firstName: 'Max',
+            lastName: 'Margin',
+            tier: 5,
+            progressMultiplier: 1,
+            salaryMultiplier: 1,
+          },
+          {
+            id: 'staff-manager-1',
+            roleId: 'staff-manager',
+            firstName: 'Op',
+            lastName: 'Director',
+            tier: 5,
+            progressMultiplier: 1,
+            salaryMultiplier: 1,
+          },
+        ],
+        staffXp: { 'staff-trader-1': 60 },
+      },
+    };
+    const margin = tradeMargin(maxed.base);
+    expect(margin).toBeLessThanOrEqual(0.15);
+    // Round-trip resale can never cover the purchase price.
+    expect(0.5 * (1 + margin)).toBeLessThan(1);
+    expect(0.6 * (1 + margin)).toBeLessThan(1);
   });
 
   it('sells non-active aircraft, unloading their loadout first', () => {

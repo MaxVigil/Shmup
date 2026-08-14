@@ -71,7 +71,7 @@ export function monthlyExpenses(base: BaseState): MonthlyExpenseBreakdown {
   let salaries = 0;
   for (const member of base.staff) {
     const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
-    salaries += Math.round((role?.creditCost ?? 0) * 0.4 * member.salaryMultiplier);
+    salaries += Math.round((role?.creditCost ?? 0) * 0.3 * member.salaryMultiplier);
   }
   for (const pilot of base.pilots) {
     salaries += pilot.salaryCreditCost ?? 0;

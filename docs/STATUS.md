@@ -48,6 +48,11 @@ The funding-nations expansion and the round-4 playtest fixes are implemented on
 - Sortie result window now includes the nation's gratitude line (single summary);
   upgraded (reinforced-ammo) machine gun shows a badge; "New Game" relabeled in
   Settings (2-step confirm, full wipe).
+- Round-5: economy rescale finished (trade centre, upgrade research, validation
+  guard), loans moved to Command (unlocked), Research/Trade tabs hidden until
+  their facilities exist, capturer row hidden until researched, trader grants a
+  flat +5% margin with a tested no-arbitrage invariant, salaries 40%→30%, month
+  cycle 6→3 sorties, END MONTH confirm when threats remain.
 
 ## Completed
 

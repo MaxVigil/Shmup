@@ -504,6 +504,7 @@ export const zh = {
   'command.resolved': '已解决',
   'command.bounty': '赏金 {credits} 信用点',
   'command.endMonth': '结束本月',
+  'command.confirmEndMonth': '结束本月？{count} 个未解决威胁将造成违约惩罚',
   'hangar.preflightMission': '任务：{country} · 威胁 {threat} · 赏金 {bounty} 信用点',
   'hangar.selectMissionHint': '出击前请在指挥部选择任务',
   'report.eyebrow': '复苏理事会 // 月度报告',

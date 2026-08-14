@@ -110,7 +110,7 @@ export function generateStaffCandidates(
       const progressMultiplier = round2(0.8 + tier * 0.12 + (rng.next() - 0.5) * 0.1);
       const salaryMultiplier = round2(0.8 + tier * 0.15 + (rng.next() - 0.5) * 0.15);
       const hireCreditCost = Math.round(role.creditCost * (0.7 + tier * 0.3));
-      const salaryCreditCost = Math.round(role.creditCost * 0.4 * salaryMultiplier);
+      const salaryCreditCost = Math.round(role.creditCost * 0.3 * salaryMultiplier);
       candidates.push({
         id: `candidate-${month}-${role.id}-${index + 1}`,
         roleId: role.id,

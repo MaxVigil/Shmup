@@ -7,7 +7,7 @@ import type {
 import type { BaseState, GameState } from './model';
 import { createSeededRng } from './rng';
 
-export const MONTH_SORTIE_LENGTH = 6;
+export const MONTH_SORTIE_LENGTH = 3;
 export const THREAT_MAP_MISSION_COUNT = 3;
 
 function stableIdHash(value: string): number {

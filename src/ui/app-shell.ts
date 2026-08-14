@@ -77,6 +77,9 @@ const scientistRole = contentCatalog.staffRoles[0];
 const engineerRole = contentCatalog.staffRoles[1];
 const traderRoleId = 'staff-trader';
 const managerRoleId = 'staff-manager';
+const tradeCentreBuilding = contentCatalog.buildings.find(
+  (entry) => entry.id === 'building-trade-centre',
+);
 const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
   'staff-scientist': 'staff.scientist',
   'staff-engineer': 'staff.engineer',
@@ -483,10 +486,13 @@ function renderBase(): void {
     : t(labBuilt ? 'facility.labBuilt' : 'facility.labUnbuilt');
   laboratoryCost.textContent = labBuilt
     ? ''
-    : t('facility.buildCost', {
-        credits: laboratory.creditCost,
-        materials: laboratory.materialCost,
-      });
+    : [
+        t('facility.buildCost', {
+          credits: laboratory.creditCost,
+          materials: laboratory.materialCost,
+        }),
+        resourceShortfall(state, laboratory.creditCost, laboratory.materialCost),
+      ].join(' · ');
   constructLaboratoryButton.hidden = labBuilt;
   constructLaboratoryButton.disabled = (
     bankrupt ||
@@ -520,10 +526,13 @@ function renderBase(): void {
       : labBuilt ? t('facility.workshopUnbuilt') : t('facility.workshopLocked');
   workshopCost.textContent = workshopBuilt || !labBuilt
     ? ''
-    : t('facility.buildCost', {
-        credits: workshop.creditCost,
-        materials: workshop.materialCost,
-      });
+    : [
+        t('facility.buildCost', {
+          credits: workshop.creditCost,
+          materials: workshop.materialCost,
+        }),
+        resourceShortfall(state, workshop.creditCost, workshop.materialCost),
+      ].join(' · ');
   constructWorkshopButton.hidden = workshopBuilt;
   constructWorkshopButton.disabled = (
     bankrupt ||
@@ -532,6 +541,17 @@ function renderBase(): void {
     state.base.credits < workshop.creditCost ||
     state.base.materials < workshop.materialCost
   );
+  const tradeCentreBuilt = tradeCentreBuilding !== undefined &&
+    state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
+  const researchTab = byId<HTMLButtonElement>('base-tab-research');
+  const tradeTab = byId<HTMLButtonElement>('base-tab-trade');
+  researchTab.hidden = !labBuilt;
+  tradeTab.hidden = !tradeCentreBuilt;
+  if (!labBuilt && activeBaseSection === 'research') {
+    showBaseSection('command');
+  } else if (!tradeCentreBuilt && activeBaseSection === 'trade') {
+    showBaseSection('command');
+  }
   blueprintStatus.textContent = blueprintUnlocked
     ? t('programme.complete')
     : blueprintProject !== undefined
@@ -572,6 +592,7 @@ function renderBase(): void {
         })
       : '';
   manufactureCapturerButton.hidden = capturerManufactured;
+  byId<HTMLElement>('capturer-equipment-row').hidden = !blueprintUnlocked;
   manufactureCapturerButton.disabled = (
     bankrupt ||
     capturerJob !== undefined ||
@@ -937,7 +958,7 @@ function renderStaffRoster(): void {
   }
   for (const member of state.base.staff) {
     const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
-    const salary = Math.round((role?.creditCost ?? 0) * 0.4 * member.salaryMultiplier);
+    const salary = Math.round((role?.creditCost ?? 0) * 0.3 * member.salaryMultiplier);
     const row = h('article', { class: 'threat-row staff-roster-row' });
     const info = h('div', null);
     info.append(
@@ -1613,23 +1634,13 @@ function renderDatabank(): void {
 function renderTrade(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
-  const tradeCentre = contentCatalog.buildings.find(
-    (entry) => entry.id === 'building-trade-centre',
-  );
-  const creditPanel = byId<HTMLElement>('credit-offers-list')
-    .closest('.command-panel') as HTMLElement | null;
+  renderCredit();
   const dynamic = byId<HTMLElement>('trade-dynamic');
   dynamic.textContent = '';
-  if (tradeCentre === undefined) {
-    if (creditPanel !== null) {
-      creditPanel.hidden = true;
-    }
+  if (tradeCentreBuilding === undefined) {
     return;
   }
-  const built = state.base.constructedBuildingIds.includes(tradeCentre.id);
-  if (creditPanel !== null) {
-    creditPanel.hidden = !built;
-  }
+  const built = state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
   if (!built) {
     const note = document.createElement('p');
     note.className = 'preflight-warning';
@@ -1640,11 +1651,12 @@ function renderTrade(): void {
     construct.className = 'base-action is-primary';
     construct.type = 'button';
     construct.textContent = t('trade.construct', {
-      credits: tradeCentre.creditCost,
+      credits: tradeCentreBuilding.creditCost,
     });
-    construct.disabled = bankrupt || !workshopBuilt || state.base.credits < tradeCentre.creditCost;
+    construct.disabled =
+      bankrupt || !workshopBuilt || state.base.credits < tradeCentreBuilding.creditCost;
     construct.addEventListener('click', () => {
-      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentre.id });
+      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentreBuilding.id });
       showToast(t('toast.buildingConstructed'));
     });
     dynamic.appendChild(construct);
@@ -1816,7 +1828,6 @@ function renderTrade(): void {
       dynamic.appendChild(row);
     }
   }
-  renderCredit();
 }
 
 function renderFleet(): void {
@@ -2954,7 +2965,32 @@ themeSelect.addEventListener('change', () => {
   applyTheme(themeSelect.value === 'terminal' ? 'terminal' : 'industrial');
 });
 
+let endMonthArmed = false;
+let endMonthTimer: number | null = null;
+
+function disarmEndMonth(): void {
+  endMonthArmed = false;
+  if (endMonthTimer !== null) {
+    window.clearTimeout(endMonthTimer);
+    endMonthTimer = null;
+  }
+  endMonthButton.textContent = t('command.endMonth');
+}
+
 endMonthButton.addEventListener('click', () => {
+  const unresolved = store.getSnapshot().base.threatMap.filter(
+    (mission) => !store.getSnapshot().base.resolvedThreatIds.includes(mission.id),
+  ).length;
+  if (unresolved > 0 && !endMonthArmed) {
+    endMonthArmed = true;
+    endMonthButton.textContent = t('command.confirmEndMonth', { count: unresolved });
+    if (endMonthTimer !== null) {
+      window.clearTimeout(endMonthTimer);
+    }
+    endMonthTimer = window.setTimeout(disarmEndMonth, 5000);
+    return;
+  }
+  disarmEndMonth();
   store.dispatch({ type: 'END_MONTH' });
 });
 monthReportContinue.addEventListener('click', () => {

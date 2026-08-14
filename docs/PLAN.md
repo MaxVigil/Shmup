@@ -238,6 +238,26 @@ Status: implemented on `test`, awaiting playtest before merging to `main`.
   rewards; debug grants rescaled (+100k/+1M); gratitude folded into the sortie
   result report; reinforced-ammo badge; Settings → NEW GAME.
 
+## Round-5 UX & economy fixes (schema v14)
+
+Status: implemented on `test`, awaiting playtest before merging to `main`.
+
+- [x] Completed the ×1000 economy rescale: trade centre 350 → 350k / upkeep 6 →
+  6k; weapon-upgrade research 140/180 → 140k/180k; dead consumable `creditCost`
+  rescaled. Added a content validation guard that rejects any credit value below
+  1000, so regressions fail fast.
+- [x] Loans moved out of the Trade Centre gate into Command (always available);
+  the Trade tab is hidden until the trade centre is built; the Research tab is
+  hidden until the laboratory is built (progressive disclosure).
+- [x] The capturer-manufacture row in Engineering is hidden until its blueprint
+  is researched; lab/workshop buttons now show a shortfall note.
+- [x] Trader now grants a flat +5% sell margin at hire (+2%/level, capped 15%,
+  manager +2%); the `SELL_RATE × (1+margin) < 1` invariant is tested so market
+  buy→resell can never turn a profit.
+- [x] Staff salaries reduced from 40% → 30% of hire cost per month.
+- [x] Month cycle aligned: `MONTH_SORTIE_LENGTH` 6 → 3 (one sortie per mission).
+- [x] END MONTH requires a confirmation when threats remain unresolved.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

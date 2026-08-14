@@ -125,7 +125,13 @@ export function buildAppTemplate(initialState: GameState): string {
               <p class="lede" id="manager-candidates-lede"></p>
               <div id="manager-candidates" class="candidate-list" aria-live="polite"></div>
             </section>
-            <section class="technology-lab command-panel" aria-labelledby="command-credit-title" hidden></section>
+            <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
+              <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
+              <h2 id="command-credit-title"></h2>
+              <p class="lede" id="command-credit-lede"></p>
+              <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
+              <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
+            </section>
           </div>
         </div>
       </section>
@@ -239,7 +245,7 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
             </div>
             <div id="engineer-candidates" class="candidate-list"></div>
-            <div class="facility-row programme-equipment">
+            <div id="capturer-equipment-row" class="facility-row programme-equipment">
               <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
               <button id="manufacture-capturer" class="base-action is-primary" type="button"></button>
             </div>
@@ -323,13 +329,6 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <div id="trade-content" class="trade-content">
           <div id="trade-dynamic" class="trade-dynamic"></div>
-          <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
-            <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
-            <h2 id="command-credit-title"></h2>
-            <p class="lede" id="command-credit-lede"></p>
-            <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
-            <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
-          </section>
           <section class="technology-lab command-panel" aria-labelledby="trader-candidates-title">
             <p class="technology-lab__eyebrow" id="trader-candidates-eyebrow"></p>
             <h2 id="trader-candidates-title"></h2>

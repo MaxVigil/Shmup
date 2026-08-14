@@ -117,7 +117,7 @@ export function generatePilotCandidates(
       tier,
       specialization,
       hireCreditCost: Math.round(150_000 * (0.7 + tier * 0.3)),
-      salaryCreditCost: Math.round(150_000 * 0.4 * salaryMultiplier),
+      salaryCreditCost: Math.round(150_000 * 0.3 * salaryMultiplier),
       progressMultiplier,
       salaryMultiplier,
       originCountryId,
