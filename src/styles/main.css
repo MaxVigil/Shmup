@@ -1472,3 +1472,52 @@ h1 {
 .research-card.is-locked .research-card__status { color: #8aa2ac; background: rgb(138 162 172 / 10%); }
 .research-card small { color: #607781; font-size: 0.66rem; line-height: 1.4; }
 .research-card__outcome { margin: 0; color: #aee7d3; font-size: 0.68rem; }
+
+/* U4 — card-based base UI */
+.facility-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 0.85rem;
+  border: 1px solid #223741;
+  border-left: 3px solid #3d5a63;
+  border-radius: 0.35rem;
+  background: rgb(9 22 28 / 62%);
+}
+.facility-row.is-ready { border-left-color: #70d6b3; }
+.facility-row.is-locked { border-left-color: #41525a; opacity: 0.8; }
+.facility-panel .facility-row,
+.programme-panel .facility-row {
+  margin-bottom: 0.55rem;
+}
+.base-action.is-primary {
+  border-color: #70a897;
+  background: #14372e;
+  color: #d9fff0;
+  font-weight: 600;
+}
+.base-action.is-primary:hover {
+  background: #1a4538;
+}
+.fleet-slot {
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.fleet-slot:hover {
+  border-color: #5c7a86;
+  transform: translateY(-1px);
+}
+.fleet-slot.is-active {
+  border-color: #70a897;
+  box-shadow: inset 3px 0 #70a897;
+}
+.fleet-slot.is-damaged {
+  border-color: #c96a5f;
+}
+.fleet-slot__ship {
+  width: 100%;
+  height: 3.4rem;
+  display: grid;
+  place-items: center;
+}
+.fleet-slot__ship svg {
+  height: 100%;
+  width: auto;
+}

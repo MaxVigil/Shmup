@@ -192,15 +192,15 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="facility-title"></h2>
             <div class="facility-row">
               <div><span class="loadout-row__label" id="laboratory-label"></span><strong id="laboratory-status"></strong><small id="laboratory-cost"></small></div>
-              <button id="construct-laboratory" class="base-action" type="button"></button>
+              <button id="construct-laboratory" class="base-action is-primary" type="button"></button>
             </div>
             <div class="facility-row">
               <div><span class="loadout-row__label" id="workshop-label"></span><strong id="workshop-status"></strong><small id="workshop-cost"></small></div>
-              <button id="construct-workshop" class="base-action" type="button"></button>
+              <button id="construct-workshop" class="base-action is-primary" type="button"></button>
             </div>
             <div id="quarantine-row" class="facility-row" hidden>
               <div><span class="loadout-row__label" id="quarantine-label"></span><strong id="quarantine-status"></strong><small id="quarantine-cost"></small></div>
-              <button id="construct-quarantine" class="base-action" type="button"></button>
+              <button id="construct-quarantine" class="base-action is-primary" type="button"></button>
             </div>
           </section>
 
@@ -213,27 +213,27 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="engineer-candidates" class="candidate-list"></div>
             <div class="facility-row programme-equipment">
               <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
-              <button id="manufacture-capturer" class="base-action" type="button"></button>
+              <button id="manufacture-capturer" class="base-action is-primary" type="button"></button>
             </div>
             <div id="accelerator-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="accelerator-production-label"></span><strong id="accelerator-production-status"></strong><small id="accelerator-production-note"></small></div>
-              <button id="manufacture-accelerator" class="base-action" type="button"></button>
+              <button id="manufacture-accelerator" class="base-action is-primary" type="button"></button>
             </div>
             <div id="alien-emitter-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="alien-emitter-production-label"></span><strong id="alien-emitter-production-status"></strong><small id="alien-emitter-production-note"></small></div>
-              <button id="manufacture-alien-emitter" class="base-action" type="button"></button>
+              <button id="manufacture-alien-emitter" class="base-action is-primary" type="button"></button>
             </div>
             <div id="canister-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="canister-production-label"></span><strong id="canister-production-status"></strong><small id="canister-production-note"></small></div>
-              <button id="manufacture-canister" class="base-action" type="button"></button>
+              <button id="manufacture-canister" class="base-action is-primary" type="button"></button>
             </div>
             <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>
-              <button id="manufacture-machine-upgrade" class="base-action" type="button"></button>
+              <button id="manufacture-machine-upgrade" class="base-action is-primary" type="button"></button>
             </div>
             <div id="accelerator-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="accelerator-upgrade-production-label"></span><strong id="accelerator-upgrade-production-status"></strong><small id="accelerator-upgrade-production-note"></small></div>
-              <button id="manufacture-accelerator-upgrade" class="base-action" type="button"></button>
+              <button id="manufacture-accelerator-upgrade" class="base-action is-primary" type="button"></button>
             </div>
           </section>
         </div>

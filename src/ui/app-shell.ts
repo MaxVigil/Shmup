@@ -44,6 +44,7 @@ import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
 import { installShmupDebugBridge } from '../debug/debug-mode';
 import { showToast } from './toast';
+import { aircraftShipSvg } from './ship-svg';
 import { resolveInitialState, temporaryPlaytestMode } from './playtest';
 
 validateContentCatalog(contentCatalog);
@@ -1210,6 +1211,16 @@ function renderFleet(): void {
     } else {
       const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
       if (aircraft !== undefined) {
+        if (state.base.activeAircraftId === aircraft.id) {
+          slot.classList.add('is-active');
+        }
+        if (aircraftDamageValue(state.base, aircraft.id) > 0) {
+          slot.classList.add('is-damaged');
+        }
+        const ship = document.createElement('div');
+        ship.className = 'fleet-slot__ship';
+        ship.innerHTML = aircraftShipSvg(aircraft.visual);
+        slot.appendChild(ship);
         const name = document.createElement('strong');
         name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
         header.appendChild(name);
@@ -1254,7 +1265,7 @@ function renderFleet(): void {
           } else {
             const standardCost = standardRepairCost(state.base, aircraft.id);
             const standard = document.createElement('button');
-            standard.className = 'base-action';
+            standard.className = 'base-action is-primary';
             standard.type = 'button';
             standard.textContent = t('hangar.repair', { credits: standardCost });
             standard.disabled = bankrupt || state.base.credits < standardCost;
@@ -1286,7 +1297,7 @@ function renderFleet(): void {
         }
         if (!isAircraftFueled(state.base, aircraft.id)) {
           const refuel = document.createElement('button');
-          refuel.className = 'base-action';
+          refuel.className = 'base-action is-primary';
           refuel.type = 'button';
           refuel.textContent = t('hangar.refuelWithCost', {
             credits: aircraft.refuelCreditCost,
@@ -1299,7 +1310,7 @@ function renderFleet(): void {
         }
         if (state.base.activeAircraftId !== aircraft.id) {
           const activate = document.createElement('button');
-          activate.className = 'base-action';
+          activate.className = 'base-action is-primary';
           activate.type = 'button';
           activate.textContent = t('hangar.activate');
           activate.disabled = bankrupt;
