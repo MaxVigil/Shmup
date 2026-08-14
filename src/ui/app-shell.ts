@@ -43,7 +43,7 @@ import { byId, setText } from './dom';
 import { h } from './h';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
-import { installShmupDebugBridge } from '../debug/debug-mode';
+import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../debug/debug-mode';
 import { showToast } from './toast';
 import { aircraftShipSvg } from './ship-svg';
 import { resolveInitialState, temporaryPlaytestMode } from './playtest';
@@ -1949,6 +1949,7 @@ function renderLocale(): void {
   setText('databank-section-lede', 'databank.lede');
   setText('settings-title', 'settings.title');
   setText('language-label', 'settings.language');
+  setText('debug-label', 'settings.debug');
   setText('restart-mission', 'settings.restart');
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
@@ -2359,6 +2360,13 @@ localeSelect.addEventListener('change', () => {
   }
   setLocale(nextLocale);
   renderLocale();
+});
+
+const debugToggle = byId<HTMLInputElement>('debug-toggle');
+debugToggle.checked = isDebugEnabled(window.localStorage);
+debugToggle.addEventListener('change', () => {
+  setDebugEnabled(window.localStorage, debugToggle.checked);
+  showToast(t(debugToggle.checked ? 'toast.debugEnabled' : 'toast.debugDisabled'));
 });
 
 const restartMissionButton = byId<HTMLButtonElement>('restart-mission');

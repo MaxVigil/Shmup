@@ -49,6 +49,10 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     if (
       building.creditCost < 0 ||
       building.materialCost < 0 ||
+      !Number.isInteger(building.constructionSorties) ||
+      building.constructionSorties <= 0 ||
+      !Number.isInteger(building.maintenanceCreditCost) ||
+      building.maintenanceCreditCost < 0 ||
       (building.requiredBlueprintId !== null &&
         !catalog.blueprints.some((blueprint) => blueprint.id === building.requiredBlueprintId) &&
         !catalog.buildingBlueprints.some((blueprint) =>
@@ -66,6 +70,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       !['earth', 'alien'].includes(blueprint.researchDomain) ||
       !Number.isInteger(blueprint.requiredProgress) ||
       blueprint.requiredProgress <= 0 ||
+      !Number.isInteger(blueprint.researchCreditCost) ||
+      blueprint.researchCreditCost < 0 ||
       !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId) ||
       !catalog.equipment.some((equipment) => equipment.id === blueprint.outputEquipmentId)
@@ -79,6 +85,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       !['earth', 'alien'].includes(blueprint.researchDomain) ||
       !Number.isInteger(blueprint.requiredProgress) ||
       blueprint.requiredProgress <= 0 ||
+      !Number.isInteger(blueprint.researchCreditCost) ||
+      blueprint.researchCreditCost < 0 ||
       !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId) ||
       !catalog.buildings.some((building) => building.id === blueprint.outputBuildingId)
@@ -94,6 +102,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       !['earth', 'alien'].includes(blueprint.researchDomain) ||
       blueprint.productionCreditCost <= 0 ||
       blueprint.productionMaterialCost < 0 ||
+      !Number.isInteger(blueprint.productionSorties) ||
+      blueprint.productionSorties <= 0 ||
       !catalog.weapons.some((weapon) => weapon.id === blueprint.outputWeaponId) ||
       !catalog.buildings.some(
         (building) => building.id === blueprint.requiredProductionBuildingId,
@@ -113,11 +123,15 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       !['earth', 'alien'].includes(blueprint.researchDomain) ||
       !Number.isInteger(blueprint.requiredProgress) ||
       blueprint.requiredProgress <= 0 ||
+      !Number.isInteger(blueprint.researchCreditCost) ||
+      blueprint.researchCreditCost < 0 ||
       !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId) ||
       !catalog.weapons.some((weapon) => weapon.id === blueprint.outputWeaponId) ||
       blueprint.productionCreditCost <= 0 ||
       blueprint.productionMaterialCost < 0 ||
+      !Number.isInteger(blueprint.productionSorties) ||
+      blueprint.productionSorties <= 0 ||
       !catalog.buildings.some(
         (building) => building.id === blueprint.requiredProductionBuildingId,
       ) ||
@@ -135,6 +149,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     if (
       equipment.creditCost < 0 ||
       equipment.materialCost < 0 ||
+      !Number.isInteger(equipment.productionSorties) ||
+      equipment.productionSorties <= 0 ||
       !catalog.buildings.some((building) => building.id === equipment.requiredBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === equipment.requiredStaffRoleId)
     ) {
@@ -165,6 +181,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       blueprint.marketPrice.maximum < blueprint.marketPrice.minimum ||
       blueprint.productionCreditCost <= 0 ||
       blueprint.productionMaterialCost < 0 ||
+      !Number.isInteger(blueprint.productionSorties) ||
+      blueprint.productionSorties <= 0 ||
       !catalog.buildings.some((building) => building.id === blueprint.requiredBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === blueprint.requiredStaffRoleId)
     ) {
@@ -178,6 +196,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       upgrade.researchCreditCost <= 0 ||
       upgrade.productionCreditCost <= 0 ||
       upgrade.productionMaterialCost < 0 ||
+      !Number.isInteger(upgrade.productionSorties) ||
+      upgrade.productionSorties <= 0 ||
       !catalog.buildings.some((building) => building.id === upgrade.requiredResearchBuildingId) ||
       !catalog.staffRoles.some((role) => role.id === upgrade.requiredStaffRoleId) ||
       !catalog.buildings.some((building) => building.id === upgrade.requiredProductionBuildingId) ||

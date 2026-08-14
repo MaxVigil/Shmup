@@ -77,6 +77,8 @@ export interface BuildingDefinition {
   readonly id: string;
   readonly creditCost: number;
   readonly materialCost: number;
+  readonly constructionSorties: number;
+  readonly maintenanceCreditCost: number;
   readonly requiredBlueprintId: string | null;
   readonly requiredBuildingId: string | null;
 }
@@ -92,6 +94,7 @@ export interface BlueprintDefinition {
   readonly id: string;
   readonly researchDomain: 'earth' | 'alien';
   readonly requiredProgress: number;
+  readonly researchCreditCost: number;
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
   readonly outputEquipmentId: string;
@@ -101,6 +104,7 @@ export interface BuildingBlueprintDefinition {
   readonly id: string;
   readonly researchDomain: 'earth' | 'alien';
   readonly requiredProgress: number;
+  readonly researchCreditCost: number;
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
   readonly outputBuildingId: string;
@@ -112,6 +116,7 @@ export interface AdaptedWeaponBlueprintDefinition {
   readonly outputWeaponId: string;
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
+  readonly productionSorties: number;
   readonly requiredProductionBuildingId: string;
   readonly requiredProductionStaffRoleId: string;
 }
@@ -120,11 +125,13 @@ export interface ResearchWeaponBlueprintDefinition {
   readonly id: string;
   readonly researchDomain: 'earth' | 'alien';
   readonly requiredProgress: number;
+  readonly researchCreditCost: number;
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
   readonly outputWeaponId: string;
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
+  readonly productionSorties: number;
   readonly requiredProductionBuildingId: string;
   readonly requiredProductionStaffRoleId: string;
 }
@@ -133,6 +140,7 @@ export interface EquipmentDefinition {
   readonly id: string;
   readonly creditCost: number;
   readonly materialCost: number;
+  readonly productionSorties: number;
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
 }
@@ -147,6 +155,7 @@ export interface MarketWeaponBlueprintDefinition {
   };
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
+  readonly productionSorties: number;
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
 }
@@ -205,6 +214,7 @@ export interface WeaponUpgradeDefinition {
   readonly researchCreditCost: number;
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
+  readonly productionSorties: number;
   readonly requiredResearchBuildingId: string;
   readonly requiredStaffRoleId: string;
   readonly requiredProductionBuildingId: string;

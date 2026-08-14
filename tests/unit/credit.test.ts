@@ -4,6 +4,7 @@ import {
   hasOutstandingLoan,
   LOAN_OFFERS,
   loanRepayment,
+  repayLoan,
   settleDueLoans,
   takeLoan,
   type LoanOfferDefinition,
@@ -15,8 +16,8 @@ describe('credit line', () => {
   const prc = LOAN_OFFERS[1] as LoanOfferDefinition;
 
   it('computes deterministic repayment from principal and interest', () => {
-    expect(loanRepayment(commission)).toBe(220);
-    expect(loanRepayment(prc)).toBe(315);
+    expect(loanRepayment(commission)).toBe(660);
+    expect(loanRepayment(prc)).toBe(1260);
   });
 
   it('grants a loan, credits the reserve, and records its due month', () => {
@@ -26,7 +27,7 @@ describe('credit line', () => {
     expect(updated.base.loans).toHaveLength(1);
     const loan = updated.base.loans[0];
     expect(loan?.lenderId).toBe(prc.lenderId);
-    expect(loan?.repaymentDue).toBe(315);
+    expect(loan?.repaymentDue).toBe(1260);
     expect(loan?.dueMonth).toBe(state.base.month + prc.termMonths);
     expect(loan?.repaid).toBe(false);
   });
@@ -52,8 +53,31 @@ describe('credit line', () => {
       },
     };
     const settled = settleDueLoans(due.base);
-    expect(settled.credits).toBe(due.base.credits - 220);
+    expect(settled.credits).toBe(due.base.credits - 660);
     expect(settled.loans[0]?.repaid).toBe(true);
+  });
+
+  it('repays a loan partially and then fully before its term', () => {
+    const state = createInitialGameState();
+    const withLoan = takeLoan(state, prc);
+    const partially = repayLoan(withLoan.base, withLoan.base.loans[0]?.id ?? '', 500);
+    expect(partially.loans[0]?.repaid).toBe(false);
+    expect(partially.loans[0]?.repaymentDue).toBe(760);
+    expect(partially.credits).toBe(withLoan.base.credits - 500);
+
+    const fully = repayLoan(partially, partially.loans[0]?.id ?? '', 760);
+    expect(fully.loans[0]?.repaid).toBe(true);
+    expect(fully.loans[0]?.repaymentDue).toBe(0);
+    expect(fully.credits).toBe(partially.credits - 760);
+  });
+
+  it('refunds overpayment when settling a loan in full', () => {
+    const state = createInitialGameState();
+    const withLoan = takeLoan(state, commission);
+    const base = withLoan.base;
+    const settled = repayLoan(base, base.loans[0]?.id ?? '', 1000);
+    expect(settled.loans[0]?.repaid).toBe(true);
+    expect(settled.credits).toBe(base.credits - 660 + 340);
   });
 
   it('leaves undue loans untouched', () => {

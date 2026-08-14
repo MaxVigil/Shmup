@@ -79,6 +79,16 @@ export function isGameState(value: unknown): value is GameState {
     Array.isArray(value.base.staffCandidates) &&
     value.base.staffCandidates.every(isStaffCandidate) &&
     isCountRecord(value.base.staffXp) &&
+    Array.isArray(value.base.constructionQueue) &&
+    value.base.constructionQueue.every(isConstructionJob) &&
+    Array.isArray(value.base.productionQueue) &&
+    value.base.productionQueue.every(isProductionJob) &&
+    Array.isArray(value.base.resolvedThreatIds) &&
+    value.base.resolvedThreatIds.every((id) => typeof id === 'string') &&
+    Array.isArray(value.base.pilotCandidates) &&
+    value.base.pilotCandidates.every(isPilotCandidate) &&
+    isCountRecord(value.base.pilotXp) &&
+    isRatioRecord(value.base.pilotFatigue) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );
@@ -142,6 +152,47 @@ function isStaffCandidate(value: unknown): boolean {
     typeof value.firstName === 'string' &&
     typeof value.lastName === 'string' &&
     typeof value.tier === 'number' &&
+    typeof value.hireCreditCost === 'number' &&
+    typeof value.salaryCreditCost === 'number' &&
+    typeof value.progressMultiplier === 'number' &&
+    typeof value.salaryMultiplier === 'number' &&
+    typeof value.originCountryId === 'string'
+  );
+}
+
+function isConstructionJob(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.buildingId === 'string' &&
+    typeof value.progress === 'number' &&
+    typeof value.requiredProgress === 'number'
+  );
+}
+
+function isProductionJob(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.projectId === 'string' &&
+    (value.kind === 'equipment' ||
+      value.kind === 'weapon' ||
+      value.kind === 'upgrade') &&
+    typeof value.progress === 'number' &&
+    typeof value.requiredProgress === 'number'
+  );
+}
+
+function isPilotCandidate(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.firstName === 'string' &&
+    typeof value.lastName === 'string' &&
+    typeof value.tier === 'number' &&
+    (value.specialization === 'speed' ||
+      value.specialization === 'damage' ||
+      value.specialization === 'recovery') &&
     typeof value.hireCreditCost === 'number' &&
     typeof value.salaryCreditCost === 'number' &&
     typeof value.progressMultiplier === 'number' &&

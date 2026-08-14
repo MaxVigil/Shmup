@@ -7,6 +7,7 @@ export interface ResearchBlueprint {
   readonly requiredBuildingId: string;
   readonly requiredStaffRoleId: string;
   readonly requiredProgress: number;
+  readonly researchCreditCost: number;
 }
 
 export function startBlueprintResearch(
@@ -28,11 +29,15 @@ export function startBlueprintResearch(
   if (state.base.researchQueue.length > 0) {
     throw new Error('One research project can be active at a time.');
   }
+  if (state.base.credits < blueprint.researchCreditCost) {
+    throw new Error(`Blueprint ${blueprint.id} requires ${blueprint.researchCreditCost} credits.`);
+  }
 
   return {
     ...state,
     base: {
       ...state.base,
+      credits: state.base.credits - blueprint.researchCreditCost,
       researchQueue: [
         ...state.base.researchQueue,
         {

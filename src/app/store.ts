@@ -12,7 +12,7 @@ import {
   monthForSorties,
   refuelAircraft,
 } from '../domain/command-centre';
-import { LOAN_OFFERS, settleDueLoans, takeLoan } from '../domain/credit';
+import { LOAN_OFFERS, repayLoan, settleDueLoans, takeLoan } from '../domain/credit';
 import {
   addConsumables,
   consumeConsumables,
@@ -31,24 +31,29 @@ import { awardStaffXp, generateStaffCandidates, hireCandidate } from '../domain/
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import { contentCatalog } from '../content/catalog';
-import { constructBuilding, hireStaff } from '../domain/base-development';
+import { hireStaff } from '../domain/base-development';
+import {
+  advanceConstruction,
+  advanceProduction,
+  startConstruction,
+  startEquipmentProduction,
+  startUpgradeProduction,
+  startWeaponProduction,
+} from '../domain/base-projects';
+import { chargeMonthlyExpenses } from '../domain/operational-economy';
 import {
   advanceBlueprintResearch,
-  manufactureEquipment,
   startBlueprintResearch,
 } from '../domain/blueprint-progression';
 import type { GameState, SortieOutcome } from '../domain/model';
 import { settleSortie } from '../domain/sortie';
 import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
-  manufacturePrimaryWeapon,
-  manufactureWeaponUpgrade,
   purchaseMarketBlueprint,
   researchWeaponUpgrade,
 } from '../domain/terrestrial-production';
 import {
   equipPrimaryWeapon,
-  manufactureAdaptedWeapon,
   researchTechnology,
 } from '../domain/technology-progression';
 
@@ -90,6 +95,7 @@ export type GameCommand =
   | { readonly type: 'SET_ACTIVE_AIRCRAFT'; readonly aircraftId: string | null }
   | { readonly type: 'REFUEL_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'TAKE_LOAN'; readonly lenderId: string }
+  | { readonly type: 'REPAY_LOAN'; readonly loanId: string; readonly amount: number }
   | {
       readonly type: 'UNEQUIP_PRIMARY_WEAPON';
       readonly slotIndex: number;
@@ -153,10 +159,14 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const afterLoans = settleDueLoans({ ...afterFuel, month: nextMonth });
           const afterRepairs = advanceRepairs({ ...afterLoans, month: nextMonth });
           const afterStaffXp = awardStaffXp(afterRepairs);
+          const afterProjects = advanceProduction(advanceConstruction(afterStaffXp));
+          const afterExpenses = nextMonth > state.base.month
+            ? chargeMonthlyExpenses({ ...afterProjects, month: nextMonth })
+            : afterProjects;
           state = {
             ...state,
             base: {
-              ...afterStaffXp,
+              ...afterExpenses,
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
               month: nextMonth,
@@ -229,7 +239,14 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (blueprint === undefined) {
             throw new Error(`Unknown production blueprint ${command.blueprintId}.`);
           }
-          state = manufacturePrimaryWeapon(state, blueprint);
+          state = startWeaponProduction(state, blueprint.id, {
+            id: blueprint.weaponId,
+            productionCreditCost: blueprint.productionCreditCost,
+            productionMaterialCost: blueprint.productionMaterialCost,
+            productionSorties: blueprint.productionSorties,
+            requiredProductionBuildingId: blueprint.requiredBuildingId,
+            requiredProductionStaffRoleId: blueprint.requiredStaffRoleId,
+          });
           break;
         }
         case 'RESEARCH_WEAPON_UPGRADE': {
@@ -249,7 +266,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (upgrade === undefined) {
             throw new Error(`Unknown weapon upgrade ${command.upgradeId}.`);
           }
-          state = manufactureWeaponUpgrade(state, upgrade);
+          state = startUpgradeProduction(state, upgrade);
           break;
         }
         case 'EQUIP_PRIMARY_WEAPON':
@@ -262,7 +279,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (building === undefined) {
             throw new Error(`Unknown building ${command.buildingId}.`);
           }
-          state = constructBuilding(state, building);
+          state = startConstruction(state, building);
           break;
         }
         case 'HIRE_STAFF': {
@@ -312,7 +329,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (weapon === undefined) {
             throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
           }
-          state = manufactureAdaptedWeapon(state, blueprint, weapon);
+          state = startWeaponProduction(state, blueprint.id, blueprint);
           break;
         }
         case 'START_RESEARCH_WEAPON_BLUEPRINT': {
@@ -338,7 +355,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (weapon === undefined) {
             throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
           }
-          state = manufactureAdaptedWeapon(state, blueprint, weapon);
+          state = startWeaponProduction(state, blueprint.id, blueprint);
           break;
         }
         case 'PURCHASE_AIRCRAFT': {
@@ -532,6 +549,10 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = takeLoan(state, offer);
           break;
         }
+        case 'REPAY_LOAN': {
+          state = { ...state, base: repayLoan(state.base, command.loanId, command.amount) };
+          break;
+        }
         case 'MANUFACTURE_EQUIPMENT': {
           const equipment = contentCatalog.equipment.find(
             (entry) => entry.id === command.equipmentId,
@@ -542,7 +563,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (equipment === undefined || blueprint === undefined) {
             throw new Error(`Unknown manufactured equipment ${command.equipmentId}.`);
           }
-          state = manufactureEquipment(state, blueprint, equipment);
+          state = startEquipmentProduction(state, blueprint, equipment);
           break;
         }
         case 'EQUIP_SPECIAL_EQUIPMENT': {

@@ -23,9 +23,9 @@ interface CombatDebugSurface {
   debugSkipToExtraction(): void;
 }
 
-const DEBUG_ENABLED = import.meta.env.DEV &&
-  new URLSearchParams(window.location.search).get('debug') === 'true';
+export const DEBUG_STORAGE_KEY = 'shmup.debug.enabled';
 
+let debugEnabled = false;
 let panel: HTMLElement | null = null;
 let invincible = false;
 
@@ -150,20 +150,43 @@ function buildPanel(): HTMLElement {
   return element;
 }
 
+export function isDebugEnabled(storage: Storage): boolean {
+  return storage.getItem(DEBUG_STORAGE_KEY) === 'true';
+}
+
+export function setDebugEnabled(storage: Storage, flag: boolean): void {
+  debugEnabled = flag;
+  storage.setItem(DEBUG_STORAGE_KEY, flag ? 'true' : 'false');
+  if (!flag && panel !== null) {
+    panel.hidden = true;
+  }
+}
+
 export function initDebugMode(): void {
-  if (DEBUG_ENABLED === false) {
-    return;
+  try {
+    debugEnabled = window.localStorage.getItem(DEBUG_STORAGE_KEY) === 'true';
+  } catch {
+    debugEnabled = false;
   }
   window.addEventListener('keydown', (event) => {
     if (event.key === 'F3') {
       event.preventDefault();
-      if (panel === null) {
-        panel = buildPanel();
-        document.body.appendChild(panel);
-      } else {
-        panel.hidden = panel.hidden ? false : true;
-      }
+      toggleDebugPanel();
     }
   });
-  console.info('Debug mode enabled. Press F3 to toggle the debug panel.');
+  if (debugEnabled) {
+    console.info('Debug mode enabled. Press F3 to toggle the debug panel.');
+  }
+}
+
+function toggleDebugPanel(): void {
+  if (!debugEnabled) {
+    return;
+  }
+  if (panel === null) {
+    panel = buildPanel();
+    document.body.appendChild(panel);
+  } else {
+    panel.hidden = panel.hidden ? false : true;
+  }
 }

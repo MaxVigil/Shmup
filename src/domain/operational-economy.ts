@@ -1,3 +1,6 @@
+import { contentCatalog } from '../content/catalog';
+import type { BaseState } from './model';
+
 export interface SortieContractLedger {
   readonly targetsDestroyed: number;
   readonly targetsBreached: number;
@@ -55,4 +58,33 @@ export function isBankrupt(credits: number): boolean {
     throw new RangeError('Credit balance must be finite.');
   }
   return credits <= 0;
+}
+
+export interface MonthlyExpenseBreakdown {
+  readonly salaries: number;
+  readonly upkeep: number;
+  readonly total: number;
+}
+
+/** Monthly recurring expenses: staff salaries plus constructed facility upkeep. */
+export function monthlyExpenses(base: BaseState): MonthlyExpenseBreakdown {
+  let salaries = 0;
+  for (const member of base.staff) {
+    const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
+    salaries += Math.round((role?.creditCost ?? 0) * 0.4 * member.salaryMultiplier);
+  }
+  let upkeep = 0;
+  for (const buildingId of base.constructedBuildingIds) {
+    const building = contentCatalog.buildings.find((entry) => entry.id === buildingId);
+    upkeep += building?.maintenanceCreditCost ?? 0;
+  }
+  return { salaries, upkeep, total: salaries + upkeep };
+}
+
+/** Deducts the monthly recurring expenses from the credit balance. */
+export function chargeMonthlyExpenses(base: BaseState): BaseState {
+  const expenses = monthlyExpenses(base);
+  return expenses.total === 0
+    ? base
+    : { ...base, credits: base.credits - expenses.total };
 }

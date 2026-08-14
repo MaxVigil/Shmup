@@ -29,6 +29,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <option id="locale-option-en" value="en"></option>
             <option id="locale-option-zh" value="zh"></option>
           </select>
+          <div class="settings-option">
+            <label for="debug-toggle" id="debug-label"></label>
+            <input id="debug-toggle" type="checkbox" />
+          </div>
           <div class="system-check" role="status">
             <span class="system-check__light" aria-hidden="true"></span>
             <span id="prototype-status"></span>

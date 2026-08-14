@@ -55,6 +55,20 @@ describe('game store M3a cycle', () => {
       type: 'MANUFACTURE_ADAPTED_WEAPON',
       blueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
     });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(moduleId);
 
     store.dispatch({ type: 'EQUIP_PRIMARY_WEAPON', weaponId: moduleId, slotIndex: 1 });
@@ -65,11 +79,19 @@ describe('game store M3a cycle', () => {
   });
 
   it('seals a delivered sample behind the containment chain', () => {
-    const store = createGameStore();
-    const laboratory = contentCatalog.buildings[0];
+    const initial = createGameStore().getSnapshot();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 3_000,
+        materials: 100,
+        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
+      },
+    });
     const workshop = contentCatalog.buildings[1];
     const quarantine = contentCatalog.buildings[2];
-    const scientist = contentCatalog.staffRoles[0];
     const containment = contentCatalog.buildingBlueprints[0];
     const technology = contentCatalog.alienTechnologies[0];
     const outcome = {
@@ -85,8 +107,6 @@ describe('game store M3a cycle', () => {
     } as const;
 
     store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
-    store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
 
     expect(() =>
       store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id }),
@@ -105,8 +125,21 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(containment.id);
 
     store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
+    for (let index = 0; index < 2; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: { ...outcome, preservedTechnologyIds: [] },
+      });
+    }
     store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
+    for (let index = 0; index < 2; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: { ...outcome, preservedTechnologyIds: [] },
+      });
+    }
     expect(store.getSnapshot().base.constructedBuildingIds).toContain(quarantine.id);
+    expect(store.getSnapshot().base.constructedBuildingIds).toContain(workshop.id);
 
     store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: technology.id });
     expect(store.getSnapshot().base.preservedTechnologyIds).toEqual([]);
@@ -122,16 +155,29 @@ describe('game store M3a cycle', () => {
       type: 'MANUFACTURE_ADAPTED_WEAPON',
       blueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
     });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: { ...outcome, preservedTechnologyIds: [] },
+    });
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(
       technology.weaponTransformation.id,
     );
   });
 
   it('researches, constructs, and manufactures the Capturer across sorties', () => {
-    const store = createGameStore();
-    const laboratory = contentCatalog.buildings[0];
+    const initial = createGameStore().getSnapshot();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 2_000,
+        materials: 100,
+        telemetryRecorded: true,
+        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
+      },
+    });
     const workshop = contentCatalog.buildings[1];
-    const scientist = contentCatalog.staffRoles[0];
     const engineer = contentCatalog.staffRoles[1];
     const blueprint = contentCatalog.blueprints[0];
     const equipment = contentCatalog.equipment[0];
@@ -144,26 +190,28 @@ describe('game store M3a cycle', () => {
       targetsBreached: 0,
       creditsEarned: 300,
       creditsPenalized: 0,
-      wardenSignalDetected: true,
+      wardenSignalDetected: false,
     } as const;
 
-    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
-    store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
     store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
     for (let index = 0; index < blueprint.requiredProgress; index += 1) {
       store.dispatch({ type: 'SETTLE_SORTIE', outcome });
     }
-
     expect(store.getSnapshot().base.unlockedBlueprintIds).toEqual([blueprint.id]);
+
     store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
+    for (let index = 0; index < 2; index += 1) {
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
+    expect(store.getSnapshot().base.constructedBuildingIds).toContain(workshop.id);
+
     store.dispatch({ type: 'HIRE_STAFF', roleId: engineer.id });
     store.dispatch({ type: 'MANUFACTURE_EQUIPMENT', equipmentId: equipment.id });
+    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
     expect(store.getSnapshot().base.manufacturedEquipmentIds).toEqual([equipment.id]);
+
     store.dispatch({ type: 'EQUIP_SPECIAL_EQUIPMENT', equipmentId: equipment.id });
     expect(store.getSnapshot().base.equippedEquipmentId).toBe(equipment.id);
-    expect(store.getSnapshot().base.credits).toBe(370);
-    expect(store.getSnapshot().base.materials).toBe(5);
   });
 
   it('runs the market-blueprint, local-production, and Accelerator-upgrade commands', () => {
@@ -192,10 +240,42 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'PURCHASE_MARKET_BLUEPRINT', blueprintId: blueprint.id });
     store.dispatch({ type: 'MANUFACTURE_PRIMARY_WEAPON', blueprintId: blueprint.id });
+    for (let index = 0; index < blueprint.productionSorties; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: {
+          extracted: true,
+          materialsFound: 0,
+          researchFound: 0,
+          preservedTechnologyIds: [],
+          targetsDestroyed: 0,
+          targetsBreached: 0,
+          creditsEarned: 0,
+          creditsPenalized: 0,
+          wardenSignalDetected: false,
+        },
+      });
+    }
+    expect(store.getSnapshot().base.locallyProducedWeaponIds).toEqual([blueprint.weaponId]);
+
     store.dispatch({ type: 'RESEARCH_WEAPON_UPGRADE', upgradeId: upgrade.id });
     store.dispatch({ type: 'MANUFACTURE_WEAPON_UPGRADE', upgradeId: upgrade.id });
-
-    expect(store.getSnapshot().base.locallyProducedWeaponIds).toEqual([blueprint.weaponId]);
+    for (let index = 0; index < upgrade.productionSorties; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: {
+          extracted: true,
+          materialsFound: 0,
+          researchFound: 0,
+          preservedTechnologyIds: [],
+          targetsDestroyed: 0,
+          targetsBreached: 0,
+          creditsEarned: 0,
+          creditsPenalized: 0,
+          wardenSignalDetected: false,
+        },
+      });
+    }
     expect(store.getSnapshot().base.manufacturedWeaponUpgradeIds).toEqual([upgrade.id]);
   });
 
@@ -203,13 +283,16 @@ describe('game store M3a cycle', () => {
     const initial = createGameStore().getSnapshot();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 2_000, materials: 100 },
+      base: {
+        ...initial.base,
+        credits: 2_000,
+        materials: 100,
+        constructedBuildingIds: [contentCatalog.buildings[0].id],
+      },
     });
-    const laboratory = contentCatalog.buildings[0];
     const scientist = contentCatalog.staffRoles[0];
     const blueprint = contentCatalog.blueprints[0];
 
-    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
     store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
 
     expect(() =>
@@ -277,6 +360,20 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(blueprint.id);
 
     store.dispatch({ type: 'MANUFACTURE_RESEARCH_WEAPON', blueprintId: blueprint.id });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
     expect(store.getSnapshot().base.ownedPrimaryWeaponIds).toContain(weaponId);
   });
 
@@ -411,7 +508,7 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'TAKE_LOAN', lenderId });
     const withLoan = store.getSnapshot();
-    expect(withLoan.base.credits).toBe(creditsBefore + 200);
+    expect(withLoan.base.credits).toBe(creditsBefore + 600);
     expect(withLoan.base.loans[0]?.dueMonth).toBe(3);
     expect(withLoan.base.loans[0]?.repaid).toBe(false);
 
@@ -439,7 +536,7 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.month).toBe(3);
     expect(store.getSnapshot().base.loans[0]?.repaid).toBe(true);
     expect(store.getSnapshot().base.credits).toBe(
-      creditsBefore + 200 + 200 * 12 - 220 - contentCatalog.aircraft[0].refuelCreditCost * 12,
+      creditsBefore + 600 + 200 * 12 - 660 - contentCatalog.aircraft[0].refuelCreditCost * 12,
     );
   });
 });

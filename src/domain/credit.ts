@@ -8,9 +8,9 @@ export interface LoanOfferDefinition {
 }
 
 export const LOAN_OFFERS: readonly LoanOfferDefinition[] = [
-  { lenderId: 'lender-commission', principal: 200, interestRate: 0.1, termMonths: 2 },
-  { lenderId: 'lender-prc', principal: 300, interestRate: 0.05, termMonths: 3 },
-  { lenderId: 'lender-ukraine', principal: 250, interestRate: 0.08, termMonths: 2 },
+  { lenderId: 'lender-commission', principal: 600, interestRate: 0.1, termMonths: 2 },
+  { lenderId: 'lender-prc', principal: 1200, interestRate: 0.05, termMonths: 4 },
+  { lenderId: 'lender-ukraine', principal: 900, interestRate: 0.08, termMonths: 3 },
 ];
 
 export function loanRepayment(offer: LoanOfferDefinition): number {
@@ -59,4 +59,35 @@ export function settleDueLoans(base: BaseState): BaseState {
     return loan;
   });
   return changed ? { ...base, credits, loans } : base;
+}
+
+/** Remaining amount owed on a loan after any partial early repayment. */
+export function loanRemaining(loan: LoanState): number {
+  return loan.repaid ? 0 : loan.repaymentDue;
+}
+
+/** Partially or fully repays an outstanding loan early; refunds overpayment. */
+export function repayLoan(base: BaseState, loanId: string, amount: number): BaseState {
+  const loan = base.loans.find((entry) => entry.id === loanId && !entry.repaid);
+  if (loan === undefined) {
+    throw new Error(`Loan ${loanId} is not outstanding.`);
+  }
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new RangeError('Loan repayment must be a positive integer.');
+  }
+  if (base.credits < loan.repaymentDue && base.credits < amount) {
+    throw new Error('Insufficient credits to repay the loan.');
+  }
+  const repayment = Math.min(amount, loan.repaymentDue);
+  const refund = amount - repayment;
+  const repaid = repayment >= loan.repaymentDue;
+  return {
+    ...base,
+    credits: base.credits - repayment + refund,
+    loans: base.loans.map((entry) =>
+      entry.id === loanId
+        ? { ...entry, repaymentDue: entry.repaymentDue - repayment, repaid }
+        : entry,
+    ),
+  };
 }
