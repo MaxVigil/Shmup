@@ -46,6 +46,8 @@ export function generateThreatMap(
   ) >>> 0;
   const rng = createSeededRng(cycleSeed);
   const missions: MissionState[] = [];
+  // Early months keep the threat ceiling low so the starting fleet can breathe.
+  const maxThreatExclusive = month === 1 ? 3 : 4;
   for (let index = 0; index < count; index += 1) {
     const pickIndex = rng.integer(0, pool.length);
     const [target] = pool.splice(pickIndex, 1);
@@ -55,7 +57,7 @@ export function generateThreatMap(
     missions.push({
       id: `mission-${month}-${index + 1}`,
       targetCountryId: target.id,
-      threatLevel: rng.integer(1, 4),
+      threatLevel: rng.integer(1, maxThreatExclusive),
     });
   }
   return missions;

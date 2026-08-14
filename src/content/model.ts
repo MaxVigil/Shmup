@@ -217,6 +217,7 @@ export interface WeaponUpgradeDefinition {
   readonly id: string;
   readonly weaponId: string;
   readonly researchCreditCost: number;
+  readonly researchSorties: number;
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
   readonly productionSorties: number;
@@ -254,6 +255,7 @@ export interface AircraftUpgradeDefinition {
   readonly aircraftBlueprintId: string;
   readonly tier: 1 | 2;
   readonly researchCreditCost: number;
+  readonly researchSorties: number;
   readonly productionCreditCost: number;
   readonly productionMaterialCost: number;
   readonly productionSorties: number;

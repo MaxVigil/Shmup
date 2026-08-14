@@ -37,6 +37,20 @@ describe('command centre', () => {
     expect(generateThreatMap(states, 42, 2)).not.toEqual(first);
   });
 
+  it('keeps the first month free of the highest threat tier', () => {
+    const states = contentCatalog.councilStates;
+    for (let seed = 0; seed < 40; seed += 1) {
+      const monthOne = generateThreatMap(states, seed, 1);
+      for (const mission of monthOne) {
+        expect(mission.threatLevel).toBeLessThanOrEqual(2);
+      }
+      const monthTwo = generateThreatMap(states, seed, 2);
+      for (const mission of monthTwo) {
+        expect(mission.threatLevel).toBeLessThanOrEqual(3);
+      }
+    }
+  });
+
   it('fuels an aircraft against credits and validates the hangar', () => {
     const state = createInitialGameState();
     const unfueled = {

@@ -82,7 +82,7 @@ export function manufacturePrimaryWeapon(
   };
 }
 
-export function researchWeaponUpgrade(
+export function startWeaponUpgradeResearch(
   state: GameState,
   upgrade: WeaponUpgradeDefinition,
 ): GameState {
@@ -112,6 +112,12 @@ export function researchWeaponUpgrade(
   if (state.base.researchedWeaponUpgradeIds.includes(upgrade.id)) {
     throw new Error(`Upgrade ${upgrade.id} has already been researched.`);
   }
+  if (state.base.researchQueue.some((project) => project.blueprintId === upgrade.id)) {
+    throw new Error(`Upgrade ${upgrade.id} is already being researched.`);
+  }
+  if (state.base.researchQueue.length > 0) {
+    throw new Error('One research project can be active at a time.');
+  }
   if (state.base.credits < upgrade.researchCreditCost) {
     throw new Error(`Upgrade ${upgrade.id} requires ${upgrade.researchCreditCost} credits.`);
   }
@@ -120,7 +126,14 @@ export function researchWeaponUpgrade(
     base: {
       ...state.base,
       credits: state.base.credits - upgrade.researchCreditCost,
-      researchedWeaponUpgradeIds: [...state.base.researchedWeaponUpgradeIds, upgrade.id],
+      researchQueue: [
+        ...state.base.researchQueue,
+        {
+          blueprintId: upgrade.id,
+          progress: 0,
+          requiredProgress: upgrade.researchSorties,
+        },
+      ],
     },
   };
 }
@@ -182,8 +195,8 @@ export function applyWeaponUpgrades<T extends {
   return { ...weapon, damage, shotsPerSecond };
 }
 
-/** Researches an aircraft upgrade tier; requires the aircraft blueprint. */
-export function researchAircraftUpgrade(
+/** Queues an aircraft upgrade tier for research; requires the aircraft blueprint. */
+export function startAircraftUpgradeResearch(
   state: GameState,
   upgrade: AircraftUpgradeDefinition,
 ): GameState {
@@ -203,6 +216,12 @@ export function researchAircraftUpgrade(
   if (state.base.researchedAircraftUpgradeIds.includes(upgrade.id)) {
     throw new Error(`Aircraft upgrade ${upgrade.id} has already been researched.`);
   }
+  if (state.base.researchQueue.some((project) => project.blueprintId === upgrade.id)) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} is already being researched.`);
+  }
+  if (state.base.researchQueue.length > 0) {
+    throw new Error('One research project can be active at a time.');
+  }
   if (state.base.credits < upgrade.researchCreditCost) {
     throw new Error(`Aircraft upgrade ${upgrade.id} requires ${upgrade.researchCreditCost} credits.`);
   }
@@ -211,9 +230,13 @@ export function researchAircraftUpgrade(
     base: {
       ...state.base,
       credits: state.base.credits - upgrade.researchCreditCost,
-      researchedAircraftUpgradeIds: [
-        ...state.base.researchedAircraftUpgradeIds,
-        upgrade.id,
+      researchQueue: [
+        ...state.base.researchQueue,
+        {
+          blueprintId: upgrade.id,
+          progress: 0,
+          requiredProgress: upgrade.researchSorties,
+        },
       ],
     },
   };

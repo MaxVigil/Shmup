@@ -11,6 +11,7 @@ export const zh = {
   'research.cardRequiresSample': '需要保存的外星样本',
   'research.cardRequiresQuarantine': '需要隔离中心和科学家',
   'research.cardAwaitingProduction': '已研究——请在工厂制造',
+  'research.cardRequiresSorties': '下一次出击后完成',
   'research.cardAlien': '外星',
   'research.cardEarth': '地球',
   'research.cardDone': '完成',

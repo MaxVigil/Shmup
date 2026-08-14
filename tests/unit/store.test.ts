@@ -259,6 +259,22 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.locallyProducedWeaponIds).toEqual([blueprint.weaponId]);
 
     store.dispatch({ type: 'RESEARCH_WEAPON_UPGRADE', upgradeId: upgrade.id });
+    for (let index = 0; index < upgrade.researchSorties; index += 1) {
+      store.dispatch({
+        type: 'SETTLE_SORTIE',
+        outcome: {
+          extracted: true,
+          materialsFound: 0,
+          researchFound: 0,
+          preservedTechnologyIds: [],
+          targetsDestroyed: 0,
+          targetsBreached: 0,
+          creditsEarned: 0,
+          creditsPenalized: 0,
+          wardenSignalDetected: false,
+        },
+      });
+    }
     store.dispatch({ type: 'MANUFACTURE_WEAPON_UPGRADE', upgradeId: upgrade.id });
     for (let index = 0; index < upgrade.productionSorties; index += 1) {
       store.dispatch({
@@ -727,6 +743,9 @@ describe('game store month cycle', () => {
     }
     expect(store.getSnapshot().base.hangarSlots).toContain(aircraftBlueprint?.outputAircraftId);
     store.dispatch({ type: 'RESEARCH_AIRCRAFT_UPGRADE', upgradeId: upgrade?.id ?? '' });
+    for (let index = 0; index < (upgrade?.researchSorties ?? 1); index += 1) {
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
     expect(store.getSnapshot().base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
     store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade?.id ?? '' });
     expect(store.getSnapshot().base.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);

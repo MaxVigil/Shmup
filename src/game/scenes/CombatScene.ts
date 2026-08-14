@@ -7,6 +7,7 @@ import type {
 } from '../../content/model';
 import { formatCredits } from '../../ui/credits';
 import { silhouetteCentroid } from '../../ui/ship-svg';
+import { MONTH_SORTIE_LENGTH } from '../../domain/command-centre';
 import type { SortieOutcome } from '../../domain/model';
 import {
   calculateMutualKnockback,
@@ -545,9 +546,14 @@ export class CombatScene extends Phaser.Scene {
     if (canSpawnRegularEnemy && this.spawnCooldownMs <= 0) {
       this.spawnEnemy();
       const pressure = Math.min(500, this.elapsedMs / 180);
+      // The first two months spawn fewer hostiles so the starting fleet can
+      // establish itself (month 1 ≈28% fewer, month 2 ≈23% fewer).
+      const month = Math.floor(this.getSortiesCompleted() / MONTH_SORTIE_LENGTH) + 1;
+      const spawnRamp = month === 1 ? 1.4 : month === 2 ? 1.3 : 1;
       this.spawnCooldownMs = Math.max(
         360,
-        920 - pressure - (this.threatLevel - 1) * 70 + this.rng.integer(0, 280),
+        Math.round((920 - pressure - (this.threatLevel - 1) * 70) * spawnRamp) +
+          this.rng.integer(0, 280),
       );
     }
 

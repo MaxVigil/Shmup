@@ -65,8 +65,8 @@ import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
   manufactureAircraftUpgrade,
   purchaseMarketBlueprint,
-  researchAircraftUpgrade,
-  researchWeaponUpgrade,
+  startAircraftUpgradeResearch,
+  startWeaponUpgradeResearch,
 } from '../domain/terrestrial-production';
 import {
   equipPrimaryWeapon,
@@ -389,7 +389,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (upgrade === undefined) {
             throw new Error(`Unknown aircraft upgrade ${command.upgradeId}.`);
           }
-          state = researchAircraftUpgrade(state, upgrade);
+          state = startAircraftUpgradeResearch(state, upgrade);
           break;
         }
         case 'MANUFACTURE_AIRCRAFT_UPGRADE': {
@@ -426,7 +426,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (upgrade === undefined) {
             throw new Error(`Unknown weapon upgrade ${command.upgradeId}.`);
           }
-          state = researchWeaponUpgrade(state, upgrade);
+          state = startWeaponUpgradeResearch(state, upgrade);
           break;
         }
         case 'MANUFACTURE_WEAPON_UPGRADE': {

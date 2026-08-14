@@ -4,6 +4,7 @@ import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { marketBlueprintPrice } from '../../src/domain/terrestrial-market';
 import { advanceProduction, startAircraftProduction } from '../../src/domain/base-projects';
+import { advanceBlueprintResearch } from '../../src/domain/blueprint-progression';
 import {
   applyAircraftUpgrades,
   applyWeaponUpgrades,
@@ -11,8 +12,8 @@ import {
   manufacturePrimaryWeapon,
   manufactureWeaponUpgrade,
   purchaseMarketBlueprint,
-  researchAircraftUpgrade,
-  researchWeaponUpgrade,
+  startAircraftUpgradeResearch,
+  startWeaponUpgradeResearch,
 } from '../../src/domain/terrestrial-production';
 
 const blueprint = contentCatalog.marketWeaponBlueprints[0];
@@ -91,15 +92,18 @@ describe('terrestrial production', () => {
 
   it('develops, manufactures, and applies reinforced machine-gun ammunition', () => {
     const ready = industrialState();
-    const researched = researchWeaponUpgrade(ready, machineUpgrade);
-    const manufactured = manufactureWeaponUpgrade(researched, machineUpgrade);
+    const queued = startWeaponUpgradeResearch(ready, machineUpgrade);
+    expect(queued.base.researchQueue).toHaveLength(1);
+    const researched = advanceBlueprintResearch(queued, scientistId);
+    const completed = advanceBlueprintResearch(researched, scientistId);
+    const manufactured = manufactureWeaponUpgrade(completed, machineUpgrade);
     const upgradedWeapon = applyWeaponUpgrades(
       contentCatalog.weapons[0],
       manufactured.base.manufacturedWeaponUpgradeIds,
       contentCatalog.weaponUpgrades,
     );
 
-    expect(researched.base.researchedWeaponUpgradeIds).toEqual([machineUpgrade.id]);
+    expect(completed.base.researchedWeaponUpgradeIds).toEqual([machineUpgrade.id]);
     expect(manufactured.base.manufacturedWeaponUpgradeIds).toEqual([machineUpgrade.id]);
     expect(upgradedWeapon.damage).toBe(
       contentCatalog.weapons[0].damage * machineUpgrade.damageMultiplier,
@@ -109,14 +113,16 @@ describe('terrestrial production', () => {
 
   it('keeps the Accelerator improvement locked until local production is qualified', () => {
     const ready = industrialState();
-    expect(() => researchWeaponUpgrade(ready, acceleratorUpgrade)).toThrow(
+    expect(() => startWeaponUpgradeResearch(ready, acceleratorUpgrade)).toThrow(
       'Weapon weapon-impulse-accelerator is required',
     );
 
     const licensed = purchaseMarketBlueprint(ready, blueprint);
     const local = manufacturePrimaryWeapon(licensed, blueprint);
-    const researched = researchWeaponUpgrade(local, acceleratorUpgrade);
-    const manufactured = manufactureWeaponUpgrade(researched, acceleratorUpgrade);
+    const queued = startWeaponUpgradeResearch(local, acceleratorUpgrade);
+    const researched = advanceBlueprintResearch(queued, scientistId);
+    const completed = advanceBlueprintResearch(researched, scientistId);
+    const manufactured = manufactureWeaponUpgrade(completed, acceleratorUpgrade);
     const upgradedWeapon = applyWeaponUpgrades(
       contentCatalog.weapons[1],
       manufactured.base.manufacturedWeaponUpgradeIds,
@@ -181,14 +187,15 @@ describe('terrestrial production', () => {
       },
     };
     // The upgrade cannot be researched without its blueprint.
-    expect(() => researchAircraftUpgrade(
+    expect(() => startAircraftUpgradeResearch(
       industrialState(),
       upgrade ?? contentCatalog.aircraftUpgrades[0],
     )).toThrow('Blueprint');
-    const researched = researchAircraftUpgrade(
+    const queued = startAircraftUpgradeResearch(
       ready,
       upgrade ?? contentCatalog.aircraftUpgrades[0],
     );
+    const researched = advanceBlueprintResearch(queued, scientistId);
     expect(researched.base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
     const manufactured = manufactureAircraftUpgrade(
       researched,

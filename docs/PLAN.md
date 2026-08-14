@@ -282,6 +282,20 @@ Status: implemented on `test`, awaiting playtest before merging to `main`.
   "complete" on start), and sortie settlement toasts buildings delivered, new
   aircraft, and researched blueprints.
 
+## Round-7 difficulty & research pacing (schema v15)
+
+Status: implemented on `test`, awaiting playtest before merging to `main`.
+
+- [x] Weapon and aircraft upgrade research now runs through the shared research
+  queue (`researchSorties` 1–2 per tier) instead of completing instantly; the
+  queue routes finished projects to weapon/aircraft/blueprint knowledge.
+- [x] Month 1 threat ceiling capped at level 2, month 2 at level 3 (was 1–3
+  from the first month).
+- [x] Enemy spawn rate reduced in early months (month 1 ≈28% fewer, month 2
+  ≈23% fewer) via a spawn-cooldown ramp keyed on completed sorties.
+- [x] Tests: threat ceiling by month, queued upgrade research + completion
+  routing, store flows updated to advance research by sorties.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

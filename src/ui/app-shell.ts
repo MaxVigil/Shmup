@@ -628,44 +628,74 @@ function renderBase(): void {
     ? t('lab.analyseSample', { research: prism.preservationResearch })
     : t('lab.researchUnlock', { module: moduleName.toUpperCase() });
 
+  const machineUpgradeProject = state.base.researchQueue.find(
+    (project) => project.blueprintId === machineGunUpgrade.id,
+  );
   machineUpgradeStatus.textContent = t(
     machineUpgradeManufactured
       ? 'upgrade.installed'
       : machineUpgradeResearched
         ? 'upgrade.researched'
-        : researchReady ? 'upgrade.available' : 'upgrade.requiresCentre',
+        : machineUpgradeProject !== undefined
+          ? 'research.cardProgress'
+          : researchReady ? 'upgrade.available' : 'upgrade.requiresCentre',
+    machineUpgradeProject !== undefined
+      ? {
+          progress: machineUpgradeProject.progress,
+          required: machineUpgradeProject.requiredProgress,
+        }
+      : {},
   );
   machineUpgradeNote.textContent = machineUpgradeManufactured
     ? t('upgrade.machineEffect')
     : machineUpgradeResearched
       ? t('upgrade.awaitingProduction')
-      : researchReady
-        ? t('upgrade.researchCost', { credits: machineGunUpgrade.researchCreditCost })
-        : '';
-  researchMachineUpgradeButton.hidden = machineUpgradeResearched;
+      : machineUpgradeProject !== undefined
+        ? t('research.cardRequiresSorties')
+        : researchReady
+          ? t('upgrade.researchCost', { credits: machineGunUpgrade.researchCreditCost })
+          : '';
+  researchMachineUpgradeButton.hidden =
+    machineUpgradeResearched || machineUpgradeProject !== undefined;
   researchMachineUpgradeButton.disabled = (
     bankrupt ||
     !researchReady ||
+    researchBusy ||
     state.base.credits < machineGunUpgrade.researchCreditCost
   );
 
   acceleratorUpgradeProject.hidden = !acceleratorLocallyProduced;
+  const acceleratorUpgradeResearch = state.base.researchQueue.find(
+    (project) => project.blueprintId === acceleratorUpgrade.id,
+  );
   acceleratorUpgradeStatus.textContent = t(
     acceleratorUpgradeManufactured
       ? 'upgrade.installed'
       : acceleratorUpgradeResearched
         ? 'upgrade.researched'
-        : 'upgrade.available',
+        : acceleratorUpgradeResearch !== undefined
+          ? 'research.cardProgress'
+          : 'upgrade.available',
+    acceleratorUpgradeResearch !== undefined
+      ? {
+          progress: acceleratorUpgradeResearch.progress,
+          required: acceleratorUpgradeResearch.requiredProgress,
+        }
+      : {},
   );
   acceleratorUpgradeNote.textContent = acceleratorUpgradeManufactured
     ? t('upgrade.acceleratorEffect')
     : acceleratorUpgradeResearched
       ? t('upgrade.awaitingProduction')
-      : t('upgrade.researchCost', { credits: acceleratorUpgrade.researchCreditCost });
-  researchAcceleratorUpgradeButton.hidden = acceleratorUpgradeResearched;
+      : acceleratorUpgradeResearch !== undefined
+        ? t('research.cardRequiresSorties')
+        : t('upgrade.researchCost', { credits: acceleratorUpgrade.researchCreditCost });
+  researchAcceleratorUpgradeButton.hidden =
+    acceleratorUpgradeResearched || acceleratorUpgradeResearch !== undefined;
   researchAcceleratorUpgradeButton.disabled = (
     bankrupt ||
     !researchReady ||
+    researchBusy ||
     state.base.credits < acceleratorUpgrade.researchCreditCost
   );
 
@@ -1026,6 +1056,7 @@ function renderAircraftProduction(): void {
 function renderAircraftUpgradeResearch(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
+  const researchBusy = state.base.researchQueue.length > 0;
   const container = byId<HTMLElement>('aircraft-upgrade-research-list');
   container.textContent = '';
   const upgrades = contentCatalog.aircraftUpgrades.filter(
@@ -1048,6 +1079,9 @@ function renderAircraftUpgradeResearch(): void {
     }
     const researched = state.base.researchedAircraftUpgradeIds.includes(upgrade.id);
     const manufactured = state.base.manufacturedAircraftUpgradeIds.includes(upgrade.id);
+    const researchProject = state.base.researchQueue.find(
+      (project) => project.blueprintId === upgrade.id,
+    );
     const row = h('div', { class: 'loadout-row' });
     const label = h(
       'span',
@@ -1081,6 +1115,12 @@ function renderAircraftUpgradeResearch(): void {
         showToast(t('toast.productionStarted'));
       });
       row.append(manufacture);
+    } else if (researchProject !== undefined) {
+      row.append(h('small', null, t('research.cardProgress', {
+        progress: researchProject.progress,
+        required: researchProject.requiredProgress,
+      })));
+      row.append(h('small', null, t('research.cardRequiresSorties')));
     } else {
       const research = h(
         'button',
@@ -1088,6 +1128,7 @@ function renderAircraftUpgradeResearch(): void {
         t('trade.researchUpgrade', { credits: upgrade.researchCreditCost }),
       );
       research.disabled = bankrupt ||
+        researchBusy ||
         !state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId) ||
         !state.base.staff.some(
           (member) => member.roleId === upgrade.requiredStaffRoleId,

@@ -58,6 +58,8 @@ The funding-nations expansion and the round-4 playtest fixes are implemented on
   Mark II/III upgrade line; two new aircraft (UK Swift, JP Precision); Hangar is
   a servicing hub with a large SVG hero panel and no market; construction/
   research/production feedback toasts fixed (start vs complete).
+- Round-7: upgrade research is queued (not instant); month 1 threat ceiling 2,
+  month 2 ceiling 3; early-month spawn-rate ramp (~28%/~23% fewer hostiles).
 
 ## Completed
 

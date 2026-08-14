@@ -1,5 +1,6 @@
 import type { BlueprintDefinition, EquipmentDefinition } from '../content/model';
-import type { GameState, ResearchProjectState } from './model';
+import { contentCatalog } from '../content/catalog';
+import type { BaseState, GameState } from './model';
 import { operationsSpeedMultiplier, staffContribution } from './staff-market';
 
 export interface ResearchBlueprint {
@@ -65,19 +66,40 @@ export function advanceBlueprintResearch(
     return state;
   }
   const progress = Math.min(front.requiredProgress, front.progress + contribution);
-  const activeProjects: ResearchProjectState[] = progress >= front.requiredProgress
+  const completed = progress >= front.requiredProgress;
+  const researchQueue = completed
     ? rest
     : [{ ...front, progress }, ...rest];
-
+  const base = { ...state.base, researchQueue };
   return {
     ...state,
-    base: {
-      ...state.base,
-      researchQueue: activeProjects,
-      unlockedBlueprintIds: progress >= front.requiredProgress
-        ? [...new Set([...state.base.unlockedBlueprintIds, front.blueprintId])]
-        : state.base.unlockedBlueprintIds,
-    },
+    base: completed ? completeResearchProject(base, front.blueprintId) : base,
+  };
+}
+
+/** Routes a finished research project to the matching knowledge store. */
+function completeResearchProject(base: BaseState, projectId: string): BaseState {
+  if (contentCatalog.weaponUpgrades.some((upgrade) => upgrade.id === projectId)) {
+    return {
+      ...base,
+      researchedWeaponUpgradeIds: [
+        ...new Set([...base.researchedWeaponUpgradeIds, projectId]),
+      ],
+    };
+  }
+  if (contentCatalog.aircraftUpgrades.some((upgrade) => upgrade.id === projectId)) {
+    return {
+      ...base,
+      researchedAircraftUpgradeIds: [
+        ...new Set([...base.researchedAircraftUpgradeIds, projectId]),
+      ],
+    };
+  }
+  return {
+    ...base,
+    unlockedBlueprintIds: [
+      ...new Set([...base.unlockedBlueprintIds, projectId]),
+    ],
   };
 }
 
