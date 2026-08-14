@@ -592,6 +592,7 @@ describe('game store month cycle', () => {
   });
 });
 
+describe('game store rocket ammunition', () => {
   const rocketsId = contentCatalog.consumables[0].id;
 
   it('purchases rockets into the warehouse and consumes the fired count', () => {
