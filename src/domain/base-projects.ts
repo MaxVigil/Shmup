@@ -2,7 +2,7 @@ import { contentCatalog } from '../content/catalog';
 import type { EquipmentDefinition } from '../content/model';
 import type { BaseState, ConstructionJobState, GameState, ProductionJobState } from './model';
 import { addWeaponStock } from './armory';
-import { staffContribution } from './staff-market';
+import { operationsSpeedMultiplier, staffContribution } from './staff-market';
 
 /* =====================================================================
    Base project queues
@@ -257,7 +257,10 @@ export function advanceProduction(base: BaseState): BaseState {
     return base;
   }
   const engineerContribution = staffContribution(base, 'staff-engineer');
-  const advance = Math.max(1, Math.round(engineerContribution));
+  const advance = Math.max(
+    1,
+    Math.round(engineerContribution * operationsSpeedMultiplier(base)),
+  );
   const completed: ProductionJobState[] = [];
   const remaining: ProductionJobState[] = [];
   for (const job of base.productionQueue) {

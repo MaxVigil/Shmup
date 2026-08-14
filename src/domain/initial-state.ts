@@ -3,6 +3,7 @@ import { SAVE_SCHEMA_VERSION } from './model';
 import { contentCatalog } from '../content/catalog';
 import { generateThreatMap } from './command-centre';
 import { generateStaffCandidates } from './staff-market';
+import { generatePilotCandidates, STARTER_PILOT_ID } from './pilot-market';
 
 export function createInitialGameState(): GameState {
   const startingWeapon = contentCatalog.weapons[0];
@@ -17,11 +18,15 @@ export function createInitialGameState(): GameState {
       allocatedEnergy: 0,
       pilots: [
         {
-          id: 'pilot-kestrel',
+          id: STARTER_PILOT_ID,
           unlocked: true,
+          firstName: 'Kestrel',
+          lastName: '',
+          specialization: 'recovery',
+          salaryCreditCost: 80_000,
         },
       ],
-      activePilotId: 'pilot-kestrel',
+      activePilotId: STARTER_PILOT_ID,
       researchQueue: [],
       preservedTechnologyIds: [],
       ownedPrimaryWeaponIds: [startingWeapon.id],
@@ -70,7 +75,7 @@ export function createInitialGameState(): GameState {
       constructionQueue: [],
       productionQueue: [],
       resolvedThreatIds: [],
-      pilotCandidates: [],
+      pilotCandidates: generatePilotCandidates(0x3a7e2026, 1),
       pilotXp: {},
       pilotFatigue: {},
       activeMissionId: null,

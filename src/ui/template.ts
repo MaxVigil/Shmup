@@ -290,6 +290,12 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="hangar-warehouse-title"></h2>
             <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
           </section>
+          <section class="technology-lab hangar-panel hangar-panel--pilots" aria-labelledby="hangar-pilots-title">
+            <p class="technology-lab__eyebrow" id="hangar-pilots-eyebrow"></p>
+            <h2 id="hangar-pilots-title"></h2>
+            <p class="lede" id="hangar-pilots-lede"></p>
+            <div id="pilots-roster" class="pilots-roster" aria-live="polite"></div>
+          </section>
         </div>
       </section>
 

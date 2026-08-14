@@ -7,6 +7,10 @@ export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 export interface PilotState {
   readonly id: string;
   readonly unlocked: boolean;
+  readonly firstName?: string;
+  readonly lastName?: string;
+  readonly specialization?: PilotSpecialization;
+  readonly salaryCreditCost?: number;
 }
 
 export type PilotSpecialization = 'speed' | 'damage' | 'recovery';

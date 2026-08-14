@@ -228,6 +228,12 @@ export const contentCatalog = {
       requiredBuildingId: 'building-trade-centre',
       maximumHeadcount: 1,
     },
+    {
+      id: 'staff-manager',
+      creditCost: 250_000,
+      requiredBuildingId: null,
+      maximumHeadcount: 1,
+    },
   ],
   blueprints: [
     {

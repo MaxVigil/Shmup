@@ -42,7 +42,10 @@ export function hireStaff(
   state: GameState,
   role: StaffRoleDefinition,
 ): GameState {
-  if (!state.base.constructedBuildingIds.includes(role.requiredBuildingId)) {
+  if (
+    role.requiredBuildingId !== null &&
+    !state.base.constructedBuildingIds.includes(role.requiredBuildingId)
+  ) {
     throw new Error(`Building ${role.requiredBuildingId} is required to hire ${role.id}.`);
   }
   if (state.base.credits < role.creditCost) {

@@ -1,6 +1,6 @@
 import type { BlueprintDefinition, EquipmentDefinition } from '../content/model';
 import type { GameState, ResearchProjectState } from './model';
-import { staffContribution } from './staff-market';
+import { operationsSpeedMultiplier, staffContribution } from './staff-market';
 
 export interface ResearchBlueprint {
   readonly id: string;
@@ -54,7 +54,8 @@ export function advanceBlueprintResearch(
   state: GameState,
   staffRoleId: string,
 ): GameState {
-  const contribution = staffContribution(state.base, staffRoleId);
+  const contribution =
+    staffContribution(state.base, staffRoleId) * operationsSpeedMultiplier(state.base);
   if (contribution === 0 || state.base.researchQueue.length === 0) {
     return state;
   }

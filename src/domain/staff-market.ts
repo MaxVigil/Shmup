@@ -99,14 +99,17 @@ export function hireCandidate(
   candidate: StaffCandidateState,
   role: {
     readonly id: string;
-    readonly requiredBuildingId: string;
+    readonly requiredBuildingId: string | null;
     readonly maximumHeadcount: number | null;
   },
 ): BaseState {
   if (!base.staffCandidates.some((entry) => entry.id === candidate.id)) {
     throw new Error(`Candidate ${candidate.id} is not available.`);
   }
-  if (!base.constructedBuildingIds.includes(role.requiredBuildingId)) {
+  if (
+    role.requiredBuildingId !== null &&
+    !base.constructedBuildingIds.includes(role.requiredBuildingId)
+  ) {
     throw new Error(`Building ${role.requiredBuildingId} is required to hire ${role.id}.`);
   }
   if (base.credits < candidate.hireCreditCost) {
@@ -146,6 +149,21 @@ export function staffContribution(base: BaseState, roleId: string): number {
       const level = staffLevel(base.staffXp[member.id] ?? 0);
       return sum + member.progressMultiplier * (1 + (level - 1) * 0.05);
     }, 0);
+}
+
+export const MANAGER_ROLE_ID = 'staff-manager';
+
+export function hasOperationsManager(base: BaseState): boolean {
+  return base.staff.some((member) => member.roleId === MANAGER_ROLE_ID);
+}
+
+/** Operations director speeds up every production and research process by 10%. */
+export function operationsSpeedMultiplier(base: BaseState): number {
+  return hasOperationsManager(base) ? 1.1 : 1;
+}
+
+export function tradeManagerMargin(base: BaseState): number {
+  return hasOperationsManager(base) ? 0.02 : 0;
 }
 
 export function awardStaffXp(base: BaseState): BaseState {

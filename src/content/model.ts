@@ -86,7 +86,7 @@ export interface BuildingDefinition {
 export interface StaffRoleDefinition {
   readonly id: string;
   readonly creditCost: number;
-  readonly requiredBuildingId: string;
+  readonly requiredBuildingId: string | null;
   readonly maximumHeadcount: number | null;
 }
 

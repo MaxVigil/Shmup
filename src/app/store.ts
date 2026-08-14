@@ -28,6 +28,13 @@ import {
   startRepair,
 } from '../domain/aircraft-integrity';
 import { awardStaffXp, generateStaffCandidates, hireCandidate } from '../domain/staff-market';
+import {
+  assignPilot,
+  awardPilotProgress,
+  generatePilotCandidates,
+  hirePilotCandidate,
+  restPilot,
+} from '../domain/pilot-market';
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import { contentCatalog } from '../content/catalog';
@@ -126,6 +133,9 @@ export type GameCommand =
   | { readonly type: 'SELECT_MISSION'; readonly missionId: string | null }
   | { readonly type: 'END_MONTH' }
   | { readonly type: 'DISMISS_MONTH_REPORT' }
+  | { readonly type: 'HIRE_PILOT'; readonly candidateId: string }
+  | { readonly type: 'ASSIGN_PILOT'; readonly pilotId: string }
+  | { readonly type: 'REST_PILOT'; readonly pilotId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null }
   | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
@@ -165,7 +175,8 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const afterFuel = consumeAircraftFuel(settled, state.base.activeAircraftId);
           const afterRepairs = advanceRepairs(afterFuel);
           const afterStaffXp = awardStaffXp(afterRepairs);
-          const afterProjects = advanceProduction(advanceConstruction(afterStaffXp));
+          const afterPilots = awardPilotProgress(afterStaffXp);
+          const afterProjects = advanceProduction(advanceConstruction(afterPilots));
           const activeMission = state.base.activeMissionId === null
             ? undefined
             : state.base.threatMap.find(
@@ -259,6 +270,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
                 base.marketSeed,
                 nextMonth,
               ),
+              pilotCandidates: generatePilotCandidates(base.marketSeed, nextMonth),
               resolvedThreatIds: [],
               monthIncome: 0,
               activeMissionId: null,
@@ -269,6 +281,24 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         }
         case 'DISMISS_MONTH_REPORT': {
           state = { ...state, base: { ...state.base, monthReport: null } };
+          break;
+        }
+        case 'HIRE_PILOT': {
+          const candidate = state.base.pilotCandidates.find(
+            (entry) => entry.id === command.candidateId,
+          );
+          if (candidate === undefined) {
+            throw new Error(`Unknown pilot candidate ${command.candidateId}.`);
+          }
+          state = { ...state, base: hirePilotCandidate(state.base, candidate) };
+          break;
+        }
+        case 'ASSIGN_PILOT': {
+          state = { ...state, base: assignPilot(state.base, command.pilotId) };
+          break;
+        }
+        case 'REST_PILOT': {
+          state = { ...state, base: restPilot(state.base, command.pilotId) };
           break;
         }
         case 'RESEARCH_TECHNOLOGY': {

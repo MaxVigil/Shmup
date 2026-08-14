@@ -6,7 +6,7 @@ import {
   removeWeapon,
   weaponStockCount,
 } from './armory';
-import { staffLevel } from './staff-market';
+import { staffLevel, tradeManagerMargin } from './staff-market';
 
 export const SELL_WEAPON_RATE = 0.5;
 export const SELL_AIRCRAFT_RATE = 0.6;
@@ -18,7 +18,7 @@ export function tradeMargin(base: BaseState): number {
     return 0;
   }
   const level = staffLevel(base.staffXp[trader.id] ?? 0);
-  return Math.min(0.15, (level - 1) * 0.03);
+  return Math.min(0.15, (level - 1) * 0.03 + tradeManagerMargin(base));
 }
 
 export function sellWeapon(

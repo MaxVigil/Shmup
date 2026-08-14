@@ -541,7 +541,9 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.month).toBe(3);
     expect(store.getSnapshot().base.loans[0]?.repaid).toBe(true);
     expect(store.getSnapshot().base.credits).toBe(
-      creditsBefore + 600_000 + 200_000 * 6 - 660_000 - contentCatalog.aircraft[0].refuelCreditCost * 6,
+      creditsBefore + 600_000 + 200_000 * 6 - 660_000 -
+        contentCatalog.aircraft[0].refuelCreditCost * 6 -
+        (store.getSnapshot().base.pilots[0]?.salaryCreditCost ?? 0) * 2,
     );
   });
 });
@@ -557,8 +559,9 @@ describe('game store month cycle', () => {
     store.dispatch({ type: 'END_MONTH' });
     const report = store.getSnapshot().base.monthReport;
     expect(report?.breachPenalties).toBeGreaterThan(0);
+    const pilotSalary = store.getSnapshot().base.pilots[0]?.salaryCreditCost ?? 0;
     expect(store.getSnapshot().base.credits).toBe(
-      before - (report?.breachPenalties ?? 0),
+      before - (report?.breachPenalties ?? 0) - pilotSalary,
     );
     expect(store.getSnapshot().base.month).toBe(2);
   });

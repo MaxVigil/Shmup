@@ -73,6 +73,9 @@ export function monthlyExpenses(base: BaseState): MonthlyExpenseBreakdown {
     const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
     salaries += Math.round((role?.creditCost ?? 0) * 0.4 * member.salaryMultiplier);
   }
+  for (const pilot of base.pilots) {
+    salaries += pilot.salaryCreditCost ?? 0;
+  }
   let upkeep = 0;
   for (const buildingId of base.constructedBuildingIds) {
     const building = contentCatalog.buildings.find((entry) => entry.id === buildingId);

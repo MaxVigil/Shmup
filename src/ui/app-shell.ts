@@ -14,6 +14,7 @@ import type {
 import { isBankrupt, monthlyExpenses } from '../domain/operational-economy';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
+import { pilotAircraftMultipliers, pilotLevel, isPilotFatigued } from '../domain/pilot-market';
 import {
   marketBlueprintPrice,
   marketConsumablePrice,
@@ -781,6 +782,7 @@ function renderBase(): void {
   renderCanister();
   renderFleet();
   renderWarehouse();
+  renderPilots();
   renderTrade();
   renderFinance();
   renderCommand();
@@ -849,8 +851,10 @@ function renderCandidates(containerId: string, roleId: string): void {
     return;
   }
   const role = contentCatalog.staffRoles.find((entry) => entry.id === roleId);
-  const facilityBuilt = role !== undefined &&
-    state.base.constructedBuildingIds.includes(role.requiredBuildingId);
+  const facilityBuilt = role !== undefined && (
+    role.requiredBuildingId === null ||
+    state.base.constructedBuildingIds.includes(role.requiredBuildingId)
+  );
   const heading = document.createElement('h3');
   heading.className = 'hangar-subtitle';
   heading.textContent = t('staff.candidates');
@@ -1107,6 +1111,101 @@ function renderMonthReport(): void {
   monthReportContinue.textContent = t('report.continue');
 }
 
+function pilotSpecializationKey(specialization: string): TranslationKey {
+  return specialization === 'speed'
+    ? 'pilot.specSpeed'
+    : specialization === 'damage'
+      ? 'pilot.specDamage'
+      : 'pilot.specRecovery';
+}
+
+function renderPilots(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const roster = byId<HTMLElement>('pilots-roster');
+  roster.textContent = '';
+
+  roster.append(h('h3', { class: 'hangar-subtitle' }, t('pilot.roster')));
+  if (state.base.pilots.length === 0) {
+    roster.append(h('p', { class: 'empty-note' }, t('pilot.noPilots')));
+  } else {
+    for (const pilot of state.base.pilots) {
+      const active = state.base.activePilotId === pilot.id;
+      const fatigue = state.base.pilotFatigue[pilot.id] ?? 0;
+      const level = pilotLevel(state.base.pilotXp[pilot.id] ?? 0);
+      const card = h('article', {
+        class: 'pilot-card' + (active ? ' is-active' : '') +
+          (isPilotFatigued(fatigue) ? ' is-fatigued' : ''),
+      });
+      const head = h('div', { class: 'pilot-card__head' });
+      head.append(
+        h('strong', null, `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim()),
+        h('small', null, [
+          t(pilotSpecializationKey(pilot.specialization ?? 'speed')),
+          t('pilot.level', { level }),
+          t('pilot.fatigue', { value: Math.round(fatigue * 100) }),
+        ].join(' · ')),
+      );
+      card.append(head);
+      const actions = h('div', { class: 'pilot-card__actions' });
+      if (active) {
+        actions.append(h('em', { class: 'status-chip is-active' }, t('pilot.active')));
+      } else {
+        const assign = h('button', { class: 'base-action', type: 'button' }, t('pilot.assign'));
+        assign.addEventListener('click', () => {
+          store.dispatch({ type: 'ASSIGN_PILOT', pilotId: pilot.id });
+        });
+        actions.append(assign);
+      }
+      if (fatigue > 0) {
+        const rest = h('button', { class: 'base-action', type: 'button' }, t('pilot.rest'));
+        rest.addEventListener('click', () => {
+          store.dispatch({ type: 'REST_PILOT', pilotId: pilot.id });
+        });
+        actions.append(rest);
+      }
+      card.append(actions);
+      roster.append(card);
+    }
+  }
+
+  if (state.base.pilotCandidates.length > 0) {
+    roster.append(h('h3', { class: 'hangar-subtitle' }, t('pilot.candidates')));
+    for (const candidate of state.base.pilotCandidates) {
+      const card = h('article', { class: 'pilot-card is-candidate' });
+      const head = h('div', { class: 'pilot-card__head' });
+      head.append(
+        h('strong', null, `${candidate.firstName} ${candidate.lastName}`),
+        h('small', null, [
+          t(candidate.originCountryId === 'council-prc'
+            ? 'country.prc'
+            : candidate.originCountryId === 'council-india'
+              ? 'country.india'
+              : candidate.originCountryId === 'council-brazil'
+                ? 'country.brazil'
+                : 'country.ukraine'),
+          t('staff.tier', { tier: candidate.tier }),
+          t(pilotSpecializationKey(candidate.specialization)),
+        ].join(' · ')),
+      );
+      card.append(head);
+      const hire = h('button', {
+        class: 'base-action is-primary',
+        type: 'button',
+      }, t('staff.hire', { credits: candidate.hireCreditCost }));
+      hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
+      hire.addEventListener('click', () => {
+        store.dispatch({ type: 'HIRE_PILOT', candidateId: candidate.id });
+        showToast(t('toast.candidateHired', {
+          name: `${candidate.firstName} ${candidate.lastName}`,
+        }));
+      });
+      card.append(hire);
+      roster.append(card);
+    }
+  }
+}
+
 function renderFinance(): void {
   const state = store.getSnapshot();
   const content = byId<HTMLElement>('finance-content');
@@ -1302,7 +1401,9 @@ function renderDatabank(): void {
     h('tr', null,
       h('td', { class: 'db-name' }, t(staffNameKey[role.id] ?? 'staff.scientist')),
       h('td', { class: 'num' }, `${formatCredits(role.creditCost)} cr`),
-      h('td', null, t(buildingNameKey[role.requiredBuildingId] ?? 'building.laboratory')),
+      h('td', null, role.requiredBuildingId === null
+        ? '—'
+        : t(buildingNameKey[role.requiredBuildingId] ?? 'building.laboratory')),
       h('td', { class: 'num' }, role.maximumHeadcount === null ? '—' : role.maximumHeadcount.toString()),
     ),
   );
@@ -2291,6 +2392,9 @@ function renderLocale(): void {
   setText('hangar-section-eyebrow', 'hangar.eyebrow');
   setText('hangar-section-title', 'hangar.title');
   setText('hangar-section-lede', 'hangar.lede');
+  setText('hangar-pilots-eyebrow', 'hangar.pilotsEyebrow');
+  setText('hangar-pilots-title', 'hangar.pilotsTitle');
+  setText('hangar-pilots-lede', 'hangar.pilotsLede');
   setText('trade-section-eyebrow', 'trade.eyebrow');
   setText('trade-section-title', 'trade.title');
   setText('trade-section-lede', 'trade.lede');
@@ -2591,12 +2695,13 @@ launchSortieButton.addEventListener('click', () => {
         const damage = aircraftId === null
           ? 0
           : aircraftDamageValue(snapshot.base, aircraftId);
+        const pilot = pilotAircraftMultipliers(snapshot.base);
         return definition === undefined
           ? { armour: 100, speedMultiplier: 1, damageMultiplier: 1 }
           : {
               armour: Math.max(1, Math.round(definition.armour * (1 - damage))),
-              speedMultiplier: definition.speedMultiplier,
-              damageMultiplier: definition.damageMultiplier,
+              speedMultiplier: definition.speedMultiplier * pilot.speedMultiplier,
+              damageMultiplier: definition.damageMultiplier * pilot.damageMultiplier,
             };
       },
       () => store.getSnapshot().base.activeAircraftId,

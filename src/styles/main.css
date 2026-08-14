@@ -2030,3 +2030,24 @@ h1 {
 .finance-row strong.is-negative { color: var(--danger-strong); }
 .finance-row strong.is-positive { color: var(--accent); }
 .finance-ledger .hangar-subtitle { margin-top: 1.2rem; }
+
+/* -- Pilot roster ------------------------------------------------------------ */
+.hangar-panel--pilots { grid-column: 1 / -1; }
+.pilots-roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.6rem; margin-top: 0.5rem; }
+.pilot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+}
+.pilot-card.is-active { border-color: var(--accent-dim); box-shadow: inset 3px 0 var(--accent); }
+.pilot-card.is-fatigued { border-color: var(--warn); }
+.pilot-card.is-candidate { border-style: dashed; }
+.pilot-card__head { display: flex; flex-direction: column; gap: 0.25rem; }
+.pilot-card__head strong { color: var(--text-hi); font-size: 0.82rem; }
+.pilot-card__head small { color: var(--text-mid); font-size: 0.68rem; line-height: 1.4; }
+.pilot-card__actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.pilot-card__actions .base-action { flex: 1; }
