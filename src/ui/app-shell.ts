@@ -861,18 +861,33 @@ function renderCandidates(containerId: string, roleId: string): void {
   container.appendChild(heading);
   for (const candidate of candidates) {
     const row = document.createElement('article');
-    row.className = 'threat-row candidate-row';
+    row.className = 'threat-row candidate-row' +
+      (candidate.tier >= 3 ? ' is-top-tier' : '');
     const info = document.createElement('div');
     const name = document.createElement('strong');
     name.textContent = `${candidate.firstName} ${candidate.lastName}`;
+    const origin = document.createElement('em');
+    origin.className = 'candidate-origin';
+    origin.textContent = t(countryNameKey(candidate.originCountryId));
     const details = document.createElement('small');
     details.textContent = [
       t('staff.tier', { tier: candidate.tier }),
       t('staff.efficiency', { value: candidate.progressMultiplier }),
       t('staff.salary', { credits: candidate.salaryCreditCost }),
     ].join(' · ');
-    info.append(name, details);
+    const head = document.createElement('div');
+    head.className = 'candidate-row__head';
+    head.append(name, origin);
+    info.append(head, details);
     row.appendChild(info);
+    const actions = document.createElement('div');
+    actions.className = 'candidate-row__actions';
+    if (candidate.tier >= 3) {
+      const badge = document.createElement('em');
+      badge.className = 'status-chip is-top';
+      badge.textContent = t('staff.topTier');
+      actions.appendChild(badge);
+    }
     const hire = document.createElement('button');
     hire.className = 'base-action';
     hire.type = 'button';
@@ -882,7 +897,8 @@ function renderCandidates(containerId: string, roleId: string): void {
       store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
       showToast(t('toast.candidateHired', { name: candidate.firstName + ' ' + candidate.lastName }));
     });
-    row.appendChild(hire);
+    actions.appendChild(hire);
+    row.appendChild(actions);
     container.appendChild(row);
   }
 }
@@ -1111,6 +1127,16 @@ function renderMonthReport(): void {
   monthReportContinue.textContent = t('report.continue');
 }
 
+function countryNameKey(originCountryId: string): TranslationKey {
+  return originCountryId === 'council-prc'
+    ? 'country.prc'
+    : originCountryId === 'council-india'
+      ? 'country.india'
+      : originCountryId === 'council-brazil'
+        ? 'country.brazil'
+        : 'country.ukraine';
+}
+
 function pilotSpecializationKey(specialization: string): TranslationKey {
   return specialization === 'speed'
     ? 'pilot.specSpeed'
@@ -1177,13 +1203,7 @@ function renderPilots(): void {
       head.append(
         h('strong', null, `${candidate.firstName} ${candidate.lastName}`),
         h('small', null, [
-          t(candidate.originCountryId === 'council-prc'
-            ? 'country.prc'
-            : candidate.originCountryId === 'council-india'
-              ? 'country.india'
-              : candidate.originCountryId === 'council-brazil'
-                ? 'country.brazil'
-                : 'country.ukraine'),
+          t(countryNameKey(candidate.originCountryId)),
           t('staff.tier', { tier: candidate.tier }),
           t(pilotSpecializationKey(candidate.specialization)),
         ].join(' · ')),

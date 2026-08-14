@@ -2051,3 +2051,10 @@ h1 {
 .pilot-card__head small { color: var(--text-mid); font-size: 0.68rem; line-height: 1.4; }
 .pilot-card__actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 .pilot-card__actions .base-action { flex: 1; }
+
+/* -- Candidate cards ----------------------------------------------------------- */
+.candidate-row.is-top-tier { border-color: var(--accent-dim); }
+.candidate-row__head { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.candidate-origin { color: var(--accent-strong); font-family: var(--font-mono); font-size: 0.6rem; font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; }
+.candidate-row__actions { display: flex; gap: 0.4rem; align-items: center; }
+.status-chip.is-top { color: #06120e; background: var(--warn); }

@@ -359,6 +359,7 @@ export const zh = {
   'hangar.preflightRepairWarning': '起飞前警告：{aircraft} 正在维修中。',
   'staff.candidates': '可用候选人',
   'staff.tier': '等级 {tier}',
+  'staff.topTier': '顶级',
   'staff.efficiency': '效率 ×{value}',
   'staff.salary': '薪水 {credits}',
   'staff.hire': '雇佣 · {credits}',

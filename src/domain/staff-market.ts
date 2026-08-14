@@ -65,13 +65,23 @@ export function generateStaffCandidates(
       const rng = createSeededRng(cycleSeed);
       const tier = rng.integer(1, 4);
       const originRoll = rng.next();
-      const originCountryId = originRoll < 0.45
-        ? 'council-ukraine'
-        : originRoll < 0.65
-          ? 'council-prc'
+      // Top-tier candidates skew toward Ukraine (innovation leader) and the
+      // PRC (key Council contributor); junior tiers are more varied.
+      const originCountryId = tier >= 3
+        ? originRoll < 0.55
+          ? 'council-ukraine'
           : originRoll < 0.85
-            ? 'council-india'
-            : 'council-brazil';
+            ? 'council-prc'
+            : originRoll < 0.95
+              ? 'council-india'
+              : 'council-brazil'
+        : originRoll < 0.35
+          ? 'council-ukraine'
+          : originRoll < 0.5
+            ? 'council-prc'
+            : originRoll < 0.75
+              ? 'council-india'
+              : 'council-brazil';
       const [firstName, lastName] = nameForOrigin(originCountryId, rng);
       const progressMultiplier = round2(0.8 + tier * 0.12 + (rng.next() - 0.5) * 0.1);
       const salaryMultiplier = round2(0.8 + tier * 0.15 + (rng.next() - 0.5) * 0.15);
