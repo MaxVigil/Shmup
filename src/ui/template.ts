@@ -162,6 +162,8 @@ export function buildAppTemplate(initialState: GameState): string {
               <strong id="earth-weapons-status"></strong>
               <small id="earth-weapons-note"></small>
             </div>
+            <h3 class="hangar-subtitle" id="aircraft-upgrade-research-title"></h3>
+            <div id="aircraft-upgrade-research-list" class="candidate-list" aria-live="polite"></div>
             <div class="terrestrial-projects">
               <article class="terrestrial-project" id="machine-upgrade-project">
                 <div>
@@ -245,6 +247,8 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
             </div>
             <div id="engineer-candidates" class="candidate-list"></div>
+            <h3 class="hangar-subtitle" id="aircraft-production-title"></h3>
+            <div id="aircraft-production-list" class="candidate-list" aria-live="polite"></div>
             <div id="capturer-equipment-row" class="facility-row programme-equipment">
               <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
               <button id="manufacture-capturer" class="base-action is-primary" type="button"></button>
@@ -283,6 +287,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <section class="technology-lab hangar-panel hangar-panel--preflight" aria-labelledby="hangar-loadout-title">
           <p class="technology-lab__eyebrow" id="hangar-loadout-eyebrow"></p>
           <h2 id="hangar-loadout-title"></h2>
+          <div id="hangar-hero" class="hangar-hero" aria-live="polite"></div>
           <div id="aircraft-loadout-editor" class="aircraft-loadout-editor" aria-live="polite"></div>
           <div class="loadout-row">
             <div><span class="loadout-row__label" id="special-equipment-label"></span><strong id="special-equipment-status"></strong><small id="special-equipment-note"></small></div>
@@ -304,8 +309,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <div><span class="loadout-row__label" id="hangar-slot-label"></span><strong id="hangar-slot-cost"></strong><small id="hangar-slot-note"></small></div>
             <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
           </div>
-          <h3 class="hangar-subtitle" id="hangar-market-subtitle"></h3>
-          <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
         </section>
           <section class="technology-lab hangar-panel hangar-panel--warehouse" aria-labelledby="hangar-warehouse-title">
             <p class="technology-lab__eyebrow" id="hangar-warehouse-eyebrow"></p>

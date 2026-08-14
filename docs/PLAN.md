@@ -258,6 +258,30 @@ Status: implemented on `test`, awaiting playtest before merging to `main`.
 - [x] Month cycle aligned: `MONTH_SORTIE_LENGTH` 6 → 3 (one sortie per mission).
 - [x] END MONTH requires a confirmation when threats remain unresolved.
 
+## Round-6 aircraft procurement & market (schema v15)
+
+Status: implemented on `test`, awaiting playtest before merging to `main`.
+
+- [x] Schema v15: `researchedAircraftUpgradeIds` / `manufacturedAircraftUpgradeIds`
+  with a v14→v15 migration (older saves upgrade through it).
+- [x] Market sells **ready aircraft and aircraft blueprints** (all six types,
+  including the starter Interceptor and its blueprint). Aircraft sales also move
+  to Trade.
+- [x] Blueprints unlock the **Mark II / Mark III upgrade line** (research in the
+  laboratory → manufacture in the workshop); upgrades apply to owned aircraft
+  stats; `signatureId` reserved for future unique Mark III effects.
+- [x] Two new aircraft: UK `Swift` (fast/light, 2 slots) and Japan `Precision`
+  (single slot, highest damage).
+- [x] Hangar is now a servicing hub: a large procedural-SVG hero panel for the
+  active aircraft (stats, status, refuel/repair/activate), compact fleet slots,
+  loadout + special equipment, pilots. The hangar's aircraft market was removed.
+- [x] Procedural ship SVG upgraded (hull + canopy inset + engine glow) and the
+  in-flight ship matches the hangar model.
+- [x] Sanity/feedback pass: construction/research/production now toast
+  "started — completes after the next sortie" (the old toast wrongly said
+  "complete" on start), and sortie settlement toasts buildings delivered, new
+  aircraft, and researched blueprints.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

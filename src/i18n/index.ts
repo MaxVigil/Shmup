@@ -28,6 +28,13 @@ const en = {
   'toast.buildingConstructed': 'Construction complete',
   'toast.loanTaken': 'Credit line received',
   'toast.loanRepaid': 'Loan repaid',
+
+  'toast.constructionStarted': 'Construction started — completes after the next sortie',
+  'toast.researchStarted': 'Research started — completes after the next sortie',
+  'toast.productionStarted': 'Production started — completes after the next sortie',
+  'toast.aircraftDelivered': 'New aircraft delivered: {aircraft}',
+  'toast.blueprintResearched': 'Aircraft blueprint researched: {aircraft}',
+
   'toast.candidateHired': '{name} hired',
 
   'nav.base': 'Base',
@@ -143,6 +150,10 @@ const en = {
   'engineering.lede': 'Construct facilities, hire technical staff, and manufacture equipment from completed blueprints.',
   'engineering.manufacturingEyebrow': 'PRODUCTION WORKS // QUALIFICATION',
   'engineering.manufacturingTitle': 'Blueprint production',
+
+  'engineering.aircraftProductionTitle': 'Aircraft production',
+  'research.aircraftUpgradeTitle': 'Aircraft improvements',
+
   'market.eyebrow': 'TERRESTRIAL MARKET // VERIFIED SUPPLIER',
   'market.title': 'Procurement',
   'market.intro': 'Acquire finished weapons immediately or license blueprints for lower-cost local production. Quotes refresh only after a sortie.',
@@ -322,6 +333,12 @@ const en = {
   'aircraft.gunshipRole': 'Assault gunship // heavier armour, slower, harder hits',
   'aircraft.aegisRole': 'Heavy tank // most armour, slowest, heaviest hits',
   'aircraft.yanlongRole': 'PRC-sourced striker // strong economy, four primary slots',
+
+  'content.swift': 'Swift',
+  'content.precision': 'Precision',
+  'aircraft.swiftRole': 'British fast interceptor // highest speed, fragile hull',
+  'aircraft.precisionRole': 'Japanese precision fighter // single slot, heaviest strikes',
+
   'aircraft.speed': 'SPEED ×{value}',
   'aircraft.damage': 'DAMAGE ×{value}',
   'hangar.fleetEyebrow': 'HANGAR // AIRCRAFT FLEET',
@@ -372,6 +389,14 @@ const en = {
   'hangar.damage': 'DAMAGE {value}%',
   'hangar.repair': 'REPAIR · {credits}',
   'hangar.emergencyRepair': 'EMERGENCY · {credits}',
+
+  'hangar.armour': 'ARMOUR {value}',
+  'hangar.speed': 'SPEED ×{value}',
+  'hangar.firepower': 'FIREPOWER ×{value}',
+  'hangar.slots': 'SLOTS {value}',
+  'hangar.upgraded': 'UPGRADED',
+  'hangar.noActiveAircraft': 'No aircraft selected.',
+
   'hangar.repairInProgress': 'Repairs: {sorties} sorties left',
   'hangar.damagedWarning': 'Aircraft damaged ({value}%): reduced armour, still flyable',
   'hangar.preflightRepairWarning': 'PREFLIGHT WARNING: {aircraft} is being repaired.',
@@ -407,6 +432,17 @@ const en = {
   'trade.sellTitle': 'Surplus sales',
   'trade.loansTitle': 'Council credit lines',
   'trade.buy': 'BUY · {credits}',
+
+  'trade.aircraftTitle': 'Ready aircraft',
+  'trade.aircraftBlueprintTitle': 'Aircraft blueprints',
+  'trade.aircraftBlueprint': 'BLUEPRINT',
+  'trade.buyBlueprint': 'BUY BLUEPRINT · {credits}',
+  'trade.aircraftLocked': 'Unlocks after {sorties} completed sorties',
+  'trade.manufactureAircraft': 'MANUFACTURE · {credits} cr / {materials} mat',
+  'trade.manufactureUpgrade': 'MANUFACTURE · {credits} cr / {materials} mat',
+  'trade.researchUpgrade': 'RESEARCH · {credits} cr',
+  'trade.aircraftMark': 'MARK {mark}',
+
   'trade.blueprintLabel': 'Blueprint: {weapon}',
   'trade.sell': 'SELL · +{credits}',
   'trade.noStock': 'Nothing available to sell.',
@@ -630,6 +666,13 @@ const uk: Record<TranslationKey, string> = {
   'toast.buildingConstructed': 'Будівництво завершено',
   'toast.loanTaken': 'Кредитну лінію відкрито',
   'toast.loanRepaid': 'Позику погашено',
+
+  'toast.constructionStarted': 'Будівництво розпочато — завершиться після наступного вильоту',
+  'toast.researchStarted': 'Дослідження розпочато — завершиться після наступного вильоту',
+  'toast.productionStarted': 'Виробництво розпочато — завершиться після наступного вильоту',
+  'toast.aircraftDelivered': 'Новий літак доставлено: {aircraft}',
+  'toast.blueprintResearched': 'Креслення літака досліджено: {aircraft}',
+
   'toast.candidateHired': '{name} найнято',
 
   'nav.base': 'База',
@@ -745,6 +788,10 @@ const uk: Record<TranslationKey, string> = {
   'engineering.lede': 'Будуйте об’єкти, наймайте технічний персонал і виготовляйте обладнання за завершеними блупринтами.',
   'engineering.manufacturingEyebrow': 'ВИРОБНИЧИЙ ЦЕХ // КВАЛІФІКАЦІЯ',
   'engineering.manufacturingTitle': 'Виробництво за блупринтами',
+
+  'engineering.aircraftProductionTitle': 'Виробництво літаків',
+  'research.aircraftUpgradeTitle': 'Покращення літаків',
+
   'market.eyebrow': 'ЗЕМНИЙ РИНОК // ПЕРЕВІРЕНИЙ ПОСТАЧАЛЬНИК',
   'market.title': 'Закупівлі',
   'market.intro': 'Купуйте готову зброю негайно або ліцензуйте блупринти для дешевшого місцевого виробництва. Ціни оновлюються після вильоту.',
@@ -924,6 +971,12 @@ const uk: Record<TranslationKey, string> = {
   'aircraft.gunshipRole': 'Штурмовик // більше броні, повільніший, важчі удари',
   'aircraft.aegisRole': 'Тяжкий танк // найбільше броні, найповільніший, найважчі удари',
   'aircraft.yanlongRole': 'Ударник з КНР // міцна економіка, чотири основні слоти',
+
+  'content.swift': 'Swift',
+  'content.precision': 'Precision',
+  'aircraft.swiftRole': 'Британський швидкий перехоплювач // найвища швидкість, крихкий корпус',
+  'aircraft.precisionRole': 'Японський точний винищувач // один слот, найважчі удари',
+
   'aircraft.speed': 'ШВИДКІСТЬ ×{value}',
   'aircraft.damage': 'УРОН ×{value}',
   'hangar.fleetEyebrow': 'АНГАР // АВІАЦІЙНИЙ ПАРК',
@@ -974,6 +1027,14 @@ const uk: Record<TranslationKey, string> = {
   'hangar.damage': 'ПОШКОДЖЕННЯ {value}%',
   'hangar.repair': 'РЕМОНТ · {credits}',
   'hangar.emergencyRepair': 'АВАРІЙНО · {credits}',
+
+  'hangar.armour': 'БРОНЯ {value}',
+  'hangar.speed': 'ШВИДКІСТЬ ×{value}',
+  'hangar.firepower': 'ВОГНЕВА МІЦЬ ×{value}',
+  'hangar.slots': 'СЛОТИ {value}',
+  'hangar.upgraded': 'ПОКРАЩЕНО',
+  'hangar.noActiveAircraft': 'Літак не обрано.',
+
   'hangar.repairInProgress': 'Ремонт: {sorties} вильотів лишилось',
   'hangar.damagedWarning': 'Літачок пошкоджено ({value}%): знижена броня, виліт можливий',
   'hangar.preflightRepairWarning': 'ПОПЕРЕДЖЕННЯ: {aircraft} у ремонті.',
@@ -1009,6 +1070,17 @@ const uk: Record<TranslationKey, string> = {
   'trade.sellTitle': 'Продаж надлишків',
   'trade.loansTitle': 'Кредитні лінії Ради',
   'trade.buy': 'КУПИТИ · {credits}',
+
+  'trade.aircraftTitle': 'Готові літаки',
+  'trade.aircraftBlueprintTitle': 'Креслення літаків',
+  'trade.aircraftBlueprint': 'КРЕСЛЕННЯ',
+  'trade.buyBlueprint': 'КУПИТИ КРЕСЛЕННЯ · {credits}',
+  'trade.aircraftLocked': 'Відкриється після {sorties} завершених вильотів',
+  'trade.manufactureAircraft': 'ВИГОТОВИТИ · {credits} кр / {materials} мат',
+  'trade.manufactureUpgrade': 'ВИГОТОВИТИ · {credits} кр / {materials} мат',
+  'trade.researchUpgrade': 'ДОСЛІДИТИ · {credits} кр',
+  'trade.aircraftMark': 'МАРКА {mark}',
+
   'trade.blueprintLabel': 'Блупринт: {weapon}',
   'trade.sell': 'ПРОДАТИ · +{credits}',
   'trade.noStock': 'Немає що продавати.',

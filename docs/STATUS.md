@@ -53,6 +53,11 @@ The funding-nations expansion and the round-4 playtest fixes are implemented on
   their facilities exist, capturer row hidden until researched, trader grants a
   flat +5% margin with a tested no-arbitrage invariant, salaries 40%→30%, month
   cycle 6→3 sorties, END MONTH confirm when threats remain.
+- Round-6 (schema v15): aircraft procurement reworked — Trade sells ready
+  aircraft and aircraft blueprints (incl. Interceptor); blueprints unlock the
+  Mark II/III upgrade line; two new aircraft (UK Swift, JP Precision); Hangar is
+  a servicing hub with a large SVG hero panel and no market; construction/
+  research/production feedback toasts fixed (start vs complete).
 
 ## Completed
 

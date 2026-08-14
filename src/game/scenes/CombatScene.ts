@@ -6,6 +6,7 @@ import type {
   WeaponDefinition,
 } from '../../content/model';
 import { formatCredits } from '../../ui/credits';
+import { silhouetteCentroid } from '../../ui/ship-svg';
 import type { SortieOutcome } from '../../domain/model';
 import {
   calculateMutualKnockback,
@@ -367,6 +368,16 @@ export class CombatScene extends Phaser.Scene {
     this.player.clear();
     this.player.fillStyle(visual.hullColor, 1);
     this.player.fillPoints(points, true);
+    // Canopy inset, matching the hangar model.
+    const centroid = silhouetteCentroid(visual.silhouette);
+    const canopy: Phaser.Math.Vector2[] = points.map((point) =>
+      new Phaser.Math.Vector2(
+        centroid.x + (point.x - centroid.x) * 0.42,
+        centroid.y + (point.y - centroid.y) * 0.42,
+      ),
+    );
+    this.player.fillStyle(visual.accentColor, 0.55);
+    this.player.fillPoints(canopy, true);
     this.player.fillStyle(visual.accentColor, 1);
     this.player.fillCircle(0, -4, 3);
   }

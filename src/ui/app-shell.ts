@@ -516,6 +516,8 @@ function renderBase(): void {
   renderCandidates('manager-candidates', managerRoleId);
   renderCandidates('trader-candidates', traderRoleId);
   renderStaffRoster();
+  renderAircraftProduction();
+  renderAircraftUpgradeResearch();
   const workshopJob = constructionJob(state, workshop.id);
   workshopStatus.textContent = workshopJob !== undefined
     ? t('facility.constructing', {
@@ -840,12 +842,16 @@ const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
   'aircraft-gunship': 'content.gunship',
   'aircraft-aegis': 'content.aegis',
   'aircraft-yanlong': 'content.yanlong',
+  'aircraft-swift': 'content.swift',
+  'aircraft-precision': 'content.precision',
 };
 const aircraftRoleKey: Readonly<Record<string, TranslationKey>> = {
   'aircraft-interceptor': 'aircraft.interceptorRole',
   'aircraft-gunship': 'aircraft.gunshipRole',
   'aircraft-aegis': 'aircraft.aegisRole',
   'aircraft-yanlong': 'aircraft.yanlongRole',
+  'aircraft-swift': 'aircraft.swiftRole',
+  'aircraft-precision': 'aircraft.precisionRole',
 };
 
 function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number; damageMultiplier: number }): string {
@@ -854,34 +860,6 @@ function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number
     t('aircraft.speed', { value: aircraft.speedMultiplier }),
     t('aircraft.damage', { value: aircraft.damageMultiplier }),
   ].join(' // ');
-}
-
-function signedDeltaText(value: number): string {
-  if (value > 0) {
-    return `+${value}`;
-  }
-  if (value < 0) {
-    return `−${Math.abs(value)}`;
-  }
-  return '0';
-}
-
-function aircraftDeltaText(
-  offer: { armour: number; speedMultiplier: number; damageMultiplier: number },
-  active: { armour: number; speedMultiplier: number; damageMultiplier: number },
-): string {
-  const armour = signedDeltaText(offer.armour - active.armour);
-  const speed = signedDeltaText(
-    Number((offer.speedMultiplier - active.speedMultiplier).toFixed(2)),
-  );
-  const damage = signedDeltaText(
-    Number((offer.damageMultiplier - active.damageMultiplier).toFixed(2)),
-  );
-  return [
-    t('combat.armour', { value: armour }),
-    t('aircraft.speed', { value: speed }),
-    t('aircraft.damage', { value: damage }),
-  ].join(' · ');
 }
 
 function renderCandidates(containerId: string, roleId: string): void {
@@ -981,6 +959,146 @@ function renderStaffRoster(): void {
       store.dispatch({ type: 'DISMISS_STAFF', staffId: member.id });
     });
     row.append(dismiss);
+    container.append(row);
+  }
+}
+
+function renderAircraftProduction(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const container = byId<HTMLElement>('aircraft-production-list');
+  container.textContent = '';
+  const blueprints = contentCatalog.aircraftBlueprints.filter(
+    (aircraftBlueprint) => state.base.unlockedBlueprintIds.includes(aircraftBlueprint.id),
+  );
+  if (blueprints.length === 0) {
+    return;
+  }
+  for (const aircraftBlueprint of blueprints) {
+    const aircraft = contentCatalog.aircraft.find(
+      (entry) => entry.id === aircraftBlueprint.outputAircraftId,
+    );
+    if (aircraft === undefined || state.base.hangarSlots.includes(aircraft.id)) {
+      continue;
+    }
+    const job = state.base.productionQueue.find(
+      (entry) => entry.projectId === aircraftBlueprint.id,
+    );
+    const row = h('div', { class: 'loadout-row' });
+    const label = h(
+      'span',
+      { class: 'loadout-row__label' },
+      t(aircraftNameKey[aircraft.id] ?? 'content.interceptor'),
+    );
+    row.append(label);
+    if (job !== undefined) {
+      row.append(h('small', null, t('production.inProgress', {
+        progress: job.progress,
+        required: job.requiredProgress,
+      })));
+    } else {
+      const manufacture = h(
+        'button',
+        { class: 'base-action is-primary', type: 'button' },
+        t('trade.manufactureAircraft', {
+          credits: aircraftBlueprint.productionCreditCost,
+          materials: aircraftBlueprint.productionMaterialCost,
+        }),
+      );
+      manufacture.disabled = bankrupt ||
+        !state.base.hangarSlots.includes(null) ||
+        !state.base.constructedBuildingIds.includes(aircraftBlueprint.requiredBuildingId) ||
+        !state.base.staff.some(
+          (member) => member.roleId === aircraftBlueprint.requiredStaffRoleId,
+        ) ||
+        state.base.credits < aircraftBlueprint.productionCreditCost ||
+        state.base.materials < aircraftBlueprint.productionMaterialCost;
+      manufacture.addEventListener('click', () => {
+        store.dispatch({ type: 'MANUFACTURE_AIRCRAFT', blueprintId: aircraftBlueprint.id });
+        showToast(t('toast.productionStarted'));
+      });
+      row.append(manufacture);
+    }
+    container.append(row);
+  }
+}
+
+function renderAircraftUpgradeResearch(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const container = byId<HTMLElement>('aircraft-upgrade-research-list');
+  container.textContent = '';
+  const upgrades = contentCatalog.aircraftUpgrades.filter(
+    (upgrade) => state.base.unlockedBlueprintIds.includes(upgrade.aircraftBlueprintId),
+  );
+  if (upgrades.length === 0) {
+    return;
+  }
+  for (const upgrade of upgrades) {
+    const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === upgrade.aircraftBlueprintId,
+    );
+    const aircraft = aircraftBlueprint === undefined
+      ? undefined
+      : contentCatalog.aircraft.find(
+          (entry) => entry.id === aircraftBlueprint.outputAircraftId,
+        );
+    if (aircraft === undefined) {
+      continue;
+    }
+    const researched = state.base.researchedAircraftUpgradeIds.includes(upgrade.id);
+    const manufactured = state.base.manufacturedAircraftUpgradeIds.includes(upgrade.id);
+    const row = h('div', { class: 'loadout-row' });
+    const label = h(
+      'span',
+      { class: 'loadout-row__label' },
+      `${t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')} · ${t(
+        'trade.aircraftMark',
+        { mark: upgrade.tier === 1 ? 'II' : 'III' },
+      )}`,
+    );
+    row.append(label);
+    if (manufactured) {
+      row.append(h('em', { class: 'status-chip is-owned' }, t('upgrade.installed')));
+    } else if (researched) {
+      const manufacture = h(
+        'button',
+        { class: 'base-action', type: 'button' },
+        t('trade.manufactureUpgrade', {
+          credits: upgrade.productionCreditCost,
+          materials: upgrade.productionMaterialCost,
+        }),
+      );
+      manufacture.disabled = bankrupt ||
+        !state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId) ||
+        !state.base.staff.some(
+          (member) => member.roleId === upgrade.requiredProductionStaffRoleId,
+        ) ||
+        state.base.credits < upgrade.productionCreditCost ||
+        state.base.materials < upgrade.productionMaterialCost;
+      manufacture.addEventListener('click', () => {
+        store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
+        showToast(t('toast.productionStarted'));
+      });
+      row.append(manufacture);
+    } else {
+      const research = h(
+        'button',
+        { class: 'base-action', type: 'button' },
+        t('trade.researchUpgrade', { credits: upgrade.researchCreditCost }),
+      );
+      research.disabled = bankrupt ||
+        !state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId) ||
+        !state.base.staff.some(
+          (member) => member.roleId === upgrade.requiredStaffRoleId,
+        ) ||
+        state.base.credits < upgrade.researchCreditCost;
+      research.addEventListener('click', () => {
+        store.dispatch({ type: 'RESEARCH_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
+        showToast(t('toast.researchStarted'));
+      });
+      row.append(research);
+    }
     container.append(row);
   }
 }
@@ -1658,7 +1776,7 @@ function renderTrade(): void {
       bankrupt || !workshopBuilt || state.base.credits < tradeCentreBuilding.creditCost;
     construct.addEventListener('click', () => {
       store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentreBuilding.id });
-      showToast(t('toast.buildingConstructed'));
+      showToast(t('toast.constructionStarted'));
     });
     dynamic.appendChild(construct);
     return;
@@ -1791,42 +1909,306 @@ function renderTrade(): void {
 
   const sellHeading = document.createElement('h3');
   sellHeading.className = 'hangar-subtitle';
+  const aircraftHeading = document.createElement('h3');
+  aircraftHeading.className = 'hangar-subtitle';
+  aircraftHeading.textContent = t('trade.aircraftTitle');
+  dynamic.appendChild(aircraftHeading);
+  for (const aircraft of contentCatalog.aircraft) {
+    if (aircraft.marketPrice === null) {
+      continue;
+    }
+    const owned = state.base.hangarSlots.includes(aircraft.id);
+    const freeSlot = state.base.hangarSlots.includes(null);
+    const price = marketAircraftPrice(
+      aircraft,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
+    const meta = document.createElement('small');
+    meta.textContent = aircraftStatSummary(aircraft);
+    row.append(label, meta);
+    if (owned) {
+      const ownedNote = document.createElement('strong');
+      ownedNote.textContent = t('hangar.aircraftOwned');
+      row.append(ownedNote);
+    } else {
+      const buy = document.createElement('button');
+      buy.className = 'base-action';
+      buy.type = 'button';
+      buy.textContent = t('trade.buy', { credits: price });
+      buy.disabled = bankrupt || !freeSlot || state.base.credits < price;
+      buy.addEventListener('click', () => {
+        store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: aircraft.id });
+      });
+      row.append(buy);
+    }
+    dynamic.appendChild(row);
+  }
+
+  const blueprintHeading = document.createElement('h3');
+  blueprintHeading.className = 'hangar-subtitle';
+  blueprintHeading.textContent = t('trade.aircraftBlueprintTitle');
+  dynamic.appendChild(blueprintHeading);
+  for (const aircraftBlueprint of contentCatalog.aircraftBlueprints) {
+    const owned = state.base.unlockedBlueprintIds.includes(aircraftBlueprint.id);
+    const available = state.base.sortiesCompleted >= aircraftBlueprint.minimumSorties;
+    const price = marketBlueprintPrice(
+      aircraftBlueprint,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t(aircraftNameKey[aircraftBlueprint.outputAircraftId] ?? 'content.interceptor');
+    const tag = document.createElement('em');
+    tag.className = 'status-chip is-owned';
+    tag.textContent = t('trade.aircraftBlueprint');
+    row.append(label, tag);
+    if (owned) {
+      const ownedNote = document.createElement('strong');
+      ownedNote.textContent = t('market.blueprintOwned');
+      row.append(ownedNote);
+    } else if (!available) {
+      const note = document.createElement('small');
+      note.textContent = t('trade.aircraftLocked', {
+        sorties: aircraftBlueprint.minimumSorties,
+      });
+      row.append(note);
+    } else {
+      const buy = document.createElement('button');
+      buy.className = 'base-action';
+      buy.type = 'button';
+      buy.textContent = t('trade.buyBlueprint', { credits: price });
+      buy.disabled = bankrupt || state.base.credits < price;
+      buy.addEventListener('click', () => {
+        store.dispatch({
+          type: 'PURCHASE_AIRCRAFT_BLUEPRINT',
+          blueprintId: aircraftBlueprint.id,
+        });
+      });
+      row.append(buy);
+    }
+    dynamic.appendChild(row);
+  }
+
   sellHeading.textContent = t('trade.sellTitle');
   dynamic.appendChild(sellHeading);
   const sellables = contentCatalog.weapons.filter(
     (weapon) => (state.base.weaponStock[weapon.id] ?? 0) > 0,
   );
-  if (sellables.length === 0) {
+  const sellableAircraft = state.base.hangarSlots.filter(
+    (aircraftId): aircraftId is string =>
+      aircraftId !== null &&
+      aircraftId !== state.base.activeAircraftId &&
+      contentCatalog.aircraft.find((entry) => entry.id === aircraftId)?.marketPrice !== null,
+  );
+  let soldAnything = false;
+  for (const weapon of sellables) {
+    const basePrice = weapon.marketPrice === null
+      ? 100
+      : marketWeaponPrice(
+          weapon,
+          state.base.marketSeed,
+          state.base.sortiesCompleted,
+        );
+    const price = Math.round(basePrice * 0.5 * (1 + tradeMargin(state.base)));
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = localizedWeaponName(weapon.id);
+    const count = document.createElement('strong');
+    count.textContent = `×${state.base.weaponStock[weapon.id] ?? 0}`;
+    const sell = document.createElement('button');
+    sell.className = 'base-action';
+    sell.type = 'button';
+    sell.textContent = t('trade.sell', { credits: price });
+    sell.addEventListener('click', () => {
+      store.dispatch({ type: 'SELL_WEAPON', weaponId: weapon.id });
+    });
+    row.append(label, count, sell);
+    dynamic.appendChild(row);
+    soldAnything = true;
+  }
+  for (const aircraftId of sellableAircraft) {
+    const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+    if (aircraft === undefined || aircraft.marketPrice === null) {
+      continue;
+    }
+    const basePrice = marketAircraftPrice(
+      aircraft,
+      state.base.marketSeed,
+      state.base.sortiesCompleted,
+    );
+    const price = Math.round(basePrice * 0.6 * (1 + tradeMargin(state.base)));
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
+    const sell = document.createElement('button');
+    sell.className = 'base-action';
+    sell.type = 'button';
+    sell.textContent = t('trade.sell', { credits: price });
+    sell.addEventListener('click', () => {
+      store.dispatch({ type: 'SELL_AIRCRAFT', aircraftId: aircraft.id });
+    });
+    row.append(label, sell);
+    dynamic.appendChild(row);
+    soldAnything = true;
+  }
+  if (!soldAnything) {
     const note = document.createElement('p');
     note.className = 'empty-note';
     note.textContent = t('trade.noStock');
     dynamic.appendChild(note);
-  } else {
-    for (const weapon of sellables) {
-      const basePrice = weapon.marketPrice === null
-        ? 100
-        : marketWeaponPrice(
-            weapon,
-            state.base.marketSeed,
-            state.base.sortiesCompleted,
-          );
-      const price = Math.round(basePrice * 0.5 * (1 + tradeMargin(state.base)));
-      const row = document.createElement('div');
-      row.className = 'loadout-row';
-      const label = document.createElement('span');
-      label.className = 'loadout-row__label';
-      label.textContent = localizedWeaponName(weapon.id);
-      const count = document.createElement('strong');
-      count.textContent = `×${state.base.weaponStock[weapon.id] ?? 0}`;
-      const sell = document.createElement('button');
-      sell.className = 'base-action';
-      sell.type = 'button';
-      sell.textContent = t('trade.sell', { credits: price });
-      sell.addEventListener('click', () => {
-        store.dispatch({ type: 'SELL_WEAPON', weaponId: weapon.id });
+  }
+}
+
+function renderHangarHero(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const container = byId<HTMLElement>('hangar-hero');
+  container.textContent = '';
+  const activeId = state.base.activeAircraftId;
+  const aircraft = activeId === null
+    ? undefined
+    : contentCatalog.aircraft.find((entry) => entry.id === activeId);
+  if (aircraft === undefined) {
+    container.append(h('p', { class: 'empty-note' }, t('hangar.noActiveAircraft')));
+    return;
+  }
+  const upgraded = applyAircraftUpgrades(
+    aircraft,
+    state.base.manufacturedAircraftUpgradeIds,
+    contentCatalog.aircraftUpgrades,
+  );
+  const damage = aircraftDamageValue(state.base, aircraft.id);
+  const repairing = isAircraftRepairing(state.base, aircraft.id);
+  const fueled = isAircraftFueled(state.base, aircraft.id);
+  const hero = h('div', { class: 'hangar-hero__model' });
+  hero.innerHTML = aircraftShipSvg(aircraft.visual);
+  const info = h('div', { class: 'hangar-hero__info' });
+  info.append(
+    h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
+    h('small', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole')),
+    h('small', null, [
+      t('hangar.armour', { value: upgraded.armour }),
+      t('hangar.speed', { value: upgraded.speedMultiplier }),
+      t('hangar.firepower', { value: upgraded.damageMultiplier }),
+      t('hangar.slots', { value: aircraft.weaponSlotCount }),
+    ].join(' · ')),
+    h('small', { class: 'hangar-hero__status' }, [
+      fueled ? t('command.fueled') : t('command.unfueled'),
+      damage > 0 ? t('hangar.damage', { value: Math.round(damage * 100) }) : '',
+    ].filter(Boolean).join(' · ')),
+  );
+  if (
+    upgraded.armour !== aircraft.armour ||
+    upgraded.speedMultiplier !== aircraft.speedMultiplier ||
+    upgraded.damageMultiplier !== aircraft.damageMultiplier
+  ) {
+    info.append(h('em', { class: 'status-chip is-owned' }, t('hangar.upgraded')));
+  }
+  const actions = h('div', { class: 'hangar-hero__actions' });
+  if (repairing) {
+    const left = state.base.aircraftRepair[aircraft.id] ?? 0;
+    if (left > 0) {
+      actions.append(h('small', null, t('hangar.repairInProgress', { sorties: left })));
+    } else {
+      const cost = standardRepairCost(state.base, aircraft.id);
+      const repair = h(
+        'button',
+        { class: 'base-action is-primary', type: 'button' },
+        t('hangar.repair', { credits: cost }),
+      );
+      repair.disabled = bankrupt || state.base.credits < cost;
+      repair.addEventListener('click', () => {
+        store.dispatch({
+          type: 'REPAIR_AIRCRAFT',
+          aircraftId: aircraft.id,
+          emergency: false,
+        });
       });
-      row.append(label, count, sell);
-      dynamic.appendChild(row);
+      actions.append(repair);
+    }
+  } else if (damage > 0) {
+    const standardCost = standardRepairCost(state.base, aircraft.id);
+    const standard = h(
+      'button',
+      { class: 'base-action', type: 'button' },
+      t('hangar.repair', { credits: standardCost }),
+    );
+    standard.disabled = bankrupt || state.base.credits < standardCost;
+    standard.addEventListener('click', () => {
+      store.dispatch({
+        type: 'REPAIR_AIRCRAFT',
+        aircraftId: aircraft.id,
+        emergency: false,
+      });
+    });
+    const emergencyCost = emergencyRepairCost(state.base, aircraft.id);
+    const emergency = h(
+      'button',
+      { class: 'base-action is-danger', type: 'button' },
+      t('hangar.emergencyRepair', { credits: emergencyCost }),
+    );
+    emergency.disabled = bankrupt || state.base.credits < emergencyCost;
+    emergency.addEventListener('click', () => {
+      store.dispatch({
+        type: 'REPAIR_AIRCRAFT',
+        aircraftId: aircraft.id,
+        emergency: true,
+      });
+    });
+    actions.append(standard, emergency);
+  }
+  if (!fueled) {
+    const refuel = h(
+      'button',
+      { class: 'base-action', type: 'button' },
+      t('hangar.refuelWithCost', { credits: aircraft.refuelCreditCost }),
+    );
+    refuel.disabled = bankrupt || state.base.credits < aircraft.refuelCreditCost;
+    refuel.addEventListener('click', () => {
+      store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: aircraft.id });
+    });
+    actions.append(refuel);
+  }
+  container.append(hero, info, actions);
+}
+
+function toastSettlementCompletions(before: GameState, after: GameState): void {
+  const newBuildings = after.base.constructedBuildingIds.filter(
+    (id) => !before.base.constructedBuildingIds.includes(id),
+  );
+  newBuildings.forEach(() => showToast(t('toast.buildingConstructed')));
+  const newAircraft = after.base.hangarSlots.filter(
+    (id): id is string => id !== null && !before.base.hangarSlots.includes(id),
+  );
+  for (const aircraftId of newAircraft) {
+    showToast(t('toast.aircraftDelivered', {
+      aircraft: t(aircraftNameKey[aircraftId] ?? 'content.interceptor'),
+    }));
+  }
+  const newBlueprints = after.base.unlockedBlueprintIds.filter(
+    (id) => !before.base.unlockedBlueprintIds.includes(id),
+  );
+  for (const blueprintId of newBlueprints) {
+    const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === blueprintId,
+    );
+    if (aircraftBlueprint !== undefined) {
+      showToast(t('toast.blueprintResearched', {
+        aircraft: t(aircraftNameKey[aircraftBlueprint.outputAircraftId] ?? 'content.interceptor'),
+      }));
     }
   }
 }
@@ -1835,10 +2217,6 @@ function renderFleet(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
   const slotsList = byId<HTMLElement>('hangar-slots-list');
-  const marketList = byId<HTMLElement>('aircraft-market-list');
-  const activeAircraft = contentCatalog.aircraft.find(
-    (entry) => entry.id === state.base.activeAircraftId,
-  );
 
   slotsList.textContent = '';
   state.base.hangarSlots.forEach((aircraftId, index) => {
@@ -1972,65 +2350,7 @@ function renderFleet(): void {
     slotsList.appendChild(slot);
   });
 
-  marketList.textContent = '';
-  for (const aircraft of contentCatalog.aircraft) {
-    if (aircraft.marketPrice === null) {
-      continue;
-    }
-    const owned = state.base.hangarSlots.includes(aircraft.id);
-    const freeSlot = state.base.hangarSlots.includes(null);
-    const price = marketAircraftPrice(
-      aircraft,
-      state.base.marketSeed,
-      state.base.sortiesCompleted,
-    );
-    const offer = document.createElement('article');
-    offer.className = 'aircraft-offer';
-    const info = document.createElement('div');
-    const name = document.createElement('strong');
-    name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
-    const role = document.createElement('small');
-    role.textContent = t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole');
-    const stats = document.createElement('small');
-    stats.textContent = aircraftStatSummary(aircraft);
-    info.append(name, role, stats);
-    if (!owned && activeAircraft !== undefined) {
-      const delta = document.createElement('small');
-      delta.className = 'aircraft-delta';
-      delta.textContent = `${t('hangar.vsActive', {
-        aircraft: t(aircraftNameKey[activeAircraft.id] ?? 'content.interceptor'),
-      })} ${aircraftDeltaText(aircraft, activeAircraft)}`;
-      info.appendChild(delta);
-    }
-    offer.appendChild(info);
-    if (owned) {
-      const badge = document.createElement('em');
-      badge.className = 'status-chip is-owned';
-      badge.textContent = t('hangar.aircraftOwned');
-      offer.appendChild(badge);
-    } else {
-      const priceText = document.createElement('strong');
-      priceText.textContent = t('hangar.aircraftCost', { credits: price });
-      const note = document.createElement('small');
-      note.textContent = !freeSlot
-        ? t('hangar.slotFull')
-        : state.base.credits >= price
-          ? t('hangar.aircraftAffordable')
-          : t('hangar.aircraftShortfall', { credits: price - state.base.credits });
-      const buyButton = document.createElement('button');
-      buyButton.className = 'base-action';
-      buyButton.type = 'button';
-      buyButton.textContent = t('hangar.purchaseAircraft', {
-        aircraft: t(aircraftNameKey[aircraft.id] ?? 'content.interceptor'),
-      });
-      buyButton.disabled = bankrupt || !freeSlot || state.base.credits < price;
-      buyButton.addEventListener('click', () => {
-        store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: aircraft.id });
-      });
-      offer.append(priceText, note, buyButton);
-    }
-    marketList.appendChild(offer);
-  }
+  renderHangarHero();
 
   byId<HTMLElement>('hangar-slot-cost').textContent = t('hangar.slotCost', {
     credits: HANGAR_SLOT_COST,
@@ -2556,7 +2876,6 @@ function renderLocale(): void {
   setText('hangar-fleet-title', 'hangar.fleetTitle');
   setText('hangar-fleet-lede', 'hangar.fleetLede');
   setText('hangar-fleet-subtitle', 'hangar.fleetSubtitle');
-  setText('hangar-market-subtitle', 'hangar.marketSubtitle');
   setText('hangar-warehouse-eyebrow', 'hangar.warehouseEyebrow');
   setText('hangar-warehouse-title', 'hangar.warehouseTitle');
   setText('hangar-slot-label', 'hangar.slotLabel');
@@ -2572,6 +2891,8 @@ function renderLocale(): void {
   setText('command-credit-lede', 'credit.lede');
   setText('staff-roster-eyebrow', 'staff.rosterEyebrow');
   setText('staff-roster-title', 'staff.rosterTitle');
+  setText('aircraft-production-title', 'engineering.aircraftProductionTitle');
+  setText('aircraft-upgrade-research-title', 'research.aircraftUpgradeTitle');
   setText('manager-candidates-eyebrow', 'staff.managerEyebrow');
   setText('manager-candidates-title', 'staff.managerTitle');
   setText('manager-candidates-lede', 'staff.managerLede');
@@ -2682,6 +3003,7 @@ objectiveOpenSectionButton.addEventListener('click', () => {
 
 researchTechnologyButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: prism.id });
+  showToast(t('toast.researchStarted'));
 });
 
 manufactureAcceleratorButton.addEventListener('click', () => {
@@ -2689,22 +3011,27 @@ manufactureAcceleratorButton.addEventListener('click', () => {
     type: 'MANUFACTURE_PRIMARY_WEAPON',
     blueprintId: acceleratorBlueprint.id,
   });
+  showToast(t('toast.productionStarted'));
 });
 
 researchMachineUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_WEAPON_UPGRADE', upgradeId: machineGunUpgrade.id });
+  showToast(t('toast.researchStarted'));
 });
 
 researchAcceleratorUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_WEAPON_UPGRADE', upgradeId: acceleratorUpgrade.id });
+  showToast(t('toast.researchStarted'));
 });
 
 manufactureMachineUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'MANUFACTURE_WEAPON_UPGRADE', upgradeId: machineGunUpgrade.id });
+  showToast(t('toast.productionStarted'));
 });
 
 manufactureAcceleratorUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'MANUFACTURE_WEAPON_UPGRADE', upgradeId: acceleratorUpgrade.id });
+  showToast(t('toast.productionStarted'));
 });
 
 switchPrimaryWeaponButton.addEventListener('click', () => {
@@ -2731,12 +3058,12 @@ byId<HTMLButtonElement>('purchase-hangar-slot').addEventListener('click', () => 
 
 constructLaboratoryButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: laboratory.id });
-  showToast(t('toast.buildingConstructed'));
+  showToast(t('toast.constructionStarted'));
 });
 
 constructWorkshopButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
-  showToast(t('toast.buildingConstructed'));
+  showToast(t('toast.constructionStarted'));
 });
 
 startBlueprintResearchButton.addEventListener('click', () => {
@@ -2744,6 +3071,7 @@ startBlueprintResearchButton.addEventListener('click', () => {
     type: 'START_BLUEPRINT_RESEARCH',
     blueprintId: capturerBlueprint.id,
   });
+  showToast(t('toast.researchStarted'));
 });
 
 startContainmentResearchButton.addEventListener('click', () => {
@@ -2751,11 +3079,12 @@ startContainmentResearchButton.addEventListener('click', () => {
     type: 'START_BUILDING_BLUEPRINT_RESEARCH',
     blueprintId: containmentBlueprint.id,
   });
+  showToast(t('toast.researchStarted'));
 });
 
 constructQuarantineButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
-  showToast(t('toast.buildingConstructed'));
+  showToast(t('toast.constructionStarted'));
 });
 
 manufactureAlienEmitterButton.addEventListener('click', () => {
@@ -2763,6 +3092,7 @@ manufactureAlienEmitterButton.addEventListener('click', () => {
     type: 'MANUFACTURE_ADAPTED_WEAPON',
     blueprintId: adaptedBlueprint.id,
   });
+  showToast(t('toast.productionStarted'));
 });
 
 researchCanisterButton.addEventListener('click', () => {
@@ -2770,6 +3100,7 @@ researchCanisterButton.addEventListener('click', () => {
     type: 'START_RESEARCH_WEAPON_BLUEPRINT',
     blueprintId: canisterBlueprint.id,
   });
+  showToast(t('toast.researchStarted'));
 });
 
 manufactureCanisterButton.addEventListener('click', () => {
@@ -2777,6 +3108,7 @@ manufactureCanisterButton.addEventListener('click', () => {
     type: 'MANUFACTURE_RESEARCH_WEAPON',
     blueprintId: canisterBlueprint.id,
   });
+  showToast(t('toast.productionStarted'));
 });
 
 manufactureCapturerButton.addEventListener('click', () => {
@@ -2784,6 +3116,7 @@ manufactureCapturerButton.addEventListener('click', () => {
     type: 'MANUFACTURE_EQUIPMENT',
     equipmentId: capturerEquipment.id,
   });
+  showToast(t('toast.productionStarted'));
 });
 
 restartProgrammeButton.addEventListener('click', () => {
@@ -2829,6 +3162,7 @@ launchSortieButton.addEventListener('click', () => {
           armourLostRatio: result.armourLostRatio,
         });
         const afterSettlement = store.getSnapshot();
+        toastSettlementCompletions(beforeSettlement, afterSettlement);
         const giftedNation = contentCatalog.councilStates.find(
           (state) =>
             afterSettlement.base.nationThanks[state.id] === true &&

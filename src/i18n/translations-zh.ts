@@ -21,6 +21,13 @@ export const zh = {
   'toast.buildingConstructed': '建造完成',
   'toast.loanTaken': '信贷额度已到账',
   'toast.loanRepaid': '贷款已偿还',
+
+  'toast.constructionStarted': '建造已开始——下一次出击后完成',
+  'toast.researchStarted': '研究已开始——下一次出击后完成',
+  'toast.productionStarted': '生产已开始——下一次出击后完成',
+  'toast.aircraftDelivered': '新战机已交付：{aircraft}',
+  'toast.blueprintResearched': '战机图纸已研究：{aircraft}',
+
   'toast.candidateHired': '已雇佣 {name}',
 
   'nav.base': '基地',
@@ -136,6 +143,10 @@ export const zh = {
   'engineering.lede': '建造设施，雇佣技术人员，并从完成的蓝图制造装备。',
   'engineering.manufacturingEyebrow': '生产厂 // 资质',
   'engineering.manufacturingTitle': '蓝图生产',
+
+  'engineering.aircraftProductionTitle': '战机生产',
+  'research.aircraftUpgradeTitle': '战机改进',
+
   'market.eyebrow': '地球市场 // 认证供应商',
   'market.title': '采购',
   'market.intro': '立即获取成品武器，或购买蓝图以降低成本的本地产量。报价仅在出击后刷新。',
@@ -315,6 +326,12 @@ export const zh = {
   'aircraft.gunshipRole': '强击炮艇 // 装甲更厚，速度较慢，打击更重',
   'aircraft.aegisRole': '重型坦克 // 装甲最厚，速度最慢，打击最重',
   'aircraft.yanlongRole': 'PRC 强击机 // 经济性强，四个主武器槽',
+
+  'content.swift': '斯威夫特',
+  'content.precision': '精准',
+  'aircraft.swiftRole': '英式高速截击机 // 最高速度，机身脆弱',
+  'aircraft.precisionRole': '日式精准战机 // 单武器槽，最强打击',
+
   'aircraft.speed': '速度 ×{value}',
   'aircraft.damage': '伤害 ×{value}',
   'hangar.fleetEyebrow': '机库 // 机队',
@@ -365,6 +382,14 @@ export const zh = {
   'hangar.damage': '损伤 {value}%',
   'hangar.repair': '维修 · {credits}',
   'hangar.emergencyRepair': '紧急 · {credits}',
+
+  'hangar.armour': '装甲 {value}',
+  'hangar.speed': '速度 ×{value}',
+  'hangar.firepower': '火力 ×{value}',
+  'hangar.slots': '武器槽 {value}',
+  'hangar.upgraded': '已升级',
+  'hangar.noActiveAircraft': '未选择战机。',
+
   'hangar.repairInProgress': '维修：还剩 {sorties} 次出击',
   'hangar.damagedWarning': '机体受损（{value}%）：装甲降低，仍可出击',
   'hangar.preflightRepairWarning': '起飞前警告：{aircraft} 正在维修中。',
@@ -400,6 +425,17 @@ export const zh = {
   'trade.sellTitle': '盈余销售',
   'trade.loansTitle': '理事会信贷额度',
   'trade.buy': '购买 · {credits}',
+
+  'trade.aircraftTitle': '现成战机',
+  'trade.aircraftBlueprintTitle': '战机图纸',
+  'trade.aircraftBlueprint': '图纸',
+  'trade.buyBlueprint': '购买图纸 · {credits}',
+  'trade.aircraftLocked': '完成 {sorties} 次出击后解锁',
+  'trade.manufactureAircraft': '制造 · {credits} 信用点 / {materials} 材料',
+  'trade.manufactureUpgrade': '制造 · {credits} 信用点 / {materials} 材料',
+  'trade.researchUpgrade': '研究 · {credits} 信用点',
+  'trade.aircraftMark': '马克 {mark}',
+
   'trade.blueprintLabel': '蓝图：{weapon}',
   'trade.sell': '出售 · +{credits}',
   'trade.noStock': '没有可出售的物品。',

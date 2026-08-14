@@ -2138,3 +2138,39 @@ html[data-theme="terminal"] .global-hud {
 }
 html[data-theme="terminal"] .status-chip.is-active { color: #03120a; background: var(--accent); }
 html[data-theme="terminal"] .status-chip.is-top { color: #1a1206; background: var(--warn); }
+
+/* -- Hangar hero ------------------------------------------------------- */
+.hangar-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--bg-2);
+}
+.hangar-hero__model svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.hangar-hero__info {
+  display: grid;
+  gap: 0.25rem;
+}
+.hangar-hero__info strong {
+  font-size: 1.1rem;
+}
+.hangar-hero__status {
+  color: var(--text-low);
+}
+.hangar-hero__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
