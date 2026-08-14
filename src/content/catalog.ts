@@ -445,7 +445,38 @@ export const contentCatalog = {
       id: 'council-india',
       nameKey: 'country.india',
     },
+    {
+      id: 'council-usa',
+      nameKey: 'country.usa',
+    },
+    {
+      id: 'council-uk',
+      nameKey: 'country.uk',
+    },
+    {
+      id: 'council-germany',
+      nameKey: 'country.germany',
+    },
+    {
+      id: 'council-japan',
+      nameKey: 'country.japan',
+    },
+    {
+      id: 'council-france',
+      nameKey: 'country.france',
+    },
   ],
+  nationGifts: {
+    'council-ukraine': { credits: 90_000, materials: 2 },
+    'council-prc': { credits: 100_000, materials: 2 },
+    'council-usa': { credits: 120_000, materials: 1 },
+    'council-uk': { credits: 80_000, materials: 1 },
+    'council-germany': { credits: 70_000, materials: 2 },
+    'council-japan': { credits: 60_000, materials: 2 },
+    'council-france': { credits: 70_000, materials: 1 },
+    'council-india': { credits: 50_000, materials: 1 },
+    'council-brazil': { credits: 40_000, materials: 1 },
+  },
   consumables: [
     {
       id: 'consumable-rockets',

@@ -11,6 +11,11 @@ export const LOAN_OFFERS: readonly LoanOfferDefinition[] = [
   { lenderId: 'lender-commission', principal: 600_000, interestRate: 0.1, termMonths: 2 },
   { lenderId: 'lender-prc', principal: 1_200_000, interestRate: 0.05, termMonths: 4 },
   { lenderId: 'lender-ukraine', principal: 900_000, interestRate: 0.08, termMonths: 3 },
+  { lenderId: 'lender-usa', principal: 1_000_000, interestRate: 0.09, termMonths: 3 },
+  { lenderId: 'lender-uk', principal: 800_000, interestRate: 0.09, termMonths: 3 },
+  { lenderId: 'lender-germany', principal: 750_000, interestRate: 0.08, termMonths: 3 },
+  { lenderId: 'lender-japan', principal: 700_000, interestRate: 0.08, termMonths: 3 },
+  { lenderId: 'lender-france', principal: 650_000, interestRate: 0.09, termMonths: 2 },
 ];
 
 export function loanRepayment(offer: LoanOfferDefinition): number {

@@ -147,6 +147,7 @@ function v14BaseDefaults(): Pick<
   | 'activeMissionId'
   | 'monthIncome'
   | 'monthReport'
+  | 'nationThanks'
 > {
   return {
     constructionQueue: [],
@@ -158,6 +159,7 @@ function v14BaseDefaults(): Pick<
     activeMissionId: null,
     monthIncome: 0,
     monthReport: null,
+    nationThanks: {},
   };
 }
 

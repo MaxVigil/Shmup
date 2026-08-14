@@ -336,6 +336,19 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     }
   }
 
+  for (const state of catalog.councilStates) {
+    const gift = catalog.nationGifts[state.id];
+    if (
+      gift === undefined ||
+      !Number.isInteger(gift.credits) ||
+      gift.credits < 0 ||
+      !Number.isInteger(gift.materials) ||
+      gift.materials < 0
+    ) {
+      throw new Error(`Council state ${state.id} is missing a valid gratitude gift.`);
+    }
+  }
+
   for (const consumable of catalog.consumables) {
     if (
       consumable.creditCost <= 0 ||

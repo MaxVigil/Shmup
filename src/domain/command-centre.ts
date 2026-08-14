@@ -1,3 +1,4 @@
+import { contentCatalog } from '../content/catalog';
 import type {
   AircraftDefinition,
   CouncilStateDefinition,
@@ -105,6 +106,25 @@ export function missionBreachPenalty(
     throw new RangeError('Penalty multiplier must be a positive integer.');
   }
   return missionBounty(mission) * penaltyMultiplier;
+}
+
+/** A nation thanks the Directorate once per month for defending its territory. */
+export function grantNationThanks(base: BaseState, nationId: string): BaseState {
+  if (base.nationThanks[nationId]) {
+    return base;
+  }
+  const gift = (contentCatalog.nationGifts as Readonly<
+    Record<string, { readonly credits: number; readonly materials: number }>
+  >)[nationId];
+  if (gift === undefined) {
+    return base;
+  }
+  return {
+    ...base,
+    credits: base.credits + gift.credits,
+    materials: base.materials + gift.materials,
+    nationThanks: { ...base.nationThanks, [nationId]: true },
+  };
 }
 
 export function consumeAircraftFuel(

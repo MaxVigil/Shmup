@@ -9,6 +9,7 @@ import {
 import {
   consumeAircraftFuel,
   generateThreatMap,
+  grantNationThanks,
   missionBreachPenalty,
   refuelAircraft,
 } from '../domain/command-centre';
@@ -184,15 +185,18 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               );
           const afterMission = activeMission === undefined
             ? afterProjects
-            : {
-                ...afterProjects,
-                resolvedThreatIds: afterProjects.resolvedThreatIds.includes(
-                  activeMission.id,
-                )
-                  ? afterProjects.resolvedThreatIds
-                  : [...afterProjects.resolvedThreatIds, activeMission.id],
-                activeMissionId: null,
-              };
+            : grantNationThanks(
+                {
+                  ...afterProjects,
+                  resolvedThreatIds: afterProjects.resolvedThreatIds.includes(
+                    activeMission.id,
+                  )
+                    ? afterProjects.resolvedThreatIds
+                    : [...afterProjects.resolvedThreatIds, activeMission.id],
+                  activeMissionId: null,
+                },
+                activeMission.targetCountryId,
+              );
           state = {
             ...state,
             base: {
@@ -274,6 +278,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               resolvedThreatIds: [],
               monthIncome: 0,
               activeMissionId: null,
+              nationThanks: {},
               monthReport,
             },
           };

@@ -13,6 +13,28 @@ const INDIAN_FIRST = ['Arjun', 'Priya', 'Rohan', 'Ananya', 'Vikram', 'Kavya'];
 const INDIAN_LAST = ['Sharma', 'Patel', 'Reddy', 'Nair', 'Iyer', 'Rao'];
 const BRAZILIAN_FIRST = ['Lucas', 'Mariana', 'Rafael', 'Beatriz', 'Thiago', 'Camila'];
 const BRAZILIAN_LAST = ['Silva', 'Souza', 'Oliveira', 'Santos', 'Costa', 'Pereira'];
+const AMERICAN_FIRST = ['James', 'Emily', 'Michael', 'Sarah', 'David', 'Laura'];
+const AMERICAN_LAST = ['Smith', 'Johnson', 'Williams', 'Brown', 'Davis', 'Miller'];
+const BRITISH_FIRST = ['Oliver', 'Amelia', 'Harry', 'Isla', 'George', 'Charlotte'];
+const BRITISH_LAST = ['Taylor', 'Brown', 'Wilson', 'Evans', 'Thomas', 'Roberts'];
+const GERMAN_FIRST = ['Lukas', 'Anna', 'Maximilian', 'Mia', 'Felix', 'Lena'];
+const GERMAN_LAST = ['Mueller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Wagner'];
+const JAPANESE_FIRST = ['Haruto', 'Yui', 'Sota', 'Aoi', 'Ren', 'Hana'];
+const JAPANESE_LAST = ['Sato', 'Suzuki', 'Tanaka', 'Takahashi', 'Watanabe', 'Ito'];
+const FRENCH_FIRST = ['Lucas', 'Camille', 'Hugo', 'Lea', 'Louis', 'Emma'];
+const FRENCH_LAST = ['Martin', 'Bernard', 'Dubois', 'Moreau', 'Laurent', 'Leroy'];
+
+const NAME_POOLS: Readonly<Record<string, { readonly first: readonly string[]; readonly last: readonly string[] }>> = {
+  'council-ukraine': { first: UKRAINIAN_FIRST, last: UKRAINIAN_LAST },
+  'council-prc': { first: CHINESE_FIRST, last: CHINESE_LAST },
+  'council-india': { first: INDIAN_FIRST, last: INDIAN_LAST },
+  'council-brazil': { first: BRAZILIAN_FIRST, last: BRAZILIAN_LAST },
+  'council-usa': { first: AMERICAN_FIRST, last: AMERICAN_LAST },
+  'council-uk': { first: BRITISH_FIRST, last: BRITISH_LAST },
+  'council-germany': { first: GERMAN_FIRST, last: GERMAN_LAST },
+  'council-japan': { first: JAPANESE_FIRST, last: JAPANESE_LAST },
+  'council-france': { first: FRENCH_FIRST, last: FRENCH_LAST },
+};
 
 function stableIdHash(value: string): number {
   let hash = 0x811c9dc5;
@@ -35,16 +57,22 @@ function nameForOrigin(
   originCountryId: string,
   rng: ReturnType<typeof createSeededRng>,
 ): readonly [string, string] {
-  if (originCountryId === 'council-prc') {
-    return [pick(CHINESE_FIRST, rng), pick(CHINESE_LAST, rng)];
-  }
-  if (originCountryId === 'council-india') {
-    return [pick(INDIAN_FIRST, rng), pick(INDIAN_LAST, rng)];
-  }
-  if (originCountryId === 'council-brazil') {
-    return [pick(BRAZILIAN_FIRST, rng), pick(BRAZILIAN_LAST, rng)];
-  }
-  return [pick(UKRAINIAN_FIRST, rng), pick(UKRAINIAN_LAST, rng)];
+  const pool = NAME_POOLS[originCountryId] ?? NAME_POOLS['council-ukraine']!;
+  return [pick(pool.first, rng), pick(pool.last, rng)];
+}
+
+const OTHER_NATIONS = [
+  'council-india',
+  'council-brazil',
+  'council-usa',
+  'council-uk',
+  'council-germany',
+  'council-japan',
+  'council-france',
+];
+
+function otherOrigin(rng: ReturnType<typeof createSeededRng>): string {
+  return OTHER_NATIONS[rng.integer(0, OTHER_NATIONS.length)] as string;
 }
 
 export function generateStaffCandidates(
@@ -72,16 +100,12 @@ export function generateStaffCandidates(
           ? 'council-ukraine'
           : originRoll < 0.85
             ? 'council-prc'
-            : originRoll < 0.95
-              ? 'council-india'
-              : 'council-brazil'
+            : otherOrigin(rng)
         : originRoll < 0.35
           ? 'council-ukraine'
           : originRoll < 0.5
             ? 'council-prc'
-            : originRoll < 0.75
-              ? 'council-india'
-              : 'council-brazil';
+            : otherOrigin(rng);
       const [firstName, lastName] = nameForOrigin(originCountryId, rng);
       const progressMultiplier = round2(0.8 + tier * 0.12 + (rng.next() - 0.5) * 0.1);
       const salaryMultiplier = round2(0.8 + tier * 0.15 + (rng.next() - 0.5) * 0.15);

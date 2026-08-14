@@ -1239,10 +1239,19 @@ function renderFinance(): void {
     (sum, mission) => sum + missionBounty(mission),
     0,
   );
+  const expectedGifts = unresolved.reduce((sum, mission) => {
+    if (state.base.nationThanks[mission.targetCountryId]) {
+      return sum;
+    }
+    const gift = (contentCatalog.nationGifts as Readonly<
+      Record<string, { readonly credits: number; readonly materials: number }>
+    >)[mission.targetCountryId];
+    return gift === undefined ? sum : sum + gift.credits;
+  }, 0);
   const loanDue = state.base.loans
     .filter((loan) => !loan.repaid && loan.dueMonth <= state.base.month + 1)
     .reduce((sum, loan) => sum + loan.repaymentDue, 0);
-  const netProjection = expectedIncome - expenses.total - loanDue;
+  const netProjection = expectedIncome + expectedGifts - expenses.total - loanDue;
   const projectedBalance = state.base.credits + netProjection;
 
   const panel = h('section', { class: 'technology-lab finance-ledger' });
@@ -1254,6 +1263,7 @@ function renderFinance(): void {
 
   const rows: ReadonlyArray<[TranslationKey, number]> = [
     ['finance.expectedIncome', expectedIncome],
+    ['finance.expectedGifts', expectedGifts],
     ['finance.salaries', expenses.salaries],
     ['finance.upkeep', expenses.upkeep],
     ['finance.loansDue', loanDue],
@@ -1955,6 +1965,11 @@ function renderCommand(): void {
     'council-ukraine': { left: 52, top: 24 },
     'council-india': { left: 68, top: 42 },
     'council-brazil': { left: 22, top: 68 },
+    'council-usa': { left: 12, top: 34 },
+    'council-uk': { left: 44, top: 18 },
+    'council-germany': { left: 50, top: 26 },
+    'council-japan': { left: 86, top: 36 },
+    'council-france': { left: 45, top: 30 },
   };
   for (const stateDefinition of contentCatalog.councilStates) {
     const mission = state.base.threatMap.find(
@@ -2064,15 +2079,18 @@ function renderCredit(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const offersList = byId<HTMLElement>('credit-offers-list');
   const loansList = byId<HTMLElement>('active-loans-list');
-  const lenderName = (lenderId: string): string => {
-    if (lenderId === 'lender-commission') {
-      return t('credit.lenderCommission');
-    }
-    if (lenderId === 'lender-prc') {
-      return t('country.prc');
-    }
-    return t('country.ukraine');
+  const LENDER_COUNTRY_KEY: Readonly<Record<string, TranslationKey>> = {
+    'lender-commission': 'credit.lenderCommission',
+    'lender-prc': 'country.prc',
+    'lender-ukraine': 'country.ukraine',
+    'lender-usa': 'country.usa',
+    'lender-uk': 'country.uk',
+    'lender-germany': 'country.germany',
+    'lender-japan': 'country.japan',
+    'lender-france': 'country.france',
   };
+  const lenderName = (lenderId: string): string =>
+    t(LENDER_COUNTRY_KEY[lenderId] ?? 'credit.lenderCommission');
 
   offersList.textContent = '';
   for (const offer of LOAN_OFFERS) {
@@ -2691,6 +2709,19 @@ launchSortieButton.addEventListener('click', () => {
           armourLostRatio: result.armourLostRatio,
         });
         const afterSettlement = store.getSnapshot();
+        const giftedNation = contentCatalog.councilStates.find(
+          (state) =>
+            afterSettlement.base.nationThanks[state.id] === true &&
+            beforeSettlement.base.nationThanks[state.id] !== true,
+        );
+        if (giftedNation !== undefined) {
+          const gift = contentCatalog.nationGifts[giftedNation.id];
+          showToast(t('toast.nationThanks', {
+            country: t(giftedNation.nameKey as TranslationKey),
+            credits: gift?.credits ?? 0,
+            materials: gift?.materials ?? 0,
+          }));
+        }
         lastSettlementSummary = summarizeSortiePayoff(
           beforeSettlement,
           afterSettlement,

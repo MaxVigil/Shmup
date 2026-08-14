@@ -202,6 +202,11 @@ export interface CouncilStateDefinition {
   readonly nameKey: string;
 }
 
+export interface NationGiftDefinition {
+  readonly credits: number;
+  readonly materials: number;
+}
+
 export interface MissionState {
   readonly id: string;
   readonly targetCountryId: string;
@@ -242,5 +247,6 @@ export interface ContentCatalog {
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];
   readonly aircraft: readonly AircraftDefinition[];
   readonly councilStates: readonly CouncilStateDefinition[];
+  readonly nationGifts: Readonly<Record<string, NationGiftDefinition>>;
   readonly consumables: readonly ConsumableDefinition[];
 }

@@ -21,6 +21,28 @@ const INDIAN_FIRST = ['Arjun', 'Priya', 'Rohan', 'Ananya'];
 const INDIAN_LAST = ['Sharma', 'Patel', 'Reddy', 'Nair'];
 const BRAZILIAN_FIRST = ['Lucas', 'Mariana', 'Rafael', 'Beatriz'];
 const BRAZILIAN_LAST = ['Silva', 'Souza', 'Oliveira', 'Santos'];
+const AMERICAN_FIRST = ['James', 'Emily', 'Michael', 'Sarah'];
+const AMERICAN_LAST = ['Smith', 'Johnson', 'Williams', 'Brown'];
+const BRITISH_FIRST = ['Oliver', 'Amelia', 'Harry', 'Isla'];
+const BRITISH_LAST = ['Taylor', 'Brown', 'Wilson', 'Evans'];
+const GERMAN_FIRST = ['Lukas', 'Anna', 'Maximilian', 'Mia'];
+const GERMAN_LAST = ['Mueller', 'Schmidt', 'Schneider', 'Fischer'];
+const JAPANESE_FIRST = ['Haruto', 'Yui', 'Sota', 'Aoi'];
+const JAPANESE_LAST = ['Sato', 'Suzuki', 'Tanaka', 'Takahashi'];
+const FRENCH_FIRST = ['Lucas', 'Camille', 'Hugo', 'Lea'];
+const FRENCH_LAST = ['Martin', 'Bernard', 'Dubois', 'Moreau'];
+
+const NAME_POOLS: Readonly<Record<string, { readonly first: readonly string[]; readonly last: readonly string[] }>> = {
+  'council-ukraine': { first: UKRAINIAN_FIRST, last: UKRAINIAN_LAST },
+  'council-prc': { first: CHINESE_FIRST, last: CHINESE_LAST },
+  'council-india': { first: INDIAN_FIRST, last: INDIAN_LAST },
+  'council-brazil': { first: BRAZILIAN_FIRST, last: BRAZILIAN_LAST },
+  'council-usa': { first: AMERICAN_FIRST, last: AMERICAN_LAST },
+  'council-uk': { first: BRITISH_FIRST, last: BRITISH_LAST },
+  'council-germany': { first: GERMAN_FIRST, last: GERMAN_LAST },
+  'council-japan': { first: JAPANESE_FIRST, last: JAPANESE_LAST },
+  'council-france': { first: FRENCH_FIRST, last: FRENCH_LAST },
+};
 
 export const PILOT_FATIGUE_PER_SORTIE = 0.15;
 export const PILOT_FATIGUE_LIMIT = 0.75;
@@ -43,16 +65,22 @@ function nameForOrigin(
   originCountryId: string,
   rng: ReturnType<typeof createSeededRng>,
 ): readonly [string, string] {
-  if (originCountryId === 'council-prc') {
-    return [pick(CHINESE_FIRST, rng), pick(CHINESE_LAST, rng)];
-  }
-  if (originCountryId === 'council-india') {
-    return [pick(INDIAN_FIRST, rng), pick(INDIAN_LAST, rng)];
-  }
-  if (originCountryId === 'council-brazil') {
-    return [pick(BRAZILIAN_FIRST, rng), pick(BRAZILIAN_LAST, rng)];
-  }
-  return [pick(UKRAINIAN_FIRST, rng), pick(UKRAINIAN_LAST, rng)];
+  const pool = NAME_POOLS[originCountryId] ?? NAME_POOLS['council-ukraine']!;
+  return [pick(pool.first, rng), pick(pool.last, rng)];
+}
+
+const OTHER_NATIONS = [
+  'council-india',
+  'council-brazil',
+  'council-usa',
+  'council-uk',
+  'council-germany',
+  'council-japan',
+  'council-france',
+];
+
+function otherOrigin(rng: ReturnType<typeof createSeededRng>): string {
+  return OTHER_NATIONS[rng.integer(0, OTHER_NATIONS.length)] as string;
 }
 
 const SPECIALIZATIONS: readonly PilotSpecialization[] = ['speed', 'damage', 'recovery'];
@@ -75,9 +103,7 @@ export function generatePilotCandidates(
       ? 'council-ukraine'
       : originRoll < 0.65
         ? 'council-prc'
-        : originRoll < 0.85
-          ? 'council-india'
-          : 'council-brazil';
+        : otherOrigin(rng);
     const [firstName, lastName] = nameForOrigin(originCountryId, rng);
     const specialization = pick(SPECIALIZATIONS, rng);
     const progressMultiplier = 0.8 + tier * 0.12 + (rng.next() - 0.5) * 0.1;

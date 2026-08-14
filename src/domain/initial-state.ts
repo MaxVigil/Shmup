@@ -81,6 +81,7 @@ export function createInitialGameState(): GameState {
       activeMissionId: null,
       monthIncome: 0,
       monthReport: null,
+      nationThanks: {},
     },
     technologyCatalog: [],
     activeRun: null,

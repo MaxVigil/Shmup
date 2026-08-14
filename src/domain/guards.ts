@@ -94,6 +94,10 @@ export function isGameState(value: unknown): value is GameState {
     typeof value.base.monthIncome === 'number' &&
     value.base.monthIncome >= 0 &&
     (value.base.monthReport === null || isRecord(value.base.monthReport)) &&
+    isRecord(value.base.nationThanks) &&
+    Object.values(value.base.nationThanks).every(
+      (entry) => typeof entry === 'boolean',
+    ) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

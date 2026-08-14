@@ -137,6 +137,7 @@ export interface BaseState {
   readonly activeMissionId: string | null;
   readonly monthIncome: number;
   readonly monthReport: MonthReportState | null;
+  readonly nationThanks: Readonly<Record<string, boolean>>;
 }
 
 export interface TechnologyKnowledge {
