@@ -1521,3 +1521,67 @@ h1 {
   height: 100%;
   width: auto;
 }
+
+/* U5 — Command geoscope + monthly timeline */
+.month-timeline {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.9rem;
+}
+.month-timeline__phase {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #223741;
+  border-radius: 0.25rem;
+  color: #607781;
+  background: rgb(5 12 16 / 70%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.month-timeline__phase.is-active {
+  color: #ffd28a;
+  border-color: #6e5a36;
+  background: rgb(60 46 18 / 45%);
+}
+.geo-map {
+  position: relative;
+  height: 11rem;
+  margin: 0.75rem 0 0.25rem;
+  border: 1px solid #1b2b33;
+  border-radius: 0.35rem;
+  background:
+    radial-gradient(circle at 30% 35%, rgb(26 53 64 / 25%), transparent 40%),
+    linear-gradient(160deg, #071019, #0a141c 55%, #060c12);
+  overflow: hidden;
+}
+.geo-map__marker {
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.3rem;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  background: rgb(7 13 17 / 78%);
+}
+.geo-map__dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #41525a;
+}
+.geo-map__marker.is-calm .geo-map__dot { background: #4f6a74; }
+.geo-map__marker.is-threat-1 .geo-map__dot { background: #70d6b3; box-shadow: 0 0 0 2px rgb(112 214 179 / 35%); }
+.geo-map__marker.is-threat-2 .geo-map__dot { background: #ffd28a; box-shadow: 0 0 0 2px rgb(255 210 138 / 35%); }
+.geo-map__marker.is-threat-3 .geo-map__dot { background: #e0665a; box-shadow: 0 0 0 3px rgb(224 102 90 / 40%); }
+.geo-map__marker small {
+  color: #a8c9c5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}

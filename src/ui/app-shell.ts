@@ -9,7 +9,7 @@ import { clearGame, loadGame, saveGame } from '../persistence/save-repository';
 import type { GameState } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
-import { isAircraftFueled } from '../domain/command-centre';
+import { isAircraftFueled, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
 import {
   marketBlueprintPrice,
   marketConsumablePrice,
@@ -1399,6 +1399,48 @@ function renderCommand(): void {
   byId<HTMLElement>('command-month-eyebrow').textContent = t('command.monthEyebrow', {
     month: state.base.month,
   });
+  const monthProgress = state.base.sortiesCompleted % MONTH_SORTIE_LENGTH;
+  const timeline = byId<HTMLElement>('month-timeline');
+  timeline.textContent = '';
+  const phases = [
+    { key: 'command.phasePlan', active: monthProgress === 0 },
+    { key: 'command.phaseExecute', active: monthProgress > 0 },
+    { key: 'command.phaseSettle', active: false },
+  ] as const;
+  for (const phase of phases) {
+    const segment = document.createElement('span');
+    segment.className = 'month-timeline__phase' + (phase.active ? ' is-active' : '');
+    segment.textContent = t(phase.key as TranslationKey);
+    timeline.appendChild(segment);
+  }
+
+  const geoMap = byId<HTMLElement>('geo-map');
+  geoMap.textContent = '';
+  const geoPositions: Readonly<Record<string, { left: number; top: number }>> = {
+    'council-prc': { left: 78, top: 28 },
+    'council-ukraine': { left: 52, top: 24 },
+    'council-india': { left: 68, top: 42 },
+    'council-brazil': { left: 22, top: 68 },
+  };
+  for (const stateDefinition of contentCatalog.councilStates) {
+    const mission = state.base.threatMap.find(
+      (entry) => entry.targetCountryId === stateDefinition.id,
+    );
+    const position = geoPositions[stateDefinition.id] ?? { left: 50, top: 50 };
+    const marker = document.createElement('div');
+    marker.className = 'geo-map__marker' + (mission === undefined
+      ? ' is-calm'
+      : ' is-threat-' + String(Math.min(3, Math.max(1, mission.threatLevel))));
+    marker.style.left = position.left + '%';
+    marker.style.top = position.top + '%';
+    const dot = document.createElement('span');
+    dot.className = 'geo-map__dot';
+    const name = document.createElement('small');
+    name.textContent = t(stateDefinition.nameKey as TranslationKey);
+    marker.append(dot, name);
+    geoMap.appendChild(marker);
+  }
+
   byId<HTMLElement>('command-month-summary').textContent = t('command.monthSummary', {
     count: state.base.threatMap.length,
   });
