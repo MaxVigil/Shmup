@@ -465,7 +465,7 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.month).toBe(1);
   });
 
-  it('advances the month and regenerates the threat map every six sorties', () => {
+  it('advances the month only when the player ends it, regenerating the threat map', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
@@ -484,17 +484,17 @@ describe('game store M3a cycle', () => {
       wardenSignalDetected: false,
     } as const;
 
-    for (let index = 0; index < 5; index += 1) {
+    for (let index = 0; index < 8; index += 1) {
       store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: contentCatalog.aircraft[0].id });
       store.dispatch({ type: 'SETTLE_SORTIE', outcome });
     }
     expect(store.getSnapshot().base.month).toBe(1);
     expect(store.getSnapshot().base.threatMap).toEqual(threatMap);
 
-    store.dispatch({ type: 'REFUEL_AIRCRAFT', aircraftId: contentCatalog.aircraft[0].id });
-    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    store.dispatch({ type: 'END_MONTH' });
     expect(store.getSnapshot().base.month).toBe(2);
     expect(store.getSnapshot().base.threatMap).not.toEqual(threatMap);
+    expect(store.getSnapshot().base.monthReport).not.toBeNull();
   });
 
   it('takes a loan and repays it when it falls due at a month boundary', () => {
@@ -529,19 +529,69 @@ describe('game store M3a cycle', () => {
         aircraftId: contentCatalog.aircraft[0].id,
       });
 
-    for (let index = 0; index < 12; index += 1) {
-      refuel();
-      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    // Resolve every threat each month before ending it, so no breach penalties apply.
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      for (const mission of store.getSnapshot().base.threatMap) {
+        store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+        refuel();
+        store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+      }
+      store.dispatch({ type: 'END_MONTH' });
     }
     expect(store.getSnapshot().base.month).toBe(3);
     expect(store.getSnapshot().base.loans[0]?.repaid).toBe(true);
     expect(store.getSnapshot().base.credits).toBe(
-      creditsBefore + 600 + 200 * 12 - 660 - contentCatalog.aircraft[0].refuelCreditCost * 12,
+      creditsBefore + 600 + 200 * 6 - 660 - contentCatalog.aircraft[0].refuelCreditCost * 6,
     );
   });
 });
 
-describe('game store rocket ammunition', () => {
+describe('game store month cycle', () => {
+  it('penalizes unresolved threats when the month ends', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 2_000 },
+    });
+    const before = store.getSnapshot().base.credits;
+    store.dispatch({ type: 'END_MONTH' });
+    const report = store.getSnapshot().base.monthReport;
+    expect(report?.breachPenalties).toBeGreaterThan(0);
+    expect(store.getSnapshot().base.credits).toBe(
+      before - (report?.breachPenalties ?? 0),
+    );
+    expect(store.getSnapshot().base.month).toBe(2);
+  });
+
+  it('selects a mission and resolves it after a sortie', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, fueledAircraftIds: [] },
+    });
+    const mission = store.getSnapshot().base.threatMap[0];
+    expect(mission).toBeDefined();
+    store.dispatch({ type: 'SELECT_MISSION', missionId: mission?.id ?? '' });
+    expect(store.getSnapshot().base.activeMissionId).toBe(mission?.id);
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
+    expect(store.getSnapshot().base.resolvedThreatIds).toContain(mission?.id);
+    expect(store.getSnapshot().base.activeMissionId).toBeNull();
+  });
+});
+
   const rocketsId = contentCatalog.consumables[0].id;
 
   it('purchases rockets into the warehouse and consumes the fired count', () => {

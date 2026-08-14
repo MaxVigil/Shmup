@@ -9,7 +9,7 @@ import {
 import {
   consumeAircraftFuel,
   generateThreatMap,
-  monthForSorties,
+  missionBreachPenalty,
   refuelAircraft,
 } from '../domain/command-centre';
 import { LOAN_OFFERS, repayLoan, settleDueLoans, takeLoan } from '../domain/credit';
@@ -40,7 +40,11 @@ import {
   startUpgradeProduction,
   startWeaponProduction,
 } from '../domain/base-projects';
-import { chargeMonthlyExpenses } from '../domain/operational-economy';
+import {
+  chargeMonthlyExpenses,
+  contractCreditDelta,
+  monthlyExpenses,
+} from '../domain/operational-economy';
 import {
   advanceBlueprintResearch,
   startBlueprintResearch,
@@ -119,6 +123,9 @@ export type GameCommand =
     }
   | { readonly type: 'SELL_WEAPON'; readonly weaponId: string }
   | { readonly type: 'SELL_AIRCRAFT'; readonly aircraftId: string }
+  | { readonly type: 'SELECT_MISSION'; readonly missionId: string | null }
+  | { readonly type: 'END_MONTH' }
+  | { readonly type: 'DISMISS_MONTH_REPORT' }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null }
   | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
@@ -154,40 +161,114 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           break;
         case 'SETTLE_SORTIE': {
           const settled = settleSortie(state.base, command.outcome);
-          const nextMonth = monthForSorties(settled.sortiesCompleted);
+          const creditDelta = contractCreditDelta(command.outcome);
           const afterFuel = consumeAircraftFuel(settled, state.base.activeAircraftId);
-          const afterLoans = settleDueLoans({ ...afterFuel, month: nextMonth });
-          const afterRepairs = advanceRepairs({ ...afterLoans, month: nextMonth });
+          const afterRepairs = advanceRepairs(afterFuel);
           const afterStaffXp = awardStaffXp(afterRepairs);
           const afterProjects = advanceProduction(advanceConstruction(afterStaffXp));
-          const afterExpenses = nextMonth > state.base.month
-            ? chargeMonthlyExpenses({ ...afterProjects, month: nextMonth })
-            : afterProjects;
+          const activeMission = state.base.activeMissionId === null
+            ? undefined
+            : state.base.threatMap.find(
+                (mission) => mission.id === state.base.activeMissionId,
+              );
+          const afterMission = activeMission === undefined
+            ? afterProjects
+            : {
+                ...afterProjects,
+                resolvedThreatIds: afterProjects.resolvedThreatIds.includes(
+                  activeMission.id,
+                )
+                  ? afterProjects.resolvedThreatIds
+                  : [...afterProjects.resolvedThreatIds, activeMission.id],
+                activeMissionId: null,
+              };
           state = {
             ...state,
             base: {
-              ...afterExpenses,
+              ...afterMission,
+              monthIncome: afterMission.monthIncome + Math.max(0, creditDelta),
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
-              month: nextMonth,
-              threatMap: nextMonth > state.base.month
-                ? generateThreatMap(
-                    contentCatalog.councilStates,
-                    state.base.marketSeed,
-                    nextMonth,
-                  )
-                : state.base.threatMap,
-              staffCandidates: nextMonth > state.base.month
-                ? generateStaffCandidates(
-                    contentCatalog.staffRoles,
-                    state.base.marketSeed,
-                    nextMonth,
-                  )
-                : state.base.staffCandidates,
             },
             activeRun: null,
           };
           state = advanceBlueprintResearch(state, contentCatalog.staffRoles[0].id);
+          break;
+        }
+        case 'SELECT_MISSION': {
+          if (command.missionId === null) {
+            state = { ...state, base: { ...state.base, activeMissionId: null } };
+            break;
+          }
+          const mission = state.base.threatMap.find(
+            (entry) => entry.id === command.missionId,
+          );
+          if (mission === undefined) {
+            throw new Error(`Unknown mission ${command.missionId}.`);
+          }
+          if (state.base.resolvedThreatIds.includes(mission.id)) {
+            throw new Error(`Mission ${mission.id} has already been resolved.`);
+          }
+          state = { ...state, base: { ...state.base, activeMissionId: mission.id } };
+          break;
+        }
+        case 'END_MONTH': {
+          const base = state.base;
+          const unresolved = base.threatMap.filter(
+            (mission) => !base.resolvedThreatIds.includes(mission.id),
+          );
+          const breachPenalties = unresolved.reduce(
+            (sum, mission) =>
+              sum + missionBreachPenalty(
+                mission,
+                contentCatalog.economy.missedEnemyPenaltyMultiplier,
+              ),
+            0,
+          );
+          const afterBreaches = breachPenalties === 0
+            ? base
+            : { ...base, credits: base.credits - breachPenalties };
+          const loanPayments = base.loans
+            .filter((loan) => !loan.repaid && loan.dueMonth <= base.month + 1)
+            .reduce((sum, loan) => sum + loan.repaymentDue, 0);
+          const afterExpenses = chargeMonthlyExpenses(afterBreaches);
+          const nextMonth = base.month + 1;
+          const afterLoans = settleDueLoans({ ...afterExpenses, month: nextMonth });
+          const expenses = monthlyExpenses(base).total + loanPayments;
+          const monthReport = {
+            month: base.month,
+            income: base.monthIncome,
+            expenses,
+            breachPenalties,
+            net: base.monthIncome - expenses - breachPenalties,
+            resolvedThreats: base.resolvedThreatIds.length,
+            totalThreats: base.threatMap.length,
+          };
+          state = {
+            ...state,
+            base: {
+              ...afterLoans,
+              month: nextMonth,
+              threatMap: generateThreatMap(
+                contentCatalog.councilStates,
+                base.marketSeed,
+                nextMonth,
+              ),
+              staffCandidates: generateStaffCandidates(
+                contentCatalog.staffRoles,
+                base.marketSeed,
+                nextMonth,
+              ),
+              resolvedThreatIds: [],
+              monthIncome: 0,
+              activeMissionId: null,
+              monthReport,
+            },
+          };
+          break;
+        }
+        case 'DISMISS_MONTH_REPORT': {
+          state = { ...state, base: { ...state.base, monthReport: null } };
           break;
         }
         case 'RESEARCH_TECHNOLOGY': {

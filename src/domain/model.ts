@@ -31,6 +31,16 @@ export interface ConstructionJobState {
   readonly requiredProgress: number;
 }
 
+export interface MonthReportState {
+  readonly month: number;
+  readonly income: number;
+  readonly expenses: number;
+  readonly breachPenalties: number;
+  readonly net: number;
+  readonly resolvedThreats: number;
+  readonly totalThreats: number;
+}
+
 export interface ProductionJobState {
   readonly id: string;
   readonly projectId: string;
@@ -120,6 +130,9 @@ export interface BaseState {
   readonly pilotCandidates: readonly PilotCandidateState[];
   readonly pilotXp: Readonly<Record<string, number>>;
   readonly pilotFatigue: Readonly<Record<string, number>>;
+  readonly activeMissionId: string | null;
+  readonly monthIncome: number;
+  readonly monthReport: MonthReportState | null;
 }
 
 export interface TechnologyKnowledge {

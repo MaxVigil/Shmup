@@ -13,7 +13,7 @@ import type {
 } from '../domain/model';
 import { isBankrupt } from '../domain/operational-economy';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
-import { isAircraftFueled, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
+import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
 import {
   marketBlueprintPrice,
   marketConsumablePrice,
@@ -150,6 +150,13 @@ const specialEquipmentNote = byId<HTMLElement>('special-equipment-note');
 const toggleSpecialEquipmentButton = byId<HTMLButtonElement>('toggle-special-equipment');
 const preflightWarning = byId<HTMLElement>('preflight-warning');
 const wardenSignalWarning = byId<HTMLElement>('warden-signal-warning');
+const preflightMission = byId<HTMLElement>('preflight-mission');
+const endMonthButton = byId<HTMLButtonElement>('end-month');
+const monthReportPanel = byId<HTMLElement>('month-report-panel');
+const monthReportEyebrow = byId<HTMLElement>('month-report-eyebrow');
+const monthReportTitle = byId<HTMLElement>('month-report-title');
+const monthReportDetails = byId<HTMLElement>('month-report-details');
+const monthReportContinue = byId<HTMLButtonElement>('month-report-continue');
 const launchSortieButton = byId<HTMLButtonElement>('launch-sortie');
 const returnToBaseButton = byId<HTMLButtonElement>('return-to-base');
 const settingsToggle = byId<HTMLButtonElement>('settings-toggle');
@@ -747,7 +754,25 @@ function renderBase(): void {
           activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
           { aircraft: activeAircraftName },
         );
-  launchSortieButton.disabled = bankrupt || !activeFueled;
+  launchSortieButton.disabled = bankrupt || !activeFueled || state.base.activeMissionId === null;
+  const activeMission = state.base.activeMissionId === null
+    ? undefined
+    : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
+  preflightMission.hidden = activeMission === undefined;
+  if (activeMission !== undefined) {
+    const stateDefinition = contentCatalog.councilStates.find(
+      (entry) => entry.id === activeMission.targetCountryId,
+    );
+    preflightMission.textContent = t('hangar.preflightMission', {
+      country: stateDefinition === undefined
+        ? activeMission.targetCountryId
+        : t(stateDefinition.nameKey as TranslationKey),
+      threat: activeMission.threatLevel,
+      bounty: missionBounty(activeMission),
+    });
+  } else {
+    preflightMission.textContent = t('hangar.selectMissionHint');
+  }
   setText('launch-sortie', 'base.launch');
   setText('return-to-base', 'sortie.return');
   renderContainment();
@@ -757,6 +782,7 @@ function renderBase(): void {
   renderWarehouse();
   renderTrade();
   renderCommand();
+  renderMonthReport();
   renderDatabank();
 }
 
@@ -1038,6 +1064,45 @@ function renderWarehouse(): void {
       list.appendChild(row);
     }
   }
+}
+
+function renderMonthReport(): void {
+  const report = store.getSnapshot().base.monthReport;
+  monthReportPanel.hidden = report === null;
+  if (report === null) {
+    return;
+  }
+  monthReportEyebrow.textContent = t('report.eyebrow');
+  monthReportTitle.textContent = t('report.title', { month: report.month });
+  monthReportDetails.textContent = '';
+  const entries: ReadonlyArray<[string, string]> = [
+    [t('report.income'), String(report.income)],
+    [t('report.expenses'), String(report.expenses)],
+    [t('report.breaches'), String(report.breachPenalties)],
+    [t('report.net'), String(report.net)],
+    [
+      t('report.resolvedLabel'),
+      t('report.resolvedValue', {
+        resolved: report.resolvedThreats,
+        total: report.totalThreats,
+      }),
+    ],
+  ];
+  for (const [label, value] of entries) {
+    const row = document.createElement('div');
+    row.className = 'month-report-details__row';
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    if (label === t('report.net')) {
+      dd.classList.toggle('is-negative', report.net < 0);
+      dd.classList.toggle('is-positive', report.net >= 0);
+    }
+    row.append(dt, dd);
+    monthReportDetails.appendChild(row);
+  }
+  monthReportContinue.textContent = t('report.continue');
 }
 
 function renderDatabank(): void {
@@ -1708,12 +1773,27 @@ function renderCommand(): void {
       (entry) => entry.targetCountryId === stateDefinition.id,
     );
     const position = geoPositions[stateDefinition.id] ?? { left: 50, top: 50 };
-    const marker = document.createElement('div');
+    const resolved = mission !== undefined &&
+      state.base.resolvedThreatIds.includes(mission.id);
+    const marker = document.createElement('button');
+    marker.type = 'button';
     marker.className = 'geo-map__marker' + (mission === undefined
       ? ' is-calm'
-      : ' is-threat-' + String(Math.min(3, Math.max(1, mission.threatLevel))));
+      : ' is-threat-' + String(Math.min(3, Math.max(1, mission.threatLevel)))) +
+      (mission !== undefined && state.base.activeMissionId === mission.id
+        ? ' is-selected'
+        : '');
     marker.style.left = position.left + '%';
     marker.style.top = position.top + '%';
+    marker.disabled = mission === undefined || resolved;
+    marker.setAttribute('aria-label', t('command.selectMission', {
+      country: t(stateDefinition.nameKey as TranslationKey),
+    }));
+    if (mission !== undefined) {
+      marker.addEventListener('click', () => {
+        store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+      });
+    }
     const dot = document.createElement('span');
     dot.className = 'geo-map__dot';
     const name = document.createElement('small');
@@ -1731,17 +1811,42 @@ function renderCommand(): void {
     const stateDefinition = contentCatalog.councilStates.find(
       (entry) => entry.id === mission.targetCountryId,
     );
+    const resolved = state.base.resolvedThreatIds.includes(mission.id);
+    const selected = state.base.activeMissionId === mission.id;
     const row = document.createElement('article');
-    row.className = 'threat-row';
+    row.className = 'threat-row mission-card' + (resolved ? ' is-resolved' : '') +
+      (selected ? ' is-selected' : '');
+    const left = document.createElement('div');
     const name = document.createElement('strong');
     name.textContent = stateDefinition === undefined
       ? mission.targetCountryId
       : t(stateDefinition.nameKey as TranslationKey);
-    const level = document.createElement('span');
-    level.textContent = t('command.threatLevel', { value: mission.threatLevel });
-    row.append(name, level);
+    const meta = document.createElement('small');
+    meta.textContent = [
+      t('command.threatLevel', { value: mission.threatLevel }),
+      t('command.bounty', { credits: missionBounty(mission) }),
+    ].join(' · ');
+    left.append(name, meta);
+    row.appendChild(left);
+    const action = document.createElement('button');
+    action.className = 'base-action' + (selected ? ' is-primary' : '');
+    action.type = 'button';
+    action.textContent = resolved
+      ? t('command.resolved')
+      : selected
+        ? t('command.selected')
+        : t('command.select');
+    action.disabled = resolved;
+    if (!resolved) {
+      action.addEventListener('click', () => {
+        store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+      });
+    }
+    row.appendChild(action);
     threatList.appendChild(row);
   }
+
+  endMonthButton.textContent = t('command.endMonth');
 
   const fuelList = byId<HTMLElement>('command-fuel-list');
   fuelList.textContent = '';
@@ -2431,6 +2536,10 @@ launchSortieButton.addEventListener('click', () => {
         combatWeaponSwitchAvailable = canSwitch;
         renderCombatWeaponControl();
       },
+      () =>
+        store.getSnapshot().base.threatMap.find(
+          (mission) => mission.id === store.getSnapshot().base.activeMissionId,
+        )?.threatLevel ?? 1,
     );
   } else {
     game.scene.getScene('combat').scene.restart();
@@ -2484,6 +2593,13 @@ debugToggle.checked = isDebugEnabled(window.localStorage);
 debugToggle.addEventListener('change', () => {
   setDebugEnabled(window.localStorage, debugToggle.checked);
   showToast(t(debugToggle.checked ? 'toast.debugEnabled' : 'toast.debugDisabled'));
+});
+
+endMonthButton.addEventListener('click', () => {
+  store.dispatch({ type: 'END_MONTH' });
+});
+monthReportContinue.addEventListener('click', () => {
+  store.dispatch({ type: 'DISMISS_MONTH_REPORT' });
 });
 
 const restartMissionButton = byId<HTMLButtonElement>('restart-mission');

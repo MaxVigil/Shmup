@@ -144,6 +144,9 @@ function v14BaseDefaults(): Pick<
   | 'pilotCandidates'
   | 'pilotXp'
   | 'pilotFatigue'
+  | 'activeMissionId'
+  | 'monthIncome'
+  | 'monthReport'
 > {
   return {
     constructionQueue: [],
@@ -152,6 +155,9 @@ function v14BaseDefaults(): Pick<
     pilotCandidates: [],
     pilotXp: {},
     pilotFatigue: {},
+    activeMissionId: null,
+    monthIncome: 0,
+    monthReport: null,
   };
 }
 

@@ -88,6 +88,25 @@ export function isAircraftFueled(base: BaseState, aircraftId: string): boolean {
   return base.fueledAircraftIds.includes(aircraftId);
 }
 
+/** Estimated bounty for a mission based on its threat level. */
+export function missionBounty(mission: MissionState): number {
+  if (!Number.isInteger(mission.threatLevel) || mission.threatLevel < 1) {
+    throw new RangeError('Mission threat level must be a positive integer.');
+  }
+  return mission.threatLevel * 80;
+}
+
+/** Breach penalty: the mission bounty times the Council penalty multiplier. */
+export function missionBreachPenalty(
+  mission: MissionState,
+  penaltyMultiplier: number,
+): number {
+  if (!Number.isInteger(penaltyMultiplier) || penaltyMultiplier < 1) {
+    throw new RangeError('Penalty multiplier must be a positive integer.');
+  }
+  return missionBounty(mission) * penaltyMultiplier;
+}
+
 export function consumeAircraftFuel(
   base: BaseState,
   aircraftId: string | null,

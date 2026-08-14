@@ -211,6 +211,7 @@ export class CombatScene extends Phaser.Scene {
   private rocketsFired = 0;
   private endStatusKey: TranslationKey | null = null;
   private debugInvincible = false;
+  private threatLevel = 1;
 
   constructor(
     private readonly onRunComplete: (result: CombatRunResult) => void = () => {},
@@ -234,12 +235,14 @@ export class CombatScene extends Phaser.Scene {
       weaponId: string,
       canSwitch: boolean,
     ) => void = () => {},
+    private readonly getThreatLevel: () => number = () => 1,
   ) {
     super('combat');
   }
 
   create(): void {
     this.resetEncounterState();
+    this.threatLevel = Math.max(1, Math.round(this.getThreatLevel()));
 
     const { width, height } = this.scale;
     this.rng = createSeededRng(0x5eed2026);
@@ -506,7 +509,10 @@ export class CombatScene extends Phaser.Scene {
     if (canSpawnRegularEnemy && this.spawnCooldownMs <= 0) {
       this.spawnEnemy();
       const pressure = Math.min(500, this.elapsedMs / 180);
-      this.spawnCooldownMs = 920 - pressure + this.rng.integer(0, 280);
+      this.spawnCooldownMs = Math.max(
+        360,
+        920 - pressure - (this.threatLevel - 1) * 70 + this.rng.integer(0, 280),
+      );
     }
 
     this.updateHud();
@@ -1060,7 +1066,9 @@ export class CombatScene extends Phaser.Scene {
       phase: this.rng.next() * Math.PI * 2,
       armourBarBackground,
       armourBarFill,
-      armour: selectedDefinition.armour,
+      armour: Math.round(
+        selectedDefinition.armour * (1 + (this.threatLevel - 1) * 0.25),
+      ),
       livedMs: 0,
       knockbackX: 0,
       knockbackY: 0,

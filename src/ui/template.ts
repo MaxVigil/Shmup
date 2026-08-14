@@ -84,6 +84,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="month-timeline" class="month-timeline" aria-live="polite"></div>
             <div id="geo-map" class="geo-map" aria-live="polite"></div>
             <div id="threat-map-list" class="threat-map" aria-live="polite"></div>
+            <button id="end-month" class="base-action is-primary end-month" type="button"></button>
           </section>
           <div class="command-dashboard__side">
             <div class="progression-objective command-objective" aria-live="polite">
@@ -267,6 +268,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <p id="preflight-warning" class="preflight-warning" role="status"></p>
         <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
         <p id="fuel-status" class="preflight-warning" role="status" hidden></p>
+        <p id="preflight-mission" class="preflight-warning preflight-mission" role="status" hidden></p>
           <button id="launch-sortie" class="base-action launch-action" type="button"></button>
         </section>
         <section class="technology-lab hangar-panel" aria-labelledby="hangar-fleet-title">
@@ -316,6 +318,13 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <p id="databank-note" class="databank-note"></p>
         <div id="databank-tables" class="databank-tables"></div>
+      </section>
+
+      <section id="month-report-panel" class="month-report-panel" hidden role="dialog" aria-modal="true" aria-labelledby="month-report-title">
+        <p class="technology-lab__eyebrow" id="month-report-eyebrow"></p>
+        <h2 id="month-report-title"></h2>
+        <dl id="month-report-details" class="month-report-details"></dl>
+        <button id="month-report-continue" class="base-action is-primary" type="button"></button>
       </section>
     </main>
 

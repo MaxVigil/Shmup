@@ -25,6 +25,7 @@ export function createGame(
   getRocketStock: () => number = () => 0,
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
+  getThreatLevel: () => number = () => 1,
 ): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -52,6 +53,7 @@ export function createGame(
       getRocketStock,
       getLocale,
       onActiveWeaponChanged,
+      getThreatLevel,
     )],
   };
 

@@ -89,6 +89,11 @@ export function isGameState(value: unknown): value is GameState {
     value.base.pilotCandidates.every(isPilotCandidate) &&
     isCountRecord(value.base.pilotXp) &&
     isRatioRecord(value.base.pilotFatigue) &&
+    (value.base.activeMissionId === null ||
+      typeof value.base.activeMissionId === 'string') &&
+    typeof value.base.monthIncome === 'number' &&
+    value.base.monthIncome >= 0 &&
+    (value.base.monthReport === null || isRecord(value.base.monthReport)) &&
     Array.isArray(value.technologyCatalog) &&
     (value.activeRun === null || isRecord(value.activeRun))
   );

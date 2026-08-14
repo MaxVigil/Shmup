@@ -1974,3 +1974,42 @@ h1 {
   font-family: var(--font-mono);
   font-size: 0.72rem;
 }
+
+/* -- Mission cards / geoscope selection -------------------------------------- */
+.geo-map__marker { border: 0; cursor: pointer; font: inherit; padding: 0.2rem 0.4rem; }
+.geo-map__marker:disabled { cursor: default; opacity: 0.55; }
+.geo-map__marker.is-selected { outline: 1px solid var(--accent); box-shadow: 0 0 0.6rem rgb(100 230 187 / 30%); }
+.mission-card > div { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.mission-card.is-resolved { opacity: 0.55; }
+.mission-card.is-selected { border-color: var(--accent-dim); box-shadow: inset 3px 0 var(--accent); }
+.end-month { width: 100%; margin-top: 0.75rem; }
+.preflight-mission { border-left-color: var(--accent-dim); }
+
+/* -- Month report overlay ---------------------------------------------------- */
+.month-report-panel {
+  position: fixed;
+  z-index: 95;
+  top: 50%;
+  left: 50%;
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-m);
+  background: linear-gradient(160deg, rgb(11 24 30 / 96%), rgb(6 12 17 / 96%));
+  box-shadow: 0 0 0 100vmax rgb(2 5 7 / 82%), 0 2rem 7rem rgb(0 0 0 / 65%);
+  transform: translate(-50%, -50%);
+}
+.month-report-panel h2 { margin: 0 0 1rem; color: var(--text-hi); font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.month-report-details { margin: 0; }
+.month-report-details__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.month-report-details dt { color: var(--text-mid); font-size: 0.72rem; }
+.month-report-details dd { margin: 0; color: var(--text); font-family: var(--font-mono); font-size: 0.8rem; }
+.month-report-details dd.is-negative { color: var(--danger-strong); }
+.month-report-details dd.is-positive { color: var(--accent); }
+.month-report-panel .base-action { width: 100%; margin-top: 1rem; }
