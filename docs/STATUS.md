@@ -22,6 +22,8 @@ are untouched; all 168 unit tests, lint, typecheck, and the production build pas
   facilities, personnel roles, research projects) rendered from the content catalog
   in uk/en/zh via the new typed DOM builder `src/ui/h.ts`.
 - `ui-template-ids` coverage extended with the databank tables container.
+- Dead CSS removed (~200 lines): legacy overview/status-grid/market-offer/
+  weapon-slot-summary/base-resource-strip classes with zero DOM usage.
 
 ## Current milestone
 
