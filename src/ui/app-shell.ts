@@ -2893,6 +2893,9 @@ function renderResearchCards(): void {
   const hasScientist = state.base.staff.some((member) => member.roleId === scientistRole.id);
   const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
   const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const acceleratorLocallyProduced = state.base.locallyProducedWeaponIds.includes(
+    impulseAccelerator.id,
+  );
 
   interface ResearchCard {
     readonly title: string;
@@ -2901,6 +2904,7 @@ function renderResearchCards(): void {
     readonly requirements: string;
     readonly progress: string;
     readonly outcome: string;
+    readonly visible?: boolean;
   }
   const cards: ResearchCard[] = [];
 
@@ -2910,6 +2914,7 @@ function renderResearchCards(): void {
     domain: 'earth' | 'alien',
     requirements: string,
     outcome: string,
+    visible = true,
   ): void => {
     const done = state.base.unlockedBlueprintIds.includes(blueprintId);
     const project = state.base.researchQueue.find((entry) => entry.blueprintId === blueprintId);
@@ -2917,7 +2922,7 @@ function renderResearchCards(): void {
     const progress = project === undefined
       ? ''
       : t('research.cardProgress', { progress: project.progress, required: project.requiredProgress });
-    cards.push({ title, domain, status, requirements, progress, outcome });
+    cards.push({ title, domain, status, requirements, progress, outcome, visible });
   };
 
   pushBlueprint(
@@ -2937,6 +2942,7 @@ function renderResearchCards(): void {
       ? labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab')
       : t('research.cardRequiresSample'),
     t('facility.quarantine'),
+    hasSample,
   );
   pushBlueprint(
     canisterBlueprint.id,
@@ -2951,6 +2957,7 @@ function renderResearchCards(): void {
     'alien',
     quarantineBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresQuarantine'),
     t('content.splitPulse'),
+    hasSample,
   );
 
   for (const upgrade of contentCatalog.weaponUpgrades) {
@@ -2959,6 +2966,7 @@ function renderResearchCards(): void {
     const title = upgrade.id.includes('machine')
       ? t('upgrade.machineName')
       : t('upgrade.acceleratorName');
+    const visible = upgrade.id.includes('machine') || acceleratorLocallyProduced;
     cards.push({
       title,
       domain: 'earth',
@@ -2966,10 +2974,14 @@ function renderResearchCards(): void {
       requirements: t('upgrade.requiresCentre'),
       progress: researched ? t('research.cardAwaitingProduction') : '',
       outcome: t('upgrade.researchCost', { credits: upgrade.researchCreditCost }),
+      visible,
     });
   }
 
   for (const card of cards) {
+    if (card.visible === false) {
+      continue;
+    }
     const article = document.createElement('article');
     article.className = 'research-card is-' + card.status + (card.domain === 'alien' ? ' is-alien' : '');
     const titleEl = document.createElement('strong');
