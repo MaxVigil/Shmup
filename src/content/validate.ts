@@ -197,6 +197,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
     if (
       !catalog.weapons.some((weapon) => weapon.id === upgrade.weaponId) ||
       upgrade.researchCreditCost <= 0 ||
+      !Number.isInteger(upgrade.researchSorties) ||
+      upgrade.researchSorties <= 0 ||
       upgrade.productionCreditCost <= 0 ||
       upgrade.productionMaterialCost < 0 ||
       !Number.isInteger(upgrade.productionSorties) ||
@@ -436,6 +438,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
         (entry) => entry.id === upgrade.aircraftBlueprintId,
       ) ||
       (upgrade.tier !== 1 && upgrade.tier !== 2) ||
+      !Number.isInteger(upgrade.researchSorties) ||
+      upgrade.researchSorties <= 0 ||
       !catalog.buildings.some(
         (entry) => entry.id === upgrade.requiredResearchBuildingId,
       ) ||

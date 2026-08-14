@@ -8,6 +8,24 @@ describe('validateContentCatalog', () => {
     expect(() => validateContentCatalog(contentCatalog)).not.toThrow();
   });
 
+  it('rejects weapon and aircraft upgrades with zero research time', () => {
+    const weaponUpgrades = [
+      { ...contentCatalog.weaponUpgrades[0], researchSorties: 0 },
+    ];
+    expect(() => validateContentCatalog({
+      ...contentCatalog,
+      weaponUpgrades,
+    })).toThrow(/invalid requirements/);
+
+    const aircraftUpgrades = [
+      { ...contentCatalog.aircraftUpgrades[0], researchSorties: 0 },
+    ];
+    expect(() => validateContentCatalog({
+      ...contentCatalog,
+      aircraftUpgrades,
+    })).toThrow(/invalid requirements/);
+  });
+
   it('rejects duplicate identifiers', () => {
     const invalidCatalog: ContentCatalog = {
       ...contentCatalog,
