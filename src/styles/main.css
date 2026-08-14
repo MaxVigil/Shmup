@@ -1,7 +1,64 @@
 :root {
-  color: #d8e4eb;
-  background: #04070a;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* ===== Design tokens — THEME B (Industrial Dark) =====
+     Every theme variant swaps only these tokens. */
+
+  /* Surface layers (elevation 0 → 4) */
+  --bg-0: #04070a;
+  --bg-1: #070d12;
+  --bg-2: #0b151a;
+  --bg-3: #101f26;
+  --bg-4: #13252c;
+  --surface: rgb(9 22 28 / 62%);
+  --surface-strong: rgb(13 29 35 / 78%);
+
+  /* Borders */
+  --border-subtle: #1b2b33;
+  --border: #223741;
+  --border-strong: #2a4049;
+  --border-accent: #70a897;
+
+  /* Text hierarchy */
+  --text-hi: #dceff0;
+  --text: #b7d9d2;
+  --text-mid: #78939d;
+  --text-low: #4f626a;
+  --text-faint: #2e3d44;
+
+  /* Semantic / status */
+  --accent: #70d6b3;
+  --accent-strong: #9dd7c7;
+  --accent-dim: #2f6f63;
+  --warn: #ffd28a;
+  --danger: #e0665a;
+  --danger-strong: #ef7185;
+  --info: #7fb6d9;
+  --neutral: #4f6a74;
+
+  /* Type */
+  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-xs: 0.62rem;
+  --text-sm: 0.72rem;
+  --text-md: 0.82rem;
+  --text-lg: 1.05rem;
+
+  /* Spacing (4px base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-12: 3rem;
+
+  /* Radius */
+  --radius-s: 0.25rem;
+  --radius-m: 0.35rem;
+  --radius-l: 0.5rem;
+
+  color: var(--text-hi);
+  background: var(--bg-0);
+  font-family: var(--font-ui);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -1585,3 +1642,308 @@ h1 {
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
+
+/* =====================================================================
+   THEME B — INDUSTRIAL DARK
+   Component surfaces, navigation, buttons, HUD, sortie and layout
+   refinements built on the token block above. Swap tokens for a new theme.
+   ===================================================================== */
+
+/* -- Surfaces --------------------------------------------------------- */
+.technology-lab,
+.facility-panel,
+.programme-panel,
+.market-panel,
+.command-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background:
+    linear-gradient(150deg, rgb(14 29 35 / 94%), rgb(7 15 20 / 94%)),
+    var(--bg-2);
+  box-shadow: inset 0 1px 0 rgb(112 214 179 / 4%), 0 1.5rem 4rem rgb(0 0 0 / 35%);
+}
+
+.section-heading .eyebrow,
+.technology-lab__eyebrow {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.section-heading h1 { color: var(--text-hi); }
+.section-heading .lede { color: var(--text-mid); }
+
+.facility-panel h2,
+.programme-panel h2,
+.market-panel h2,
+.technology-lab h2 {
+  color: var(--text-hi);
+  font-size: var(--text-lg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.domain-intro { color: var(--text-mid); }
+
+/* -- Navigation ------------------------------------------------------- */
+.base-navigation {
+  border-color: var(--border);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+}
+
+.base-navigation button {
+  color: var(--text-mid);
+  border-bottom-color: var(--border-subtle);
+}
+.base-navigation button:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.base-navigation button[aria-selected="true"] {
+  color: var(--text-hi);
+  background: linear-gradient(90deg, rgb(16 31 38 / 92%), var(--bg-4));
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+/* -- Buttons ---------------------------------------------------------- */
+.base-action {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  color: var(--text);
+  background: var(--bg-3);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease;
+}
+.base-action:hover:not(:disabled) {
+  border-color: var(--border-accent);
+  color: var(--text-hi);
+  background: var(--bg-4);
+}
+.base-action:active:not(:disabled) { transform: translateY(1px); }
+.base-action:disabled {
+  border-color: var(--border-subtle);
+  color: var(--text-low);
+  background: var(--bg-1);
+  cursor: not-allowed;
+}
+.base-action.is-primary {
+  border-color: var(--accent-dim);
+  background: linear-gradient(180deg, #14402f, #0e2e23);
+  color: #d9fff0;
+  font-weight: 600;
+}
+.base-action.is-primary:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #1a4c38, #123a2b);
+}
+.base-action.is-danger {
+  border-color: #7d3342;
+  background: rgb(64 18 28 / 78%);
+  color: #ffd7dd;
+}
+.base-action.is-danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgb(86 24 36 / 85%);
+}
+.text-action { color: var(--accent-strong); }
+.text-action:hover { color: var(--text-hi); }
+
+/* -- Launch actions --------------------------------------------------- */
+.launch-action,
+.return-action {
+  width: 100%;
+  margin-top: 1.25rem;
+  border-color: var(--accent-dim);
+  background: linear-gradient(180deg, #14402f, #0e2e23);
+  color: #d9fff0;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+.launch-action:hover:not(:disabled),
+.return-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #1a4c38, #123a2b);
+  color: #fff;
+}
+
+/* -- Global strategic HUD --------------------------------------------- */
+.global-hud {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: stretch;
+  margin: 0 auto 1rem;
+  padding: 0.6rem 1rem;
+  width: min(100%, 88rem);
+  border: 1px solid var(--border);
+  border-bottom-color: var(--border-strong);
+  border-radius: var(--radius-m);
+  background: linear-gradient(180deg, rgb(10 20 26 / 92%), rgb(6 12 17 / 92%));
+  box-shadow: inset 0 1px 0 rgb(112 214 179 / 4%);
+}
+.global-hud__month { padding-right: 1rem; border-right: 1px solid var(--border-subtle); }
+.global-hud__objective { padding-left: 1rem; border-left: 1px solid var(--border-subtle); }
+.global-hud__resources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.global-hud__resources > div { padding: 0.2rem 0.75rem; border-left: 1px solid var(--border-subtle); }
+.global-hud__resources strong.is-negative { color: var(--danger-strong); }
+.global-hud__objective strong { color: var(--warn); }
+
+/* -- Sortie console ---------------------------------------------------- */
+.sortie-controls {
+  border-color: var(--border);
+  border-radius: var(--radius-m);
+  background: linear-gradient(180deg, rgb(9 18 23 / 92%), rgb(4 9 12 / 92%));
+  box-shadow: inset 0 1px 0 rgb(112 214 179 / 4%), 0 1rem 3rem rgb(0 0 0 / 35%);
+}
+.sortie-controls span { color: var(--text-mid); }
+.sortie-controls strong { color: var(--text-hi); }
+.weapon-switch-action {
+  border-color: var(--accent-dim);
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--accent-strong);
+}
+.weapon-switch-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text-hi); }
+.weapon-switch-action:disabled { border-color: var(--border); color: var(--text-low); background: var(--bg-1); }
+.combat-frame { border-color: var(--border); }
+
+/* -- Trade layout ------------------------------------------------------- */
+.trade-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+  gap: 1rem;
+  align-items: start;
+}
+.trade-dynamic { min-width: 0; display: grid; gap: 0.9rem; align-content: start; }
+.trade-dynamic .hangar-subtitle { margin: 0.25rem 0 -0.2rem; }
+.trade-content .command-panel { width: 100%; }
+
+/* -- Databank (in-game reference) --------------------------------------- */
+.databank-note {
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 2px solid var(--accent-dim);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  color: var(--text-mid);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.databank-block { margin-bottom: 1.5rem; }
+.databank-block h2 {
+  margin: 0 0 0.4rem;
+  color: var(--text-hi);
+  font-size: var(--text-lg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.data-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
+}
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.data-table th,
+.data-table td { padding: 0.5rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.data-table thead th {
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.data-table tbody tr:last-child td { border-bottom: 0; }
+.data-table tbody tr:hover { background: var(--bg-3); }
+.data-table td { color: var(--text); }
+.data-table td.num { font-family: var(--font-mono); color: var(--text-mid); }
+.data-table td.is-alien { color: #c39fe8; font-family: var(--font-mono); }
+.data-table td.is-earth { color: var(--accent-strong); font-family: var(--font-mono); }
+.data-table td.db-name { color: var(--text-hi); font-weight: 600; }
+
+/* -- Empty states -------------------------------------------------------- */
+.empty-note {
+  padding: 1rem 1.25rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  color: var(--text-low);
+  background: var(--bg-1);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+/* -- Cards / chips refinement ------------------------------------------- */
+.fleet-slot,
+.aircraft-offer,
+.threat-row {
+  border-color: var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  transition: border-color 0.12s ease, transform 0.12s ease, background 0.12s ease;
+}
+.threat-row span { color: var(--accent); }
+.status-chip { font-family: var(--font-mono); letter-spacing: 0.07em; }
+.status-chip.is-active { color: #06120e; background: var(--accent); }
+.status-chip.is-fueled { color: #b7e3d6; background: rgb(112 214 179 / 16%); border: 1px solid rgb(112 214 179 / 45%); }
+.status-chip.is-unfueled { color: #f0c98a; background: rgb(242 198 109 / 14%); border: 1px solid rgb(242 198 109 / 45%); }
+.status-chip.is-owned { color: #aab8d8; background: rgb(169 183 215 / 14%); border: 1px solid rgb(169 183 215 / 45%); }
+.status-chip.is-damaged { color: #ffb3bd; background: rgb(240 113 133 / 14%); border: 1px solid rgb(240 113 133 / 50%); }
+.facility-row { border-radius: var(--radius-m); }
+.fleet-slot:hover { border-color: var(--border-accent); background: var(--surface-strong); }
+.fleet-slot.is-active { border-color: var(--accent-dim); box-shadow: inset 3px 0 var(--accent); }
+.fleet-slot.is-damaged { border-color: var(--danger); }
+
+/* -- Research cards refinement ------------------------------------------- */
+.research-card {
+  border-color: var(--border);
+  border-radius: var(--radius-m);
+  background: linear-gradient(160deg, rgb(9 18 24 / 92%), rgb(5 11 15 / 92%));
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.research-card:hover { border-color: var(--border-accent); transform: translateY(-1px); }
+.research-card.is-alien { background: linear-gradient(160deg, rgb(16 9 25 / 92%), rgb(7 5 12 / 92%)); border-color: #4a3560; }
+.research-card__domain { color: var(--text-low); }
+.research-card strong { color: var(--text-hi); }
+
+/* -- Toasts / status strips ---------------------------------------------- */
+.toast {
+  border-color: var(--border-strong);
+  border-radius: var(--radius-m);
+  background: linear-gradient(180deg, rgb(10 20 26 / 97%), rgb(6 12 17 / 97%));
+  color: var(--text-hi);
+  box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 50%);
+}
+.progression-objective {
+  border-color: var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+}
+.progression-objective span { color: var(--accent); }
+.progression-objective strong { color: var(--text-hi); }
+
+/* -- Responsive refinements ---------------------------------------------- */
+@media (max-width: 980px) {
+  .trade-content { grid-template-columns: 1fr; }
+  .global-hud__objective { display: none; }
+}
+@media (max-width: 820px) {
+  .global-hud { grid-template-columns: 1fr; gap: 0.5rem; }
+  .global-hud__month, .global-hud__objective { padding: 0.25rem 0; border: 0; }
+  .global-hud__resources { grid-template-columns: repeat(3, 1fr); }
+  .global-hud__resources > div { padding: 0.25rem 0.5rem; }
+}
+
+/* -- Scrollbars ----------------------------------------------------------- */
+.data-table-wrap::-webkit-scrollbar { height: 0.5rem; }
+.data-table-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+.data-table-wrap::-webkit-scrollbar-track { background: var(--bg-0); }

@@ -1,6 +1,23 @@
 # Project status
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
+
+## Theme B — Industrial Dark UX rebuild (test2)
+
+The full base + sortie presentation has been re-layered onto a real design-token
+system on branch `test2` (not yet merged). Domain, store, content, and save schema
+are untouched; all 168 unit tests, lint, typecheck, and the production build pass.
+
+- Design tokens: 4 surface layers, 3 border tiers, 5 text tiers, semantic/status
+  colours, 4px spacing scale, type scale, mono data font (`:root` block).
+- Theme B component surfaces: panels, navigation, buttons (primary/danger),
+  launch actions, global HUD card, sortie console, toasts, research/fleet cards.
+- Trade layout fixed with a two-column `trade-content` grid (market + credit lines)
+  that stacks on narrow screens; empty states added.
+- Databank is now a real in-game feature: entity tables (weapons, fleet, hostiles,
+  facilities, personnel roles, research projects) rendered from the content catalog
+  in uk/en/zh via the new typed DOM builder `src/ui/h.ts`.
+- `ui-template-ids` coverage extended with the databank tables container.
 
 ## Current milestone
 

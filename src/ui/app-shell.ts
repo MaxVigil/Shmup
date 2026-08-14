@@ -40,6 +40,7 @@ import {
   type SortiePayoffSummary,
 } from '../domain/sortie-payoff';
 import { byId, setText } from './dom';
+import { h } from './h';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
 import { installShmupDebugBridge } from '../debug/debug-mode';
@@ -694,6 +695,7 @@ function renderBase(): void {
   renderWarehouse();
   renderTrade();
   renderCommand();
+  renderDatabank();
 }
 
 const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
@@ -976,6 +978,223 @@ function renderWarehouse(): void {
   }
 }
 
+function renderDatabank(): void {
+  const container = byId<HTMLElement>('databank-tables');
+  container.textContent = '';
+
+  const buildingNameKey: Readonly<Record<string, TranslationKey>> = {
+    'building-laboratory': 'building.laboratory',
+    'building-workshop': 'building.workshop',
+    'building-quarantine-centre': 'building.quarantine',
+    'building-trade-centre': 'building.tradeCentre',
+  };
+  const staffNameKey: Readonly<Record<string, TranslationKey>> = {
+    'staff-scientist': 'staff.scientist',
+    'staff-engineer': 'staff.engineer',
+    'staff-trader': 'staff.trader',
+  };
+  const blueprintNameKey: Readonly<Record<string, TranslationKey>> = {
+    'blueprint-alien-technology-capturer': 'blueprint.capturer',
+    'blueprint-safe-containment': 'blueprint.containment',
+    'blueprint-canister-cannon': 'blueprint.canister',
+    'blueprint-split-pulse-adaptation': 'blueprint.adapted',
+    'blueprint-impulse-accelerator-production': 'blueprint.impulse',
+  };
+  const enemyNameKey: Readonly<Record<string, TranslationKey>> = {
+    'enemy-scout': 'content.scout',
+    'enemy-weaver': 'content.weaver',
+    'enemy-warden': 'content.warden',
+    'enemy-gunship': 'content.enemyGunship',
+  };
+
+  const blocks: Array<{
+    heading: TranslationKey;
+    headers: readonly TranslationKey[];
+    rows: readonly HTMLElement[];
+  }> = [];
+
+  const weaponHeaders = [
+    'databank.colName',
+    'databank.colOrigin',
+    'databank.colDamage',
+    'databank.colCadence',
+    'databank.colProjectiles',
+    'databank.colSpeed',
+    'databank.colMarket',
+  ] as const;
+  const weaponRows = contentCatalog.weapons.map((weapon) =>
+    h('tr', null,
+      h('td', { class: 'db-name' }, localizedWeaponName(weapon.id)),
+      h('td', { class: weapon.origin === 'alien' ? 'is-alien' : 'is-earth' },
+        t(weapon.origin === 'alien' ? 'databank.originAlien' : 'databank.originEarth')),
+      h('td', { class: 'num' }, weapon.damage.toString()),
+      h('td', { class: 'num' }, weapon.shotsPerSecond.toString()),
+      h('td', { class: 'num' }, weapon.projectileCount.toString()),
+      h('td', { class: 'num' }, weapon.projectileSpeed.toString()),
+      h('td', null, weapon.marketPrice === null ? '—' : `${weapon.marketPrice.minimum}..${weapon.marketPrice.maximum}`),
+    ),
+  );
+  blocks.push({ heading: 'databank.weapons', headers: weaponHeaders, rows: weaponRows });
+
+  const aircraftHeaders = [
+    'databank.colName',
+    'databank.colRole',
+    'databank.colArmour',
+    'databank.colSpeed',
+    'databank.colDamage',
+    'databank.colSlots',
+    'databank.colRefuel',
+    'databank.colMarket',
+  ] as const;
+  const aircraftRows = contentCatalog.aircraft.map((aircraft) =>
+    h('tr', null,
+      h('td', { class: 'db-name' }, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
+      h('td', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole')),
+      h('td', { class: 'num' }, aircraft.armour.toString()),
+      h('td', { class: 'num' }, `${aircraft.speedMultiplier}×`),
+      h('td', { class: 'num' }, `${aircraft.damageMultiplier}×`),
+      h('td', { class: 'num' }, aircraft.weaponSlotCount.toString()),
+      h('td', { class: 'num' }, `${aircraft.refuelCreditCost} cr`),
+      h('td', null, aircraft.marketPrice === null ? '—' : `${aircraft.marketPrice.minimum}..${aircraft.marketPrice.maximum}`),
+    ),
+  );
+  blocks.push({ heading: 'databank.aircraft', headers: aircraftHeaders, rows: aircraftRows });
+
+  const enemyHeaders = [
+    'databank.colName',
+    'databank.colKind',
+    'databank.colArmour',
+    'databank.colSpeed',
+    'databank.colContact',
+    'databank.colScore',
+    'databank.colMaterials',
+    'databank.colCredits',
+    'databank.colRanged',
+  ] as const;
+  const enemyRows = contentCatalog.enemies.map((enemy) =>
+    h('tr', null,
+      h('td', { class: 'db-name' }, t(enemyNameKey[enemy.id] ?? 'content.warden')),
+      h('td', null, t(enemy.kind === 'elite' ? 'databank.kindElite' : 'databank.kindRegular')),
+      h('td', { class: 'num' }, enemy.armour.toString()),
+      h('td', { class: 'num' }, enemy.speed.toString()),
+      h('td', { class: 'num' }, enemy.contactDamage.toString()),
+      h('td', { class: 'num' }, enemy.score.toString()),
+      h('td', { class: 'num' }, enemy.materialReward.toString()),
+      h('td', { class: 'num' }, enemy.creditReward.toString()),
+      h('td', null, enemy.ranged === null ? '—' : t('databank.yes')),
+    ),
+  );
+  blocks.push({ heading: 'databank.enemies', headers: enemyHeaders, rows: enemyRows });
+
+  const buildingHeaders = ['databank.colName', 'databank.colCost', 'databank.colPrereq'] as const;
+  const buildingRows = contentCatalog.buildings.map((building) => {
+    const prerequisites: string[] = [];
+    if (building.requiredBuildingId !== null) {
+      prerequisites.push(t(buildingNameKey[building.requiredBuildingId] ?? 'building.laboratory'));
+    }
+    if (building.requiredBlueprintId !== null) {
+      prerequisites.push(t(blueprintNameKey[building.requiredBlueprintId] ?? 'blueprint.capturer'));
+    }
+    return h('tr', null,
+      h('td', { class: 'db-name' }, t(buildingNameKey[building.id] ?? 'building.laboratory')),
+      h('td', { class: 'num' }, `${building.creditCost} cr / ${building.materialCost} mat`),
+      h('td', null, prerequisites.length === 0 ? '—' : prerequisites.join(' + ')),
+    );
+  });
+  blocks.push({ heading: 'databank.buildings', headers: buildingHeaders, rows: buildingRows });
+
+  const staffHeaders = ['databank.colName', 'databank.colCost', 'databank.colPrereq', 'databank.colHeadcount'] as const;
+  const staffRows = contentCatalog.staffRoles.map((role) =>
+    h('tr', null,
+      h('td', { class: 'db-name' }, t(staffNameKey[role.id] ?? 'staff.scientist')),
+      h('td', { class: 'num' }, `${role.creditCost} cr`),
+      h('td', null, t(buildingNameKey[role.requiredBuildingId] ?? 'building.laboratory')),
+      h('td', { class: 'num' }, role.maximumHeadcount === null ? '—' : role.maximumHeadcount.toString()),
+    ),
+  );
+  blocks.push({ heading: 'databank.staff', headers: staffHeaders, rows: staffRows });
+
+  const blueprintHeaders = [
+    'databank.colName',
+    'databank.colDomain',
+    'databank.colProgress',
+    'databank.colRequirements',
+    'databank.colOutput',
+  ] as const;
+  const blueprintRows = [
+    ...contentCatalog.blueprints.map((blueprint) =>
+      h('tr', null,
+        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.capturer')),
+        h('td', { class: 'is-earth' }, t('databank.originEarth')),
+        h('td', { class: 'num' }, `${blueprint.requiredProgress} sorties`),
+        h('td', null, [
+          t(buildingNameKey[blueprint.requiredBuildingId] ?? 'building.laboratory'),
+          t(staffNameKey[blueprint.requiredStaffRoleId] ?? 'staff.scientist'),
+        ].join(' + ')),
+        h('td', null, t('content.capturer')),
+      ),
+    ),
+    ...contentCatalog.buildingBlueprints.map((blueprint) =>
+      h('tr', null,
+        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.containment')),
+        h('td', { class: 'is-earth' }, t('databank.originEarth')),
+        h('td', { class: 'num' }, `${blueprint.requiredProgress} sorties`),
+        h('td', null, [
+          t(buildingNameKey[blueprint.requiredBuildingId] ?? 'building.laboratory'),
+          t(staffNameKey[blueprint.requiredStaffRoleId] ?? 'staff.scientist'),
+        ].join(' + ')),
+        h('td', null, t(buildingNameKey[blueprint.outputBuildingId] ?? 'building.quarantine')),
+      ),
+    ),
+    ...contentCatalog.adaptedWeaponBlueprints.map((blueprint) =>
+      h('tr', null,
+        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.adapted')),
+        h('td', { class: 'is-alien' }, t('databank.originAlien')),
+        h('td', { class: 'num' }, '—'),
+        h('td', null, [t('building.quarantine'), t('staff.scientist')].join(' + ')),
+        h('td', null, t('content.splitPulse')),
+      ),
+    ),
+    ...contentCatalog.researchWeaponBlueprints.map((blueprint) =>
+      h('tr', null,
+        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.canister')),
+        h('td', { class: 'is-earth' }, t('databank.originEarth')),
+        h('td', { class: 'num' }, `${blueprint.requiredProgress} sorties`),
+        h('td', null, [
+          t(buildingNameKey[blueprint.requiredBuildingId] ?? 'building.laboratory'),
+          t(staffNameKey[blueprint.requiredStaffRoleId] ?? 'staff.scientist'),
+        ].join(' + ')),
+        h('td', null, t('content.canisterCannon')),
+      ),
+    ),
+    ...contentCatalog.marketWeaponBlueprints.map((blueprint) =>
+      h('tr', null,
+        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.impulse')),
+        h('td', { class: 'is-earth' }, t('databank.originEarth')),
+        h('td', { class: 'num' }, `${blueprint.minimumSorties} sorties`),
+        h('td', null, '—'),
+        h('td', null, t('content.impulseAccelerator')),
+      ),
+    ),
+  ];
+  blocks.push({ heading: 'databank.blueprints', headers: blueprintHeaders, rows: blueprintRows });
+
+  for (const block of blocks) {
+    const section = h('section', { class: 'databank-block' });
+    section.append(h('h2', null, t(block.heading)));
+    if (block.rows.length === 0) {
+      section.append(h('p', { class: 'empty-note' }, t('databank.empty')));
+    } else {
+      const headRow = h('tr', null,
+        ...block.headers.map((key) => h('th', { scope: 'col' }, t(key))),
+      );
+      const table = h('table', { class: 'data-table' });
+      table.append(h('thead', null, headRow), h('tbody', null, ...block.rows));
+      section.append(h('div', { class: 'data-table-wrap' }, table));
+    }
+    container.append(section);
+  }
+}
 function renderTrade(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -1003,7 +1222,7 @@ function renderTrade(): void {
     dynamic.appendChild(note);
     const workshopBuilt = state.base.constructedBuildingIds.includes('building-workshop');
     const construct = document.createElement('button');
-    construct.className = 'base-action';
+    construct.className = 'base-action is-primary';
     construct.type = 'button';
     construct.textContent = t('trade.construct', {
       credits: tradeCentre.creditCost,
@@ -1034,7 +1253,7 @@ function renderTrade(): void {
     );
     if (candidate !== undefined) {
       const hire = document.createElement('button');
-      hire.className = 'base-action';
+      hire.className = 'base-action is-primary';
       hire.type = 'button';
       hire.textContent = t('staff.hire', { credits: candidate.hireCreditCost });
       hire.disabled = bankrupt || state.base.credits < candidate.hireCreditCost;
@@ -1151,7 +1370,7 @@ function renderTrade(): void {
   );
   if (sellables.length === 0) {
     const note = document.createElement('p');
-    note.className = 'preflight-warning';
+    note.className = 'empty-note';
     note.textContent = t('trade.noStock');
     dynamic.appendChild(note);
   } else {

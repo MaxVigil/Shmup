@@ -34,7 +34,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <span id="prototype-status"></span>
             <small><span id="save-schema-label"></span> v${initialState.schemaVersion}</small>
           </div>
-          <button id="restart-mission" class="base-action settings-restart" type="button"></button>
+          <button id="restart-mission" class="base-action settings-restart is-danger" type="button"></button>
         </div>
       </div>
     </header>
@@ -44,7 +44,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <span id="insolvency-label"></span>
         <strong id="insolvency-title"></strong>
         <p id="insolvency-detail"></p>
-        <button id="restart-programme" class="base-action" type="button"></button>
+        <button id="restart-programme" class="base-action is-danger" type="button"></button>
       </section>
 
       <nav id="base-navigation" class="base-navigation" role="tablist">
@@ -177,7 +177,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="technology-lab-title"></h2>
             <p id="alien-research-intro" class="domain-intro"></p>
             <p id="technology-status" class="technology-lab__status"></p>
-            <button id="research-technology" class="base-action" type="button" hidden></button>
+            <button id="research-technology" class="base-action is-primary" type="button" hidden></button>
           </section>
         </div>
       </section>
@@ -304,7 +304,8 @@ export function buildAppTemplate(initialState: GameState): string {
           <h1 id="databank-section-title"></h1>
           <p class="lede" id="databank-section-lede"></p>
         </header>
-        <p id="databank-note" class="preflight-warning"></p>
+        <p id="databank-note" class="databank-note"></p>
+        <div id="databank-tables" class="databank-tables"></div>
       </section>
     </main>
 
