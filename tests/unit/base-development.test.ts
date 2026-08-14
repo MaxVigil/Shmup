@@ -36,7 +36,7 @@ describe('base development', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 500,
+        credits: 500_000,
         constructedBuildingIds: [laboratory.id, workshop.id],
       },
     };

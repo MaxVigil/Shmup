@@ -41,11 +41,11 @@ describe('command centre', () => {
     const state = createInitialGameState();
     const unfueled = {
       ...state,
-      base: { ...state.base, credits: 500, fueledAircraftIds: [] },
+      base: { ...state.base, credits: 500_000, fueledAircraftIds: [] },
     };
     const fueled = refuelAircraft(unfueled, interceptor, interceptor.refuelCreditCost);
     expect(fueled.base.fueledAircraftIds).toContain(interceptor.id);
-    expect(fueled.base.credits).toBe(500 - interceptor.refuelCreditCost);
+    expect(fueled.base.credits).toBe(500_000 - interceptor.refuelCreditCost);
     expect(isAircraftFueled(fueled.base, interceptor.id)).toBe(true);
   });
 
@@ -56,7 +56,7 @@ describe('command centre', () => {
     );
     const foreign = {
       ...state,
-      base: { ...state.base, credits: 500, fueledAircraftIds: [] },
+      base: { ...state.base, credits: 500_000, fueledAircraftIds: [] },
     };
     expect(() => refuelAircraft(foreign, contentCatalog.aircraft[1], 45)).toThrowError(
       /not in the hangar/i,

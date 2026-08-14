@@ -25,7 +25,7 @@ function industrialState() {
     ...initial,
     base: {
       ...initial.base,
-      credits: 2_000,
+      credits: 2_000_000,
       materials: 100,
       sortiesCompleted: blueprint.minimumSorties,
       constructedBuildingIds: [centreId, worksId],

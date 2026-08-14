@@ -43,6 +43,7 @@ import {
   summarizeSortiePayoff,
   type SortiePayoffSummary,
 } from '../domain/sortie-payoff';
+import { formatCredits } from './credits';
 import { byId, setText } from './dom';
 import { h } from './h';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
@@ -439,7 +440,7 @@ function renderBase(): void {
     ),
   };
 
-  creditTotal.textContent = state.base.credits.toString();
+  creditTotal.textContent = formatCredits(state.base.credits);
   creditTotal.classList.toggle('is-negative', bankrupt);
   materialTotal.textContent = state.base.materials.toString();
   researchTotal.textContent = state.base.research.toString();
@@ -1077,10 +1078,10 @@ function renderMonthReport(): void {
   monthReportTitle.textContent = t('report.title', { month: report.month });
   monthReportDetails.textContent = '';
   const entries: ReadonlyArray<[string, string]> = [
-    [t('report.income'), String(report.income)],
-    [t('report.expenses'), String(report.expenses)],
-    [t('report.breaches'), String(report.breachPenalties)],
-    [t('report.net'), String(report.net)],
+    [t('report.income'), formatCredits(report.income)],
+    [t('report.expenses'), formatCredits(report.expenses)],
+    [t('report.breaches'), formatCredits(report.breachPenalties)],
+    [t('report.net'), formatCredits(report.net)],
     [
       t('report.resolvedLabel'),
       t('report.resolvedValue', {
@@ -1143,7 +1144,7 @@ function renderFinance(): void {
   for (const [key, value] of rows) {
     const row = h('div', { class: 'finance-row' });
     row.append(h('span', null, t(key)));
-    const amount = h('strong', null, String(value));
+    const amount = h('strong', null, formatCredits(value));
     amount.classList.toggle('is-negative', value < 0);
     amount.classList.toggle('is-positive', key === 'finance.projectedBalance' && value >= 0);
     row.append(amount);
@@ -1224,7 +1225,7 @@ function renderDatabank(): void {
       h('td', { class: 'num' }, weapon.shotsPerSecond.toString()),
       h('td', { class: 'num' }, weapon.projectileCount.toString()),
       h('td', { class: 'num' }, weapon.projectileSpeed.toString()),
-      h('td', null, weapon.marketPrice === null ? '—' : `${weapon.marketPrice.minimum}..${weapon.marketPrice.maximum}`),
+      h('td', null, weapon.marketPrice === null ? '—' : `${formatCredits(weapon.marketPrice.minimum)}..${formatCredits(weapon.marketPrice.maximum)}`),
     ),
   );
   blocks.push({ heading: 'databank.weapons', headers: weaponHeaders, rows: weaponRows });
@@ -1247,8 +1248,8 @@ function renderDatabank(): void {
       h('td', { class: 'num' }, `${aircraft.speedMultiplier}×`),
       h('td', { class: 'num' }, `${aircraft.damageMultiplier}×`),
       h('td', { class: 'num' }, aircraft.weaponSlotCount.toString()),
-      h('td', { class: 'num' }, `${aircraft.refuelCreditCost} cr`),
-      h('td', null, aircraft.marketPrice === null ? '—' : `${aircraft.marketPrice.minimum}..${aircraft.marketPrice.maximum}`),
+      h('td', { class: 'num' }, `${formatCredits(aircraft.refuelCreditCost)} cr`),
+      h('td', null, aircraft.marketPrice === null ? '—' : `${formatCredits(aircraft.marketPrice.minimum)}..${formatCredits(aircraft.marketPrice.maximum)}`),
     ),
   );
   blocks.push({ heading: 'databank.aircraft', headers: aircraftHeaders, rows: aircraftRows });
@@ -1290,7 +1291,7 @@ function renderDatabank(): void {
     }
     return h('tr', null,
       h('td', { class: 'db-name' }, t(buildingNameKey[building.id] ?? 'building.laboratory')),
-      h('td', { class: 'num' }, `${building.creditCost} cr / ${building.materialCost} mat`),
+      h('td', { class: 'num' }, `${formatCredits(building.creditCost)} cr / ${building.materialCost} mat`),
       h('td', null, prerequisites.length === 0 ? '—' : prerequisites.join(' + ')),
     );
   });
@@ -1300,7 +1301,7 @@ function renderDatabank(): void {
   const staffRows = contentCatalog.staffRoles.map((role) =>
     h('tr', null,
       h('td', { class: 'db-name' }, t(staffNameKey[role.id] ?? 'staff.scientist')),
-      h('td', { class: 'num' }, `${role.creditCost} cr`),
+      h('td', { class: 'num' }, `${formatCredits(role.creditCost)} cr`),
       h('td', null, t(buildingNameKey[role.requiredBuildingId] ?? 'building.laboratory')),
       h('td', { class: 'num' }, role.maximumHeadcount === null ? '—' : role.maximumHeadcount.toString()),
     ),

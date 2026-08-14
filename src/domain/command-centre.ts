@@ -93,7 +93,7 @@ export function missionBounty(mission: MissionState): number {
   if (!Number.isInteger(mission.threatLevel) || mission.threatLevel < 1) {
     throw new RangeError('Mission threat level must be a positive integer.');
   }
-  return mission.threatLevel * 80;
+  return mission.threatLevel * 80_000;
 }
 
 /** Breach penalty: the mission bounty times the Council penalty multiplier. */

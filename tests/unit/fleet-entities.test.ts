@@ -90,22 +90,22 @@ describe('aircraft integrity', () => {
     const initial = createInitialGameState();
     const damaged = applySortieDamage(initial.base, interceptorId, 0.5);
     expect(isAircraftRepairing(damaged, interceptorId)).toBe(true);
-    expect(standardRepairCost(damaged, interceptorId)).toBe(30);
-    expect(emergencyRepairCost(damaged, interceptorId)).toBe(60);
+    expect(standardRepairCost(damaged, interceptorId)).toBe(30_000);
+    expect(emergencyRepairCost(damaged, interceptorId)).toBe(60_000);
     const repaired = startRepair(
-      { ...damaged, credits: 200 },
+      { ...damaged, credits: 200_000 },
       interceptorId,
       true,
     );
     expect(isAircraftRepairing(repaired, interceptorId)).toBe(false);
-    expect(repaired.credits).toBe(200 - 60);
+    expect(repaired.credits).toBe(200_000 - 60_000);
   });
 
   it('standard repairs consume sortie-time and clear when complete', () => {
     const initial = createInitialGameState();
     const damaged = applySortieDamage(initial.base, interceptorId, 0.5);
     const repairing = startRepair(
-      { ...damaged, credits: 200 },
+      { ...damaged, credits: 200_000 },
       interceptorId,
       false,
     );
@@ -143,7 +143,7 @@ describe('staff market', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 1_000,
+        credits: 1_000_000,
         constructedBuildingIds: [role.requiredBuildingId],
       },
     };
@@ -215,17 +215,17 @@ describe('trade centre', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 5_000,
+        credits: 5_000_000,
         hangarSlots: [interceptorId, contentCatalog.aircraft[2].id],
       },
     };
     const sold = sellAircraft(
       { ...state.base, aircraftLoadouts: { ...state.base.aircraftLoadouts } },
       contentCatalog.aircraft[2].id,
-      1_000,
+      1_000_000,
     );
     expect(sold.hangarSlots).toEqual([interceptorId, null]);
-    expect(sold.credits).toBe(5_000 + Math.round(1_000 * 0.6));
+    expect(sold.credits).toBe(5_000_000 + Math.round(1_000_000 * 0.6));
   });
 });
 

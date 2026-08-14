@@ -11,7 +11,7 @@ const outcome = {
   preservedTechnologyIds: [],
   targetsDestroyed: 25,
   targetsBreached: 0,
-  creditsEarned: 200,
+  creditsEarned: 200_000,
   creditsPenalized: 0,
   wardenSignalDetected: false,
 } as const;
@@ -30,15 +30,15 @@ describe('sortie payoff summary', () => {
       ...before,
       base: {
         ...before.base,
-        credits: before.base.credits + 200,
+        credits: before.base.credits + 200_000,
         materials: before.base.materials + 8,
         researchQueue: [{ blueprintId, progress: 2, requiredProgress: 3 }],
       },
     };
 
     expect(summarizeSortiePayoff(before, after, blueprintId, outcome)).toEqual({
-      creditDelta: 200,
-      creditsEarned: 200,
+      creditDelta: 200_000,
+      creditsEarned: 200_000,
       creditsPenalized: 0,
       targetsDestroyed: 25,
       targetsBreached: 0,
@@ -78,21 +78,21 @@ describe('sortie payoff summary', () => {
     const before = createInitialGameState();
     const after = {
       ...before,
-      base: { ...before.base, credits: -20 },
+      base: { ...before.base, credits: -20_000 },
     };
     const insolventOutcome = {
       ...outcome,
       targetsDestroyed: 0,
       targetsBreached: 13,
       creditsEarned: 0,
-      creditsPenalized: 520,
+      creditsPenalized: 520_000,
     };
 
     expect(
       summarizeSortiePayoff(before, after, blueprintId, insolventOutcome),
     ).toMatchObject({
-      creditDelta: -520,
-      creditBalance: -20,
+      creditDelta: -520_000,
+      creditBalance: -20_000,
       bankrupt: true,
     });
   });

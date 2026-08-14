@@ -27,7 +27,7 @@ function stateWithPreservedPrism() {
     ...state,
     base: {
       ...state.base,
-      credits: 2_000,
+      credits: 2_000_000,
       materials: 100,
       preservedTechnologyIds: [technology.id],
       constructedBuildingIds: [laboratory.id, quarantine.id],

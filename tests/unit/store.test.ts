@@ -14,7 +14,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 2_000,
+        credits: 2_000_000,
         materials: 100,
         constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
         staff: [
@@ -35,7 +35,7 @@ describe('game store M3a cycle', () => {
         preservedTechnologyIds: [technology.id],
         targetsDestroyed: 25,
         targetsBreached: 0,
-        creditsEarned: 200,
+        creditsEarned: 200_000,
         creditsPenalized: 0,
         wardenSignalDetected: false,
       },
@@ -84,7 +84,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 3_000,
+        credits: 3_000_000,
         materials: 100,
         constructedBuildingIds: [contentCatalog.buildings[0].id],
         staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
@@ -101,7 +101,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [technology.id],
       targetsDestroyed: 25,
       targetsBreached: 0,
-      creditsEarned: 300,
+      creditsEarned: 300_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -170,7 +170,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 2_000,
+        credits: 2_000_000,
         materials: 100,
         telemetryRecorded: true,
         constructedBuildingIds: [contentCatalog.buildings[0].id],
@@ -188,7 +188,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [],
       targetsDestroyed: 25,
       targetsBreached: 0,
-      creditsEarned: 300,
+      creditsEarned: 300_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -227,7 +227,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 2_000,
+        credits: 2_000_000,
         materials: 100,
         sortiesCompleted: blueprint.minimumSorties,
         constructedBuildingIds: [centre.id, works.id],
@@ -285,7 +285,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 2_000,
+        credits: 2_000_000,
         materials: 100,
         constructedBuildingIds: [contentCatalog.buildings[0].id],
       },
@@ -308,7 +308,7 @@ describe('game store M3a cycle', () => {
         preservedTechnologyIds: [],
         targetsDestroyed: 20,
         targetsBreached: 0,
-        creditsEarned: 200,
+        creditsEarned: 200_000,
         creditsPenalized: 0,
         wardenSignalDetected: true,
       },
@@ -331,7 +331,7 @@ describe('game store M3a cycle', () => {
       ...initial,
       base: {
         ...initial.base,
-        credits: 2_000,
+        credits: 2_000_000,
         materials: 100,
         telemetryRecorded: true,
         constructedBuildingIds: [laboratory.id, workshop.id],
@@ -348,7 +348,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [],
       targetsDestroyed: 25,
       targetsBreached: 0,
-      creditsEarned: 300,
+      creditsEarned: 300_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -385,7 +385,7 @@ describe('game store M3a cycle', () => {
     expect(rocketPod).toBeDefined();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 2_000 },
+      base: { ...initial.base, credits: 2_000_000 },
     });
 
     store.dispatch({ type: 'PURCHASE_MARKET_WEAPON', weaponId: rocketPod?.id ?? '' });
@@ -408,7 +408,7 @@ describe('game store M3a cycle', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 5_000 },
+      base: { ...initial.base, credits: 5_000_000 },
     });
     const gunship = contentCatalog.aircraft[1];
     const aegis = contentCatalog.aircraft[2];
@@ -442,7 +442,7 @@ describe('game store M3a cycle', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 500, fueledAircraftIds: [] },
+      base: { ...initial.base, credits: 500_000, fueledAircraftIds: [] },
     });
     const interceptor = contentCatalog.aircraft[0];
     const outcome = {
@@ -452,7 +452,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [],
       targetsDestroyed: 20,
       targetsBreached: 0,
-      creditsEarned: 200,
+      creditsEarned: 200_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -479,7 +479,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [],
       targetsDestroyed: 20,
       targetsBreached: 0,
-      creditsEarned: 200,
+      creditsEarned: 200_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -508,7 +508,7 @@ describe('game store M3a cycle', () => {
 
     store.dispatch({ type: 'TAKE_LOAN', lenderId });
     const withLoan = store.getSnapshot();
-    expect(withLoan.base.credits).toBe(creditsBefore + 600);
+    expect(withLoan.base.credits).toBe(creditsBefore + 600_000);
     expect(withLoan.base.loans[0]?.dueMonth).toBe(3);
     expect(withLoan.base.loans[0]?.repaid).toBe(false);
 
@@ -519,7 +519,7 @@ describe('game store M3a cycle', () => {
       preservedTechnologyIds: [],
       targetsDestroyed: 20,
       targetsBreached: 0,
-      creditsEarned: 200,
+      creditsEarned: 200_000,
       creditsPenalized: 0,
       wardenSignalDetected: false,
     } as const;
@@ -541,7 +541,7 @@ describe('game store M3a cycle', () => {
     expect(store.getSnapshot().base.month).toBe(3);
     expect(store.getSnapshot().base.loans[0]?.repaid).toBe(true);
     expect(store.getSnapshot().base.credits).toBe(
-      creditsBefore + 600 + 200 * 6 - 660 - contentCatalog.aircraft[0].refuelCreditCost * 6,
+      creditsBefore + 600_000 + 200_000 * 6 - 660_000 - contentCatalog.aircraft[0].refuelCreditCost * 6,
     );
   });
 });
@@ -551,7 +551,7 @@ describe('game store month cycle', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 2_000 },
+      base: { ...initial.base, credits: 2_000_000 },
     });
     const before = store.getSnapshot().base.credits;
     store.dispatch({ type: 'END_MONTH' });
@@ -599,7 +599,7 @@ describe('game store rocket ammunition', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 1_000 },
+      base: { ...initial.base, credits: 1_000_000 },
     });
 
     store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: rocketsId });
@@ -618,7 +618,7 @@ describe('game store rocket ammunition', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 1_000 },
+      base: { ...initial.base, credits: 1_000_000 },
     });
 
     store.dispatch({ type: 'PURCHASE_CONSUMABLE', consumableId: rocketsId });
@@ -634,7 +634,7 @@ describe('game store rocket ammunition', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 1_000 },
+      base: { ...initial.base, credits: 1_000_000 },
     });
 
     store.dispatch({

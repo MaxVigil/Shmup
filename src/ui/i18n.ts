@@ -7,6 +7,7 @@ import {
   type TranslationKey,
   type TranslationParams,
 } from '../i18n';
+import { formatCredits } from './credits';
 
 let locale: Locale = loadLocale(window.localStorage);
 
@@ -19,8 +20,17 @@ export function setLocale(nextLocale: Locale): void {
   saveLocale(window.localStorage, nextLocale);
 }
 
+const CREDIT_PARAMS = new Set(['credits', 'principal', 'repayment', 'bounty']);
+
 export function t(key: TranslationKey, params: TranslationParams = {}): string {
-  return translate(locale, key, params);
+  const formatted: Record<string, string | number> = { ...params };
+  for (const moneyKey of CREDIT_PARAMS) {
+    const value = formatted[moneyKey];
+    if (typeof value === 'number') {
+      formatted[moneyKey] = formatCredits(value);
+    }
+  }
+  return translate(locale, key, formatted);
 }
 
 export function localizedWeaponName(weaponId: string | null): string {

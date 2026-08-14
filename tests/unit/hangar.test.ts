@@ -19,7 +19,7 @@ describe('hangar fleet', () => {
     const initial = createInitialGameState();
     return {
       ...initial,
-      base: { ...initial.base, credits: 5_000 },
+      base: { ...initial.base, credits: 5_000_000 },
     };
   }
 

@@ -8,9 +8,9 @@ export interface LoanOfferDefinition {
 }
 
 export const LOAN_OFFERS: readonly LoanOfferDefinition[] = [
-  { lenderId: 'lender-commission', principal: 600, interestRate: 0.1, termMonths: 2 },
-  { lenderId: 'lender-prc', principal: 1200, interestRate: 0.05, termMonths: 4 },
-  { lenderId: 'lender-ukraine', principal: 900, interestRate: 0.08, termMonths: 3 },
+  { lenderId: 'lender-commission', principal: 600_000, interestRate: 0.1, termMonths: 2 },
+  { lenderId: 'lender-prc', principal: 1_200_000, interestRate: 0.05, termMonths: 4 },
+  { lenderId: 'lender-ukraine', principal: 900_000, interestRate: 0.08, termMonths: 3 },
 ];
 
 export function loanRepayment(offer: LoanOfferDefinition): number {

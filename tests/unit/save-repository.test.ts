@@ -126,7 +126,7 @@ describe('save repository', () => {
     storage.setItem(LEGACY_V3_SAVE_KEY, JSON.stringify({
       schemaVersion: 3,
       base: {
-        credits: 275,
+        credits: 275_000,
         materials: 12,
         research: 0,
         energyCapacity: 6,
@@ -147,7 +147,7 @@ describe('save repository', () => {
     expect(loadGame(storage)).toMatchObject({
       schemaVersion: 14,
       base: {
-        credits: 275,
+        credits: 275_000,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
         unlockedBlueprintIds: [],
         manufacturedEquipmentIds: [],
@@ -397,7 +397,7 @@ describe('save repository', () => {
     const initial = createInitialGameState();
     const store = createGameStore({
       ...initial,
-      base: { ...initial.base, credits: 5_000, materials: 100 },
+      base: { ...initial.base, credits: 5_000_000, materials: 100 },
     });
     store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: contentCatalog.buildings[0].id });
     store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: contentCatalog.aircraft[1].id });

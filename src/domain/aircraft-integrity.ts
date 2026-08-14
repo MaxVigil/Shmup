@@ -1,7 +1,7 @@
 import type { BaseState } from './model';
 
 export const REPAIR_SORTIES_PER_DAMAGE = 3;
-export const REPAIR_CREDIT_PER_DAMAGE = 100;
+export const REPAIR_CREDIT_PER_DAMAGE = 100_000;
 export const EMERGENCY_REPAIR_MULTIPLIER = 2;
 export const SORTIE_DAMAGE_WEIGHT = 0.6;
 

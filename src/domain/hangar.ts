@@ -3,7 +3,7 @@ import type { GameState } from './model';
 import { createSeededRng } from './rng';
 
 export const STARTING_HANGAR_SLOTS = 2;
-export const HANGAR_SLOT_COST = 1_200;
+export const HANGAR_SLOT_COST = 1_200_000;
 
 function stableIdHash(value: string): number {
   let hash = 0x811c9dc5;

@@ -23,7 +23,7 @@ function researchReadyState() {
     ...state,
     base: {
       ...state.base,
-      credits: 2_000,
+      credits: 2_000_000,
       materials: 100,
       constructedBuildingIds: [laboratory.id],
       staff: [staffMember('staff-scientist-1', scientist.id)],
