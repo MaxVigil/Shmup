@@ -12,6 +12,10 @@ are untouched; all 168 unit tests, lint, typecheck, and the production build pas
   colours, 4px spacing scale, type scale, mono data font (`:root` block).
 - Theme B component surfaces: panels, navigation, buttons (primary/danger),
   launch actions, global HUD card, sortie console, toasts, research/fleet cards.
+- Theme B2 visual overhaul: panel corner brackets, mono uppercase panel headers,
+  brighter accent palette, geoscope theatre (coordinate grid, sweep animation,
+  pulsing threat blips), command dashboard (two-column), research cards band +
+  two domain columns, hangar pre-launch two-column layout.
 - Trade layout fixed with a two-column `trade-content` grid (market + credit lines)
   that stacks on narrow screens; empty states added.
 - Databank is now a real in-game feature: entity tables (weapons, fleet, hostiles,

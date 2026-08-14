@@ -1947,3 +1947,192 @@ h1 {
 .data-table-wrap::-webkit-scrollbar { height: 0.5rem; }
 .data-table-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
 .data-table-wrap::-webkit-scrollbar-track { background: var(--bg-0); }
+
+/* =====================================================================
+   THEME B2 - visual overhaul
+   Panel chrome, command dashboard, research/hangar layouts, geoscope
+   theatre, typography and button language on top of Theme B.
+   ===================================================================== */
+
+/* -- Palette bump ------------------------------------------------------- */
+:root {
+  --accent: #64e6bb;
+  --accent-strong: #b6f4dc;
+  --border-strong: #31505a;
+  --text-hi: #e9f6f2;
+}
+
+/* -- Panel chrome -------------------------------------------------------- */
+.technology-lab,
+.facility-panel,
+.programme-panel,
+.market-panel,
+.command-panel,
+.hangar-panel {
+  position: relative;
+}
+
+.technology-lab::before,
+.facility-panel::before,
+.programme-panel::before,
+.market-panel::before,
+.command-panel::before,
+.hangar-panel::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-top: 1px solid rgb(100 230 187 / 55%);
+  border-left: 1px solid rgb(100 230 187 / 55%);
+  pointer-events: none;
+}
+
+.technology-lab::after,
+.facility-panel::after,
+.programme-panel::after,
+.market-panel::after,
+.command-panel::after,
+.hangar-panel::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-right: 1px solid rgb(100 230 187 / 55%);
+  border-bottom: 1px solid rgb(100 230 187 / 55%);
+  pointer-events: none;
+}
+
+/* -- Panel headers --------------------------------------------------------- */
+.technology-lab h2,
+.facility-panel h2,
+.programme-panel h2,
+.market-panel h2 {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.technology-lab__eyebrow {
+  color: var(--accent);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+}
+
+/* -- Typography -------------------------------------------------------------- */
+.section-heading h1 { letter-spacing: -0.02em; }
+.section-heading .lede {
+  color: var(--text-mid);
+  font-size: 0.88rem;
+  max-width: 46rem;
+}
+
+/* -- Buttons ------------------------------------------------------------------ */
+.base-action {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+}
+.base-action.is-primary { box-shadow: 0 0 0.85rem rgb(100 230 187 / 16%); }
+.base-action.is-primary:hover:not(:disabled) { box-shadow: 0 0 1.15rem rgb(100 230 187 / 26%); }
+
+/* -- Top bar ------------------------------------------------------------------- */
+.top-bar { border-bottom: 1px solid var(--border); }
+.top-bar__brand {
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+  color: var(--text-hi);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+}
+
+/* -- Card hover ------------------------------------------------------------------ */
+.research-card:hover,
+.facility-row:hover,
+.fleet-slot:hover,
+.terrestrial-project:hover {
+  box-shadow: 0 0.3rem 1.4rem rgb(0 0 0 / 45%), 0 0 0.8rem rgb(100 230 187 / 7%);
+}
+
+/* -- Command dashboard ------------------------------------------------------------ */
+.command-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.command-dashboard__theatre { width: 100%; }
+.command-dashboard__side { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+.command-dashboard__side > .progression-objective { margin-top: 0; }
+.command-objective {
+  border-color: var(--border-strong);
+  border-radius: var(--radius-m);
+  background: linear-gradient(150deg, rgb(16 34 41 / 88%), rgb(8 17 22 / 88%)), var(--bg-2);
+}
+.command-objective strong { color: var(--text-hi); }
+
+@media (max-width: 900px) {
+  .command-dashboard { grid-template-columns: 1fr; }
+}
+
+/* -- Geoscope theatre -------------------------------------------------------------- */
+.geo-map {
+  height: 21rem;
+  margin: 0.85rem 0 0.3rem;
+  border-color: var(--border-strong);
+  background:
+    radial-gradient(circle at 50% 42%, rgb(28 62 72 / 34%), transparent 56%),
+    repeating-linear-gradient(0deg, rgb(100 230 187 / 4%) 0 1px, transparent 1px 2.5rem),
+    repeating-linear-gradient(90deg, rgb(100 230 187 / 4%) 0 1px, transparent 1px 2.5rem),
+    linear-gradient(160deg, #08141c, #0b1822 55%, #060d13);
+}
+.geo-map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 44%, rgb(100 230 187 / 9%) 50%, transparent 56%);
+  animation: geo-sweep 7s linear infinite;
+  pointer-events: none;
+}
+@keyframes geo-sweep {
+  from { transform: translateX(-115%); }
+  to { transform: translateX(115%); }
+}
+.geo-map__marker.is-threat-1 .geo-map__dot { animation: geo-blip 2.6s ease-in-out infinite; }
+.geo-map__marker.is-threat-2 .geo-map__dot { animation: geo-blip 1.8s ease-in-out infinite; }
+.geo-map__marker.is-threat-3 .geo-map__dot { animation: geo-blip 1.2s ease-in-out infinite; }
+@keyframes geo-blip {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.4); }
+}
+
+/* -- Research rework ------------------------------------------------------------------- */
+.research-cards-band { margin-bottom: 0.9rem; }
+.research-grid > .programme-panel:last-child { grid-column: 1 / -1; }
+.research-domain.is-earth { border-top: 2px solid var(--accent-dim); }
+.research-domain.is-alien { border-top: 2px solid #9368c7; }
+
+/* -- Hangar rework ----------------------------------------------------------------------- */
+.hangar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.hangar-layout .hangar-panel { width: 100%; }
+.hangar-panel--preflight {
+  border-color: var(--border-strong);
+  border-top: 2px solid var(--accent-dim);
+}
+.hangar-layout .hangar-panel--warehouse { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .hangar-layout { grid-template-columns: 1fr; }
+  .hangar-layout .hangar-panel--warehouse { grid-column: auto; }
+}

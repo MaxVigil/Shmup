@@ -72,36 +72,40 @@ export function buildAppTemplate(initialState: GameState): string {
           <h1 id="command-section-title"></h1>
           <p class="lede" id="command-section-lede"></p>
         </header>
-        <div class="progression-objective command-objective" aria-live="polite">
-          <span id="objective-label"></span>
-          <strong id="objective-title"></strong>
-          <p id="objective-detail"></p>
-          <button id="objective-open-section" class="text-action" type="button"></button>
-        </div>
-        <p class="run-report" id="base-run-report" aria-live="polite"></p>
-        <section class="technology-lab command-panel" aria-labelledby="command-mandate-title">
-          <p class="technology-lab__eyebrow" id="command-mandate-eyebrow"></p>
-          <h2 id="command-mandate-title"></h2>
-          <div class="mandate-brief">
-            <span id="mandate-label"></span>
-            <p id="mandate-copy"></p>
-            <small id="mandate-terms"></small>
+        <div class="command-dashboard">
+          <section class="technology-lab command-panel command-dashboard__theatre" aria-labelledby="command-month-title">
+            <p class="technology-lab__eyebrow" id="command-month-eyebrow"></p>
+            <h2 id="command-month-title"></h2>
+            <p class="lede" id="command-month-summary"></p>
+            <div id="month-timeline" class="month-timeline" aria-live="polite"></div>
+            <div id="geo-map" class="geo-map" aria-live="polite"></div>
+            <div id="threat-map-list" class="threat-map" aria-live="polite"></div>
+          </section>
+          <div class="command-dashboard__side">
+            <div class="progression-objective command-objective" aria-live="polite">
+              <span id="objective-label"></span>
+              <strong id="objective-title"></strong>
+              <p id="objective-detail"></p>
+              <button id="objective-open-section" class="text-action" type="button"></button>
+            </div>
+            <section class="technology-lab command-panel" aria-labelledby="command-fuel-title">
+              <p class="technology-lab__eyebrow" id="command-fuel-eyebrow"></p>
+              <h2 id="command-fuel-title"></h2>
+              <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
+            </section>
+            <p class="run-report" id="base-run-report" aria-live="polite"></p>
+            <section class="technology-lab command-panel" aria-labelledby="command-mandate-title">
+              <p class="technology-lab__eyebrow" id="command-mandate-eyebrow"></p>
+              <h2 id="command-mandate-title"></h2>
+              <div class="mandate-brief">
+                <span id="mandate-label"></span>
+                <p id="mandate-copy"></p>
+                <small id="mandate-terms"></small>
+              </div>
+            </section>
+            <section class="technology-lab command-panel" aria-labelledby="command-credit-title" hidden></section>
           </div>
-        </section>
-        <section class="technology-lab command-panel" aria-labelledby="command-month-title">
-          <p class="technology-lab__eyebrow" id="command-month-eyebrow"></p>
-          <h2 id="command-month-title"></h2>
-          <p class="lede" id="command-month-summary"></p>
-          <div id="month-timeline" class="month-timeline" aria-live="polite"></div>
-          <div id="geo-map" class="geo-map" aria-live="polite"></div>
-          <div id="threat-map-list" class="threat-map" aria-live="polite"></div>
-        </section>
-        <section class="technology-lab command-panel" aria-labelledby="command-fuel-title">
-          <p class="technology-lab__eyebrow" id="command-fuel-eyebrow"></p>
-          <h2 id="command-fuel-title"></h2>
-          <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
-        </section>
-        <section class="technology-lab command-panel" aria-labelledby="command-credit-title" hidden></section>
+        </div>
       </section>
 
       <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>
@@ -110,8 +114,8 @@ export function buildAppTemplate(initialState: GameState): string {
           <h1 id="research-section-title"></h1>
           <p class="lede" id="research-section-lede"></p>
         </header>
+        <div id="research-card-grid" class="research-card-grid research-cards-band" aria-live="polite"></div>
         <div class="research-grid">
-          <div id="research-card-grid" class="research-card-grid" aria-live="polite"></div>
           <section class="programme-panel research-domain is-earth" aria-labelledby="earth-research-title">
             <p class="technology-lab__eyebrow" id="earth-research-eyebrow"></p>
             <h2 id="earth-research-title"></h2>
@@ -247,7 +251,8 @@ export function buildAppTemplate(initialState: GameState): string {
           <h1 id="hangar-section-title"></h1>
           <p class="lede" id="hangar-section-lede"></p>
         </header>
-        <section class="technology-lab hangar-panel" aria-labelledby="hangar-loadout-title">
+        <div class="hangar-layout">
+          <section class="technology-lab hangar-panel hangar-panel--preflight" aria-labelledby="hangar-loadout-title">
           <p class="technology-lab__eyebrow" id="hangar-loadout-eyebrow"></p>
           <h2 id="hangar-loadout-title"></h2>
           <div id="aircraft-loadout-editor" class="aircraft-loadout-editor" aria-live="polite"></div>
@@ -273,11 +278,12 @@ export function buildAppTemplate(initialState: GameState): string {
           <h3 class="hangar-subtitle" id="hangar-market-subtitle"></h3>
           <div class="fleet-market" id="aircraft-market-list" aria-live="polite"></div>
         </section>
-        <section class="technology-lab hangar-panel" aria-labelledby="hangar-warehouse-title">
-          <p class="technology-lab__eyebrow" id="hangar-warehouse-eyebrow"></p>
-          <h2 id="hangar-warehouse-title"></h2>
-          <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
-        </section>
+          <section class="technology-lab hangar-panel hangar-panel--warehouse" aria-labelledby="hangar-warehouse-title">
+            <p class="technology-lab__eyebrow" id="hangar-warehouse-eyebrow"></p>
+            <h2 id="hangar-warehouse-title"></h2>
+            <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
+          </section>
+        </div>
       </section>
 
       <section id="base-panel-trade" class="base-panel" role="tabpanel" aria-labelledby="base-tab-trade" hidden>
