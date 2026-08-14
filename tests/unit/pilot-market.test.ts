@@ -45,30 +45,18 @@ describe('pilot market', () => {
     const afterSortie = awardPilotProgress(assigned);
     expect(afterSortie.pilotXp[pilot?.id ?? '']).toBe(1);
     expect(afterSortie.pilotFatigue[pilot?.id ?? '']).toBeGreaterThan(0);
-    // A rested replacement is required to stand the active pilot down.
-    const withSecond = {
-      ...afterSortie,
-      pilots: [
-        ...afterSortie.pilots,
-        {
-          id: 'pilot-2',
-          unlocked: true,
-          firstName: 'Second',
-          lastName: 'Pilot',
-          specialization: 'speed' as const,
-          salaryCreditCost: 60_000,
-        },
-      ],
-    };
-    const rested = restPilot(withSecond, pilot?.id ?? '');
-    expect(rested.activePilotId).toBe('pilot-2');
+    // The rested second starter pilot stands the active pilot down.
+    const rested = restPilot(afterSortie, pilot?.id ?? '');
+    expect(rested.activePilotId).toBe('pilot-yaroslava');
     expect(rested.pilotFatigue[pilot?.id ?? '']).toBeGreaterThan(0);
     // Fatigue recovers passively while the other pilot flies.
-    const recovered = awardPilotProgress({ ...rested, activePilotId: 'pilot-2' });
+    const recovered = awardPilotProgress(rested);
     expect(recovered.pilotFatigue[pilot?.id ?? ''] ?? 0).toBeLessThan(
       rested.pilotFatigue[pilot?.id ?? ''] ?? 0,
     );
-    expect(() => restPilot(withSecond, 'pilot-2')).toThrow('not the active pilot');
+    expect(() => restPilot(afterSortie, 'pilot-yaroslava')).toThrow(
+      'not the active pilot',
+    );
   });
 
   it('rejects assigning a fatigued pilot', () => {

@@ -3,11 +3,15 @@ import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { marketBlueprintPrice } from '../../src/domain/terrestrial-market';
+import { advanceProduction, startAircraftProduction } from '../../src/domain/base-projects';
 import {
+  applyAircraftUpgrades,
   applyWeaponUpgrades,
+  manufactureAircraftUpgrade,
   manufacturePrimaryWeapon,
   manufactureWeaponUpgrade,
   purchaseMarketBlueprint,
+  researchAircraftUpgrade,
   researchWeaponUpgrade,
 } from '../../src/domain/terrestrial-production';
 
@@ -122,6 +126,82 @@ describe('terrestrial production', () => {
     expect(upgradedWeapon.damage).toBe(contentCatalog.weapons[1].damage);
     expect(upgradedWeapon.shotsPerSecond).toBe(
       contentCatalog.weapons[1].shotsPerSecond * acceleratorUpgrade.cadenceMultiplier,
+    );
+  });
+
+  it('purchases an aircraft blueprint and manufactures the aircraft into a free hangar slot', () => {
+    const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === 'blueprint-aircraft-gunship',
+    );
+    expect(aircraftBlueprint).toBeDefined();
+    const ready = {
+      ...industrialState(),
+      base: {
+        ...industrialState().base,
+        credits: 3_000_000,
+        sortiesCompleted: aircraftBlueprint?.minimumSorties ?? 2,
+      },
+    };
+    const purchased = purchaseMarketBlueprint(
+      ready,
+      aircraftBlueprint ?? contentCatalog.aircraftBlueprints[0],
+    );
+    expect(purchased.base.unlockedBlueprintIds).toContain(aircraftBlueprint?.id);
+    const started = startAircraftProduction(
+      purchased,
+      aircraftBlueprint ?? contentCatalog.aircraftBlueprints[0],
+    );
+    expect(started.base.productionQueue).toHaveLength(1);
+    expect(started.base.credits).toBe(
+      purchased.base.credits - (aircraftBlueprint?.productionCreditCost ?? 0),
+    );
+    const afterFirst = advanceProduction(started.base);
+    const afterSecond = advanceProduction(afterFirst);
+    expect(afterSecond.hangarSlots).toContain(aircraftBlueprint?.outputAircraftId);
+    expect(afterSecond.productionQueue).toHaveLength(0);
+    // A second copy cannot be manufactured while the type is already in the hangar.
+    expect(() => startAircraftProduction(
+      { ...purchased, base: { ...afterSecond, hangarSlots: [null, null] } },
+      aircraftBlueprint ?? contentCatalog.aircraftBlueprints[0],
+    )).not.toThrow();
+  });
+
+  it('researches and manufactures an aircraft upgrade tier keyed to its blueprint', () => {
+    const upgrade = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === 'upgrade-aircraft-interceptor-mk2',
+    );
+    expect(upgrade).toBeDefined();
+    const ready = {
+      ...industrialState(),
+      base: {
+        ...industrialState().base,
+        credits: 2_500_000,
+        materials: 100,
+        unlockedBlueprintIds: [upgrade?.aircraftBlueprintId ?? ''],
+      },
+    };
+    // The upgrade cannot be researched without its blueprint.
+    expect(() => researchAircraftUpgrade(
+      industrialState(),
+      upgrade ?? contentCatalog.aircraftUpgrades[0],
+    )).toThrow('Blueprint');
+    const researched = researchAircraftUpgrade(
+      ready,
+      upgrade ?? contentCatalog.aircraftUpgrades[0],
+    );
+    expect(researched.base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
+    const manufactured = manufactureAircraftUpgrade(
+      researched,
+      upgrade ?? contentCatalog.aircraftUpgrades[0],
+    );
+    expect(manufactured.base.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);
+    const applied = applyAircraftUpgrades(
+      contentCatalog.aircraft[0],
+      manufactured.base.manufacturedAircraftUpgradeIds,
+      contentCatalog.aircraftUpgrades,
+    );
+    expect(applied.armour).toBe(
+      contentCatalog.aircraft[0].armour + (upgrade?.armourDelta ?? 0),
     );
   });
 });

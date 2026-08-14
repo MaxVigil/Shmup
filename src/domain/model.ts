@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 14 as const;
+export const SAVE_SCHEMA_VERSION = 15 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -48,7 +48,7 @@ export interface MonthReportState {
 export interface ProductionJobState {
   readonly id: string;
   readonly projectId: string;
-  readonly kind: 'equipment' | 'weapon' | 'upgrade';
+  readonly kind: 'equipment' | 'weapon' | 'upgrade' | 'aircraft';
   readonly progress: number;
   readonly requiredProgress: number;
 }
@@ -111,6 +111,8 @@ export interface BaseState {
   readonly locallyProducedWeaponIds: readonly string[];
   readonly researchedWeaponUpgradeIds: readonly string[];
   readonly manufacturedWeaponUpgradeIds: readonly string[];
+  readonly researchedAircraftUpgradeIds: readonly string[];
+  readonly manufacturedAircraftUpgradeIds: readonly string[];
   readonly manufacturedEquipmentIds: readonly string[];
   readonly equippedEquipmentId: string | null;
   readonly telemetryRecorded: boolean;

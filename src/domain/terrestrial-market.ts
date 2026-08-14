@@ -1,7 +1,4 @@
-import type {
-  MarketWeaponBlueprintDefinition,
-  WeaponDefinition,
-} from '../content/model';
+import type { WeaponDefinition } from '../content/model';
 import type { GameState } from './model';
 import type { ConsumableDefinition } from '../content/model';
 import { createSeededRng } from './rng';
@@ -56,7 +53,13 @@ export function marketConsumablePrice(
 }
 
 export function marketBlueprintPrice(
-  blueprint: MarketWeaponBlueprintDefinition,
+  blueprint: {
+    readonly id: string;
+    readonly marketPrice: {
+      readonly minimum: number;
+      readonly maximum: number;
+    };
+  },
   marketSeed: number,
   sortiesCompleted: number,
 ): number {

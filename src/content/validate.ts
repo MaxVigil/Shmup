@@ -34,6 +34,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   assertUniqueIds('marketWeaponBlueprints', catalog.marketWeaponBlueprints);
   assertUniqueIds('weaponUpgrades', catalog.weaponUpgrades);
   assertUniqueIds('aircraft', catalog.aircraft);
+  assertUniqueIds('aircraftBlueprints', catalog.aircraftBlueprints);
+  assertUniqueIds('aircraftUpgrades', catalog.aircraftUpgrades);
   assertUniqueIds('councilStates', catalog.councilStates);
   assertUniqueIds('consumables', catalog.consumables);
 
@@ -410,6 +412,48 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       assertScaledCredit(`aircraft ${aircraft.id} min`, aircraft.marketPrice.minimum);
       assertScaledCredit(`aircraft ${aircraft.id} max`, aircraft.marketPrice.maximum);
     }
+  }
+  for (const blueprint of catalog.aircraftBlueprints) {
+    if (
+      !Number.isInteger(blueprint.minimumSorties) ||
+      blueprint.minimumSorties < 0 ||
+      !catalog.aircraft.some((entry) => entry.id === blueprint.outputAircraftId) ||
+      !catalog.buildings.some((entry) => entry.id === blueprint.requiredBuildingId) ||
+      !catalog.staffRoles.some((entry) => entry.id === blueprint.requiredStaffRoleId)
+    ) {
+      throw new Error(`Aircraft blueprint ${blueprint.id} has invalid requirements.`);
+    }
+    assertScaledCredit(`aircraft blueprint ${blueprint.id} min`, blueprint.marketPrice.minimum);
+    assertScaledCredit(`aircraft blueprint ${blueprint.id} max`, blueprint.marketPrice.maximum);
+    assertScaledCredit(
+      `aircraft blueprint ${blueprint.id} production`,
+      blueprint.productionCreditCost,
+    );
+  }
+  for (const upgrade of catalog.aircraftUpgrades) {
+    if (
+      !catalog.aircraftBlueprints.some(
+        (entry) => entry.id === upgrade.aircraftBlueprintId,
+      ) ||
+      (upgrade.tier !== 1 && upgrade.tier !== 2) ||
+      !catalog.buildings.some(
+        (entry) => entry.id === upgrade.requiredResearchBuildingId,
+      ) ||
+      !catalog.staffRoles.some((entry) => entry.id === upgrade.requiredStaffRoleId) ||
+      !catalog.buildings.some(
+        (entry) => entry.id === upgrade.requiredProductionBuildingId,
+      ) ||
+      !catalog.staffRoles.some(
+        (entry) => entry.id === upgrade.requiredProductionStaffRoleId,
+      )
+    ) {
+      throw new Error(`Aircraft upgrade ${upgrade.id} has invalid requirements.`);
+    }
+    assertScaledCredit(`aircraft upgrade ${upgrade.id} research`, upgrade.researchCreditCost);
+    assertScaledCredit(
+      `aircraft upgrade ${upgrade.id} production`,
+      upgrade.productionCreditCost,
+    );
   }
 }
 

@@ -44,6 +44,7 @@ import { hireStaff } from '../domain/base-development';
 import {
   advanceConstruction,
   advanceProduction,
+  startAircraftProduction,
   startConstruction,
   startEquipmentProduction,
   startUpgradeProduction,
@@ -62,7 +63,9 @@ import type { GameState, SortieOutcome } from '../domain/model';
 import { settleSortie } from '../domain/sortie';
 import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
+  manufactureAircraftUpgrade,
   purchaseMarketBlueprint,
+  researchAircraftUpgrade,
   researchWeaponUpgrade,
 } from '../domain/terrestrial-production';
 import {
@@ -76,6 +79,10 @@ export type GameCommand =
   | { readonly type: 'RESEARCH_TECHNOLOGY'; readonly technologyId: string }
   | { readonly type: 'PURCHASE_MARKET_WEAPON'; readonly weaponId: string }
   | { readonly type: 'PURCHASE_MARKET_BLUEPRINT'; readonly blueprintId: string }
+  | { readonly type: 'PURCHASE_AIRCRAFT_BLUEPRINT'; readonly blueprintId: string }
+  | { readonly type: 'MANUFACTURE_AIRCRAFT'; readonly blueprintId: string }
+  | { readonly type: 'RESEARCH_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
+  | { readonly type: 'MANUFACTURE_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
   | { readonly type: 'MANUFACTURE_PRIMARY_WEAPON'; readonly blueprintId: string }
   | { readonly type: 'RESEARCH_WEAPON_UPGRADE'; readonly upgradeId: string }
   | { readonly type: 'MANUFACTURE_WEAPON_UPGRADE'; readonly upgradeId: string }
@@ -353,6 +360,46 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             throw new Error(`Unknown market blueprint ${command.blueprintId}.`);
           }
           state = purchaseMarketBlueprint(state, blueprint);
+          break;
+        }
+        case 'PURCHASE_AIRCRAFT_BLUEPRINT': {
+          const blueprint = contentCatalog.aircraftBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown aircraft blueprint ${command.blueprintId}.`);
+          }
+          state = purchaseMarketBlueprint(state, blueprint);
+          break;
+        }
+        case 'MANUFACTURE_AIRCRAFT': {
+          const blueprint = contentCatalog.aircraftBlueprints.find(
+            (entry) => entry.id === command.blueprintId,
+          );
+          if (blueprint === undefined) {
+            throw new Error(`Unknown aircraft blueprint ${command.blueprintId}.`);
+          }
+          state = startAircraftProduction(state, blueprint);
+          break;
+        }
+        case 'RESEARCH_AIRCRAFT_UPGRADE': {
+          const upgrade = contentCatalog.aircraftUpgrades.find(
+            (entry) => entry.id === command.upgradeId,
+          );
+          if (upgrade === undefined) {
+            throw new Error(`Unknown aircraft upgrade ${command.upgradeId}.`);
+          }
+          state = researchAircraftUpgrade(state, upgrade);
+          break;
+        }
+        case 'MANUFACTURE_AIRCRAFT_UPGRADE': {
+          const upgrade = contentCatalog.aircraftUpgrades.find(
+            (entry) => entry.id === command.upgradeId,
+          );
+          if (upgrade === undefined) {
+            throw new Error(`Unknown aircraft upgrade ${command.upgradeId}.`);
+          }
+          state = manufactureAircraftUpgrade(state, upgrade);
           break;
         }
         case 'MANUFACTURE_PRIMARY_WEAPON': {

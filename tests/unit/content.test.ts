@@ -181,9 +181,11 @@ describe('validateContentCatalog', () => {
     const interceptor = contentCatalog.aircraft[0];
     const gunship = contentCatalog.aircraft[1];
     const aegis = contentCatalog.aircraft[2];
+    const swift = contentCatalog.aircraft[4];
+    const precision = contentCatalog.aircraft[5];
 
-    expect(contentCatalog.aircraft).toHaveLength(4);
-    expect(interceptor.marketPrice).toBeNull();
+    expect(contentCatalog.aircraft).toHaveLength(6);
+    expect(interceptor.marketPrice).not.toBeNull();
 
     expect(gunship.armour).toBeGreaterThan(interceptor.armour);
     expect(gunship.speedMultiplier).toBeLessThan(interceptor.speedMultiplier);
@@ -196,6 +198,13 @@ describe('validateContentCatalog', () => {
     expect(aegis.marketPrice?.minimum).toBeGreaterThan(
       gunship.marketPrice?.minimum ?? 0,
     );
+
+    expect(swift.speedMultiplier).toBeGreaterThan(interceptor.speedMultiplier);
+    expect(swift.armour).toBeLessThan(interceptor.armour);
+    expect(precision.damageMultiplier).toBeGreaterThan(
+      gunship.damageMultiplier,
+    );
+    expect(precision.weaponSlotCount).toBe(1);
   });
 
   it('scales refuel cost with aircraft weight and lists the Council states', () => {

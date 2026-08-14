@@ -230,6 +230,44 @@ export interface WeaponUpgradeDefinition {
   readonly cadenceMultiplier: number;
 }
 
+/** A market-purchasable aircraft blueprint; owning it unlocks local
+ *  manufacturing of the aircraft and its upgrade line (Mark II / III). */
+export interface AircraftBlueprintDefinition {
+  readonly id: string;
+  readonly outputAircraftId: string;
+  readonly minimumSorties: number;
+  readonly marketPrice: {
+    readonly minimum: number;
+    readonly maximum: number;
+  };
+  readonly productionCreditCost: number;
+  readonly productionMaterialCost: number;
+  readonly productionSorties: number;
+  readonly requiredBuildingId: string;
+  readonly requiredStaffRoleId: string;
+}
+
+/** One upgrade tier (Mark II / Mark III) for a locally-produced aircraft line.
+ *  Researched in the laboratory, then manufactured in the workshop. */
+export interface AircraftUpgradeDefinition {
+  readonly id: string;
+  readonly aircraftBlueprintId: string;
+  readonly tier: 1 | 2;
+  readonly researchCreditCost: number;
+  readonly productionCreditCost: number;
+  readonly productionMaterialCost: number;
+  readonly productionSorties: number;
+  readonly requiredResearchBuildingId: string;
+  readonly requiredStaffRoleId: string;
+  readonly requiredProductionBuildingId: string;
+  readonly requiredProductionStaffRoleId: string;
+  readonly armourDelta: number;
+  readonly speedMultiplierDelta: number;
+  readonly damageMultiplierDelta: number;
+  /** Reserved for a unique per-aircraft Mark III effect; designed later. */
+  readonly signatureId: string | null;
+}
+
 export interface ContentCatalog {
   readonly weapons: readonly WeaponDefinition[];
   readonly alienTechnologies: readonly AlienTechnologyDefinition[];
@@ -246,6 +284,8 @@ export interface ContentCatalog {
   readonly marketWeaponBlueprints: readonly MarketWeaponBlueprintDefinition[];
   readonly weaponUpgrades: readonly WeaponUpgradeDefinition[];
   readonly aircraft: readonly AircraftDefinition[];
+  readonly aircraftBlueprints: readonly AircraftBlueprintDefinition[];
+  readonly aircraftUpgrades: readonly AircraftUpgradeDefinition[];
   readonly councilStates: readonly CouncilStateDefinition[];
   readonly nationGifts: Readonly<Record<string, NationGiftDefinition>>;
   readonly consumables: readonly ConsumableDefinition[];

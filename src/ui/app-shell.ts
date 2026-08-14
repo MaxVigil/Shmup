@@ -20,6 +20,7 @@ import {
   marketConsumablePrice,
   marketWeaponPrice,
 } from '../domain/terrestrial-market';
+import { applyAircraftUpgrades } from '../domain/terrestrial-production';
 import {
   aircraftDamageValue,
   emergencyRepairCost,
@@ -2873,12 +2874,19 @@ launchSortieButton.addEventListener('click', () => {
           ? 0
           : aircraftDamageValue(snapshot.base, aircraftId);
         const pilot = pilotAircraftMultipliers(snapshot.base);
-        return definition === undefined
+        const upgraded = definition === undefined
+          ? undefined
+          : applyAircraftUpgrades(
+              definition,
+              snapshot.base.manufacturedAircraftUpgradeIds,
+              contentCatalog.aircraftUpgrades,
+            );
+        return upgraded === undefined
           ? { armour: 100, speedMultiplier: 1, damageMultiplier: 1 }
           : {
-              armour: Math.max(1, Math.round(definition.armour * (1 - damage))),
-              speedMultiplier: definition.speedMultiplier * pilot.speedMultiplier,
-              damageMultiplier: definition.damageMultiplier * pilot.damageMultiplier,
+              armour: Math.max(1, Math.round(upgraded.armour * (1 - damage))),
+              speedMultiplier: upgraded.speedMultiplier * pilot.speedMultiplier,
+              damageMultiplier: upgraded.damageMultiplier * pilot.damageMultiplier,
             };
       },
       () => store.getSnapshot().base.activeAircraftId,

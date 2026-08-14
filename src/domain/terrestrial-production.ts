@@ -1,14 +1,23 @@
 import type {
+  AircraftUpgradeDefinition,
   MarketWeaponBlueprintDefinition,
   WeaponUpgradeDefinition,
 } from '../content/model';
+import { contentCatalog } from '../content/catalog';
 import type { GameState } from './model';
 import { marketBlueprintPrice } from './terrestrial-market';
 import { addWeaponStock } from './armory';
 
 export function purchaseMarketBlueprint(
   state: GameState,
-  blueprint: MarketWeaponBlueprintDefinition,
+  blueprint: {
+    readonly id: string;
+    readonly minimumSorties: number;
+    readonly marketPrice: {
+      readonly minimum: number;
+      readonly maximum: number;
+    };
+  },
 ): GameState {
   if (state.base.sortiesCompleted < blueprint.minimumSorties) {
     throw new Error(`Blueprint ${blueprint.id} is not yet available.`);
@@ -171,4 +180,117 @@ export function applyWeaponUpgrades<T extends {
     }
   }
   return { ...weapon, damage, shotsPerSecond };
+}
+
+/** Researches an aircraft upgrade tier; requires the aircraft blueprint. */
+export function researchAircraftUpgrade(
+  state: GameState,
+  upgrade: AircraftUpgradeDefinition,
+): GameState {
+  if (!state.base.unlockedBlueprintIds.includes(upgrade.aircraftBlueprintId)) {
+    throw new Error(
+      `Blueprint ${upgrade.aircraftBlueprintId} is required for aircraft upgrades.`,
+    );
+  }
+  if (!state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId)) {
+    throw new Error(
+      `Building ${upgrade.requiredResearchBuildingId} is required for research.`,
+    );
+  }
+  if (!state.base.staff.some((member) => member.roleId === upgrade.requiredStaffRoleId)) {
+    throw new Error(`Staff role ${upgrade.requiredStaffRoleId} is required for research.`);
+  }
+  if (state.base.researchedAircraftUpgradeIds.includes(upgrade.id)) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} has already been researched.`);
+  }
+  if (state.base.credits < upgrade.researchCreditCost) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} requires ${upgrade.researchCreditCost} credits.`);
+  }
+  return {
+    ...state,
+    base: {
+      ...state.base,
+      credits: state.base.credits - upgrade.researchCreditCost,
+      researchedAircraftUpgradeIds: [
+        ...state.base.researchedAircraftUpgradeIds,
+        upgrade.id,
+      ],
+    },
+  };
+}
+
+/** Manufactures a researched aircraft upgrade in the workshop. */
+export function manufactureAircraftUpgrade(
+  state: GameState,
+  upgrade: AircraftUpgradeDefinition,
+): GameState {
+  if (!state.base.researchedAircraftUpgradeIds.includes(upgrade.id)) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} has not been researched.`);
+  }
+  if (!state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId)) {
+    throw new Error(
+      `Building ${upgrade.requiredProductionBuildingId} is required for production.`,
+    );
+  }
+  if (
+    !state.base.staff.some(
+      (member) => member.roleId === upgrade.requiredProductionStaffRoleId,
+    )
+  ) {
+    throw new Error(
+      `Staff role ${upgrade.requiredProductionStaffRoleId} is required for production.`,
+    );
+  }
+  if (state.base.manufacturedAircraftUpgradeIds.includes(upgrade.id)) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} has already been manufactured.`);
+  }
+  if (
+    state.base.credits < upgrade.productionCreditCost ||
+    state.base.materials < upgrade.productionMaterialCost
+  ) {
+    throw new Error(`Insufficient resources to manufacture ${upgrade.id}.`);
+  }
+  return {
+    ...state,
+    base: {
+      ...state.base,
+      credits: state.base.credits - upgrade.productionCreditCost,
+      materials: state.base.materials - upgrade.productionMaterialCost,
+      manufacturedAircraftUpgradeIds: [
+        ...state.base.manufacturedAircraftUpgradeIds,
+        upgrade.id,
+      ],
+    },
+  };
+}
+
+/** Applies every manufactured upgrade tier for an aircraft to its stats. */
+export function applyAircraftUpgrades<T extends {
+  readonly id: string;
+  readonly armour: number;
+  readonly speedMultiplier: number;
+  readonly damageMultiplier: number;
+}>(
+  aircraft: T,
+  manufacturedUpgradeIds: readonly string[],
+  upgrades: readonly AircraftUpgradeDefinition[],
+): T {
+  let armour = aircraft.armour;
+  let speedMultiplier = aircraft.speedMultiplier;
+  let damageMultiplier = aircraft.damageMultiplier;
+  for (const upgrade of upgrades) {
+    const blueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === upgrade.aircraftBlueprintId,
+    );
+    if (
+      blueprint !== undefined &&
+      blueprint.outputAircraftId === aircraft.id &&
+      manufacturedUpgradeIds.includes(upgrade.id)
+    ) {
+      armour += upgrade.armourDelta;
+      speedMultiplier += upgrade.speedMultiplierDelta;
+      damageMultiplier += upgrade.damageMultiplierDelta;
+    }
+  }
+  return { ...aircraft, armour, speedMultiplier, damageMultiplier };
 }

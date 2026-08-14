@@ -36,6 +36,8 @@ export function isGameState(value: unknown): value is GameState {
     Array.isArray(value.base.locallyProducedWeaponIds) &&
     Array.isArray(value.base.researchedWeaponUpgradeIds) &&
     Array.isArray(value.base.manufacturedWeaponUpgradeIds) &&
+    Array.isArray(value.base.researchedAircraftUpgradeIds) &&
+    Array.isArray(value.base.manufacturedAircraftUpgradeIds) &&
     Array.isArray(value.base.manufacturedEquipmentIds) &&
     (value.base.equippedEquipmentId === null ||
       typeof value.base.equippedEquipmentId === 'string') &&
@@ -186,7 +188,8 @@ function isProductionJob(value: unknown): boolean {
     typeof value.projectId === 'string' &&
     (value.kind === 'equipment' ||
       value.kind === 'weapon' ||
-      value.kind === 'upgrade') &&
+      value.kind === 'upgrade' ||
+      value.kind === 'aircraft') &&
     typeof value.progress === 'number' &&
     typeof value.requiredProgress === 'number'
   );

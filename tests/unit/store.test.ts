@@ -557,9 +557,12 @@ describe('game store month cycle', () => {
     store.dispatch({ type: 'END_MONTH' });
     const report = store.getSnapshot().base.monthReport;
     expect(report?.breachPenalties).toBeGreaterThan(0);
-    const pilotSalary = store.getSnapshot().base.pilots[0]?.salaryCreditCost ?? 0;
+    const pilotSalaries = store.getSnapshot().base.pilots.reduce(
+      (sum, pilot) => sum + (pilot.salaryCreditCost ?? 0),
+      0,
+    );
     expect(store.getSnapshot().base.credits).toBe(
-      before - (report?.breachPenalties ?? 0) - pilotSalary,
+      before - (report?.breachPenalties ?? 0) - pilotSalaries,
     );
     expect(store.getSnapshot().base.month).toBe(2);
   });
@@ -670,6 +673,63 @@ describe('game store month cycle', () => {
     });
     store.dispatch({ type: 'DISMISS_STAFF', staffId: 'staff-scientist-1' });
     expect(store.getSnapshot().base.staff).toHaveLength(0);
+  });
+
+  it('buys an aircraft blueprint, manufactures the aircraft, and researches its upgrade', () => {
+    const initial = createInitialGameState();
+    const lab = contentCatalog.buildings[0];
+    const workshop = contentCatalog.buildings[1];
+    const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === 'blueprint-aircraft-gunship',
+    );
+    const upgrade = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === 'upgrade-aircraft-gunship-mk2',
+    );
+    expect(aircraftBlueprint).toBeDefined();
+    expect(upgrade).toBeDefined();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 5_000_000,
+        materials: 200,
+        sortiesCompleted: aircraftBlueprint?.minimumSorties ?? 2,
+        constructedBuildingIds: [lab.id, workshop.id],
+        staff: [
+          staffMember('staff-scientist-1', contentCatalog.staffRoles[0].id),
+          staffMember('staff-engineer-1', contentCatalog.staffRoles[1].id),
+        ],
+      },
+    });
+    store.dispatch({
+      type: 'PURCHASE_AIRCRAFT_BLUEPRINT',
+      blueprintId: aircraftBlueprint?.id ?? '',
+    });
+    expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(aircraftBlueprint?.id);
+    store.dispatch({
+      type: 'MANUFACTURE_AIRCRAFT',
+      blueprintId: aircraftBlueprint?.id ?? '',
+    });
+    expect(store.getSnapshot().base.productionQueue).toHaveLength(1);
+    const outcome = {
+      extracted: true,
+      materialsFound: 0,
+      researchFound: 0,
+      preservedTechnologyIds: [],
+      targetsDestroyed: 1,
+      targetsBreached: 0,
+      creditsEarned: 0,
+      creditsPenalized: 0,
+      wardenSignalDetected: false,
+    } as const;
+    for (let index = 0; index < (aircraftBlueprint?.productionSorties ?? 2); index += 1) {
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
+    expect(store.getSnapshot().base.hangarSlots).toContain(aircraftBlueprint?.outputAircraftId);
+    store.dispatch({ type: 'RESEARCH_AIRCRAFT_UPGRADE', upgradeId: upgrade?.id ?? '' });
+    expect(store.getSnapshot().base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
+    store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade?.id ?? '' });
+    expect(store.getSnapshot().base.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);
   });
 });
 

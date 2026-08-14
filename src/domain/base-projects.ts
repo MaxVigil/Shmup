@@ -193,6 +193,68 @@ export function startWeaponProduction(
   };
 }
 
+export function startAircraftProduction(
+  state: GameState,
+  blueprint: {
+    readonly id: string;
+    readonly outputAircraftId: string;
+    readonly productionCreditCost: number;
+    readonly productionMaterialCost: number;
+    readonly productionSorties: number;
+    readonly requiredBuildingId: string;
+    readonly requiredStaffRoleId: string;
+  },
+): GameState {
+  if (!state.base.unlockedBlueprintIds.includes(blueprint.id)) {
+    throw new Error(`Blueprint ${blueprint.id} is required for production.`);
+  }
+  if (!state.base.constructedBuildingIds.includes(blueprint.requiredBuildingId)) {
+    throw new Error(
+      `Building ${blueprint.requiredBuildingId} is required for production.`,
+    );
+  }
+  if (
+    !state.base.staff.some(
+      (member) => member.roleId === blueprint.requiredStaffRoleId,
+    )
+  ) {
+    throw new Error(
+      `Staff role ${blueprint.requiredStaffRoleId} is required for production.`,
+    );
+  }
+  if (state.base.hangarSlots.includes(blueprint.outputAircraftId)) {
+    throw new Error(`Aircraft ${blueprint.outputAircraftId} is already in the hangar.`);
+  }
+  if (!state.base.hangarSlots.includes(null)) {
+    throw new Error('No free hangar slot is available.');
+  }
+  if (state.base.productionQueue.some((job) => job.projectId === blueprint.id)) {
+    throw new Error(`Blueprint ${blueprint.id} is already in production.`);
+  }
+  if (
+    state.base.credits < blueprint.productionCreditCost ||
+    state.base.materials < blueprint.productionMaterialCost
+  ) {
+    throw new Error(`Insufficient resources to manufacture ${blueprint.outputAircraftId}.`);
+  }
+  const job: ProductionJobState = {
+    id: `production-${blueprint.id}`,
+    projectId: blueprint.id,
+    kind: 'aircraft',
+    progress: 0,
+    requiredProgress: blueprint.productionSorties,
+  };
+  return {
+    ...state,
+    base: {
+      ...state.base,
+      credits: state.base.credits - blueprint.productionCreditCost,
+      materials: state.base.materials - blueprint.productionMaterialCost,
+      productionQueue: [...state.base.productionQueue, job],
+    },
+  };
+}
+
 export function startUpgradeProduction(
   state: GameState,
   upgrade: {
@@ -299,6 +361,45 @@ function completeProductionJob(base: BaseState, job: ProductionJobState): BaseSt
       manufacturedWeaponUpgradeIds: [
         ...new Set([...base.manufacturedWeaponUpgradeIds, job.projectId]),
       ],
+    };
+  }
+  if (job.kind === 'aircraft') {
+    const blueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === job.projectId,
+    );
+    if (blueprint === undefined) {
+      return base;
+    }
+    const aircraft = contentCatalog.aircraft.find(
+      (entry) => entry.id === blueprint.outputAircraftId,
+    );
+    if (
+      aircraft === undefined ||
+      base.hangarSlots.includes(aircraft.id)
+    ) {
+      return base;
+    }
+    const freeIndex = base.hangarSlots.indexOf(null);
+    if (freeIndex === -1) {
+      return base;
+    }
+    const hangarSlots = [...base.hangarSlots];
+    hangarSlots[freeIndex] = aircraft.id;
+    const loadout = Array.from(
+      { length: aircraft.weaponSlotCount },
+      () => null,
+    );
+    return {
+      ...base,
+      hangarSlots,
+      aircraftLoadouts: {
+        ...base.aircraftLoadouts,
+        [aircraft.id]: loadout,
+      },
+      aircraftModules: {
+        ...base.aircraftModules,
+        [aircraft.id]: null,
+      },
     };
   }
   const weapon = lookupWeaponByBlueprint(job.projectId);
