@@ -11,7 +11,7 @@ import type {
   GameState,
   ProductionJobState,
 } from '../domain/model';
-import { isBankrupt } from '../domain/operational-economy';
+import { isBankrupt, monthlyExpenses } from '../domain/operational-economy';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
 import {
@@ -781,6 +781,7 @@ function renderBase(): void {
   renderFleet();
   renderWarehouse();
   renderTrade();
+  renderFinance();
   renderCommand();
   renderMonthReport();
   renderDatabank();
@@ -1103,6 +1104,71 @@ function renderMonthReport(): void {
     monthReportDetails.appendChild(row);
   }
   monthReportContinue.textContent = t('report.continue');
+}
+
+function renderFinance(): void {
+  const state = store.getSnapshot();
+  const content = byId<HTMLElement>('finance-content');
+  content.textContent = '';
+
+  const expenses = monthlyExpenses(state.base);
+  const unresolved = state.base.threatMap.filter(
+    (mission) => !state.base.resolvedThreatIds.includes(mission.id),
+  );
+  const expectedIncome = unresolved.reduce(
+    (sum, mission) => sum + missionBounty(mission),
+    0,
+  );
+  const loanDue = state.base.loans
+    .filter((loan) => !loan.repaid && loan.dueMonth <= state.base.month + 1)
+    .reduce((sum, loan) => sum + loan.repaymentDue, 0);
+  const netProjection = expectedIncome - expenses.total - loanDue;
+  const projectedBalance = state.base.credits + netProjection;
+
+  const panel = h('section', { class: 'technology-lab finance-ledger' });
+  panel.append(
+    h('p', { class: 'technology-lab__eyebrow' }, t('finance.eyebrow')),
+    h('h2', null, t('finance.title')),
+    h('p', { class: 'lede' }, t('finance.lede')),
+  );
+
+  const rows: ReadonlyArray<[TranslationKey, number]> = [
+    ['finance.expectedIncome', expectedIncome],
+    ['finance.salaries', expenses.salaries],
+    ['finance.upkeep', expenses.upkeep],
+    ['finance.loansDue', loanDue],
+    ['finance.netProjection', netProjection],
+    ['finance.projectedBalance', projectedBalance],
+  ];
+  for (const [key, value] of rows) {
+    const row = h('div', { class: 'finance-row' });
+    row.append(h('span', null, t(key)));
+    const amount = h('strong', null, String(value));
+    amount.classList.toggle('is-negative', value < 0);
+    amount.classList.toggle('is-positive', key === 'finance.projectedBalance' && value >= 0);
+    row.append(amount);
+    panel.append(row);
+  }
+
+  panel.append(h('h3', { class: 'hangar-subtitle' }, t('finance.threats')));
+  if (unresolved.length === 0) {
+    panel.append(h('p', { class: 'empty-note' }, t('finance.allResolved')));
+  } else {
+    for (const mission of unresolved) {
+      const stateDefinition = contentCatalog.councilStates.find(
+        (entry) => entry.id === mission.targetCountryId,
+      );
+      const row = h('div', { class: 'finance-row' });
+      const label = h('span', null, stateDefinition === undefined
+        ? mission.targetCountryId
+        : t(stateDefinition.nameKey as TranslationKey));
+      const bounty = h('strong', null, `${missionBounty(mission)} ${t('finance.creditsSuffix')}`);
+      row.append(label, bounty);
+      panel.append(row);
+    }
+  }
+
+  content.append(panel);
 }
 
 function renderDatabank(): void {
@@ -2165,7 +2231,11 @@ function renderLocale(): void {
   setText('base-tab-engineering', 'baseNav.engineering');
   setText('base-tab-hangar', 'baseNav.hangar');
   setText('base-tab-trade', 'baseNav.trade');
+  setText('base-tab-finance', 'baseNav.finance');
   setText('base-tab-databank', 'baseNav.databank');
+  setText('finance-section-eyebrow', 'finance.eyebrow');
+  setText('finance-section-title', 'finance.heading');
+  setText('finance-section-lede', 'finance.lede');
   setText('databank-section-eyebrow', 'databank.eyebrow');
   setText('databank-section-title', 'databank.title');
   setText('databank-section-lede', 'databank.lede');

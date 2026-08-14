@@ -1,6 +1,13 @@
 import type { ProgressionObjectiveKind } from './progression-guidance';
 
-export type BaseSection = 'command' | 'research' | 'engineering' | 'hangar' | 'trade' | 'databank';
+export type BaseSection =
+  | 'command'
+  | 'research'
+  | 'engineering'
+  | 'hangar'
+  | 'trade'
+  | 'finance'
+  | 'databank';
 
 export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection {
   switch (kind) {

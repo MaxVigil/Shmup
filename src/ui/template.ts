@@ -57,6 +57,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" data-nav-glyph="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
         <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" data-nav-glyph="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
         <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" data-nav-glyph="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
+        <button id="base-tab-finance" type="button" role="tab" data-base-section="finance" data-nav-glyph="finance" aria-controls="base-panel-finance" aria-selected="false"></button>
         <button id="base-tab-databank" type="button" role="tab" data-base-section="databank" data-nav-glyph="databank" aria-controls="base-panel-databank" aria-selected="false"></button>
       </nav>
 
@@ -308,6 +309,15 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
           </section>
         </div>
+      </section>
+
+      <section id="base-panel-finance" class="base-panel" role="tabpanel" aria-labelledby="base-tab-finance" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="finance-section-eyebrow"></p>
+          <h1 id="finance-section-title"></h1>
+          <p class="lede" id="finance-section-lede"></p>
+        </header>
+        <div id="finance-content" class="finance-content" aria-live="polite"></div>
       </section>
 
       <section id="base-panel-databank" class="base-panel" role="tabpanel" aria-labelledby="base-tab-databank" hidden>

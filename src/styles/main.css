@@ -2013,3 +2013,20 @@ h1 {
 .month-report-details dd.is-negative { color: var(--danger-strong); }
 .month-report-details dd.is-positive { color: var(--accent); }
 .month-report-panel .base-action { width: 100%; margin-top: 1rem; }
+
+/* -- Finance ledger ---------------------------------------------------------- */
+.base-navigation button[data-nav-glyph="finance"]::before { content: "¤"; }
+.finance-ledger { width: min(100%, 44rem); }
+.finance-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.finance-row:last-child { border-bottom: 0; }
+.finance-row span { color: var(--text-mid); font-size: 0.76rem; }
+.finance-row strong { color: var(--text); font-family: var(--font-mono); font-size: 0.82rem; }
+.finance-row strong.is-negative { color: var(--danger-strong); }
+.finance-row strong.is-positive { color: var(--accent); }
+.finance-ledger .hangar-subtitle { margin-top: 1.2rem; }
