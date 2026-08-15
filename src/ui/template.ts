@@ -393,6 +393,18 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <div id="design-system-content" class="design-system-content"></div>
       </section>
+
+      <section id="sortie-picker-overlay" class="sortie-picker-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="sortie-picker-title">
+        <header class="sortie-picker-overlay__header">
+          <div>
+            <p class="technology-lab__eyebrow" id="sortie-picker-eyebrow"></p>
+            <h2 id="sortie-picker-title"></h2>
+          </div>
+          <button id="sortie-picker-close" class="icon-button" type="button" aria-label="close"></button>
+        </header>
+        <div id="sortie-picker-list" class="candidate-list" aria-live="polite"></div>
+        <p id="sortie-picker-empty" class="empty-note" hidden></p>
+      </section>
     </main>
 
     <main id="sortie-screen" class="screen sortie-screen" hidden>

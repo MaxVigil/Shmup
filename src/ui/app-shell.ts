@@ -18,6 +18,7 @@ import { pilotAircraftMultipliers, pilotLevel, isPilotFatigued } from '../domain
 import {
   hasMedicalTreatmentCapability,
   isPilotDead,
+  isPilotFlightReady,
   outsourceTreatmentCost,
 } from '../domain/pilot-medical';
 import { MANAGER_ROLE_ID, STAFF_SALARY_CAP } from '../domain/staff-market';
@@ -217,6 +218,9 @@ const designSystemOverlay = byId<HTMLElement>('design-system-overlay');
 const designSystemContent = byId<HTMLElement>('design-system-content');
 const designSystemOpenButton = byId<HTMLButtonElement>('design-system-open');
 const designSystemCloseButton = byId<HTMLButtonElement>('design-system-close');
+const sortiePickerOverlay = byId<HTMLElement>('sortie-picker-overlay');
+const sortiePickerList = byId<HTMLElement>('sortie-picker-list');
+const sortiePickerEmpty = byId<HTMLElement>('sortie-picker-empty');
 const alienEmitterProductionRow = byId<HTMLElement>('alien-emitter-production-row');
 const alienEmitterProductionStatus = byId<HTMLElement>('alien-emitter-production-status');
 const alienEmitterProductionNote = byId<HTMLElement>('alien-emitter-production-note');
@@ -2449,6 +2453,97 @@ function renderFleet(): void {
   purchaseSlotButton.disabled = bankrupt || state.base.credits < HANGAR_SLOT_COST;
 }
 
+function isAircraftReadyForSortie(state: GameState, aircraftId: string): boolean {
+  const fueled = isAircraftFueled(state.base, aircraftId);
+  const undamaged = aircraftDamageValue(state.base, aircraftId) <= 0 &&
+    (state.base.aircraftRepair[aircraftId] ?? 0) <= 0;
+  const activePilot = state.base.activePilotId === null
+    ? undefined
+    : state.base.pilots.find((pilot) => pilot.id === state.base.activePilotId);
+  const pilotReady = activePilot !== undefined &&
+    isPilotFlightReady(state.base, activePilot.id);
+  return fueled && undamaged && pilotReady;
+}
+
+function hasReadyAircraft(state: GameState): boolean {
+  return state.base.hangarSlots.some(
+    (aircraftId) => aircraftId !== null && isAircraftReadyForSortie(state, aircraftId),
+  );
+}
+
+function renderSortiePicker(): void {
+  const state = store.getSnapshot();
+  const list = sortiePickerList;
+  list.textContent = '';
+  const aircraftEntries = state.base.hangarSlots.filter(
+    (aircraftId): aircraftId is string => aircraftId !== null,
+  );
+  const anyReady = hasReadyAircraft(state);
+  sortiePickerEmpty.hidden = anyReady;
+  if (!anyReady) {
+    sortiePickerEmpty.textContent = t('sortiePicker.noAircraftReady');
+  }
+  const activePilot = state.base.activePilotId === null
+    ? undefined
+    : state.base.pilots.find((pilot) => pilot.id === state.base.activePilotId);
+  const pilotName = activePilot === undefined
+    ? ''
+    : `${activePilot.firstName ?? ''} ${activePilot.lastName ?? ''}`.trim();
+  for (const aircraftId of aircraftEntries) {
+    const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+    if (aircraft === undefined) {
+      continue;
+    }
+    const ready = isAircraftReadyForSortie(state, aircraftId);
+    const row = h('article', { class: 'threat-row' + (ready ? ' is-ready' : '') });
+    const info = h('div', null);
+    info.append(
+      h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
+      h('small', null, [
+        t('hangar.armour', { value: aircraft.armour }),
+        t('hangar.speed', { value: aircraft.speedMultiplier }),
+        t('hangar.firepower', { value: aircraft.damageMultiplier }),
+        pilotName,
+      ].filter(Boolean).join(' · ')),
+    );
+    if (!ready) {
+      const reasons: string[] = [];
+      if (!isAircraftFueled(state.base, aircraftId)) {
+        reasons.push(t('sortiePicker.reasonFuel'));
+      }
+      if (aircraftDamageValue(state.base, aircraftId) > 0 ||
+        (state.base.aircraftRepair[aircraftId] ?? 0) > 0) {
+        reasons.push(t('sortiePicker.reasonDamage'));
+      }
+      if (pilotName === '') {
+        reasons.push(t('sortiePicker.reasonPilot'));
+      }
+      info.append(h('small', { class: 'sortie-picker__reason' }, reasons.join(' · ')));
+    }
+    row.append(info);
+    const actions = h('div', { class: 'candidate-row__actions' });
+    const fly = h(
+      'button',
+      { class: 'base-action is-primary', type: 'button' },
+      t('sortiePicker.fly'),
+    );
+    fly.disabled = !ready;
+    fly.addEventListener('click', () => {
+      store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
+      sortiePickerOverlay.hidden = true;
+      launchSortie();
+    });
+    actions.append(fly);
+    row.append(actions);
+    list.append(row);
+  }
+}
+
+function openSortiePicker(): void {
+  renderSortiePicker();
+  sortiePickerOverlay.hidden = false;
+}
+
 function renderCommand(): void {
   const state = store.getSnapshot();
   byId<HTMLElement>('command-month-eyebrow').textContent = t('command.monthEyebrow', {
@@ -2530,6 +2625,7 @@ function renderCommand(): void {
   });
   const threatList = byId<HTMLElement>('threat-map-list');
   threatList.textContent = '';
+  const anyReady = hasReadyAircraft(state);
   for (const mission of state.base.threatMap) {
     const stateDefinition = contentCatalog.councilStates.find(
       (entry) => entry.id === mission.targetCountryId,
@@ -2552,21 +2648,26 @@ function renderCommand(): void {
     left.append(name, meta);
     row.appendChild(left);
     const action = document.createElement('button');
-    action.className = 'base-action' + (selected ? ' is-primary' : '');
+    action.className = 'base-action is-primary';
     action.type = 'button';
-    action.textContent = resolved
-      ? t('command.resolved')
-      : selected
-        ? t('command.selected')
-        : t('command.select');
-    action.disabled = resolved;
+    action.textContent = resolved ? t('command.resolved') : t('command.flyMission');
+    action.disabled = resolved || !anyReady;
     if (!resolved) {
       action.addEventListener('click', () => {
-        store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+        if (!selected) {
+          store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+        }
+        openSortiePicker();
       });
     }
     row.appendChild(action);
     threatList.appendChild(row);
+  }
+  if (!anyReady) {
+    const hint = document.createElement('p');
+    hint.className = 'preflight-warning';
+    hint.textContent = t('command.noAircraftReady');
+    threatList.appendChild(hint);
   }
 
   endMonthButton.textContent = t('command.endMonth');
@@ -3355,6 +3456,8 @@ function renderLocale(): void {
   setText('warehouse-section-eyebrow', 'warehouse.eyebrow');
   setText('warehouse-section-title', 'warehouse.title');
   setText('warehouse-section-lede', 'warehouse.lede');
+  setText('sortie-picker-eyebrow', 'sortiePicker.eyebrow');
+  setText('sortie-picker-title', 'sortiePicker.title');
   setText('construct-medical', 'facility.constructMedical');
   setText('medical-eyebrow', 'medical.eyebrow');
   setText('medical-title', 'medical.title');
@@ -3607,13 +3710,20 @@ designSystemCloseButton.addEventListener('click', () => {
   designSystemOverlay.hidden = true;
 });
 
+byId<HTMLButtonElement>('sortie-picker-close').addEventListener('click', () => {
+  sortiePickerOverlay.hidden = true;
+});
+
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !designSystemOverlay.hidden) {
     designSystemOverlay.hidden = true;
   }
+  if (event.key === 'Escape' && !sortiePickerOverlay.hidden) {
+    sortiePickerOverlay.hidden = true;
+  }
 });
 
-launchSortieButton.addEventListener('click', () => {
+function launchSortie(): void {
   settingsMenu.hidden = true;
   settingsToggle.setAttribute('aria-expanded', 'false');
   lastRunResult = null;
@@ -3727,7 +3837,9 @@ launchSortieButton.addEventListener('click', () => {
   } else {
     game.scene.getScene('combat').scene.restart();
   }
-});
+}
+
+launchSortieButton.addEventListener('click', launchSortie);
 
 returnToBaseButton.addEventListener('click', () => {
   showScreen('base');

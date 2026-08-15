@@ -2322,3 +2322,41 @@ html[data-theme="terminal"] .status-chip.is-top { color: #1a1206; background: va
   justify-content: space-between;
 }
 
+
+/* -- Sortie aircraft picker overlay --------------------------------------- */
+.sortie-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  overflow-y: auto;
+  background: rgb(3 6 8 / 88%);
+  backdrop-filter: blur(2px);
+}
+.sortie-picker-overlay__header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 1rem;
+}
+.sortie-picker-overlay .candidate-list,
+.sortie-picker-overlay .empty-note {
+  max-width: 46rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.sortie-picker-overlay .candidate-list {
+  padding: 0 1.25rem 3rem;
+}
+.sortie-picker-overlay .empty-note {
+  padding: 0 1.25rem 3rem;
+}
+.sortie-picker__reason {
+  color: var(--warn);
+}
+.threat-row.is-ready {
+  border-left-color: var(--accent);
+}
+
