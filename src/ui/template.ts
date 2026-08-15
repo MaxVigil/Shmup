@@ -222,15 +222,24 @@ export function buildAppTemplate(initialState: GameState): string {
             </div>
             <div id="accelerator-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="accelerator-production-label"></span><strong id="accelerator-production-status"></strong><small id="accelerator-production-note"></small></div>
-              <button id="manufacture-accelerator" class="base-action is-primary" type="button"></button>
+              <div class="production-qty">
+                <input id="production-qty-accelerator" class="production-qty__input" type="number" min="1" value="1" />
+                <button id="manufacture-accelerator" class="base-action is-primary" type="button"></button>
+              </div>
             </div>
             <div id="alien-emitter-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="alien-emitter-production-label"></span><strong id="alien-emitter-production-status"></strong><small id="alien-emitter-production-note"></small></div>
-              <button id="manufacture-alien-emitter" class="base-action is-primary" type="button"></button>
+              <div class="production-qty">
+                <input id="production-qty-alien-emitter" class="production-qty__input" type="number" min="1" value="1" />
+                <button id="manufacture-alien-emitter" class="base-action is-primary" type="button"></button>
+              </div>
             </div>
             <div id="canister-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="canister-production-label"></span><strong id="canister-production-status"></strong><small id="canister-production-note"></small></div>
-              <button id="manufacture-canister" class="base-action is-primary" type="button"></button>
+              <div class="production-qty">
+                <input id="production-qty-canister" class="production-qty__input" type="number" min="1" value="1" />
+                <button id="manufacture-canister" class="base-action is-primary" type="button"></button>
+              </div>
             </div>
             <div id="machine-upgrade-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="machine-upgrade-production-label"></span><strong id="machine-upgrade-production-status"></strong><small id="machine-upgrade-production-note"></small></div>

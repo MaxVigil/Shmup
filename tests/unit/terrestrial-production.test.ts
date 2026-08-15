@@ -3,7 +3,7 @@ import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { marketBlueprintPrice } from '../../src/domain/terrestrial-market';
-import { advanceProduction, startAircraftProduction } from '../../src/domain/base-projects';
+import { advanceProduction, startAircraftProduction, startWeaponProduction, weaponProductionCost } from '../../src/domain/base-projects';
 import { advanceBlueprintResearch } from '../../src/domain/blueprint-progression';
 import {
   applyAircraftUpgrades,
@@ -210,5 +210,48 @@ describe('terrestrial production', () => {
     expect(applied.armour).toBe(
       contentCatalog.aircraft[0].armour + (upgrade?.armourDelta ?? 0),
     );
+  });
+
+  it('produces any quantity of a weapon repeatedly into the warehouse', () => {
+    const state = {
+      ...industrialState(),
+      base: {
+        ...industrialState().base,
+        unlockedBlueprintIds: [blueprint.id],
+      },
+    };
+    const weapon = {
+      id: blueprint.weaponId,
+      productionCreditCost: blueprint.productionCreditCost,
+      productionMaterialCost: blueprint.productionMaterialCost,
+      productionSorties: blueprint.productionSorties,
+      requiredProductionBuildingId: blueprint.requiredBuildingId,
+      requiredProductionStaffRoleId: blueprint.requiredStaffRoleId,
+    };
+    const creditsBefore = state.base.credits;
+    const materialsBefore = state.base.materials;
+    expect(weaponProductionCost(weapon, 3)).toEqual({
+      credits: weapon.productionCreditCost * 3,
+      materials: weapon.productionMaterialCost * 3,
+    });
+    const started = startWeaponProduction(state, blueprint.id, weapon, 3);
+    expect(started.base.credits).toBe(
+      creditsBefore - weapon.productionCreditCost * 3,
+    );
+    expect(started.base.materials).toBe(
+      materialsBefore - weapon.productionMaterialCost * 3,
+    );
+    expect(started.base.productionQueue[0]?.quantity).toBe(3);
+
+    // Completing the batch stocks the warehouse, then another batch may run.
+    const completed = advanceProduction(started.base);
+    expect(completed.weaponStock[blueprint.weaponId]).toBe(3);
+    const again = startWeaponProduction(
+      { ...state, base: completed },
+      blueprint.id,
+      weapon,
+      2,
+    );
+    expect(again.base.productionQueue[0]?.quantity).toBe(2);
   });
 });

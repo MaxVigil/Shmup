@@ -2360,3 +2360,22 @@ html[data-theme="terminal"] .status-chip.is-top { color: #1a1206; background: va
   border-left-color: var(--accent);
 }
 
+
+/* -- Production quantity selector ------------------------------------------ */
+.production-qty {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.production-qty__input {
+  width: 3.5rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  color: var(--text);
+  background: var(--bg-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-align: center;
+}
+

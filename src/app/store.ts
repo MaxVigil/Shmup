@@ -142,7 +142,11 @@ export type GameCommand =
   | { readonly type: 'MANUFACTURE_AIRCRAFT'; readonly blueprintId: string }
   | { readonly type: 'RESEARCH_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
   | { readonly type: 'MANUFACTURE_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
-  | { readonly type: 'MANUFACTURE_PRIMARY_WEAPON'; readonly blueprintId: string }
+  | {
+      readonly type: 'MANUFACTURE_PRIMARY_WEAPON';
+      readonly blueprintId: string;
+      readonly quantity?: number;
+    }
   | { readonly type: 'RESEARCH_WEAPON_UPGRADE'; readonly upgradeId: string }
   | { readonly type: 'MANUFACTURE_WEAPON_UPGRADE'; readonly upgradeId: string }
   | {
@@ -161,6 +165,7 @@ export type GameCommand =
   | {
       readonly type: 'MANUFACTURE_ADAPTED_WEAPON';
       readonly blueprintId: string;
+      readonly quantity?: number;
     }
   | {
       readonly type: 'START_RESEARCH_WEAPON_BLUEPRINT';
@@ -169,6 +174,7 @@ export type GameCommand =
   | {
       readonly type: 'MANUFACTURE_RESEARCH_WEAPON';
       readonly blueprintId: string;
+      readonly quantity?: number;
     }
   | { readonly type: 'PURCHASE_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'PURCHASE_HANGAR_SLOT' }
@@ -515,7 +521,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             productionSorties: blueprint.productionSorties,
             requiredProductionBuildingId: blueprint.requiredBuildingId,
             requiredProductionStaffRoleId: blueprint.requiredStaffRoleId,
-          });
+          }, command.quantity ?? 1);
           break;
         }
         case 'RESEARCH_WEAPON_UPGRADE': {
@@ -598,7 +604,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (weapon === undefined) {
             throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
           }
-          state = startWeaponProduction(state, blueprint.id, blueprint);
+          state = startWeaponProduction(state, blueprint.id, blueprint, command.quantity ?? 1);
           break;
         }
         case 'START_RESEARCH_WEAPON_BLUEPRINT': {
@@ -624,7 +630,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (weapon === undefined) {
             throw new Error(`Weapon ${blueprint.outputWeaponId} is not defined.`);
           }
-          state = startWeaponProduction(state, blueprint.id, blueprint);
+          state = startWeaponProduction(state, blueprint.id, blueprint, command.quantity ?? 1);
           break;
         }
         case 'PURCHASE_AIRCRAFT': {

@@ -120,6 +120,7 @@ export function startEquipmentProduction(
     kind: 'equipment',
     progress: 0,
     requiredProgress: equipment.productionSorties,
+    quantity: 1,
   };
   return {
     ...state,
@@ -143,7 +144,11 @@ export function startWeaponProduction(
     readonly requiredProductionBuildingId: string;
     readonly requiredProductionStaffRoleId: string;
   },
+  quantity = 1,
 ): GameState {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new RangeError('Production quantity must be a positive integer.');
+  }
   if (!state.base.unlockedBlueprintIds.includes(projectId)) {
     throw new Error(`Blueprint ${projectId} is required for production.`);
   }
@@ -163,15 +168,14 @@ export function startWeaponProduction(
       `Staff role ${weapon.requiredProductionStaffRoleId} is required for production.`,
     );
   }
-  if (state.base.ownedPrimaryWeaponIds.includes(weapon.id)) {
-    throw new Error(`Weapon ${weapon.id} has already been manufactured.`);
-  }
   if (state.base.productionQueue.some((job) => job.projectId === projectId)) {
     throw new Error(`Blueprint ${projectId} is already in production.`);
   }
+  const totalCreditCost = weapon.productionCreditCost * quantity;
+  const totalMaterialCost = weapon.productionMaterialCost * quantity;
   if (
-    state.base.credits < weapon.productionCreditCost ||
-    state.base.materials < weapon.productionMaterialCost
+    state.base.credits < totalCreditCost ||
+    state.base.materials < totalMaterialCost
   ) {
     throw new Error(`Insufficient resources to manufacture ${weapon.id}.`);
   }
@@ -181,15 +185,30 @@ export function startWeaponProduction(
     kind: 'weapon',
     progress: 0,
     requiredProgress: weapon.productionSorties,
+    quantity,
   };
   return {
     ...state,
     base: {
       ...state.base,
-      credits: state.base.credits - weapon.productionCreditCost,
-      materials: state.base.materials - weapon.productionMaterialCost,
+      credits: state.base.credits - totalCreditCost,
+      materials: state.base.materials - totalMaterialCost,
       productionQueue: [...state.base.productionQueue, job],
     },
+  };
+}
+
+/** Total credit + material cost for producing `quantity` weapon units. */
+export function weaponProductionCost(
+  weapon: {
+    readonly productionCreditCost: number;
+    readonly productionMaterialCost: number;
+  },
+  quantity: number,
+): { readonly credits: number; readonly materials: number } {
+  return {
+    credits: weapon.productionCreditCost * quantity,
+    materials: weapon.productionMaterialCost * quantity,
   };
 }
 
@@ -243,6 +262,7 @@ export function startAircraftProduction(
     kind: 'aircraft',
     progress: 0,
     requiredProgress: blueprint.productionSorties,
+    quantity: 1,
   };
   return {
     ...state,
@@ -301,6 +321,7 @@ export function startUpgradeProduction(
     kind: 'upgrade',
     progress: 0,
     requiredProgress: upgrade.productionSorties,
+    quantity: 1,
   };
   return {
     ...state,
@@ -406,7 +427,7 @@ function completeProductionJob(base: BaseState, job: ProductionJobState): BaseSt
   if (weapon === null) {
     return base;
   }
-  const stock = addWeaponStock(base, weapon.id, 1);
+  const stock = addWeaponStock(base, weapon.id, job.quantity);
   return {
     ...stock,
     locallyProducedWeaponIds: stock.locallyProducedWeaponIds.includes(weapon.id)

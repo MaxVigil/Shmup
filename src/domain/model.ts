@@ -61,6 +61,8 @@ export interface ProductionJobState {
   readonly kind: 'equipment' | 'weapon' | 'upgrade' | 'aircraft';
   readonly progress: number;
   readonly requiredProgress: number;
+  /** Number of units produced when the job completes. */
+  readonly quantity: number;
 }
 
 export interface ResearchProjectState {

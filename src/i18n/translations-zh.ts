@@ -282,6 +282,7 @@ export const zh = {
   'production.installed': '已制造并安装。',
   'production.branchUnlocked': '首个本地样机解锁了加速器改进分支。',
   'production.cost': '生产：{credits} 资金 + {materials} 材料',
+  'production.manufactureQty': '制造 ×{quantity} · {credits} 资金 · {materials} 材料',
   'production.manufactureSample': '制造样机',
   'production.manufactureUpgrade': '制造改进',
   'lab.eyebrow': '外星研究 // 隔离实验室',

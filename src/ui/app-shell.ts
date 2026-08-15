@@ -28,6 +28,7 @@ import {
   marketWeaponPrice,
 } from '../domain/terrestrial-market';
 import { applyAircraftUpgrades } from '../domain/terrestrial-production';
+import { weaponProductionCost } from '../domain/base-projects';
 import {
   aircraftDamageValue,
   emergencyRepairCost,
@@ -113,7 +114,6 @@ const pilotInjurySeverityKey: Readonly<Record<string, TranslationKey>> = {
 };
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
-const canisterWeapon = contentCatalog.weapons[3];
 const rocketPodWeapon = contentCatalog.weapons.find(
   (weapon) => weapon.visualProfile === 'rocket-pod',
 ) ?? contentCatalog.weapons[4];
@@ -242,6 +242,9 @@ const acceleratorProductionRow = byId<HTMLElement>('accelerator-production-row')
 const acceleratorProductionStatus = byId<HTMLElement>('accelerator-production-status');
 const acceleratorProductionNote = byId<HTMLElement>('accelerator-production-note');
 const manufactureAcceleratorButton = byId<HTMLButtonElement>('manufacture-accelerator');
+const productionQtyAccelerator = byId<HTMLInputElement>('production-qty-accelerator');
+const productionQtyAlienEmitter = byId<HTMLInputElement>('production-qty-alien-emitter');
+const productionQtyCanister = byId<HTMLInputElement>('production-qty-canister');
 const machineUpgradeStatus = byId<HTMLElement>('machine-upgrade-status');
 const machineUpgradeNote = byId<HTMLElement>('machine-upgrade-note');
 const researchMachineUpgradeButton = byId<HTMLButtonElement>('research-machine-upgrade');
@@ -367,6 +370,38 @@ function productionJob(
   return state.base.productionQueue.find((job) => job.projectId === projectId);
 }
 
+function readProductionQuantity(input: HTMLInputElement): number {
+  const value = Math.floor(Number(input.value));
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function applyWeaponProductionButton(
+  state: GameState,
+  input: HTMLInputElement,
+  button: HTMLButtonElement,
+  job: ProductionJobState | undefined,
+  productionReady: boolean,
+  bankrupt: boolean,
+  weapon: {
+    readonly productionCreditCost: number;
+    readonly productionMaterialCost: number;
+  },
+): void {
+  const quantity = readProductionQuantity(input);
+  const cost = weaponProductionCost(weapon, quantity);
+  button.textContent = t('production.manufactureQty', {
+    quantity,
+    credits: formatCredits(cost.credits),
+    materials: cost.materials,
+  });
+  button.disabled =
+    bankrupt ||
+    job !== undefined ||
+    !productionReady ||
+    state.base.credits < cost.credits ||
+    state.base.materials < cost.materials;
+}
+
 function renderBase(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -485,8 +520,15 @@ function renderBase(): void {
     state.base.materials < workshop.materialCost
   );
   const researchTab = byId<HTMLButtonElement>('base-tab-research');
+  const medicalTab = byId<HTMLButtonElement>('base-tab-medical');
+  const medicalBlockBuilt = state.base.constructedBuildingIds.includes(
+    'building-medical-block',
+  );
   researchTab.hidden = !labBuilt;
+  medicalTab.hidden = !medicalBlockBuilt;
   if (!labBuilt && activeBaseSection === 'research') {
+    showBaseSection('command');
+  } else if (!medicalBlockBuilt && activeBaseSection === 'medical') {
     showBaseSection('command');
   }
   blueprintStatus.textContent = blueprintUnlocked
@@ -640,24 +682,20 @@ function renderBase(): void {
         progress: acceleratorJob.progress,
         required: acceleratorJob.requiredProgress,
       })
-    : t(
-        acceleratorLocallyProduced
-          ? 'production.mastered'
-          : productionReady ? 'production.ready' : 'production.requiresEngineer',
-      );
-  acceleratorProductionNote.textContent = acceleratorLocallyProduced
-    ? t('production.branchUnlocked')
-    : t('production.cost', {
-        credits: acceleratorBlueprint.productionCreditCost,
-        materials: acceleratorBlueprint.productionMaterialCost,
-      });
-  manufactureAcceleratorButton.hidden = acceleratorLocallyProduced;
-  manufactureAcceleratorButton.disabled = (
-    bankrupt ||
-    acceleratorJob !== undefined ||
-    !productionReady ||
-    state.base.credits < acceleratorBlueprint.productionCreditCost ||
-    state.base.materials < acceleratorBlueprint.productionMaterialCost
+    : productionReady ? t('production.ready') : t('production.requiresEngineer');
+  acceleratorProductionNote.textContent = t('production.cost', {
+    credits: acceleratorBlueprint.productionCreditCost,
+    materials: acceleratorBlueprint.productionMaterialCost,
+  });
+  manufactureAcceleratorButton.hidden = false;
+  applyWeaponProductionButton(
+    state,
+    productionQtyAccelerator,
+    manufactureAcceleratorButton,
+    acceleratorJob,
+    productionReady,
+    bankrupt,
+    acceleratorBlueprint,
   );
 
   machineUpgradeProductionRow.hidden = !machineUpgradeResearched;
@@ -2794,7 +2832,6 @@ function renderCanister(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const researchBusy = state.base.researchQueue.length > 0;
   const canisterUnlocked = state.base.unlockedBlueprintIds.includes(canisterBlueprint.id);
-  const canisterOwned = state.base.ownedPrimaryWeaponIds.includes(canisterWeapon.id);
   const canisterProject = state.base.researchQueue.find(
     (project) => project.blueprintId === canisterBlueprint.id,
   );
@@ -2828,8 +2865,8 @@ function renderCanister(): void {
     state.base.credits < canisterBlueprint.researchCreditCost;
 
   const canisterJob = productionJob(state, canisterBlueprint.id);
-  canisterProductionRow.hidden = !canisterUnlocked || canisterOwned;
-  if (canisterUnlocked && !canisterOwned) {
+  canisterProductionRow.hidden = !canisterUnlocked;
+  if (canisterUnlocked) {
     canisterProductionStatus.textContent = canisterJob !== undefined
       ? t('production.inProgress', {
           progress: canisterJob.progress,
@@ -2842,12 +2879,15 @@ function renderCanister(): void {
       credits: canisterBlueprint.productionCreditCost,
       materials: canisterBlueprint.productionMaterialCost,
     });
-    manufactureCanisterButton.disabled =
-      bankrupt ||
-      canisterJob !== undefined ||
-      !productionReady ||
-      state.base.credits < canisterBlueprint.productionCreditCost ||
-      state.base.materials < canisterBlueprint.productionMaterialCost;
+    applyWeaponProductionButton(
+      state,
+      productionQtyCanister,
+      manufactureCanisterButton,
+      canisterJob,
+      productionReady,
+      bankrupt,
+      canisterBlueprint,
+    );
   }
 }
 
@@ -2874,7 +2914,6 @@ function renderContainment(): void {
   ).length;
   const productionReady = workshopBuilt && engineers > 0;
   const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
-  const emitterOwned = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeapon.id);
 
   containmentProgramme.hidden = !hasSample;
   if (containmentUnlocked) {
@@ -2935,9 +2974,9 @@ function renderContainment(): void {
       state.base.materials < quarantine.materialCost;
   }
 
-  alienEmitterProductionRow.hidden = !adaptedUnlocked || emitterOwned;
+  alienEmitterProductionRow.hidden = !adaptedUnlocked;
   const emitterJob = productionJob(state, adaptedBlueprint.id);
-  if (adaptedUnlocked && !emitterOwned) {
+  if (adaptedUnlocked) {
     alienEmitterProductionStatus.textContent = emitterJob !== undefined
       ? t('production.inProgress', {
           progress: emitterJob.progress,
@@ -2950,12 +2989,15 @@ function renderContainment(): void {
       credits: adaptedBlueprint.productionCreditCost,
       materials: adaptedBlueprint.productionMaterialCost,
     });
-    manufactureAlienEmitterButton.disabled =
-      bankrupt ||
-      emitterJob !== undefined ||
-      !productionReady ||
-      state.base.credits < adaptedBlueprint.productionCreditCost ||
-      state.base.materials < adaptedBlueprint.productionMaterialCost;
+    applyWeaponProductionButton(
+      state,
+      productionQtyAlienEmitter,
+      manufactureAlienEmitterButton,
+      emitterJob,
+      productionReady,
+      bankrupt,
+      adaptedBlueprint,
+    );
   }
 }
 
@@ -3560,9 +3602,14 @@ manufactureAcceleratorButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_PRIMARY_WEAPON',
     blueprintId: acceleratorBlueprint.id,
+    quantity: readProductionQuantity(productionQtyAccelerator),
   });
   showToast(t('toast.productionStarted'));
 });
+
+productionQtyAccelerator.addEventListener('change', () => renderBase());
+productionQtyCanister.addEventListener('change', () => renderBase());
+productionQtyAlienEmitter.addEventListener('change', () => renderBase());
 
 researchMachineUpgradeButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_WEAPON_UPGRADE', upgradeId: machineGunUpgrade.id });
@@ -3661,6 +3708,7 @@ manufactureAlienEmitterButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_ADAPTED_WEAPON',
     blueprintId: adaptedBlueprint.id,
+    quantity: readProductionQuantity(productionQtyAlienEmitter),
   });
   showToast(t('toast.productionStarted'));
 });
@@ -3677,6 +3725,7 @@ manufactureCanisterButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_RESEARCH_WEAPON',
     blueprintId: canisterBlueprint.id,
+    quantity: readProductionQuantity(productionQtyCanister),
   });
   showToast(t('toast.productionStarted'));
 });
