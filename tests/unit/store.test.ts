@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { staffMember } from './test-state';
-import { createGameStore } from '../../src/app/store';
+import { createGameStore, setInstantProjectsEnabled } from '../../src/app/store';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 
@@ -811,6 +811,46 @@ describe('game store rocket ammunition', () => {
         count: 1,
       }),
     ).toThrow();
+  });
+
+  it('completes construction, research, and production instantly when the debug flag is on', () => {
+    const initial = createInitialGameState();
+    const laboratory = contentCatalog.buildings[0];
+    const workshop = contentCatalog.buildings[1];
+    const medicalBlueprint = contentCatalog.buildingBlueprints.find(
+      (entry) => entry.id === 'blueprint-medical-block',
+    ) ?? contentCatalog.buildingBlueprints[0];
+    const medicalBlock = contentCatalog.buildings.find(
+      (entry) => entry.id === 'building-medical-block',
+    ) ?? contentCatalog.buildings[0];
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        credits: 5_000_000,
+        materials: 100,
+        constructedBuildingIds: [laboratory.id],
+        staff: [staffMember('staff-scientist-1', contentCatalog.staffRoles[0].id)],
+      },
+    });
+    try {
+      setInstantProjectsEnabled(true);
+      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
+      expect(store.getSnapshot().base.constructedBuildingIds).toContain(workshop.id);
+      expect(store.getSnapshot().base.constructionQueue).toHaveLength(0);
+
+      store.dispatch({
+        type: 'START_BUILDING_BLUEPRINT_RESEARCH',
+        blueprintId: medicalBlueprint.id,
+      });
+      expect(store.getSnapshot().base.researchQueue).toHaveLength(0);
+      expect(store.getSnapshot().base.unlockedBlueprintIds).toContain(medicalBlueprint.id);
+
+      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: medicalBlock.id });
+      expect(store.getSnapshot().base.constructedBuildingIds).toContain(medicalBlock.id);
+    } finally {
+      setInstantProjectsEnabled(false);
+    }
   });
 });
 

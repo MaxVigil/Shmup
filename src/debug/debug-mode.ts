@@ -1,4 +1,5 @@
 import type { GameStore } from '../app/store';
+import { setInstantProjectsEnabled, isInstantProjectsEnabled } from '../app/store';
 import { contentCatalog } from '../content/catalog';
 import { saveGame } from '../persistence/save-repository';
 
@@ -24,6 +25,7 @@ interface CombatDebugSurface {
 }
 
 export const DEBUG_STORAGE_KEY = 'shmup.debug.enabled';
+export const INSTANT_PROJECTS_KEY = 'shmup.debug.instantProjects';
 
 let debugEnabled = false;
 let panel: HTMLElement | null = null;
@@ -84,7 +86,7 @@ function buildPanel(): HTMLElement {
   title.style.gridColumn = '1 / -1';
   element.appendChild(title);
 
-  const add = (label: string, onClick: () => void): void => {
+  const add = (label: string, onClick: () => void): HTMLButtonElement => {
     const button = makeButton(label, onClick);
     button.style.cssText = [
       'padding:0.35rem',
@@ -97,6 +99,7 @@ function buildPanel(): HTMLElement {
       'letter-spacing:0.05em',
     ].join(';');
     element.appendChild(button);
+    return button;
   };
 
   add('+100k CR', () => dispatch({ type: 'DEBUG_GRANT', credits: 100_000 }));
@@ -135,6 +138,23 @@ function buildPanel(): HTMLElement {
     }
   });
   add('FINISH RES', () => dispatch({ type: 'DEBUG_COMPLETE_RESEARCH' }));
+  const instantButton = add(
+    isInstantProjectsEnabled() ? 'INSTANT: ON' : 'INSTANT: OFF',
+    () => {
+      const next = !isInstantProjectsEnabled();
+      setInstantProjectsEnabled(next);
+      try {
+        window.localStorage.setItem(INSTANT_PROJECTS_KEY, next ? 'true' : 'false');
+      } catch {
+        // Debug helpers must keep working without storage access.
+      }
+      instantButton.textContent = next ? 'INSTANT: ON' : 'INSTANT: OFF';
+      instantButton.style.borderColor = next ? '#7ee2a8' : '#2e4a54';
+    },
+  );
+  if (isInstantProjectsEnabled()) {
+    instantButton.style.borderColor = '#7ee2a8';
+  }
   add('INVINCIBLE', () => {
     invincible = !invincible;
     combatScene()?.setDebugInvincible(invincible);
@@ -166,6 +186,9 @@ export function setDebugEnabled(storage: Storage, flag: boolean): void {
 export function initDebugMode(): void {
   try {
     debugEnabled = window.localStorage.getItem(DEBUG_STORAGE_KEY) === 'true';
+    setInstantProjectsEnabled(
+      window.localStorage.getItem(INSTANT_PROJECTS_KEY) === 'true',
+    );
   } catch {
     debugEnabled = false;
   }

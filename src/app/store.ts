@@ -70,7 +70,7 @@ import {
   advanceBlueprintResearch,
   startBlueprintResearch,
 } from '../domain/blueprint-progression';
-import type { GameState, SortieOutcome } from '../domain/model';
+import type { BaseState, GameState, SortieOutcome } from '../domain/model';
 import { settleSortie } from '../domain/sortie';
 import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
@@ -83,6 +83,49 @@ import {
   equipPrimaryWeapon,
   researchTechnology,
 } from '../domain/technology-progression';
+
+/* ---------------------------------------------------------------------
+   Playtest aid: when enabled, construction, production, and research
+   queues are drained to completion after every dispatch. This is a
+   temporary debug toggle and never changes the underlying content values.
+   --------------------------------------------------------------------- */
+let instantProjectsEnabled = false;
+
+export function setInstantProjectsEnabled(flag: boolean): void {
+  instantProjectsEnabled = flag;
+}
+
+export function isInstantProjectsEnabled(): boolean {
+  return instantProjectsEnabled;
+}
+
+/** Completes every construction and production job in one pass. */
+function completeAllProjects(base: BaseState): BaseState {
+  let next = base;
+  for (let guard = 0; guard < 64; guard += 1) {
+    if (next.constructionQueue.length === 0 && next.productionQueue.length === 0) {
+      break;
+    }
+    next = advanceProduction(advanceConstruction(next));
+  }
+  return next;
+}
+
+/** Completes the active research project (and any routed successors). */
+function completeAllResearch(state: GameState): GameState {
+  let next = state;
+  for (let guard = 0; guard < 64; guard += 1) {
+    if (next.base.researchQueue.length === 0) {
+      break;
+    }
+    const advanced = advanceBlueprintResearch(next, contentCatalog.staffRoles[0].id);
+    if (advanced === next) {
+      break;
+    }
+    next = advanced;
+  }
+  return next;
+}
 
 export type GameCommand =
   | { readonly type: 'RESET' }
@@ -803,6 +846,13 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = { ...state, base: syncActiveLoadout(base) };
           break;
         }
+      }
+
+      if (instantProjectsEnabled) {
+        state = completeAllResearch({
+          ...state,
+          base: completeAllProjects(state.base),
+        });
       }
 
       emit();
