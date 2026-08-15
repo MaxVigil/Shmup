@@ -38,6 +38,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <option id="theme-option-industrial" value="industrial"></option>
             <option id="theme-option-terminal" value="terminal"></option>
           </select>
+          <button id="design-system-open" class="text-action settings-design" type="button"></button>
           <div class="system-check" role="status">
             <span class="system-check__light" aria-hidden="true"></span>
             <span id="prototype-status"></span>
@@ -384,6 +385,18 @@ export function buildAppTemplate(initialState: GameState): string {
         <h2 id="month-report-title"></h2>
         <dl id="month-report-details" class="month-report-details"></dl>
         <button id="month-report-continue" class="base-action is-primary" type="button"></button>
+      </section>
+
+      <section id="design-system-overlay" class="design-system-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="design-system-title">
+        <header class="design-system-overlay__header">
+          <div>
+            <p class="technology-lab__eyebrow" id="design-system-eyebrow"></p>
+            <h2 id="design-system-title"></h2>
+            <p class="lede" id="design-system-lede"></p>
+          </div>
+          <button id="design-system-close" class="icon-button design-system-overlay__close" type="button" aria-label="close"></button>
+        </header>
+        <div id="design-system-content" class="design-system-content"></div>
       </section>
     </main>
 

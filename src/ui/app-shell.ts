@@ -229,6 +229,10 @@ const medicNote = byId<HTMLElement>('medic-note');
 const medicCandidates = byId<HTMLElement>('medic-candidates');
 const pilotMemorial = byId<HTMLElement>('pilot-memorial');
 const pilotMemorialList = byId<HTMLElement>('pilot-memorial-list');
+const designSystemOverlay = byId<HTMLElement>('design-system-overlay');
+const designSystemContent = byId<HTMLElement>('design-system-content');
+const designSystemOpenButton = byId<HTMLButtonElement>('design-system-open');
+const designSystemCloseButton = byId<HTMLButtonElement>('design-system-close');
 const alienEmitterProductionRow = byId<HTMLElement>('alien-emitter-production-row');
 const alienEmitterProductionStatus = byId<HTMLElement>('alien-emitter-production-status');
 const alienEmitterProductionNote = byId<HTMLElement>('alien-emitter-production-note');
@@ -3072,6 +3076,183 @@ function renderMedicalProgramme(): void {
   }
 }
 
+function designSection(
+  titleKey: TranslationKey,
+  ...children: readonly HTMLElement[]
+): HTMLElement {
+  const section = h('section', { class: 'design-system-section' });
+  section.append(h('h3', { class: 'hangar-subtitle' }, t(titleKey)));
+  for (const child of children) {
+    section.append(child);
+  }
+  return section;
+}
+
+function colorSwatch(variable: string, label: string): HTMLElement {
+  const chip = h('span', {
+    class: 'design-swatch__chip',
+    style: `background:var(${variable});border:1px solid var(--border);`,
+  });
+  return h('div', { class: 'design-swatch' }, chip, h('small', null, label));
+}
+
+function buttonSample(
+  label: string,
+  caption: string,
+  attrs: { readonly class?: string; readonly disabled?: boolean } = {},
+): HTMLElement {
+  const button = h('button', { class: 'base-action', type: 'button', ...attrs }, label);
+  return h('div', { class: 'design-button-cell' }, button, h('small', null, caption));
+}
+
+/** Static, state-independent reference of the design tokens and components. */
+function renderDesignSystem(): void {
+  designSystemContent.textContent = '';
+
+  const colorPairs: ReadonlyArray<readonly [string, string]> = [
+    ['--bg-0', 'bg-0'], ['--bg-1', 'bg-1'], ['--bg-2', 'bg-2'], ['--bg-3', 'bg-3'], ['--bg-4', 'bg-4'],
+    ['--surface', 'surface'], ['--surface-strong', 'surface-strong'],
+    ['--text-hi', 'text-hi'], ['--text', 'text'], ['--text-mid', 'text-mid'],
+    ['--text-low', 'text-low'], ['--text-faint', 'text-faint'],
+    ['--accent', 'accent'], ['--accent-strong', 'accent-strong'], ['--accent-dim', 'accent-dim'],
+    ['--warn', 'warn'], ['--danger', 'danger'], ['--danger-strong', 'danger-strong'],
+    ['--info', 'info'], ['--neutral', 'neutral'],
+    ['--border-subtle', 'border-subtle'], ['--border', 'border'],
+    ['--border-strong', 'border-strong'], ['--border-accent', 'border-accent'],
+  ];
+  const colorGrid = h('div', { class: 'design-system-grid design-system-grid--swatches' });
+  for (const [variable, label] of colorPairs) {
+    colorGrid.append(colorSwatch(variable, label));
+  }
+  designSystemContent.append(designSection('design.colors', colorGrid));
+
+  const typeBlock = h('div', { class: 'design-system-stack' });
+  typeBlock.append(
+    h('div', { class: 'design-type' },
+      h('strong', { style: 'font-size:var(--text-lg)' }, 'Text large · 1.05rem'),
+      h('small', null, '--text-lg · UI font')),
+    h('div', { class: 'design-type' },
+      h('strong', { style: 'font-size:var(--text-md)' }, 'Text medium · 0.82rem'),
+      h('small', null, '--text-md · UI font')),
+    h('div', { class: 'design-type' },
+      h('strong', { style: 'font-size:var(--text-sm)' }, 'Text small · 0.72rem'),
+      h('small', null, '--text-sm · UI font')),
+    h('div', { class: 'design-type' },
+      h('strong', { style: 'font-family:var(--font-mono);font-size:var(--text-sm)' }, 'DATA 0.72rem · MONO'),
+      h('small', null, '--font-mono · labels, numbers')),
+  );
+  designSystemContent.append(designSection('design.typography', typeBlock));
+
+  const buttonsBlock = h('div', { class: 'design-system-grid design-system-grid--buttons' });
+  buttonsBlock.append(
+    buttonSample('DEFAULT', 'default'),
+    buttonSample('DISABLED', 'disabled', { disabled: true }),
+    buttonSample('PRIMARY', 'primary · is-primary', { class: 'is-primary' }),
+    buttonSample('DANGER', 'danger · is-danger', { class: 'is-danger' }),
+    buttonSample('LAUNCH', 'launch-action', { class: 'launch-action' }),
+  );
+  const textButton = h('button', { class: 'text-action', type: 'button' }, 'TEXT ACTION');
+  const iconButton = h('button', { class: 'icon-button', type: 'button', 'aria-expanded': 'false' }, '⚙');
+  buttonsBlock.append(
+    h('div', { class: 'design-button-cell' }, textButton, h('small', null, 'text-action')),
+    h('div', { class: 'design-button-cell' }, iconButton, h('small', null, 'icon-button')),
+  );
+  designSystemContent.append(designSection('design.buttons', buttonsBlock));
+
+  const chips = h('div', { class: 'design-system-grid design-system-grid--chips' });
+  const chipSamples: ReadonlyArray<readonly [string, string]> = [
+    ['is-active', 'ACTIVE'], ['is-fueled', 'FUELED'], ['is-unfueled', 'UNFUELED'],
+    ['is-owned', 'UPGRADED'], ['is-damaged', 'DAMAGED'], ['is-injured', 'INJURED'],
+    ['is-resting', 'RESTING'], ['is-top', 'TOP TIER'], ['is-memorial', 'KIA'],
+  ];
+  for (const [cls, text] of chipSamples) {
+    chips.append(h('em', { class: `status-chip ${cls}` }, text));
+  }
+  designSystemContent.append(designSection('design.chips', chips));
+
+  const tabs = h('div', { class: 'base-navigation design-nav', role: 'tablist' });
+  const tabSamples: ReadonlyArray<readonly [string, string, boolean]> = [
+    ['command', 'COMMAND', true],
+    ['research', 'RESEARCH', false],
+    ['engineering', 'ENGINEERING', false],
+    ['hangar', 'HANGAR', false],
+    ['trade', 'TRADE', false],
+    ['databank', 'DATABANK', false],
+  ];
+  for (const [section, label, selected] of tabSamples) {
+    tabs.append(h('button', {
+      type: 'button',
+      role: 'tab',
+      'data-base-section': section,
+      'data-nav-glyph': section,
+      'aria-selected': selected ? 'true' : 'false',
+    }, label));
+  }
+  designSystemContent.append(designSection('design.tabs', tabs));
+
+  const panels = h('div', { class: 'design-system-grid design-system-grid--panels' });
+  const labSample = h('section', { class: 'technology-lab design-panel-sample' },
+    h('p', { class: 'technology-lab__eyebrow' }, 'TECHNOLOGY LAB'),
+    h('h2', null, 'Panel heading'),
+    h('p', { class: 'lede' }, 'Section lede copy sits here as muted supporting text.'),
+    h('p', { class: 'technology-lab__status' }, 'status line · uppercase mono'),
+  );
+  const facilitySample = h('section', { class: 'facility-panel design-panel-sample' },
+    h('p', { class: 'technology-lab__eyebrow' }, 'FACILITY PANEL'),
+    h('div', { class: 'facility-row' },
+      h('div', null,
+        h('span', { class: 'loadout-row__label' }, 'LABEL'),
+        h('strong', null, 'Facility title'),
+        h('small', null, 'Supporting caption under the title.')),
+      h('button', { class: 'base-action is-primary', type: 'button' }, 'ACTION')),
+  );
+  panels.append(labSample, facilitySample);
+  designSystemContent.append(designSection('design.panels', panels));
+
+  const cardSamples = h('div', { class: 'research-card-grid design-card-band' },
+    h('article', { class: 'research-card is-done' },
+      h('span', { class: 'research-card__domain' }, 'EARTH'),
+      h('strong', null, 'Done card'),
+      h('span', { class: 'research-card__status' }, 'COMPLETE')),
+    h('article', { class: 'research-card is-active' },
+      h('span', { class: 'research-card__domain' }, 'EARTH'),
+      h('strong', null, 'Active card'),
+      h('span', { class: 'research-card__status' }, 'PROGRESS 2/3')),
+    h('article', { class: 'research-card is-locked' },
+      h('span', { class: 'research-card__domain' }, 'EARTH'),
+      h('strong', null, 'Locked card'),
+      h('span', { class: 'research-card__status' }, 'LOCKED')),
+    h('article', { class: 'research-card is-alien is-locked' },
+      h('span', { class: 'research-card__domain' }, 'ALIEN'),
+      h('strong', null, 'Alien card'),
+      h('span', { class: 'research-card__status' }, 'QUARANTINED')),
+  );
+  designSystemContent.append(designSection('design.cards', cardSamples));
+
+  const forms = h('div', { class: 'design-system-grid design-system-grid--forms' });
+  const select = document.createElement('select');
+  select.className = 'design-select';
+  const ukOption = document.createElement('option');
+  ukOption.value = 'uk';
+  ukOption.textContent = 'Українська';
+  const enOption = document.createElement('option');
+  enOption.value = 'en';
+  enOption.textContent = 'English';
+  select.append(ukOption, enOption);
+  const checkbox = h('label', { class: 'settings-option design-check' },
+    h('span', null, 'Checkbox option'),
+    h('input', { type: 'checkbox' }),
+  );
+  forms.append(
+    h('div', { class: 'design-form-cell' }, h('label', null, 'Select label'), select),
+    h('div', { class: 'design-form-cell' }, checkbox),
+  );
+  designSystemContent.append(designSection('design.forms', forms));
+
+  const toast = h('div', { class: 'toast' }, '+80 000 cr · 4 materials');
+  designSystemContent.append(designSection('design.toast', toast));
+}
+
 function renderLocale(): void {
   document.documentElement.lang = getLocale();
   setText('app-brand', 'app.brand');
@@ -3095,6 +3276,12 @@ function renderLocale(): void {
   setText('language-label', 'settings.language');
   setText('debug-label', 'settings.debug');
   setText('theme-label', 'settings.theme');
+  setText('design-system-open', 'settings.designSystem');
+  setText('design-system-eyebrow', 'design.eyebrow');
+  setText('design-system-title', 'design.title');
+  setText('design-system-lede', 'design.lede');
+  designSystemCloseButton.setAttribute('aria-label', t('design.close'));
+  designSystemCloseButton.textContent = '✕';
   setText('theme-option-industrial', 'theme.industrial');
   setText('theme-option-terminal', 'theme.terminal');
   setText('restart-mission', 'settings.restart');
@@ -3427,6 +3614,23 @@ restartProgrammeButton.addEventListener('click', () => {
   showScreen('base');
   showBaseSection('command');
   renderReports();
+});
+
+designSystemOpenButton.addEventListener('click', () => {
+  settingsMenu.hidden = true;
+  settingsToggle.setAttribute('aria-expanded', 'false');
+  renderDesignSystem();
+  designSystemOverlay.hidden = false;
+});
+
+designSystemCloseButton.addEventListener('click', () => {
+  designSystemOverlay.hidden = true;
+});
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !designSystemOverlay.hidden) {
+    designSystemOverlay.hidden = true;
+  }
 });
 
 launchSortieButton.addEventListener('click', () => {
