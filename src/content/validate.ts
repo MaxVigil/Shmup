@@ -163,6 +163,8 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
   for (const role of catalog.staffRoles) {
     if (
       role.creditCost <= 0 ||
+      !Number.isInteger(role.salaryCreditCost) ||
+      role.salaryCreditCost <= 0 ||
       (role.requiredBuildingId !== null &&
         !catalog.buildings.some((building) => building.id === role.requiredBuildingId)) ||
       (role.maximumHeadcount !== null && (

@@ -20,7 +20,8 @@ export function isGameState(value: unknown): value is GameState {
     typeof value.base.research === 'number' &&
     typeof value.base.energyCapacity === 'number' &&
     typeof value.base.allocatedEnergy === 'number' &&
-    typeof value.base.activePilotId === 'string' &&
+    (typeof value.base.activePilotId === 'string' ||
+      value.base.activePilotId === null) &&
     Array.isArray(value.base.pilots) &&
     Array.isArray(value.base.researchQueue) &&
     Array.isArray(value.base.preservedTechnologyIds) &&
@@ -91,6 +92,9 @@ export function isGameState(value: unknown): value is GameState {
     value.base.pilotCandidates.every(isPilotCandidate) &&
     isCountRecord(value.base.pilotXp) &&
     isRatioRecord(value.base.pilotFatigue) &&
+    isPilotInjuryRecord(value.base.pilotInjuries) &&
+    isStringArray(value.base.deadPilotIds) &&
+    isCountRecord(value.base.pilotDeathMonth) &&
     (value.base.activeMissionId === null ||
       typeof value.base.activeMissionId === 'string') &&
     typeof value.base.monthIncome === 'number' &&
@@ -139,6 +143,27 @@ function isRatioRecord(value: unknown): boolean {
       (entry) =>
         typeof entry === 'number' && entry >= 0 && entry <= 1,
     )
+  );
+}
+
+function isStringArray(value: unknown): boolean {
+  return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+function isPilotInjuryRecord(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return Object.values(value).every(
+    (entry) =>
+      isRecord(entry) &&
+      (entry.severity === 'light' ||
+        entry.severity === 'medium' ||
+        entry.severity === 'severe') &&
+      typeof entry.monthsRemaining === 'number' &&
+      (entry.treatment === 'outsource' ||
+        entry.treatment === 'medical' ||
+        entry.treatment === null),
   );
 }
 

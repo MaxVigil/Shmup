@@ -296,6 +296,35 @@ Status: implemented on `test`, awaiting playtest before merging to `main`.
 - [x] Tests: threat ceiling by month, queued upgrade research + completion
   routing, store flows updated to advance research by sorties.
 
+## Round-8 pilot casualties & the Medical Block (schema v16)
+
+Status: implemented on `test`, awaiting playtest before merging to `main`.
+
+- [x] Schema v16: `pilotInjuries`, `deadPilotIds`, `pilotDeathMonth` with a
+  v15→v16 migration; `activePilotId` is now nullable (a fallen active pilot
+  leaves the slot open until a new assignment).
+- [x] A damaged sortie rolls a seeded casualty (no damage = no roll), scaled by
+  the armour fraction lost: death 0.5%·p, severe 1.5%·p, medium 4%·p,
+  light 8%·p. Fatalities clear XP/fatigue and move the pilot to the
+  Board of Honour.
+- [x] Injured pilots cannot fly and only recover while in treatment: a Council
+  state heals at the base 1x speed for a one-off fee (light 80k / medium 180k /
+  severe 400k, PRC cheapest), or the Medical Block heals free with medics
+  accelerating up to 3x.
+- [x] Medical Block: researched as an earth building blueprint (laboratory +
+  scientist), constructed in the Works (350k + 20 materials, 2 sorties,
+  6k/month upkeep); the medic staff role (≤4) is hired there and accelerates
+  recovery (`1 + 0.5 × medic contribution`, 2–3 medics ≈ 2x–3x).
+- [x] Salary rebalance: explicit per-role `salaryCreditCost` (scientists/
+  engineers/traders/medics 8–9k, manager 25k) replaces the `0.3 × hire cost`
+  formula; monthly salaries are clamped to 10k for everyone but the manager.
+  Pilot candidate salaries are 7–10k.
+- [x] UI + i18n (uk/en/zh): pilot cards show wounds/treatment, per-country
+  outsource pricing, the Medical Block programme/construction/staff, and the
+  Board of Honour.
+- [x] Tests: casualty thresholds, injury/death handling, outsource pricing,
+  in-house gating, medic acceleration, salary cap, v15→v16 migration.
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

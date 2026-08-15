@@ -75,8 +75,15 @@ function otherOrigin(rng: ReturnType<typeof createSeededRng>): string {
   return OTHER_NATIONS[rng.integer(0, OTHER_NATIONS.length)] as string;
 }
 
+/** Monthly salary ceiling for all roles except the operations manager. */
+export const STAFF_SALARY_CAP = 10_000;
+
 export function generateStaffCandidates(
-  roles: readonly { readonly id: string; readonly creditCost: number }[],
+  roles: readonly {
+    readonly id: string;
+    readonly creditCost: number;
+    readonly salaryCreditCost: number;
+  }[],
   marketSeed: number,
   month: number,
   candidatesPerRole = 2,
@@ -110,7 +117,10 @@ export function generateStaffCandidates(
       const progressMultiplier = round2(0.8 + tier * 0.12 + (rng.next() - 0.5) * 0.1);
       const salaryMultiplier = round2(0.8 + tier * 0.15 + (rng.next() - 0.5) * 0.15);
       const hireCreditCost = Math.round(role.creditCost * (0.7 + tier * 0.3));
-      const salaryCreditCost = Math.round(role.creditCost * 0.3 * salaryMultiplier);
+      const rawSalary = Math.round(role.salaryCreditCost * salaryMultiplier);
+      const salaryCreditCost = role.id === MANAGER_ROLE_ID
+        ? rawSalary
+        : Math.min(STAFF_SALARY_CAP, rawSalary);
       candidates.push({
         id: `candidate-${month}-${role.id}-${index + 1}`,
         roleId: role.id,

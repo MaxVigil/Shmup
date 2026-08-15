@@ -37,10 +37,21 @@ import {
   recoverMonthlyPilotFatigue,
   restPilot,
 } from '../domain/pilot-market';
+import {
+  treatPilotInMedical,
+  treatPilotOutsource,
+} from '../domain/pilot-medical';
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import { contentCatalog } from '../content/catalog';
 import { hireStaff } from '../domain/base-development';
+import {
+  advancePilotRecovery,
+  applyPilotInjury,
+  killPilot,
+  rollPilotCasualty,
+} from '../domain/pilot-medical';
+import { createSeededRng } from '../domain/rng';
 import {
   advanceConstruction,
   advanceProduction,
@@ -75,7 +86,12 @@ import {
 
 export type GameCommand =
   | { readonly type: 'RESET' }
-  | { readonly type: 'SETTLE_SORTIE'; readonly outcome: SortieOutcome }
+  | {
+      readonly type: 'SETTLE_SORTIE';
+      readonly outcome: SortieOutcome;
+      /** Fraction of the active aircraft armour lost during this sortie. */
+      readonly armourLostRatio?: number;
+    }
   | { readonly type: 'RESEARCH_TECHNOLOGY'; readonly technologyId: string }
   | { readonly type: 'PURCHASE_MARKET_WEAPON'; readonly weaponId: string }
   | { readonly type: 'PURCHASE_MARKET_BLUEPRINT'; readonly blueprintId: string }
@@ -146,6 +162,8 @@ export type GameCommand =
   | { readonly type: 'HIRE_PILOT'; readonly candidateId: string }
   | { readonly type: 'ASSIGN_PILOT'; readonly pilotId: string }
   | { readonly type: 'REST_PILOT'; readonly pilotId: string }
+  | { readonly type: 'TREAT_PILOT_OUTSOURCE'; readonly pilotId: string; readonly countryId: string }
+  | { readonly type: 'TREAT_PILOT_MEDICAL'; readonly pilotId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null }
   | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
@@ -206,11 +224,30 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
                 },
                 activeMission.targetCountryId,
               );
+          const activePilotId = state.base.activePilotId;
+          const armourLost = Math.max(0, Math.min(1, command.armourLostRatio ?? 0));
+          let nextBase = afterMission;
+          if (activePilotId !== null && armourLost > 0) {
+            const casualtySeed = (
+              (state.base.marketSeed >>> 0) ^
+              Math.imul(state.base.sortiesCompleted, 0x9e3779b1) ^
+              0x5f3759df
+            ) >>> 0;
+            const casualty = rollPilotCasualty(
+              armourLost,
+              createSeededRng(casualtySeed),
+            );
+            nextBase = casualty === 'death'
+              ? killPilot(nextBase, activePilotId, state.base.month)
+              : casualty === null
+                ? nextBase
+                : applyPilotInjury(nextBase, activePilotId, casualty);
+          }
           state = {
             ...state,
             base: {
-              ...afterMission,
-              monthIncome: afterMission.monthIncome + Math.max(0, creditDelta),
+              ...nextBase,
+              monthIncome: nextBase.monthIncome + Math.max(0, creditDelta),
               telemetryRecorded:
                 state.base.telemetryRecorded || command.outcome.wardenSignalDetected,
             },
@@ -263,6 +300,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const nextMonth = base.month + 1;
           const afterLoans = settleDueLoans({ ...afterExpenses, month: nextMonth });
           const afterPilotRecovery = recoverMonthlyPilotFatigue(afterLoans);
+          const afterMedicalRecovery = advancePilotRecovery(afterPilotRecovery);
           const expenses = monthlyExpenses(base).total + loanPayments;
           const monthReport = {
             month: base.month,
@@ -276,7 +314,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = {
             ...state,
             base: {
-              ...afterPilotRecovery,
+              ...afterMedicalRecovery,
               month: nextMonth,
               threatMap: generateThreatMap(
                 contentCatalog.councilStates,
@@ -318,6 +356,24 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         }
         case 'REST_PILOT': {
           state = { ...state, base: restPilot(state.base, command.pilotId) };
+          break;
+        }
+        case 'TREAT_PILOT_OUTSOURCE': {
+          state = {
+            ...state,
+            base: treatPilotOutsource(
+              state.base,
+              command.pilotId,
+              command.countryId,
+            ),
+          };
+          break;
+        }
+        case 'TREAT_PILOT_MEDICAL': {
+          state = {
+            ...state,
+            base: treatPilotInMedical(state.base, command.pilotId),
+          };
           break;
         }
         case 'RESEARCH_TECHNOLOGY': {

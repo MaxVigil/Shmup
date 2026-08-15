@@ -61,7 +61,7 @@ describe('pilot market', () => {
 
   it('rejects assigning a fatigued pilot', () => {
     const initial = createInitialGameState();
-    const id = initial.base.activePilotId;
+    const id = initial.base.activePilotId ?? 'pilot-kestrel';
     const fatigued = {
       ...initial.base,
       pilotFatigue: { ...initial.base.pilotFatigue, [id]: 0.8 },
@@ -71,7 +71,7 @@ describe('pilot market', () => {
 
   it('recovers fatigue at the month boundary', () => {
     const initial = createInitialGameState();
-    const id = initial.base.activePilotId;
+    const id = initial.base.activePilotId ?? 'pilot-kestrel';
     const tired = {
       ...initial.base,
       pilotFatigue: { ...initial.base.pilotFatigue, [id]: 0.5 },

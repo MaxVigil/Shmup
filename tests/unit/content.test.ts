@@ -122,10 +122,11 @@ describe('validateContentCatalog', () => {
   it('rejects building blueprints whose output is not a known building', () => {
     const invalidCatalog: ContentCatalog = {
       ...contentCatalog,
-      buildingBlueprints: [{
-        ...contentCatalog.buildingBlueprints[0],
-        outputBuildingId: 'building-does-not-exist',
-      }],
+      buildingBlueprints: contentCatalog.buildingBlueprints.map((blueprint, index) =>
+        index === 0
+          ? { ...blueprint, outputBuildingId: 'building-does-not-exist' }
+          : blueprint,
+      ),
     };
 
     expect(() => validateContentCatalog(invalidCatalog)).toThrow(

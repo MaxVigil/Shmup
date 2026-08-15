@@ -5,6 +5,7 @@ import type {
   PilotState,
 } from './model';
 import { createSeededRng } from './rng';
+import { isPilotDead, isPilotInjured, isPilotFlightReady } from './pilot-medical';
 
 /* =====================================================================
    Pilot market
@@ -117,7 +118,7 @@ export function generatePilotCandidates(
       tier,
       specialization,
       hireCreditCost: Math.round(150_000 * (0.7 + tier * 0.3)),
-      salaryCreditCost: Math.round(150_000 * 0.3 * salaryMultiplier),
+      salaryCreditCost: Math.round(9_000 * (0.7 + tier * 0.1)),
       progressMultiplier,
       salaryMultiplier,
       originCountryId,
@@ -156,6 +157,12 @@ export function assignPilot(base: BaseState, pilotId: string): BaseState {
   if (!base.pilots.some((pilot) => pilot.id === pilotId)) {
     throw new Error(`Pilot ${pilotId} is not on the roster.`);
   }
+  if (isPilotDead(base, pilotId)) {
+    throw new Error(`Pilot ${pilotId} has died in service.`);
+  }
+  if (isPilotInjured(base, pilotId)) {
+    throw new Error(`Pilot ${pilotId} is recovering from injuries.`);
+  }
   if (isPilotFatigued(base.pilotFatigue[pilotId] ?? 0)) {
     throw new Error(`Pilot ${pilotId} is too fatigued to fly.`);
   }
@@ -170,7 +177,10 @@ export function restPilot(base: BaseState, pilotId: string): BaseState {
     throw new Error(`Pilot ${pilotId} is not the active pilot.`);
   }
   const replacement = base.pilots.find(
-    (pilot) => pilot.id !== pilotId && !isPilotFatigued(base.pilotFatigue[pilot.id] ?? 0),
+    (pilot) =>
+      pilot.id !== pilotId &&
+      isPilotFlightReady(base, pilot.id) &&
+      !isPilotFatigued(base.pilotFatigue[pilot.id] ?? 0),
   );
   if (replacement === undefined) {
     throw new Error('No rested pilot is available to replace the fatigued pilot.');
@@ -195,6 +205,9 @@ export function awardPilotProgress(base: BaseState): BaseState {
   }
   const pilotFatigue: Record<string, number> = { ...base.pilotFatigue };
   for (const pilot of base.pilots) {
+    if (isPilotDead(base, pilot.id)) {
+      continue;
+    }
     const current = pilotFatigue[pilot.id] ?? 0;
     pilotFatigue[pilot.id] = pilot.id === id
       ? Math.min(1, current + PILOT_FATIGUE_PER_SORTIE)
@@ -212,6 +225,9 @@ export function recoverMonthlyPilotFatigue(base: BaseState): BaseState {
   const pilotFatigue: Record<string, number> = { ...base.pilotFatigue };
   let changed = false;
   for (const pilot of base.pilots) {
+    if (isPilotDead(base, pilot.id)) {
+      continue;
+    }
     const current = pilotFatigue[pilot.id] ?? 0;
     if (current > 0) {
       pilotFatigue[pilot.id] = Math.max(

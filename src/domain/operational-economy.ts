@@ -1,5 +1,6 @@
 import { contentCatalog } from '../content/catalog';
 import type { BaseState } from './model';
+import { MANAGER_ROLE_ID, STAFF_SALARY_CAP } from './staff-market';
 
 export interface SortieContractLedger {
   readonly targetsDestroyed: number;
@@ -71,7 +72,13 @@ export function monthlyExpenses(base: BaseState): MonthlyExpenseBreakdown {
   let salaries = 0;
   for (const member of base.staff) {
     const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
-    salaries += Math.round((role?.creditCost ?? 0) * 0.3 * member.salaryMultiplier);
+    if (role === undefined) {
+      continue;
+    }
+    const raw = role.salaryCreditCost * member.salaryMultiplier;
+    salaries += Math.round(
+      role.id === MANAGER_ROLE_ID ? raw : Math.min(STAFF_SALARY_CAP, raw),
+    );
   }
   for (const pilot of base.pilots) {
     salaries += pilot.salaryCreditCost ?? 0;

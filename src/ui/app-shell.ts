@@ -16,6 +16,11 @@ import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
 import { pilotAircraftMultipliers, pilotLevel, isPilotFatigued } from '../domain/pilot-market';
 import {
+  hasMedicalTreatmentCapability,
+  isPilotDead,
+  outsourceTreatmentCost,
+} from '../domain/pilot-medical';
+import {
   marketBlueprintPrice,
   marketConsumablePrice,
   marketWeaponPrice,
@@ -86,6 +91,7 @@ const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
   'staff-engineer': 'staff.engineer',
   'staff-trader': 'staff.trader',
   'staff-manager': 'staff.manager',
+  'staff-medic': 'staff.medic',
 };
 const capturerBlueprint = contentCatalog.blueprints[0];
 const capturerEquipment = contentCatalog.equipment[0];
@@ -93,7 +99,21 @@ const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
 const machineGunUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
 const containmentBlueprint = contentCatalog.buildingBlueprints[0];
+const medicalBlueprint = contentCatalog.buildingBlueprints.find(
+  (entry) => entry.id === 'blueprint-medical-block',
+) ?? contentCatalog.buildingBlueprints[0];
 const quarantine = contentCatalog.buildings[2];
+const medicalBlock = contentCatalog.buildings.find(
+  (entry) => entry.id === 'building-medical-block',
+) ?? quarantine;
+const medicRole = contentCatalog.staffRoles.find(
+  (entry) => entry.id === 'staff-medic',
+) ?? contentCatalog.staffRoles[0];
+const pilotInjurySeverityKey: Readonly<Record<string, TranslationKey>> = {
+  light: 'pilot.injuryLight',
+  medium: 'pilot.injuryMedium',
+  severe: 'pilot.injurySevere',
+};
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
 const canisterWeapon = contentCatalog.weapons[3];
@@ -195,6 +215,20 @@ const quarantineRow = byId<HTMLElement>('quarantine-row');
 const quarantineStatus = byId<HTMLElement>('quarantine-status');
 const quarantineCost = byId<HTMLElement>('quarantine-cost');
 const constructQuarantineButton = byId<HTMLButtonElement>('construct-quarantine');
+const medicalProgramme = byId<HTMLElement>('medical-programme');
+const medicalResearchStatus = byId<HTMLElement>('medical-research-status');
+const medicalResearchNote = byId<HTMLElement>('medical-research-note');
+const startMedicalResearchButton = byId<HTMLButtonElement>('start-medical-research');
+const medicalRow = byId<HTMLElement>('medical-row');
+const medicalStatus = byId<HTMLElement>('medical-status');
+const medicalCost = byId<HTMLElement>('medical-cost');
+const constructMedicalButton = byId<HTMLButtonElement>('construct-medical');
+const medicStaffRow = byId<HTMLElement>('medic-staff-row');
+const medicCount = byId<HTMLElement>('medic-count');
+const medicNote = byId<HTMLElement>('medic-note');
+const medicCandidates = byId<HTMLElement>('medic-candidates');
+const pilotMemorial = byId<HTMLElement>('pilot-memorial');
+const pilotMemorialList = byId<HTMLElement>('pilot-memorial-list');
 const alienEmitterProductionRow = byId<HTMLElement>('alien-emitter-production-row');
 const alienEmitterProductionStatus = byId<HTMLElement>('alien-emitter-production-status');
 const alienEmitterProductionNote = byId<HTMLElement>('alien-emitter-production-note');
@@ -515,6 +549,7 @@ function renderBase(): void {
   renderCandidates('engineer-candidates', engineerRole.id);
   renderCandidates('manager-candidates', managerRoleId);
   renderCandidates('trader-candidates', traderRoleId);
+  renderCandidates('medic-candidates', medicRole.id);
   renderStaffRoster();
   renderAircraftProduction();
   renderAircraftUpgradeResearch();
@@ -820,20 +855,26 @@ function renderBase(): void {
   const fuelStatus = byId<HTMLElement>('fuel-status');
   fuelStatus.hidden = false;
   fuelStatus.classList.toggle('is-ready', activeFueled && activeDamage <= 0);
-  fuelStatus.textContent = activePilotFatigued
-    ? t('hangar.pilotFatiguedWarning', { pilot: activePilotName })
-    : activeRepairLeft > 0
-      ? t('hangar.repairInProgress', { sorties: activeRepairLeft })
-      : activeDamage > 0
-        ? t('hangar.damagedWarning', {
-            value: Math.round(activeDamage * 100),
-          })
-        : t(
-            activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
-            { aircraft: activeAircraftName },
-          );
+  fuelStatus.textContent = state.base.activePilotId === null
+    ? t('hangar.noPilotWarning')
+    : activePilotFatigued
+      ? t('hangar.pilotFatiguedWarning', { pilot: activePilotName })
+      : activeRepairLeft > 0
+        ? t('hangar.repairInProgress', { sorties: activeRepairLeft })
+        : activeDamage > 0
+          ? t('hangar.damagedWarning', {
+              value: Math.round(activeDamage * 100),
+            })
+          : t(
+              activeFueled ? 'hangar.preflightFuelReady' : 'hangar.preflightFuelWarning',
+              { aircraft: activeAircraftName },
+            );
   launchSortieButton.disabled =
-    bankrupt || !activeFueled || state.base.activeMissionId === null || activePilotFatigued;
+    bankrupt ||
+    state.base.activePilotId === null ||
+    !activeFueled ||
+    state.base.activeMissionId === null ||
+    activePilotFatigued;
   const activeMission = state.base.activeMissionId === null
     ? undefined
     : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
@@ -855,6 +896,7 @@ function renderBase(): void {
   setText('launch-sortie', 'base.launch');
   setText('return-to-base', 'sortie.return');
   renderContainment();
+  renderMedicalProgramme();
   renderResearchCards();
   renderCanister();
   renderFleet();
@@ -1414,22 +1456,29 @@ function renderPilots(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const roster = byId<HTMLElement>('pilots-roster');
   roster.textContent = '';
+  const livingPilots = state.base.pilots.filter(
+    (pilot) => !isPilotDead(state.base, pilot.id),
+  );
+  const medicalReady = hasMedicalTreatmentCapability(state.base);
 
   roster.append(h('h3', { class: 'hangar-subtitle' }, t('pilot.roster')));
-  if (state.base.pilots.length === 0) {
+  if (livingPilots.length === 0) {
     roster.append(h('p', { class: 'empty-note' }, t('pilot.noPilots')));
   } else {
-    for (const pilot of state.base.pilots) {
+    for (const pilot of livingPilots) {
       const active = state.base.activePilotId === pilot.id;
       const fatigue = state.base.pilotFatigue[pilot.id] ?? 0;
       const level = pilotLevel(state.base.pilotXp[pilot.id] ?? 0);
+      const injury = state.base.pilotInjuries[pilot.id];
+      const pilotName = `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim();
       const card = h('article', {
         class: 'pilot-card' + (active ? ' is-active' : '') +
-          (isPilotFatigued(fatigue) ? ' is-fatigued' : ''),
+          (isPilotFatigued(fatigue) ? ' is-fatigued' : '') +
+          (injury !== undefined ? ' is-injured' : ''),
       });
       const head = h('div', { class: 'pilot-card__head' });
       head.append(
-        h('strong', null, `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim()),
+        h('strong', null, pilotName),
         h('small', null, [
           t(pilotSpecializationKey(pilot.specialization ?? 'speed')),
           t('pilot.level', { level }),
@@ -1439,27 +1488,90 @@ function renderPilots(): void {
       if (isPilotFatigued(fatigue)) {
         head.append(h('em', { class: 'status-chip is-damaged' }, t('pilot.fatiguedTag')));
       }
+      if (injury !== undefined) {
+        head.append(h(
+          'em',
+          { class: 'status-chip is-injured' },
+          t(pilotInjurySeverityKey[injury.severity] ?? 'pilot.injuryLight'),
+        ));
+      }
       card.append(head);
       const actions = h('div', { class: 'pilot-card__actions' });
-      if (active) {
-        actions.append(h('em', { class: 'status-chip is-active' }, t('pilot.active')));
+      if (injury === undefined) {
+        if (active) {
+          actions.append(h('em', { class: 'status-chip is-active' }, t('pilot.active')));
+        } else {
+          const assign = h('button', { class: 'base-action', type: 'button' }, t('pilot.assign'));
+          assign.disabled = isPilotFatigued(fatigue);
+          assign.addEventListener('click', () => {
+            store.dispatch({ type: 'ASSIGN_PILOT', pilotId: pilot.id });
+          });
+          actions.append(assign);
+        }
+        if (fatigue > 0 && active) {
+          const rest = h('button', { class: 'base-action', type: 'button' }, t('pilot.rest'));
+          rest.addEventListener('click', () => {
+            store.dispatch({ type: 'REST_PILOT', pilotId: pilot.id });
+          });
+          actions.append(rest);
+        }
+        if (fatigue > 0 && !active) {
+          actions.append(h('em', { class: 'status-chip is-resting' }, t('pilot.recovering')));
+        }
       } else {
-        const assign = h('button', { class: 'base-action', type: 'button' }, t('pilot.assign'));
-        assign.disabled = isPilotFatigued(fatigue);
-        assign.addEventListener('click', () => {
-          store.dispatch({ type: 'ASSIGN_PILOT', pilotId: pilot.id });
-        });
-        actions.append(assign);
-      }
-      if (fatigue > 0 && active) {
-        const rest = h('button', { class: 'base-action', type: 'button' }, t('pilot.rest'));
-        rest.addEventListener('click', () => {
-          store.dispatch({ type: 'REST_PILOT', pilotId: pilot.id });
-        });
-        actions.append(rest);
-      }
-      if (fatigue > 0 && !active) {
-        actions.append(h('em', { class: 'status-chip is-resting' }, t('pilot.recovering')));
+        const months = Math.ceil(injury.monthsRemaining);
+        actions.append(h(
+          'em',
+          { class: 'status-chip is-injured' },
+          injury.treatment === null
+            ? t('pilot.awaitingTreatment')
+            : t(injury.treatment === 'medical'
+              ? 'pilot.inTreatmentMedical'
+              : 'pilot.inTreatmentOutsource'),
+        ));
+        actions.append(h(
+          'em',
+          { class: 'status-chip is-resting' },
+          t('pilot.injuryMonths', { months }),
+        ));
+        if (injury.treatment === null) {
+          if (medicalReady) {
+            const inHouse = h(
+              'button',
+              { class: 'base-action is-primary', type: 'button' },
+              t('pilot.treatMedical'),
+            );
+            inHouse.addEventListener('click', () => {
+              store.dispatch({ type: 'TREAT_PILOT_MEDICAL', pilotId: pilot.id });
+              showToast(t('toast.pilotInTreatment', { pilot: pilotName }));
+            });
+            actions.append(inHouse);
+          }
+          const countrySelect = document.createElement('select');
+          countrySelect.className = 'pilot-treat__country';
+          for (const country of contentCatalog.councilStates) {
+            const option = document.createElement('option');
+            option.value = country.id;
+            option.textContent = `${t(country.nameKey as TranslationKey)} · ` +
+              formatCredits(outsourceTreatmentCost(state.base, pilot.id, country.id));
+            countrySelect.appendChild(option);
+          }
+          const outsource = h(
+            'button',
+            { class: 'base-action', type: 'button' },
+            t('pilot.treatOutsource'),
+          );
+          outsource.disabled = bankrupt;
+          outsource.addEventListener('click', () => {
+            store.dispatch({
+              type: 'TREAT_PILOT_OUTSOURCE',
+              pilotId: pilot.id,
+              countryId: countrySelect.value,
+            });
+            showToast(t('toast.pilotInTreatment', { pilot: pilotName }));
+          });
+          actions.append(countrySelect, outsource);
+        }
       }
       card.append(actions);
       roster.append(card);
@@ -1493,6 +1605,25 @@ function renderPilots(): void {
       });
       card.append(hire);
       roster.append(card);
+    }
+  }
+
+  const fallen = state.base.pilots.filter((pilot) => isPilotDead(state.base, pilot.id));
+  pilotMemorial.hidden = fallen.length === 0;
+  pilotMemorialList.textContent = '';
+  if (fallen.length > 0) {
+    byId<HTMLElement>('pilot-memorial-title').textContent = t('pilot.memorialTitle');
+    for (const pilot of fallen) {
+      const month = state.base.pilotDeathMonth[pilot.id];
+      const card = h('article', { class: 'pilot-card is-memorial' });
+      card.append(
+        h('strong', null, `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim()),
+        h('small', null, [
+          t(pilotSpecializationKey(pilot.specialization ?? 'speed')),
+          t('pilot.deadMonth', { month: month ?? state.base.month }),
+        ].join(' · ')),
+      );
+      pilotMemorialList.append(card);
     }
   }
 }
@@ -2252,6 +2383,28 @@ function toastSettlementCompletions(before: GameState, after: GameState): void {
       }));
     }
   }
+  const newDead = after.base.deadPilotIds.filter(
+    (id) => !before.base.deadPilotIds.includes(id),
+  );
+  for (const pilotId of newDead) {
+    const pilot = after.base.pilots.find((entry) => entry.id === pilotId);
+    showToast(t('toast.pilotDied', {
+      pilot: `${pilot?.firstName ?? pilotId} ${pilot?.lastName ?? ''}`.trim(),
+    }));
+  }
+  const newInjuries = Object.keys(after.base.pilotInjuries).filter(
+    (pilotId) => before.base.pilotInjuries[pilotId] === undefined,
+  );
+  for (const pilotId of newInjuries) {
+    const pilot = after.base.pilots.find((entry) => entry.id === pilotId);
+    const injury = after.base.pilotInjuries[pilotId];
+    showToast(t('toast.pilotInjured', {
+      pilot: `${pilot?.firstName ?? pilotId} ${pilot?.lastName ?? ''}`.trim(),
+      severity: injury === undefined
+        ? ''
+        : t(pilotInjurySeverityKey[injury.severity] ?? 'pilot.injuryLight'),
+    }));
+  }
 }
 
 function renderFleet(): void {
@@ -2832,6 +2985,93 @@ function renderContainment(): void {
   }
 }
 
+function renderMedicalProgramme(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const researchBusy = state.base.researchQueue.length > 0;
+  const medicalUnlocked = state.base.unlockedBlueprintIds.includes(medicalBlueprint.id);
+  const medicalBuilt = state.base.constructedBuildingIds.includes(medicalBlock.id);
+  const medicalProject = state.base.researchQueue.find(
+    (project) => project.blueprintId === medicalBlueprint.id,
+  );
+  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const scientists = state.base.staff.filter(
+    (member) => member.roleId === scientistRole.id,
+  ).length;
+  const researchReady = labBuilt && scientists > 0;
+  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+
+  medicalProgramme.hidden = !labBuilt;
+  if (medicalUnlocked) {
+    medicalResearchStatus.textContent = t('medical.unlocked');
+    medicalResearchNote.textContent = '';
+    startMedicalResearchButton.hidden = true;
+  } else if (medicalProject !== undefined) {
+    medicalResearchStatus.textContent = t('medical.active', {
+      progress: medicalProject.progress,
+      required: medicalProject.requiredProgress,
+    });
+    medicalResearchNote.textContent = researchReady
+      ? t('containment.contribution', { count: scientists })
+      : '';
+    startMedicalResearchButton.hidden = true;
+  } else {
+    medicalResearchStatus.textContent = researchReady
+      ? t('medical.available')
+      : t('medical.requiresTeam');
+    medicalResearchNote.textContent = '';
+    startMedicalResearchButton.hidden = false;
+    startMedicalResearchButton.disabled =
+      bankrupt || !researchReady || researchBusy ||
+      state.base.credits < medicalBlueprint.researchCreditCost;
+  }
+
+  medicalRow.hidden = !medicalUnlocked;
+  const medicalJob = constructionJob(state, medicalBlock.id);
+  if (medicalBuilt) {
+    medicalStatus.textContent = t('facility.medicalBuilt');
+    medicalCost.textContent = '';
+    constructMedicalButton.hidden = true;
+  } else if (medicalJob !== undefined) {
+    medicalStatus.textContent = t('facility.constructing', {
+      progress: medicalJob.progress,
+      required: medicalJob.requiredProgress,
+    });
+    medicalCost.textContent = '';
+    constructMedicalButton.hidden = true;
+  } else {
+    medicalStatus.textContent =
+      state.base.credits >= medicalBlock.creditCost &&
+      state.base.materials >= medicalBlock.materialCost
+        ? t('facility.medicalAffordable')
+        : t('facility.medicalShortfall', {
+            credits: Math.max(0, medicalBlock.creditCost - state.base.credits),
+            materials: Math.max(0, medicalBlock.materialCost - state.base.materials),
+          });
+    medicalCost.textContent = t('facility.medicalCost', {
+      credits: medicalBlock.creditCost,
+      materials: medicalBlock.materialCost,
+    });
+    constructMedicalButton.hidden = false;
+    constructMedicalButton.disabled =
+      bankrupt || !workshopBuilt ||
+      state.base.credits < medicalBlock.creditCost ||
+      state.base.materials < medicalBlock.materialCost;
+  }
+
+  const medics = state.base.staff.filter(
+    (member) => member.roleId === medicRole.id,
+  ).length;
+  medicStaffRow.hidden = !medicalBuilt;
+  medicCandidates.hidden = !medicalBuilt;
+  if (medicalBuilt) {
+    medicCount.textContent = t('facility.medicCount', { count: medics });
+    medicNote.textContent = medics > 0
+      ? t('facility.medicReady')
+      : t('facility.candidatesHint');
+  }
+}
+
 function renderLocale(): void {
   document.documentElement.lang = getLocale();
   setText('app-brand', 'app.brand');
@@ -2950,6 +3190,12 @@ function renderLocale(): void {
   setText('construct-workshop', 'facility.constructWorkshop');
   setText('quarantine-label', 'facility.quarantine');
   setText('construct-quarantine', 'facility.constructQuarantine');
+  setText('medical-label', 'facility.medical');
+  setText('construct-medical', 'facility.constructMedical');
+  setText('medical-eyebrow', 'medical.eyebrow');
+  setText('medical-title', 'medical.title');
+  setText('start-medical-research', 'medical.start');
+  setText('medics-label', 'facility.medics');
   setText('containment-eyebrow', 'containment.eyebrow');
   setText('containment-title', 'containment.title');
   setText('start-containment-research', 'containment.start');
@@ -3128,6 +3374,19 @@ constructQuarantineButton.addEventListener('click', () => {
   showToast(t('toast.constructionStarted'));
 });
 
+startMedicalResearchButton.addEventListener('click', () => {
+  store.dispatch({
+    type: 'START_BUILDING_BLUEPRINT_RESEARCH',
+    blueprintId: medicalBlueprint.id,
+  });
+  showToast(t('toast.researchStarted'));
+});
+
+constructMedicalButton.addEventListener('click', () => {
+  store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: medicalBlock.id });
+  showToast(t('toast.constructionStarted'));
+});
+
 manufactureAlienEmitterButton.addEventListener('click', () => {
   store.dispatch({
     type: 'MANUFACTURE_ADAPTED_WEAPON',
@@ -3189,7 +3448,11 @@ launchSortieButton.addEventListener('click', () => {
         sortieInProgress = false;
         combatWeaponSwitchAvailable = false;
         const beforeSettlement = store.getSnapshot();
-        store.dispatch({ type: 'SETTLE_SORTIE', outcome: result.outcome });
+        store.dispatch({
+          type: 'SETTLE_SORTIE',
+          outcome: result.outcome,
+          armourLostRatio: result.armourLostRatio,
+        });
         if (result.rocketsFired > 0) {
           store.dispatch({
             type: 'CONSUME_SORTIE_CONSUMABLES',
@@ -3525,6 +3788,13 @@ function renderResearchCards(): void {
       : t('research.cardRequiresSample'),
     t('facility.quarantine'),
     hasSample,
+  );
+  pushBlueprint(
+    medicalBlueprint.id,
+    t('medical.title'),
+    'earth',
+    labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab'),
+    t('facility.medical'),
   );
   pushBlueprint(
     canisterBlueprint.id,

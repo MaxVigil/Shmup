@@ -4,7 +4,8 @@ import { generateStaffCandidates } from '../domain/staff-market';
 import { isGameState } from '../domain/guards';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v15';
+export const SAVE_KEY = 'shmup.save.v16';
+export const LEGACY_V15_SAVE_KEY = 'shmup.save.v15';
 export const LEGACY_V14_SAVE_KEY = 'shmup.save.v14';
 export const LEGACY_V13_SAVE_KEY = 'shmup.save.v13';
 export const LEGACY_V12_SAVE_KEY = 'shmup.save.v12';
@@ -145,6 +146,9 @@ function v14BaseDefaults(): Pick<
   | 'pilotCandidates'
   | 'pilotXp'
   | 'pilotFatigue'
+  | 'pilotInjuries'
+  | 'deadPilotIds'
+  | 'pilotDeathMonth'
   | 'activeMissionId'
   | 'monthIncome'
   | 'monthReport'
@@ -159,6 +163,9 @@ function v14BaseDefaults(): Pick<
     pilotCandidates: [],
     pilotXp: {},
     pilotFatigue: {},
+    pilotInjuries: {},
+    deadPilotIds: [],
+    pilotDeathMonth: {},
     activeMissionId: null,
     monthIncome: 0,
     monthReport: null,
@@ -175,6 +182,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V15_SAVE_KEY, migrateV15Save],
     [LEGACY_V14_SAVE_KEY, migrateV14Save],
     [LEGACY_V13_SAVE_KEY, migrateV13Save],
     [LEGACY_V12_SAVE_KEY, migrateV12Save],
@@ -353,7 +361,7 @@ function migratedState(
   );
   const activeAircraftId = options.activeAircraftId ?? aircraftIds[0] ?? contentCatalog.aircraft[0].id;
   const migrated: GameState = {
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       credits: options.credits,
@@ -423,7 +431,7 @@ function migrateV7Save(rawSave: string | null): GameState | null {
     return null;
   }
   const migrated: GameState = {
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       credits: base.credits,
@@ -472,6 +480,31 @@ function migrateV7Save(rawSave: string | null): GameState | null {
   return isGameState(migrated) ? migrated : null;
 }
 
+function migrateV15Save(rawSave: string | null): GameState | null {
+  if (rawSave === null) {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(rawSave);
+    if (!isRecord(parsed) || parsed.schemaVersion !== 15 || !isRecord(parsed.base)) {
+      return null;
+    }
+    const upgraded: GameState = {
+      ...(parsed as Omit<GameState, 'base' | 'schemaVersion'>),
+      schemaVersion: 16,
+      base: {
+        ...(parsed.base as unknown as BaseState),
+        pilotInjuries: {},
+        deadPilotIds: [],
+        pilotDeathMonth: {},
+      },
+    };
+    return isGameState(upgraded) ? upgraded : null;
+  } catch {
+    return null;
+  }
+}
+
 function migrateV14Save(rawSave: string | null): GameState | null {
   if (rawSave === null) {
     return null;
@@ -483,7 +516,7 @@ function migrateV14Save(rawSave: string | null): GameState | null {
     }
     const upgraded: GameState = {
       ...(parsed as Omit<GameState, 'base' | 'schemaVersion'>),
-      schemaVersion: 15,
+      schemaVersion: 16,
       base: {
         ...(parsed.base as unknown as BaseState),
         researchedAircraftUpgradeIds: [],
@@ -507,7 +540,7 @@ function migrateV13Save(rawSave: string | null): GameState | null {
     }
     const upgraded: GameState = {
       ...(parsed as Omit<GameState, 'base' | 'schemaVersion'>),
-      schemaVersion: 15,
+      schemaVersion: 16,
       base: {
         ...(parsed.base as unknown as BaseState),
         ...v14BaseDefaults(),
@@ -537,7 +570,7 @@ function migrateV12Save(rawSave: string | null): GameState | null {
     : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       ...(base as unknown as BaseState),
@@ -569,7 +602,7 @@ function migrateV11Save(rawSave: string | null): GameState | null {
   const { parsed, base } = legacy;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       ...(base as unknown as BaseState),
@@ -608,7 +641,7 @@ function migrateV10Save(rawSave: string | null): GameState | null {
     : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       ...(base as unknown as BaseState),
@@ -649,7 +682,7 @@ function migrateV9Save(rawSave: string | null): GameState | null {
     : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       ...(base as unknown as BaseState),
@@ -690,7 +723,7 @@ function migrateV8Save(rawSave: string | null): GameState | null {
     : DEFAULT_MARKET_SEED;
   const migrated: GameState = {
     ...(parsed as unknown as GameState),
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       ...(base as unknown as BaseState),
@@ -750,7 +783,7 @@ function migrateV6Save(rawSave: string | null): GameState | null {
     ? base.equippedPrimaryWeaponId
     : contentCatalog.weapons[0].id;
   const migrated: GameState = {
-    schemaVersion: 15,
+    schemaVersion: 16,
     base: {
       ...v14BaseDefaults(),
       credits: base.credits,
@@ -982,6 +1015,7 @@ export function saveGame(storage: KeyValueStorage, state: GameState): void {
 
 export function clearGame(storage: KeyValueStorage): void {
   storage.removeItem(SAVE_KEY);
+  storage.removeItem(LEGACY_V15_SAVE_KEY);
   storage.removeItem(LEGACY_V14_SAVE_KEY);
   storage.removeItem(LEGACY_V13_SAVE_KEY);
   storage.removeItem(LEGACY_V12_SAVE_KEY);

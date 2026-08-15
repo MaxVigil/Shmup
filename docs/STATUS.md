@@ -1,6 +1,24 @@
 # Project status
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
+
+## Round-8 pilot casualties & the Medical Block (schema v16)
+
+Implemented on `test`. Full loop: damaged sorties roll seeded casualties
+(death/severe/medium/light scaled by armour lost), injured pilots can only
+recover via paid state outsourcing or the free Medical Block treatment
+accelerated by hired medics, fatalities move to the Board of Honour, and the
+salary economy was reset to a 10k monthly cap (manager excepted).
+
+- Schema v16 (`pilotInjuries`, `deadPilotIds`, `pilotDeathMonth`, nullable
+  `activePilotId`) with a v15→v16 migration; 200 unit tests, lint, typecheck,
+  and the production build pass.
+- New `src/domain/pilot-medical.ts` (seeded casualty roll, treatment modes,
+  medic healing rate) and the Medical Block building/blueprint/medic role in
+  the content catalogue; store commands `TREAT_PILOT_OUTSOURCE` /
+  `TREAT_PILOT_MEDICAL`; per-role `salaryCreditCost` (8–9k, manager 25k).
+- UI (uk/en/zh): pilot injury/treatment cards with per-country outsource
+  pricing, Board of Honour, Medical Block programme/construction/medic staff.
 
 ## Theme B — Industrial Dark UX rebuild (test2)
 

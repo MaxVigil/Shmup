@@ -204,6 +204,13 @@ export function buildAppTemplate(initialState: GameState): string {
               <small id="containment-note" class="programme-note"></small>
               <button id="start-containment-research" class="base-action" type="button"></button>
             </div>
+            <div class="containment-programme" id="medical-programme" hidden>
+              <p class="technology-lab__eyebrow" id="medical-eyebrow"></p>
+              <h3 id="medical-title"></h3>
+              <p id="medical-research-status" class="technology-lab__status"></p>
+              <small id="medical-research-note" class="programme-note"></small>
+              <button id="start-medical-research" class="base-action" type="button"></button>
+            </div>
           </section>
 
           <section class="technology-lab research-domain is-alien" aria-labelledby="technology-lab-title">
@@ -238,6 +245,10 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="quarantine-label"></span><strong id="quarantine-status"></strong><small id="quarantine-cost"></small></div>
               <button id="construct-quarantine" class="base-action is-primary" type="button"></button>
             </div>
+            <div id="medical-row" class="facility-row" hidden>
+              <div><span class="loadout-row__label" id="medical-label"></span><strong id="medical-status"></strong><small id="medical-cost"></small></div>
+              <button id="construct-medical" class="base-action is-primary" type="button"></button>
+            </div>
           </section>
 
           <section class="programme-panel" aria-labelledby="manufacturing-title">
@@ -247,6 +258,10 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
             </div>
             <div id="engineer-candidates" class="candidate-list"></div>
+            <div class="facility-row production-staff-row" id="medic-staff-row" hidden>
+              <div><span class="loadout-row__label" id="medics-label"></span><strong id="medic-count"></strong><small id="medic-note"></small></div>
+            </div>
+            <div id="medic-candidates" class="candidate-list" hidden></div>
             <h3 class="hangar-subtitle" id="aircraft-production-title"></h3>
             <div id="aircraft-production-list" class="candidate-list" aria-live="polite"></div>
             <div id="capturer-equipment-row" class="facility-row programme-equipment">
@@ -320,6 +335,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="hangar-pilots-title"></h2>
             <p class="lede" id="hangar-pilots-lede"></p>
             <div id="pilots-roster" class="pilots-roster" aria-live="polite"></div>
+            <div id="pilot-memorial" class="pilot-memorial" hidden>
+              <h3 class="hangar-subtitle" id="pilot-memorial-title"></h3>
+              <div id="pilot-memorial-list" class="candidate-list" aria-live="polite"></div>
+            </div>
           </section>
         </div>
       </section>

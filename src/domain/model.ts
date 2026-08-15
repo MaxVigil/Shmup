@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 15 as const;
+export const SAVE_SCHEMA_VERSION = 16 as const;
 
 export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
 
@@ -14,6 +14,16 @@ export interface PilotState {
 }
 
 export type PilotSpecialization = 'speed' | 'damage' | 'recovery';
+
+export type PilotInjurySeverity = 'light' | 'medium' | 'severe';
+
+export interface PilotInjuryState {
+  readonly severity: PilotInjurySeverity;
+  /** Full recovery months that remain at the current treatment speed. */
+  readonly monthsRemaining: number;
+  /** Treatment mode; null means the pilot is awaiting a treatment decision. */
+  readonly treatment: 'outsource' | 'medical' | null;
+}
 
 export interface PilotCandidateState {
   readonly id: string;
@@ -98,7 +108,7 @@ export interface BaseState {
   readonly energyCapacity: number;
   readonly allocatedEnergy: number;
   readonly pilots: readonly PilotState[];
-  readonly activePilotId: string;
+  readonly activePilotId: string | null;
   readonly researchQueue: readonly ResearchProjectState[];
   readonly preservedTechnologyIds: readonly string[];
   readonly ownedPrimaryWeaponIds: readonly string[];
@@ -136,6 +146,9 @@ export interface BaseState {
   readonly pilotCandidates: readonly PilotCandidateState[];
   readonly pilotXp: Readonly<Record<string, number>>;
   readonly pilotFatigue: Readonly<Record<string, number>>;
+  readonly pilotInjuries: Readonly<Record<string, PilotInjuryState>>;
+  readonly deadPilotIds: readonly string[];
+  readonly pilotDeathMonth: Readonly<Record<string, number>>;
   readonly activeMissionId: string | null;
   readonly monthIncome: number;
   readonly monthReport: MonthReportState | null;
