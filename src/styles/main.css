@@ -1369,19 +1369,23 @@ h1 {
 .fleet-slot.is-damaged {
   border-color: #c96a5f;
 }
+/* The aircraft visual is absolutely positioned so its intrinsic SVG size
+   (e.g. 512x570) can never inflate the grid/flex track of the slot tile;
+   object-fit keeps the image contained within the tile bounds. */
 .fleet-slot__ship {
+  position: relative;
   width: 100%;
   height: 3.4rem;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
 }
-.fleet-slot__ship svg {
+.fleet-slot__ship svg,
+.fleet-slot__ship img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
 }
 .fleet-slot__ship img {
-  height: 100%;
-  width: auto;
   object-fit: contain;
 }
 
