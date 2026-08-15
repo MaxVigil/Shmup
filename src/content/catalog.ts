@@ -363,6 +363,7 @@ export const contentCatalog = {
         hullColor: 0x9dd7c7,
         accentColor: 0x2f6f63,
         silhouette: [0, -18, 10, 4, 4, 10, -4, 10, -10, 4],
+        imageUrl: `${import.meta.env.BASE_URL}assets/interceptor.svg`,
       },
       marketPrice: {
         minimum: 400_000,
@@ -405,6 +406,7 @@ export const contentCatalog = {
         hullColor: 0xa9b7d7,
         accentColor: 0x4c5a78,
         silhouette: [0, -16, 12, -6, 12, 12, 0, 20, -12, 12, -12, -6],
+        imageUrl: `${import.meta.env.BASE_URL}assets/aegis.svg`,
       },
       marketPrice: {
         minimum: 1_300_000,
@@ -468,6 +470,7 @@ export const contentCatalog = {
         hullColor: 0xd9a7c0,
         accentColor: 0x7a2e52,
         silhouette: [0, -20, 4, -8, 8, 0, 3, 8, 0, 14, -3, 8, -8, 0, -4, -8],
+        imageUrl: `${import.meta.env.BASE_URL}assets/precision.svg`,
       },
       marketPrice: {
         minimum: 800_000,

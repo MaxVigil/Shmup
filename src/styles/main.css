@@ -1379,6 +1379,11 @@ h1 {
   height: 100%;
   width: auto;
 }
+.fleet-slot__ship img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
 
 /* U5 — Command geoscope + monthly timeline */
 .month-timeline {
@@ -2152,6 +2157,13 @@ html[data-theme="terminal"] .status-chip.is-top { color: #1a1206; background: va
   background: var(--bg-2);
 }
 .hangar-hero__model svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.hangar-hero__model img {
   width: 100%;
   max-width: 220px;
   height: auto;

@@ -165,6 +165,8 @@ export interface AircraftVisualDefinition {
   readonly accentColor: number;
   /** Centered polygon points [x0,y0,x1,y1,…] in a 40-unit box, nose pointing up (−y). */
   readonly silhouette: readonly number[];
+  /** Optional top-down image (public path); overrides the procedural silhouette. */
+  readonly imageUrl?: string;
 }
 
 export interface AircraftDefinition {

@@ -52,7 +52,7 @@ import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
 import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../debug/debug-mode';
 import { showToast } from './toast';
-import { aircraftShipSvg } from './ship-svg';
+import { aircraftVisualHtml } from './ship-svg';
 import { resolveInitialState, temporaryPlaytestMode } from './playtest';
 
 validateContentCatalog(contentCatalog);
@@ -2135,7 +2135,7 @@ function renderHangarHero(): void {
   const repairing = isAircraftRepairing(state.base, aircraft.id);
   const fueled = isAircraftFueled(state.base, aircraft.id);
   const hero = h('div', { class: 'hangar-hero__model' });
-  hero.innerHTML = aircraftShipSvg(aircraft.visual);
+  hero.innerHTML = aircraftVisualHtml(aircraft.visual);
   const info = h('div', { class: 'hangar-hero__info' });
   info.append(
     h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
@@ -2284,7 +2284,7 @@ function renderFleet(): void {
         }
         const ship = document.createElement('div');
         ship.className = 'fleet-slot__ship';
-        ship.innerHTML = aircraftShipSvg(aircraft.visual);
+        ship.innerHTML = aircraftVisualHtml(aircraft.visual);
         slot.appendChild(ship);
         const name = document.createElement('strong');
         name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');

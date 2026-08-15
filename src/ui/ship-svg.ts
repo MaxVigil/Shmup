@@ -2,6 +2,7 @@ export interface ShipVisual {
   readonly hullColor: number;
   readonly accentColor: number;
   readonly silhouette: readonly number[];
+  readonly imageUrl?: string;
 }
 
 export function silhouetteCentroid(silhouette: readonly number[]): {
@@ -34,6 +35,15 @@ export function scaledSilhouette(
     );
   }
   return scaled;
+}
+
+/** Renders the aircraft visual as HTML: an <img> when an image is provided,
+ *  otherwise the procedural SVG. */
+export function aircraftVisualHtml(visual: ShipVisual): string {
+  if (visual.imageUrl !== undefined) {
+    return '<img src="' + visual.imageUrl + '" alt="" class="aircraft-visual"/>';
+  }
+  return aircraftShipSvg(visual);
 }
 
 export function aircraftShipSvg(visual: ShipVisual): string {

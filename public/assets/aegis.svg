@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="570" viewBox="0 0 512 570"
+     role="img" aria-labelledby="title description">
+  <title id="title">Важкий броньований реактивний літак для Shmup гри</title>
+  <desc id="description">Масивна і повільна варіація реактивного літака, вид зверху, з широким фюзеляжем, товстими крилами та бронепанелями.</desc>
+
+  <defs>
+    <path id="heavy-airframe-shape"
+          d="M256 19
+             C239 24 229 50 225 84
+             L218 184
+             L201 232
+             L60 307
+             C49 313 43 323 44 335
+             L47 405
+             C48 417 58 425 70 424
+             L199 462
+             L197 468
+             L156 478
+             C148 484 144 494 145 503
+             L147 523
+             C148 535 159 542 170 538
+             L217 522
+             L225 530
+             L225 535
+             C225 546 234 553 245 553
+             L267 553
+             C278 553 287 546 287 535
+             L287 530
+             L295 522
+             L342 538
+             C353 542 364 535 365 523
+             L367 503
+             C368 494 364 484 356 478
+             L315 468
+             L313 462
+             L442 424
+             C454 425 464 417 465 405
+             L468 335
+             C469 323 463 313 452 307
+             L311 232
+             L294 184
+             L287 84
+             C283 50 273 24 256 19Z"/>
+    <clipPath id="heavy-airframe-clip">
+      <use href="#heavy-airframe-shape"/>
+    </clipPath>
+  </defs>
+
+  <g id="aircraft-heavy">
+    <use id="silhouette" href="#heavy-airframe-shape" fill="#172128"/>
+
+    <g id="airframe" clip-path="url(#heavy-airframe-clip)">
+      <!-- Thick primary structure. -->
+      <path d="M256 30
+               C245 34 237 55 233 87
+               L226 188
+               L208 239
+               L66 314
+               C58 318 54 326 55 335
+               L58 401
+               C59 408 64 413 72 412
+               L208 452
+               L206 463
+               L163 485
+               C158 489 155 495 156 502
+               L158 519
+               C159 526 165 530 172 527
+               L220 511
+               L234 529
+               L234 535
+               C234 541 239 544 247 544
+               L265 544
+               C273 544 278 541 278 535
+               L278 529
+               L292 511
+               L340 527
+               C347 530 353 526 354 519
+               L356 502
+               C357 495 354 489 349 485
+               L306 463
+               L304 452
+               L440 412
+               C448 413 453 408 454 401
+               L457 335
+               C458 326 454 318 446 314
+               L304 239
+               L286 188
+               L279 87
+               C275 55 267 34 256 30Z"
+            fill="#4E6068"/>
+
+      <!-- Large reinforced wings with thick, rounded tips. -->
+      <g id="armoured-wings" fill="#74868C">
+        <path d="M207 247
+                 L67 319
+                 C61 322 59 328 60 335
+                 L63 397
+                 C64 402 68 405 74 404
+                 L202 446
+                 L231 350Z"/>
+        <path d="M305 247
+                 L445 319
+                 C451 322 453 328 452 335
+                 L449 397
+                 C448 402 444 405 438 404
+                 L310 446
+                 L281 350Z"/>
+
+        <path d="M205 468
+                 L164 487
+                 C159 491 158 496 159 502
+                 L161 516
+                 C162 522 167 525 173 522
+                 L219 507
+                 L233 480Z"/>
+        <path d="M307 468
+                 L348 487
+                 C353 491 354 496 353 502
+                 L351 516
+                 C350 522 345 525 339 522
+                 L293 507
+                 L279 480Z"/>
+      </g>
+
+      <!-- Dark intake blocks make the centre feel dense and heavy. -->
+      <g id="intakes" fill="#172128">
+        <path d="M202 252 L226 206 L228 371 L204 402 L183 369Z"/>
+        <path d="M310 252 L286 206 L284 371 L308 402 L329 369Z"/>
+      </g>
+
+      <!-- Wide central armoured spine. -->
+      <path id="fuselage-spine"
+            d="M256 29
+               C244 49 239 83 238 123
+               L235 194
+               L226 240
+               L230 374
+               L240 417
+               L240 510
+               L249 535
+               L263 535
+               L272 510
+               L272 417
+               L282 374
+               L286 240
+               L277 194
+               L274 123
+               C273 83 268 49 256 29Z"
+            fill="#4E6068"/>
+
+      <!-- Layered armour plates. -->
+      <g id="armour-plates" fill="#74868C">
+        <path d="M256 35 L243 94 L243 184 L253 211 L256 207Z"/>
+        <path d="M256 35 L269 94 L269 184 L259 211 L256 207Z"/>
+        <path d="M238 223 L252 215 L252 392 L239 374Z"/>
+        <path d="M274 223 L260 215 L260 392 L273 374Z"/>
+        <path d="M240 418 L252 402 L252 506 L244 522 L240 505Z"/>
+        <path d="M272 418 L260 402 L260 506 L268 522 L272 505Z"/>
+
+        <!-- Reinforcement bars across the wings. -->
+        <path d="M76 337 L194 278 L208 292 L87 352Z"/>
+        <path d="M436 337 L318 278 L304 292 L425 352Z"/>
+      </g>
+
+      <!-- Small protected canopy. -->
+      <path id="canopy"
+            d="M256 95
+               C244 107 240 130 243 151
+               L250 177
+               C252 184 260 184 262 177
+               L269 151
+               C272 130 268 107 256 95Z"
+            fill="#B8CDD1"/>
+
+      <!-- Compact flat-cut turbine. -->
+      <path id="engine-nozzle"
+            d="M235 505 H277 V536
+               Q277 544 267 544
+               H245
+               Q235 544 235 536Z"
+            fill="#172128"/>
+      <path d="M244 514 H268 V540 H244Z" fill="#74868C"/>
+
+      <!-- Large fasteners remain visible at game-sprite scale. -->
+      <g id="armour-fasteners" fill="#172128">
+        <circle cx="213" cy="281" r="4"/><circle cx="199" cy="375" r="4"/>
+        <circle cx="299" cy="281" r="4"/><circle cx="313" cy="375" r="4"/>
+        <circle cx="236" cy="423" r="4"/><circle cx="276" cy="423" r="4"/>
+      </g>
+
+      <g id="panel-lines" fill="none" stroke="#172128" stroke-width="5" stroke-linecap="round" opacity="0.8">
+        <path d="M218 184 L241 207"/>
+        <path d="M294 184 L271 207"/>
+        <path d="M199 462 L231 392"/>
+        <path d="M313 462 L281 392"/>
+        <path d="M217 522 L238 488"/>
+        <path d="M295 522 L274 488"/>
+      </g>
+    </g>
+
+    <use href="#heavy-airframe-shape"
+         fill="none" stroke="#172128" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+</svg>

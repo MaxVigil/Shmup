@@ -160,7 +160,7 @@ export interface AircraftCombatStats {
 }
 
 export class CombatScene extends Phaser.Scene {
-  private player!: Phaser.GameObjects.Graphics;
+  private player!: Phaser.GameObjects.Image | Phaser.GameObjects.Graphics;
   private playerArmourBarBackground!: Phaser.GameObjects.Rectangle;
   private playerArmourBarFill!: Phaser.GameObjects.Rectangle;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -248,6 +248,15 @@ export class CombatScene extends Phaser.Scene {
     super('combat');
   }
 
+  preload(): void {
+    for (const aircraft of contentCatalog.aircraft) {
+      const imageUrl = 'imageUrl' in aircraft.visual ? aircraft.visual.imageUrl : undefined;
+      if (imageUrl !== undefined) {
+        this.load.image(`ship-${aircraft.id}`, imageUrl);
+      }
+    }
+  }
+
   create(): void {
     this.resetEncounterState();
     this.threatLevel = Math.max(1, Math.round(this.getThreatLevel()));
@@ -258,9 +267,20 @@ export class CombatScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, 0x05080d);
     this.createStarfield(width, height);
 
-    this.player = this.add.graphics();
-    this.player.setPosition(width / 2, height * 0.78);
-    this.drawPlayerShip();
+    const aircraftId = this.getActiveAircraftId();
+    const visual = this.activeAircraftVisual();
+    const shipTexture = aircraftId === null || visual.imageUrl === undefined
+      ? null
+      : `ship-${aircraftId}`;
+    if (shipTexture !== null && this.textures.exists(shipTexture)) {
+      this.player = this.add
+        .image(width / 2, height * 0.78, shipTexture)
+        .setDisplaySize(48, 54);
+    } else {
+      this.player = this.add.graphics();
+      this.player.setPosition(width / 2, height * 0.78);
+      this.drawPlayerShip();
+    }
     this.playerArmourBarBackground = this.add
       .rectangle(
         this.player.x,
@@ -356,6 +376,9 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private drawPlayerShip(): void {
+    if (!(this.player instanceof Phaser.GameObjects.Graphics)) {
+      return;
+    }
     const visual = this.activeAircraftVisual();
     const points: Phaser.Math.Vector2[] = [];
     for (let index = 0; index < visual.silhouette.length; index += 2) {
