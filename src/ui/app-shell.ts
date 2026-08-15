@@ -20,6 +20,7 @@ import {
   isPilotDead,
   outsourceTreatmentCost,
 } from '../domain/pilot-medical';
+import { MANAGER_ROLE_ID, STAFF_SALARY_CAP } from '../domain/staff-market';
 import {
   marketBlueprintPrice,
   marketConsumablePrice,
@@ -39,13 +40,8 @@ import {
   loanRepayment,
 } from '../domain/credit';
 import {
-  sectionForObjective,
   type BaseSection,
 } from '../domain/base-navigation';
-import {
-  getProgressionObjective,
-  type ProgressionObjectiveKind,
-} from '../domain/progression-guidance';
 import {
   summarizeSortiePayoff,
   type SortiePayoffSummary,
@@ -121,23 +117,10 @@ const rocketPodWeapon = contentCatalog.weapons.find(
   (weapon) => weapon.visualProfile === 'rocket-pod',
 ) ?? contentCatalog.weapons[4];
 const rocketsConsumable = contentCatalog.consumables[0];
-const progressionDefinitions = {
-  laboratoryId: laboratory.id,
-  scientistRoleId: scientistRole.id,
-  engineerRoleId: engineerRole.id,
-  blueprintId: capturerBlueprint.id,
-  workshopId: workshop.id,
-  equipmentId: capturerEquipment.id,
-  containmentBlueprintId: containmentBlueprint.id,
-  quarantineId: quarantine.id,
-  adaptedBlueprintId: adaptedBlueprint.id,
-  adaptedWeaponId: splitPulseWeapon.id,
-};
 
 let game: ReturnType<typeof createGame> | null = null;
 let activeScreen: 'base' | 'sortie' = 'base';
 let activeBaseSection: BaseSection = 'command';
-let objectiveBaseSection: BaseSection = 'engineering';
 let lastRunResult: CombatRunResult | null = null;
 let lastSettlementSummary: SortiePayoffSummary | null = null;
 let lastThanksLine: string | null = null;
@@ -166,16 +149,12 @@ const switchPrimaryWeaponButton = byId<HTMLButtonElement>('switch-primary-weapon
 const weaponSwitchNote = byId<HTMLElement>('weapon-switch-note');
 const creditTotal = byId<HTMLElement>('credit-total');
 const hudMonth = byId<HTMLElement>('hud-month');
-const hudObjective = byId<HTMLElement>('hud-objective');
 const materialTotal = byId<HTMLElement>('material-total');
 const researchTotal = byId<HTMLElement>('research-total');
 const baseRunReport = byId<HTMLElement>('base-run-report');
 const systemCheck = byId<HTMLElement>('prototype-status').parentElement;
 const insolvencyPanel = byId<HTMLElement>('insolvency-panel');
 const restartProgrammeButton = byId<HTMLButtonElement>('restart-programme');
-const objectiveTitle = byId<HTMLElement>('objective-title');
-const objectiveDetail = byId<HTMLElement>('objective-detail');
-const objectiveOpenSectionButton = byId<HTMLButtonElement>('objective-open-section');
 const sortieRunReport = byId<HTMLElement>('sortie-run-report');
 const sortieOutcome = byId<HTMLElement>('sortie-outcome');
 const technologyStatus = byId<HTMLElement>('technology-status');
@@ -215,6 +194,10 @@ const quarantineRow = byId<HTMLElement>('quarantine-row');
 const quarantineStatus = byId<HTMLElement>('quarantine-status');
 const quarantineCost = byId<HTMLElement>('quarantine-cost');
 const constructQuarantineButton = byId<HTMLButtonElement>('construct-quarantine');
+const tradeCentreRow = byId<HTMLElement>('trade-centre-row');
+const tradeCentreStatus = byId<HTMLElement>('trade-centre-status');
+const tradeCentreCost = byId<HTMLElement>('trade-centre-cost');
+const constructTradeCentreButton = byId<HTMLButtonElement>('construct-trade-centre');
 const medicalProgramme = byId<HTMLElement>('medical-programme');
 const medicalResearchStatus = byId<HTMLElement>('medical-research-status');
 const medicalResearchNote = byId<HTMLElement>('medical-research-note');
@@ -227,6 +210,7 @@ const medicStaffRow = byId<HTMLElement>('medic-staff-row');
 const medicCount = byId<HTMLElement>('medic-count');
 const medicNote = byId<HTMLElement>('medic-note');
 const medicCandidates = byId<HTMLElement>('medic-candidates');
+const medicalTreatmentList = byId<HTMLElement>('medical-treatment-list');
 const pilotMemorial = byId<HTMLElement>('pilot-memorial');
 const pilotMemorialList = byId<HTMLElement>('pilot-memorial-list');
 const designSystemOverlay = byId<HTMLElement>('design-system-overlay');
@@ -334,59 +318,11 @@ function renderReports(): void {
   sortieOutcome.hidden = !hasResult;
 }
 
-function objectiveKeys(kind: ProgressionObjectiveKind): {
-  readonly title: TranslationKey;
-  readonly detail: TranslationKey;
-} {
-  switch (kind) {
-    case 'build-laboratory':
-      return { title: 'objective.buildLab', detail: 'objective.buildLabDetail' };
-    case 'hire-scientist':
-      return { title: 'objective.hireScientist', detail: 'objective.hireScientistDetail' };
-    case 'hire-engineer':
-      return { title: 'objective.hireEngineer', detail: 'objective.hireEngineerDetail' };
-    case 'start-blueprint':
-      return { title: 'objective.startBlueprint', detail: 'objective.startBlueprintDetail' };
-    case 'advance-blueprint':
-      return { title: 'objective.advanceBlueprint', detail: 'objective.advanceBlueprintDetail' };
-    case 'build-workshop':
-      return { title: 'objective.buildWorkshop', detail: 'objective.buildWorkshopDetail' };
-    case 'manufacture-equipment':
-      return { title: 'objective.manufacture', detail: 'objective.manufactureDetail' };
-    case 'equip-equipment':
-      return { title: 'objective.equip', detail: 'objective.equipDetail' };
-    case 'recover-artefact':
-      return { title: 'objective.recover', detail: 'objective.recoverDetail' };
-    case 'start-containment':
-      return { title: 'objective.startContainment', detail: 'objective.startContainmentDetail' };
-    case 'advance-containment':
-      return { title: 'objective.advanceContainment', detail: 'objective.advanceContainmentDetail' };
-    case 'construct-quarantine':
-      return { title: 'objective.constructQuarantine', detail: 'objective.constructQuarantineDetail' };
-    case 'analyse-sample':
-      return { title: 'objective.analyseSample', detail: 'objective.analyseSampleDetail' };
-    case 'manufacture-adapted-weapon':
-      return {
-        title: 'objective.manufactureAdapted',
-        detail: 'objective.manufactureAdaptedDetail',
-      };
-    case 'equip-adapted-weapon':
-      return {
-        title: 'objective.equipAdapted',
-        detail: 'objective.equipAdaptedDetail',
-      };
-    case 'await-warden-signal':
-      return {
-        title: 'objective.awaitSignal',
-        detail: 'objective.awaitSignalDetail',
-      };
-  }
-}
-
 function isBaseSection(value: string | undefined): value is BaseSection {
   return value === 'command' || value === 'research' ||
     value === 'engineering' || value === 'hangar' || value === 'trade' ||
-    value === 'finance' || value === 'databank';
+    value === 'finance' || value === 'staff' || value === 'medical' ||
+    value === 'warehouse' || value === 'databank';
 }
 
 function showBaseSection(section: BaseSection): void {
@@ -467,52 +403,13 @@ function renderBase(): void {
   const researchBusy = state.base.researchQueue.length > 0;
   const technologyName = t('content.prism');
   const moduleName = t('content.splitPulse');
-  const objective = getProgressionObjective(state, progressionDefinitions);
-  const objectiveTranslationKeys = objectiveKeys(objective.kind);
-  objectiveBaseSection = sectionForObjective(objective.kind);
-  const objectiveParams = {
-    progress: objective.progress ?? 0,
-    required: objective.requiredProgress ?? capturerBlueprint.requiredProgress,
-    labResources: resourceShortfall(state, laboratory.creditCost, laboratory.materialCost),
-    scientistResources: resourceShortfall(state, scientistRole.creditCost, 0),
-    engineerResources: resourceShortfall(state, engineerRole.creditCost, 0),
-    workshopResources: resourceShortfall(state, workshop.creditCost, workshop.materialCost),
-    equipmentResources: resourceShortfall(
-      state,
-      capturerEquipment.creditCost,
-      capturerEquipment.materialCost,
-    ),
-    quarantineResources: resourceShortfall(
-      state,
-      quarantine.creditCost,
-      quarantine.materialCost,
-    ),
-    adaptedWeaponResources: resourceShortfall(
-      state,
-      adaptedBlueprint.productionCreditCost,
-      adaptedBlueprint.productionMaterialCost,
-    ),
-  };
 
   creditTotal.textContent = formatCredits(state.base.credits);
   creditTotal.classList.toggle('is-negative', bankrupt);
   materialTotal.textContent = state.base.materials.toString();
   researchTotal.textContent = state.base.research.toString();
-  objectiveTitle.textContent = bankrupt
-    ? t('insolvency.objective')
-    : t(objectiveTranslationKeys.title, objectiveParams);
-  objectiveDetail.textContent = bankrupt
-    ? t('insolvency.objectiveDetail')
-    : t(objectiveTranslationKeys.detail, objectiveParams);
   hudMonth.textContent = t('hud.month', { month: state.base.month });
   byId<HTMLElement>('databank-note').textContent = t('databank.note');
-  hudObjective.textContent = bankrupt
-    ? t('insolvency.objective')
-    : t(objectiveTranslationKeys.title, objectiveParams);
-  objectiveOpenSectionButton.hidden = bankrupt;
-  objectiveOpenSectionButton.textContent = t('objective.openSection', {
-    section: t(`baseNav.${objectiveBaseSection}`),
-  });
   insolvencyPanel.hidden = !bankrupt;
   baseScreen.classList.toggle('is-insolvent', bankrupt);
   systemCheck?.classList.toggle('is-critical', bankrupt);
@@ -583,15 +480,9 @@ function renderBase(): void {
     state.base.credits < workshop.creditCost ||
     state.base.materials < workshop.materialCost
   );
-  const tradeCentreBuilt = tradeCentreBuilding !== undefined &&
-    state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
   const researchTab = byId<HTMLButtonElement>('base-tab-research');
-  const tradeTab = byId<HTMLButtonElement>('base-tab-trade');
   researchTab.hidden = !labBuilt;
-  tradeTab.hidden = !tradeCentreBuilt;
   if (!labBuilt && activeBaseSection === 'research') {
-    showBaseSection('command');
-  } else if (!tradeCentreBuilt && activeBaseSection === 'trade') {
     showBaseSection('command');
   }
   blueprintStatus.textContent = blueprintUnlocked
@@ -901,6 +792,8 @@ function renderBase(): void {
   setText('return-to-base', 'sortie.return');
   renderContainment();
   renderMedicalProgramme();
+  renderMedicalTreatment();
+  renderTradeCentre();
   renderResearchCards();
   renderCanister();
   renderFleet();
@@ -908,6 +801,7 @@ function renderBase(): void {
   renderPilots();
   renderTrade();
   renderFinance();
+  renderCredit();
   renderCommand();
   renderMonthReport();
   renderDatabank();
@@ -954,9 +848,15 @@ function renderCandidates(containerId: string, roleId: string): void {
     role.requiredBuildingId === null ||
     state.base.constructedBuildingIds.includes(role.requiredBuildingId)
   );
+  const headcountFull = role !== undefined &&
+    role.maximumHeadcount !== null &&
+    state.base.staff.filter((member) => member.roleId === roleId).length >=
+      role.maximumHeadcount;
   const heading = document.createElement('h3');
   heading.className = 'hangar-subtitle';
-  heading.textContent = t('staff.candidates');
+  heading.textContent = t(
+    staffRoleNameKey[roleId] ?? 'staff.scientist',
+  );
   container.appendChild(heading);
   for (const candidate of candidates) {
     const row = document.createElement('article');
@@ -991,12 +891,19 @@ function renderCandidates(containerId: string, roleId: string): void {
     hire.className = 'base-action';
     hire.type = 'button';
     hire.textContent = t('staff.hire', { credits: candidate.hireCreditCost });
-    hire.disabled = bankrupt || !facilityBuilt || state.base.credits < candidate.hireCreditCost;
+    hire.disabled = bankrupt || !facilityBuilt || headcountFull ||
+      state.base.credits < candidate.hireCreditCost;
     hire.addEventListener('click', () => {
       store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
       showToast(t('toast.candidateHired', { name: candidate.firstName + ' ' + candidate.lastName }));
     });
     actions.appendChild(hire);
+    if (headcountFull) {
+      const limit = document.createElement('em');
+      limit.className = 'status-chip is-resting';
+      limit.textContent = t('staff.limitReached');
+      actions.appendChild(limit);
+    }
     row.appendChild(actions);
     container.appendChild(row);
   }
@@ -1011,31 +918,43 @@ function renderStaffRoster(): void {
     container.append(h('p', { class: 'empty-note' }, t('staff.noStaff')));
     return;
   }
-  for (const member of state.base.staff) {
-    const role = contentCatalog.staffRoles.find((entry) => entry.id === member.roleId);
-    const salary = Math.round((role?.creditCost ?? 0) * 0.3 * member.salaryMultiplier);
-    const row = h('article', { class: 'threat-row staff-roster-row' });
-    const info = h('div', null);
-    info.append(
-      h('strong', null, `${member.firstName} ${member.lastName}`),
-      h('small', null, [
-        t(staffRoleNameKey[member.roleId] ?? 'staff.scientist'),
-        t('staff.tier', { tier: member.tier }),
-        t('staff.efficiency', { value: member.progressMultiplier }),
-        t('staff.salary', { credits: salary }),
-      ].join(' · ')),
-    );
-    row.append(info);
-    const dismiss = h(
-      'button',
-      { class: 'base-action is-danger', type: 'button' },
-      t('staff.dismiss'),
-    );
-    dismiss.addEventListener('click', () => {
-      store.dispatch({ type: 'DISMISS_STAFF', staffId: member.id });
-    });
-    row.append(dismiss);
-    container.append(row);
+  for (const role of contentCatalog.staffRoles) {
+    const members = state.base.staff.filter((member) => member.roleId === role.id);
+    if (members.length === 0) {
+      continue;
+    }
+    container.append(h(
+      'h4',
+      { class: 'hangar-subtitle staff-group-title' },
+      t(staffRoleNameKey[role.id] ?? 'staff.scientist'),
+    ));
+    for (const member of members) {
+      const raw = role.salaryCreditCost * member.salaryMultiplier;
+      const salary = Math.round(
+        role.id === MANAGER_ROLE_ID ? raw : Math.min(STAFF_SALARY_CAP, raw),
+      );
+      const row = h('article', { class: 'threat-row staff-roster-row' });
+      const info = h('div', null);
+      info.append(
+        h('strong', null, `${member.firstName} ${member.lastName}`),
+        h('small', null, [
+          t('staff.tier', { tier: member.tier }),
+          t('staff.efficiency', { value: member.progressMultiplier }),
+          t('staff.salary', { credits: salary }),
+        ].join(' · ')),
+      );
+      row.append(info);
+      const dismiss = h(
+        'button',
+        { class: 'base-action is-danger', type: 'button' },
+        t('staff.dismiss'),
+      );
+      dismiss.addEventListener('click', () => {
+        store.dispatch({ type: 'DISMISS_STAFF', staffId: member.id });
+      });
+      row.append(dismiss);
+      container.append(row);
+    }
   }
 }
 
@@ -1941,20 +1860,6 @@ function renderTrade(): void {
     note.className = 'preflight-warning';
     note.textContent = t('trade.locked');
     dynamic.appendChild(note);
-    const workshopBuilt = state.base.constructedBuildingIds.includes('building-workshop');
-    const construct = document.createElement('button');
-    construct.className = 'base-action is-primary';
-    construct.type = 'button';
-    construct.textContent = t('trade.construct', {
-      credits: tradeCentreBuilding.creditCost,
-    });
-    construct.disabled =
-      bankrupt || !workshopBuilt || state.base.credits < tradeCentreBuilding.creditCost;
-    construct.addEventListener('click', () => {
-      store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentreBuilding.id });
-      showToast(t('toast.constructionStarted'));
-    });
-    dynamic.appendChild(construct);
     return;
   }
 
@@ -2319,7 +2224,7 @@ function renderHangarHero(): void {
     const standardCost = standardRepairCost(state.base, aircraft.id);
     const standard = h(
       'button',
-      { class: 'base-action', type: 'button' },
+      { class: 'base-action is-primary', type: 'button' },
       t('hangar.repair', { credits: standardCost }),
     );
     standard.disabled = bankrupt || state.base.credits < standardCost;
@@ -2330,21 +2235,7 @@ function renderHangarHero(): void {
         emergency: false,
       });
     });
-    const emergencyCost = emergencyRepairCost(state.base, aircraft.id);
-    const emergency = h(
-      'button',
-      { class: 'base-action is-danger', type: 'button' },
-      t('hangar.emergencyRepair', { credits: emergencyCost }),
-    );
-    emergency.disabled = bankrupt || state.base.credits < emergencyCost;
-    emergency.addEventListener('click', () => {
-      store.dispatch({
-        type: 'REPAIR_AIRCRAFT',
-        aircraftId: aircraft.id,
-        emergency: true,
-      });
-    });
-    actions.append(standard, emergency);
+    actions.append(standard);
   }
   if (!fueled) {
     const refuel = h(
@@ -2679,28 +2570,6 @@ function renderCommand(): void {
   }
 
   endMonthButton.textContent = t('command.endMonth');
-
-  const fuelList = byId<HTMLElement>('command-fuel-list');
-  fuelList.textContent = '';
-  for (const aircraftId of state.base.hangarSlots) {
-    if (aircraftId === null) {
-      continue;
-    }
-    const aircraft = contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
-    if (aircraft === undefined) {
-      continue;
-    }
-    const row = document.createElement('article');
-    row.className = 'threat-row';
-    const name = document.createElement('strong');
-    name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
-    const fuel = document.createElement('span');
-    fuel.textContent = t(
-      isAircraftFueled(state.base, aircraft.id) ? 'command.fueled' : 'command.unfueled',
-    );
-    row.append(name, fuel);
-    fuelList.appendChild(row);
-  }
 }
 
 function renderCredit(): void {
@@ -2989,6 +2858,43 @@ function renderContainment(): void {
   }
 }
 
+function renderTradeCentre(): void {
+  if (tradeCentreBuilding === undefined) {
+    tradeCentreRow.hidden = true;
+    return;
+  }
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const built = state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
+  const job = constructionJob(state, tradeCentreBuilding.id);
+  const workshopBuilt = state.base.constructedBuildingIds.includes('building-workshop');
+  tradeCentreRow.hidden = built;
+  if (built || job !== undefined) {
+    if (job !== undefined) {
+      tradeCentreStatus.textContent = t('facility.constructing', {
+        progress: job.progress,
+        required: job.requiredProgress,
+      });
+    }
+    tradeCentreCost.textContent = '';
+    constructTradeCentreButton.hidden = true;
+    return;
+  }
+  tradeCentreStatus.textContent = workshopBuilt
+    ? t('facility.tradeCentreAffordable')
+    : t('facility.tradeCentreLocked');
+  tradeCentreCost.textContent = t('facility.tradeCentreCost', {
+    credits: tradeCentreBuilding.creditCost,
+    materials: tradeCentreBuilding.materialCost,
+  });
+  constructTradeCentreButton.hidden = false;
+  constructTradeCentreButton.disabled =
+    bankrupt ||
+    !workshopBuilt ||
+    state.base.credits < tradeCentreBuilding.creditCost ||
+    state.base.materials < tradeCentreBuilding.materialCost;
+}
+
 function renderMedicalProgramme(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -3073,6 +2979,83 @@ function renderMedicalProgramme(): void {
     medicNote.textContent = medics > 0
       ? t('facility.medicReady')
       : t('facility.candidatesHint');
+  }
+}
+
+function renderMedicalTreatment(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const list = medicalTreatmentList;
+  list.textContent = '';
+  const injured = state.base.pilots.filter(
+    (pilot) => state.base.pilotInjuries[pilot.id] !== undefined,
+  );
+  if (injured.length === 0) {
+    list.append(h('p', { class: 'empty-note' }, t('medical.noInjured')));
+    return;
+  }
+  const medicalReady = hasMedicalTreatmentCapability(state.base);
+  for (const pilot of injured) {
+    const injury = state.base.pilotInjuries[pilot.id];
+    if (injury === undefined) {
+      continue;
+    }
+    const pilotName = `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim();
+    const row = h('article', { class: 'threat-row' });
+    const info = h('div', null);
+    info.append(
+      h('strong', null, pilotName),
+      h('small', null, [
+        t(pilotInjurySeverityKey[injury.severity] ?? 'pilot.injuryLight'),
+        t('pilot.injuryMonths', { months: Math.ceil(injury.monthsRemaining) }),
+        injury.treatment === null
+          ? t('pilot.awaitingTreatment')
+          : t(injury.treatment === 'medical'
+            ? 'pilot.inTreatmentMedical'
+            : 'pilot.inTreatmentOutsource'),
+      ].join(' · ')),
+    );
+    row.append(info);
+    const actions = h('div', { class: 'pilot-card__actions' });
+    if (injury.treatment === null) {
+      if (medicalReady) {
+        const inHouse = h(
+          'button',
+          { class: 'base-action is-primary', type: 'button' },
+          t('pilot.treatMedical'),
+        );
+        inHouse.addEventListener('click', () => {
+          store.dispatch({ type: 'TREAT_PILOT_MEDICAL', pilotId: pilot.id });
+          showToast(t('toast.pilotInTreatment', { pilot: pilotName }));
+        });
+        actions.append(inHouse);
+      }
+      const countrySelect = document.createElement('select');
+      for (const country of contentCatalog.councilStates) {
+        const option = document.createElement('option');
+        option.value = country.id;
+        option.textContent = `${t(country.nameKey as TranslationKey)} · ` +
+          formatCredits(outsourceTreatmentCost(state.base, pilot.id, country.id));
+        countrySelect.appendChild(option);
+      }
+      const outsource = h(
+        'button',
+        { class: 'base-action', type: 'button' },
+        t('pilot.treatOutsource'),
+      );
+      outsource.disabled = bankrupt;
+      outsource.addEventListener('click', () => {
+        store.dispatch({
+          type: 'TREAT_PILOT_OUTSOURCE',
+          pilotId: pilot.id,
+          countryId: countrySelect.value,
+        });
+        showToast(t('toast.pilotInTreatment', { pilot: pilotName }));
+      });
+      actions.append(countrySelect, outsource);
+    }
+    row.append(actions);
+    list.append(row);
   }
 }
 
@@ -3266,6 +3249,9 @@ function renderLocale(): void {
   setText('base-tab-trade', 'baseNav.trade');
   setText('base-tab-finance', 'baseNav.finance');
   setText('base-tab-databank', 'baseNav.databank');
+  setText('base-tab-staff', 'baseNav.staff');
+  setText('base-tab-medical', 'baseNav.medical');
+  setText('base-tab-warehouse', 'baseNav.warehouse');
   setText('finance-section-eyebrow', 'finance.eyebrow');
   setText('finance-section-title', 'finance.heading');
   setText('finance-section-lede', 'finance.lede');
@@ -3288,17 +3274,9 @@ function renderLocale(): void {
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
   setText('locale-option-zh', 'locale.zh');
-  setText('mandate-label', 'mandate.label');
-  setText('mandate-copy', 'mandate.copy');
-  setText('mandate-terms', 'mandate.terms', {
-    multiplier: contentCatalog.economy.missedEnemyPenaltyMultiplier,
-  });
-  setText('command-mandate-eyebrow', 'command.mandateEyebrow');
-  setText('command-mandate-title', 'command.mandateTitle');
   setText('save-schema-label', 'base.saveSchema');
   setText('credit-label', 'base.credits');
   setText('hud-month-label', 'hud.monthLabel');
-  setText('hud-objective-label', 'hud.objectiveLabel');
   setText('material-label', 'base.materials');
   setText('research-label', 'base.research');
   setText('prototype-status', 'base.prototype');
@@ -3306,7 +3284,6 @@ function renderLocale(): void {
   setText('insolvency-title', 'insolvency.title');
   setText('insolvency-detail', 'insolvency.detail');
   setText('restart-programme', 'insolvency.restart');
-  setText('objective-label', 'objective.label');
   setText('research-section-eyebrow', 'research.eyebrow');
   setText('research-section-title', 'research.title');
   setText('research-section-lede', 'research.lede');
@@ -3344,29 +3321,17 @@ function renderLocale(): void {
   setText('hangar-fleet-title', 'hangar.fleetTitle');
   setText('hangar-fleet-lede', 'hangar.fleetLede');
   setText('hangar-fleet-subtitle', 'hangar.fleetSubtitle');
-  setText('hangar-warehouse-eyebrow', 'hangar.warehouseEyebrow');
-  setText('hangar-warehouse-title', 'hangar.warehouseTitle');
   setText('hangar-slot-label', 'hangar.slotLabel');
   setText('hangar-slot-note', 'hangar.slotNote');
   setText('command-section-eyebrow', 'command.eyebrow');
   setText('command-section-title', 'command.title');
   setText('command-section-lede', 'command.lede');
   setText('command-month-title', 'command.monthTitle');
-  setText('command-fuel-eyebrow', 'command.fuelEyebrow');
-  setText('command-fuel-title', 'command.fuelTitle');
   setText('command-credit-eyebrow', 'credit.eyebrow');
   setText('command-credit-title', 'credit.title');
   setText('command-credit-lede', 'credit.lede');
-  setText('staff-roster-eyebrow', 'staff.rosterEyebrow');
-  setText('staff-roster-title', 'staff.rosterTitle');
   setText('aircraft-production-title', 'engineering.aircraftProductionTitle');
   setText('aircraft-upgrade-research-title', 'research.aircraftUpgradeTitle');
-  setText('manager-candidates-eyebrow', 'staff.managerEyebrow');
-  setText('manager-candidates-title', 'staff.managerTitle');
-  setText('manager-candidates-lede', 'staff.managerLede');
-  setText('trader-candidates-eyebrow', 'staff.traderEyebrow');
-  setText('trader-candidates-title', 'staff.traderTitle');
-  setText('trader-candidates-lede', 'staff.traderLede');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');
   setText('laboratory-label', 'facility.laboratory');
@@ -3378,6 +3343,18 @@ function renderLocale(): void {
   setText('quarantine-label', 'facility.quarantine');
   setText('construct-quarantine', 'facility.constructQuarantine');
   setText('medical-label', 'facility.medical');
+  setText('medical-treatment-title', 'medical.treatmentTitle');
+  setText('trade-centre-label', 'facility.tradeCentre');
+  setText('construct-trade-centre', 'facility.constructTradeCentre');
+  setText('staff-section-eyebrow', 'staff.eyebrow');
+  setText('staff-section-title', 'staff.title');
+  setText('staff-section-lede', 'staff.lede');
+  setText('medical-section-eyebrow', 'medical.sectionEyebrow');
+  setText('medical-section-title', 'medical.sectionTitle');
+  setText('medical-section-lede', 'medical.sectionLede');
+  setText('warehouse-section-eyebrow', 'warehouse.eyebrow');
+  setText('warehouse-section-title', 'warehouse.title');
+  setText('warehouse-section-lede', 'warehouse.lede');
   setText('construct-medical', 'facility.constructMedical');
   setText('medical-eyebrow', 'medical.eyebrow');
   setText('medical-title', 'medical.title');
@@ -3471,10 +3448,6 @@ for (const [index, button] of baseTabButtons.entries()) {
   });
 }
 
-objectiveOpenSectionButton.addEventListener('click', () => {
-  showBaseSection(objectiveBaseSection);
-});
-
 researchTechnologyButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: prism.id });
   showToast(t('toast.researchStarted'));
@@ -3559,6 +3532,13 @@ startContainmentResearchButton.addEventListener('click', () => {
 constructQuarantineButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: quarantine.id });
   showToast(t('toast.constructionStarted'));
+});
+
+constructTradeCentreButton.addEventListener('click', () => {
+  if (tradeCentreBuilding !== undefined) {
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: tradeCentreBuilding.id });
+    showToast(t('toast.constructionStarted'));
+  }
 });
 
 startMedicalResearchButton.addEventListener('click', () => {

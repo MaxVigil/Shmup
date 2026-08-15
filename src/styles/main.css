@@ -292,6 +292,10 @@ select:focus-visible {
 .base-navigation button[data-nav-glyph="engineering"]::before { content: "⚒"; }
 .base-navigation button[data-nav-glyph="hangar"]::before { content: "✈"; }
 .base-navigation button[data-nav-glyph="trade"]::before { content: "⇄"; }
+.base-navigation button[data-nav-glyph="finance"]::before { content: "◈"; }
+.base-navigation button[data-nav-glyph="staff"]::before { content: "♙"; }
+.base-navigation button[data-nav-glyph="medical"]::before { content: "✚"; }
+.base-navigation button[data-nav-glyph="warehouse"]::before { content: "▤"; }
 .base-navigation button[data-nav-glyph="databank"]::before { content: "☰"; }
 
 .base-navigation button:hover {

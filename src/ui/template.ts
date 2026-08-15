@@ -64,6 +64,9 @@ export function buildAppTemplate(initialState: GameState): string {
         <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" data-nav-glyph="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
         <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" data-nav-glyph="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
         <button id="base-tab-finance" type="button" role="tab" data-base-section="finance" data-nav-glyph="finance" aria-controls="base-panel-finance" aria-selected="false"></button>
+        <button id="base-tab-staff" type="button" role="tab" data-base-section="staff" data-nav-glyph="staff" aria-controls="base-panel-staff" aria-selected="false"></button>
+        <button id="base-tab-medical" type="button" role="tab" data-base-section="medical" data-nav-glyph="medical" aria-controls="base-panel-medical" aria-selected="false"></button>
+        <button id="base-tab-warehouse" type="button" role="tab" data-base-section="warehouse" data-nav-glyph="warehouse" aria-controls="base-panel-warehouse" aria-selected="false"></button>
         <button id="base-tab-databank" type="button" role="tab" data-base-section="databank" data-nav-glyph="databank" aria-controls="base-panel-databank" aria-selected="false"></button>
       </nav>
 
@@ -74,7 +77,6 @@ export function buildAppTemplate(initialState: GameState): string {
           <div><span id="material-label"></span><strong id="material-total"></strong></div>
           <div><span id="research-label"></span><strong id="research-total"></strong></div>
         </div>
-        <div class="global-hud__objective"><span id="hud-objective-label"></span><strong id="hud-objective"></strong></div>
       </div>
 
       <section id="base-panel-command" class="base-panel" role="tabpanel" aria-labelledby="base-tab-command" hidden>
@@ -94,45 +96,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <button id="end-month" class="base-action is-primary end-month" type="button"></button>
           </section>
           <div class="command-dashboard__side">
-            <div class="progression-objective command-objective" aria-live="polite">
-              <span id="objective-label"></span>
-              <strong id="objective-title"></strong>
-              <p id="objective-detail"></p>
-              <button id="objective-open-section" class="text-action" type="button"></button>
-            </div>
-            <section class="technology-lab command-panel" aria-labelledby="command-fuel-title">
-              <p class="technology-lab__eyebrow" id="command-fuel-eyebrow"></p>
-              <h2 id="command-fuel-title"></h2>
-              <div id="command-fuel-list" class="threat-map" aria-live="polite"></div>
-            </section>
             <p class="run-report" id="base-run-report" aria-live="polite"></p>
-            <section class="technology-lab command-panel" aria-labelledby="command-mandate-title">
-              <p class="technology-lab__eyebrow" id="command-mandate-eyebrow"></p>
-              <h2 id="command-mandate-title"></h2>
-              <div class="mandate-brief">
-                <span id="mandate-label"></span>
-                <p id="mandate-copy"></p>
-                <small id="mandate-terms"></small>
-              </div>
-            </section>
-            <section class="technology-lab command-panel" aria-labelledby="staff-roster-title">
-              <p class="technology-lab__eyebrow" id="staff-roster-eyebrow"></p>
-              <h2 id="staff-roster-title"></h2>
-              <div id="staff-roster" class="candidate-list" aria-live="polite"></div>
-            </section>
-            <section class="technology-lab command-panel" aria-labelledby="manager-candidates-title">
-              <p class="technology-lab__eyebrow" id="manager-candidates-eyebrow"></p>
-              <h2 id="manager-candidates-title"></h2>
-              <p class="lede" id="manager-candidates-lede"></p>
-              <div id="manager-candidates" class="candidate-list" aria-live="polite"></div>
-            </section>
-            <section class="technology-lab command-panel" aria-labelledby="command-credit-title">
-              <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
-              <h2 id="command-credit-title"></h2>
-              <p class="lede" id="command-credit-lede"></p>
-              <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
-              <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
-            </section>
           </div>
         </div>
       </section>
@@ -152,7 +116,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <div class="facility-row research-staff-row">
               <div><span class="loadout-row__label" id="scientists-label"></span><strong id="scientist-count"></strong><small id="scientist-note"></small></div>
             </div>
-            <div id="scientist-candidates" class="candidate-list"></div>
             <div class="research-lane">
               <span id="earth-airframe-label"></span>
               <strong id="earth-airframe-status"></strong>
@@ -205,13 +168,6 @@ export function buildAppTemplate(initialState: GameState): string {
               <small id="containment-note" class="programme-note"></small>
               <button id="start-containment-research" class="base-action" type="button"></button>
             </div>
-            <div class="containment-programme" id="medical-programme" hidden>
-              <p class="technology-lab__eyebrow" id="medical-eyebrow"></p>
-              <h3 id="medical-title"></h3>
-              <p id="medical-research-status" class="technology-lab__status"></p>
-              <small id="medical-research-note" class="programme-note"></small>
-              <button id="start-medical-research" class="base-action" type="button"></button>
-            </div>
           </section>
 
           <section class="technology-lab research-domain is-alien" aria-labelledby="technology-lab-title">
@@ -246,9 +202,9 @@ export function buildAppTemplate(initialState: GameState): string {
               <div><span class="loadout-row__label" id="quarantine-label"></span><strong id="quarantine-status"></strong><small id="quarantine-cost"></small></div>
               <button id="construct-quarantine" class="base-action is-primary" type="button"></button>
             </div>
-            <div id="medical-row" class="facility-row" hidden>
-              <div><span class="loadout-row__label" id="medical-label"></span><strong id="medical-status"></strong><small id="medical-cost"></small></div>
-              <button id="construct-medical" class="base-action is-primary" type="button"></button>
+            <div id="trade-centre-row" class="facility-row" hidden>
+              <div><span class="loadout-row__label" id="trade-centre-label"></span><strong id="trade-centre-status"></strong><small id="trade-centre-cost"></small></div>
+              <button id="construct-trade-centre" class="base-action is-primary" type="button"></button>
             </div>
           </section>
 
@@ -258,11 +214,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <div class="facility-row production-staff-row">
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
             </div>
-            <div id="engineer-candidates" class="candidate-list"></div>
-            <div class="facility-row production-staff-row" id="medic-staff-row" hidden>
-              <div><span class="loadout-row__label" id="medics-label"></span><strong id="medic-count"></strong><small id="medic-note"></small></div>
-            </div>
-            <div id="medic-candidates" class="candidate-list" hidden></div>
             <h3 class="hangar-subtitle" id="aircraft-production-title"></h3>
             <div id="aircraft-production-list" class="candidate-list" aria-live="polite"></div>
             <div id="capturer-equipment-row" class="facility-row programme-equipment">
@@ -326,11 +277,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
           </div>
         </section>
-          <section class="technology-lab hangar-panel hangar-panel--warehouse" aria-labelledby="hangar-warehouse-title">
-            <p class="technology-lab__eyebrow" id="hangar-warehouse-eyebrow"></p>
-            <h2 id="hangar-warehouse-title"></h2>
-            <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
-          </section>
           <section class="technology-lab hangar-panel hangar-panel--pilots" aria-labelledby="hangar-pilots-title">
             <p class="technology-lab__eyebrow" id="hangar-pilots-eyebrow"></p>
             <h2 id="hangar-pilots-title"></h2>
@@ -352,12 +298,6 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <div id="trade-content" class="trade-content">
           <div id="trade-dynamic" class="trade-dynamic"></div>
-          <section class="technology-lab command-panel" aria-labelledby="trader-candidates-title">
-            <p class="technology-lab__eyebrow" id="trader-candidates-eyebrow"></p>
-            <h2 id="trader-candidates-title"></h2>
-            <p class="lede" id="trader-candidates-lede"></p>
-            <div id="trader-candidates" class="candidate-list" aria-live="polite"></div>
-          </section>
         </div>
       </section>
 
@@ -368,6 +308,61 @@ export function buildAppTemplate(initialState: GameState): string {
           <p class="lede" id="finance-section-lede"></p>
         </header>
         <div id="finance-content" class="finance-content" aria-live="polite"></div>
+        <section class="technology-lab command-panel finance-credit" aria-labelledby="command-credit-title">
+          <p class="technology-lab__eyebrow" id="command-credit-eyebrow"></p>
+          <h2 id="command-credit-title"></h2>
+          <p class="lede" id="command-credit-lede"></p>
+          <div id="credit-offers-list" class="threat-map" aria-live="polite"></div>
+          <div id="active-loans-list" class="threat-map" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section id="base-panel-staff" class="base-panel" role="tabpanel" aria-labelledby="base-tab-staff" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="staff-section-eyebrow"></p>
+          <h1 id="staff-section-title"></h1>
+          <p class="lede" id="staff-section-lede"></p>
+        </header>
+        <div id="staff-roster" class="candidate-list" aria-live="polite"></div>
+        <div id="scientist-candidates" class="candidate-list"></div>
+        <div id="engineer-candidates" class="candidate-list"></div>
+        <div id="manager-candidates" class="candidate-list"></div>
+        <div id="trader-candidates" class="candidate-list"></div>
+        <div id="medic-candidates" class="candidate-list" hidden></div>
+      </section>
+
+      <section id="base-panel-medical" class="base-panel" role="tabpanel" aria-labelledby="base-tab-medical" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="medical-section-eyebrow"></p>
+          <h1 id="medical-section-title"></h1>
+          <p class="lede" id="medical-section-lede"></p>
+        </header>
+        <div id="medical-programme" class="containment-programme" hidden>
+          <p class="technology-lab__eyebrow" id="medical-eyebrow"></p>
+          <h3 id="medical-title"></h3>
+          <p id="medical-research-status" class="technology-lab__status"></p>
+          <small id="medical-research-note" class="programme-note"></small>
+          <button id="start-medical-research" class="base-action" type="button"></button>
+        </div>
+        <div id="medical-row" class="facility-row" hidden>
+          <div><span class="loadout-row__label" id="medical-label"></span><strong id="medical-status"></strong><small id="medical-cost"></small></div>
+          <button id="construct-medical" class="base-action is-primary" type="button"></button>
+        </div>
+        <div class="facility-row production-staff-row" id="medic-staff-row" hidden>
+          <div><span class="loadout-row__label" id="medics-label"></span><strong id="medic-count"></strong><small id="medic-note"></small></div>
+        </div>
+        <div id="medic-candidates" class="candidate-list" hidden></div>
+        <h3 class="hangar-subtitle" id="medical-treatment-title"></h3>
+        <div id="medical-treatment-list" class="candidate-list" aria-live="polite"></div>
+      </section>
+
+      <section id="base-panel-warehouse" class="base-panel" role="tabpanel" aria-labelledby="base-tab-warehouse" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="warehouse-section-eyebrow"></p>
+          <h1 id="warehouse-section-title"></h1>
+          <p class="lede" id="warehouse-section-lede"></p>
+        </header>
+        <div id="warehouse-stock-list" class="threat-map" aria-live="polite"></div>
       </section>
 
       <section id="base-panel-databank" class="base-panel" role="tabpanel" aria-labelledby="base-tab-databank" hidden>

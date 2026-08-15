@@ -288,9 +288,9 @@ export class CombatScene extends Phaser.Scene {
         ARMOUR_BAR_WIDTH,
         ARMOUR_BAR_HEIGHT,
         0x05080d,
-        0.9,
+        0.5,
       )
-      .setStrokeStyle(1, 0xb7d9d2, 0.8);
+      .setStrokeStyle(1, 0xb7d9d2, 0.5);
     this.playerArmourBarFill = this.add
       .rectangle(
         this.player.x - ARMOUR_BAR_WIDTH / 2,
@@ -298,6 +298,7 @@ export class CombatScene extends Phaser.Scene {
         ARMOUR_BAR_WIDTH,
         ARMOUR_BAR_HEIGHT - 2,
         0x70d6b3,
+        0.5,
       )
       .setOrigin(0, 0.5);
 

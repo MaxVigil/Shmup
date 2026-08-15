@@ -7,6 +7,9 @@ export type BaseSection =
   | 'hangar'
   | 'trade'
   | 'finance'
+  | 'staff'
+  | 'medical'
+  | 'warehouse'
   | 'databank';
 
 export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection {

@@ -813,6 +813,30 @@ describe('game store rocket ammunition', () => {
     ).toThrow();
   });
 
+  it('enforces a single operations director', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 5_000_000 },
+    });
+    const managerCandidates = store.getSnapshot().base.staffCandidates.filter(
+      (candidate) => candidate.roleId === 'staff-manager',
+    );
+    expect(managerCandidates.length).toBeGreaterThanOrEqual(2);
+    const first = managerCandidates[0];
+    const second = managerCandidates[1];
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: first?.id ?? '' });
+    const managersAfterFirst = store.getSnapshot().base.staff.filter(
+      (member) => member.roleId === 'staff-manager',
+    );
+    expect(managersAfterFirst).toHaveLength(1);
+    expect(() =>
+      store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: second?.id ?? '' }),
+    ).toThrow('headcount limit');
+  });
+
   it('completes construction, research, and production instantly when the debug flag is on', () => {
     const initial = createInitialGameState();
     const laboratory = contentCatalog.buildings[0];
