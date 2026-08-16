@@ -170,7 +170,7 @@ describe('pilot medical system', () => {
     expect(medicalAfterTwoMonths.pilotInjuries[id]?.monthsRemaining).toBeLessThan(3);
   });
 
-  it('caps monthly staff salaries below the cap except for the manager', () => {
+  it('charges full team salaries with no monthly salary cap', () => {
     const initial = createInitialGameState();
     const base = {
       ...initial.base,
@@ -180,9 +180,12 @@ describe('pilot medical system', () => {
       ],
     };
     const expenses = monthlyExpenses(base);
-    // Scientist raw salary 8000x1.5 is clamped to the 10k cap; the manager
-    // keeps 25000x1.5; the two starter pilots add 8000 each.
-    expect(expenses.salaries).toBe(10_000 + Math.round(25_000 * 1.5) + 16_000);
+    // The scientist team (30000 × 1.5) is no longer clamped to the old 10k
+    // cap; the operations director keeps 50000 × 1.5; the two starter pilots
+    // add 8000 each.
+    expect(expenses.salaries).toBe(
+      Math.round(30_000 * 1.5) + Math.round(50_000 * 1.5) + 16_000,
+    );
   });
 });
 

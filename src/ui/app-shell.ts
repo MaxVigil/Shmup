@@ -21,7 +21,6 @@ import {
   isPilotFlightReady,
   outsourceTreatmentCost,
 } from '../domain/pilot-medical';
-import { MANAGER_ROLE_ID, STAFF_SALARY_CAP } from '../domain/staff-market';
 import {
   marketBlueprintPrice,
   marketConsumablePrice,
@@ -92,6 +91,17 @@ const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
   'staff-medic': 'staff.medic',
   'staff-repair-master': 'staff.repairMaster',
 };
+/** Scrum-team roles: a single hire represents a lead + a team of specialists. */
+const TEAM_ROLE_IDS = new Set([
+  'staff-scientist',
+  'staff-engineer',
+  'staff-medic',
+  'staff-repair-master',
+]);
+const TEAM_SIZE = 8;
+function isTeamRole(roleId: string): boolean {
+  return TEAM_ROLE_IDS.has(roleId);
+}
 const capturerBlueprint = contentCatalog.blueprints[0];
 const capturerEquipment = contentCatalog.equipment[0];
 const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
@@ -913,7 +923,10 @@ function renderCandidates(containerId: string, roleId: string): void {
       (candidate.tier >= 3 ? ' is-top-tier' : '');
     const info = document.createElement('div');
     const name = document.createElement('strong');
-    name.textContent = `${candidate.firstName} ${candidate.lastName}`;
+    const displayName = isTeamRole(roleId)
+      ? `${t('staff.lead')} ${candidate.firstName} ${candidate.lastName}`
+      : `${candidate.firstName} ${candidate.lastName}`;
+    name.textContent = displayName;
     const origin = document.createElement('em');
     origin.className = 'candidate-origin';
     origin.textContent = t(countryNameKey(candidate.originCountryId));
@@ -922,6 +935,7 @@ function renderCandidates(containerId: string, roleId: string): void {
       t('staff.tier', { tier: candidate.tier }),
       t('staff.efficiency', { value: candidate.progressMultiplier }),
       t('staff.salary', { credits: candidate.salaryCreditCost }),
+      ...(isTeamRole(roleId) ? [t('staff.teamOf', { count: TEAM_SIZE })] : []),
     ].join(' · ');
     const head = document.createElement('div');
     head.className = 'candidate-row__head';
@@ -944,7 +958,7 @@ function renderCandidates(containerId: string, roleId: string): void {
       state.base.credits < candidate.hireCreditCost;
     hire.addEventListener('click', () => {
       store.dispatch({ type: 'HIRE_CANDIDATE', candidateId: candidate.id });
-      showToast(t('toast.candidateHired', { name: candidate.firstName + ' ' + candidate.lastName }));
+      showToast(t('toast.candidateHired', { name: displayName }));
     });
     actions.appendChild(hire);
     if (headcountFull) {
@@ -978,18 +992,18 @@ function renderStaffRoster(): void {
       t(staffRoleNameKey[role.id] ?? 'staff.scientist'),
     ));
     for (const member of members) {
-      const raw = role.salaryCreditCost * member.salaryMultiplier;
-      const salary = Math.round(
-        role.id === MANAGER_ROLE_ID ? raw : Math.min(STAFF_SALARY_CAP, raw),
-      );
+      const salary = Math.round(role.salaryCreditCost * member.salaryMultiplier);
       const row = h('article', { class: 'threat-row staff-roster-row' });
       const info = h('div', null);
       info.append(
-        h('strong', null, `${member.firstName} ${member.lastName}`),
+        h('strong', null, isTeamRole(role.id)
+          ? `${t('staff.lead')} ${member.firstName} ${member.lastName}`
+          : `${member.firstName} ${member.lastName}`),
         h('small', null, [
           t('staff.tier', { tier: member.tier }),
           t('staff.efficiency', { value: member.progressMultiplier }),
           t('staff.salary', { credits: salary }),
+          ...(isTeamRole(role.id) ? [t('staff.teamOf', { count: TEAM_SIZE })] : []),
         ].join(' · ')),
       );
       row.append(info);

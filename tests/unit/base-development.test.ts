@@ -87,7 +87,11 @@ describe('base development', () => {
     expect(() => hireStaff(createInitialGameState(), scientist)).toThrow(
       'is required to hire',
     );
-    const constructed = constructBuilding(fundedState(), laboratory);
+    const funded = {
+      ...fundedState(),
+      base: { ...fundedState().base, credits: 1_000_000 },
+    };
+    const constructed = constructBuilding(funded, laboratory);
     const hired = hireStaff(constructed, scientist);
 
     expect(hired.base.staff).toEqual([staffMember('staff-scientist-1', scientist.id)]);

@@ -2,6 +2,20 @@
 
 Last updated: 2026-08-16
 
+## Iteration 8 — Scrum teams + salaries
+
+Implemented on `test`.
+
+- Scientist/engineer/medic/repair-master hires are presented as scrum teams
+  ("LEAD X · TEAM OF 8"); the trader and the operations director remain
+  individual hires.
+- Salaries are back at team scale: 30k (scientist/medic), 40k (engineer),
+  35k (repair master), 20k (trader), 50k (director); hire costs scale
+  accordingly. The old 10k monthly salary clamp is gone from candidate
+  generation, monthly expenses, and the roster.
+- No schema change: content + presentation only. 210 unit tests, lint,
+  typecheck, and the production build pass.
+
 ## Iteration 7 — Aircraft fire-rate & projectile-speed multipliers
 
 Implemented on `test`.

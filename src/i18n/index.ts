@@ -444,6 +444,8 @@ const en = {
   'staff.efficiency': 'Efficiency ×{value}',
   'staff.salary': 'Salary {credits}',
   'staff.hire': 'HIRE · {credits}',
+  'staff.lead': 'LEAD',
+  'staff.teamOf': 'TEAM OF {count}',
 
   'staff.roster': 'STAFF ROSTER',
   'staff.noStaff': 'No specialists are employed yet.',
@@ -1132,6 +1134,8 @@ const uk: Record<TranslationKey, string> = {
   'staff.efficiency': 'Ефективність ×{value}',
   'staff.salary': 'Зарплата {credits}',
   'staff.hire': 'НАЙНЯТИ · {credits}',
+  'staff.lead': 'КЕРІВНИК',
+  'staff.teamOf': 'КОМАНДА З {count}',
 
   'staff.roster': 'ШТАТ',
   'staff.noStaff': 'Найнятих спеціалістів ще немає.',

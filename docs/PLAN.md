@@ -431,6 +431,24 @@ Status: implemented on `test`.
   multipliers through unchanged. 207 unit tests, lint, typecheck, and the
   production build pass. No schema change (content + runtime presentation only).
 
+## Iteration 8 — Scrum teams + salaries (plan iteration B)
+
+Status: implemented on `test`.
+
+- [x] Team roles (scientist, engineer, medic, repair master) are framed as
+  "LEAD X · TEAM OF N" in candidate cards, the staff roster, and hire toasts;
+  the trader and the operations director remain individual hires.
+- [x] Salaries raised to team scale: scientist 30k, engineer 40k, medic 30k,
+  repair master 35k; trader 20k; manager (director) 50k. Hire costs scale with
+  the team (scientist 250k, engineer 300k, medic 280k, repair master 300k,
+  trader 250k, manager 400k).
+- [x] `STAFF_SALARY_CAP` (10k) removed from candidate generation, monthly
+  expenses, and the roster display — salaries are no longer clamped.
+- [x] Tests: new staff-market salary suite (no cap, team band, individual
+  trader/manager) + updated monthly-expenses test. 210 unit tests, lint,
+  typecheck, and the production build pass. No schema change (content +
+  presentation only).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

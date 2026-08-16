@@ -437,6 +437,8 @@ export const zh = {
   'staff.efficiency': '效率 ×{value}',
   'staff.salary': '薪水 {credits}',
   'staff.hire': '雇佣 · {credits}',
+  'staff.lead': '主管',
+  'staff.teamOf': '团队 {count} 人',
 
   'staff.roster': '员工名册',
   'staff.noStaff': '尚未雇用专家。',
