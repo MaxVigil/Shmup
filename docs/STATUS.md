@@ -2,6 +2,17 @@
 
 Last updated: 2026-08-16
 
+## Iteration 14 — Process lessons in AGENTS.md
+
+Implemented on `test`.
+
+- `AGENTS.md` now carries a "Process lessons" section: commit+push in one step,
+  per-iteration report + review instruction, `npm run balance` after tuning
+  (guard test), human dev-server checks for visual changes, the single
+  mother-button rule, renaming commands when semantics change, and small unique
+  edits. No code/schema change; 215 unit tests, lint, typecheck, and the
+  production build pass.
+
 ## Iteration 13 — Master balance tables
 
 Implemented on `test`.

@@ -544,6 +544,19 @@ Status: implemented on `test`.
 - [x] 215 unit tests, lint, typecheck, and the production build pass. No schema
   change.
 
+## Iteration 14 — Process lessons in AGENTS.md
+
+Status: implemented on `test`.
+
+- [x] Added a "Process lessons" section to `AGENTS.md`: commit+push as one step,
+  post-iteration report + copy-paste review instruction, balance regeneration
+  (`npm run balance`, guard test), human dev-server verification for visual
+  changes, the single mother-button rule (`.base-action`, semantic-only
+  `is-primary`/`is-danger`, unmistakable disabled state), renaming commands
+  when semantics change, and small unique edits.
+- [x] No code/schema change. 215 unit tests, lint, typecheck, and the production
+  build pass.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain
