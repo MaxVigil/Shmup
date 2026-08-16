@@ -44,6 +44,13 @@ import {
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import { contentCatalog } from '../content/catalog';
+import {
+  blueprintId,
+  buildingId,
+  buildingById,
+  staffRoleById,
+  staffRoleId,
+} from '../content/ids';
 import { hireStaff } from '../domain/base-development';
 import {
   advancePilotRecovery,
@@ -118,7 +125,7 @@ function completeAllResearch(state: GameState): GameState {
     if (next.base.researchQueue.length === 0) {
       break;
     }
-    const advanced = advanceBlueprintResearch(next, contentCatalog.staffRoles[0].id);
+    const advanced = advanceBlueprintResearch(next, staffRoleId.scientist);
     if (advanced === next) {
       break;
     }
@@ -302,7 +309,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             },
             activeRun: null,
           };
-          state = advanceBlueprintResearch(state, contentCatalog.staffRoles[0].id);
+          state = advanceBlueprintResearch(state, staffRoleId.scientist);
           break;
         }
         case 'SELECT_MISSION': {
@@ -432,8 +439,8 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (technology === undefined) {
             throw new Error(`Unknown alien technology ${command.technologyId}.`);
           }
-          const laboratory = contentCatalog.buildings[0];
-          const scientistRole = contentCatalog.staffRoles[0];
+          const laboratory = buildingById(buildingId.researchCentre)!;
+          const scientistRole = staffRoleById(staffRoleId.scientist)!;
           const quarantine = contentCatalog.buildings.find(
             (entry) => entry.id === 'building-quarantine-centre',
           );
@@ -573,7 +580,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             throw new Error(`Unknown blueprint ${command.blueprintId}.`);
           }
           if (
-            blueprint.id === contentCatalog.blueprints[0].id &&
+            blueprint.id === blueprintId.alienTechnologyCapturer &&
             !state.base.telemetryRecorded
           ) {
             throw new Error(`Blueprint ${blueprint.id} requires Warden telemetry.`);

@@ -14,22 +14,22 @@
 
 | Building | Credits | Materials | Sorties | Upkeep /mo | Requires blueprint | Requires building |
 | --- | --- | --- | --- | --- | --- | --- |
-| building-laboratory | 300,000 | 10 | 1 | 5,000 | — | — |
-| building-workshop | 450,000 | 15 | 2 | 8,000 | — | building-laboratory |
-| building-quarantine-centre | 350,000 | 20 | 2 | 6,000 | blueprint-safe-containment | building-workshop |
-| building-trade-centre | 350,000 | 15 | 1 | 6,000 | — | building-workshop |
-| building-medical-block | 350,000 | 20 | 2 | 6,000 | blueprint-medical-block | building-workshop |
+| building-research-centre | 300,000 | 10 | 1 | 5,000 | — | — |
+| building-production-works | 450,000 | 15 | 2 | 8,000 | — | building-research-centre |
+| building-quarantine-centre | 350,000 | 20 | 2 | 6,000 | blueprint-safe-containment | building-production-works |
+| building-trade-centre | 350,000 | 15 | 1 | 6,000 | — | building-production-works |
+| building-medical-block | 350,000 | 20 | 2 | 6,000 | blueprint-medical-block | building-production-works |
 
 ## Staff roles
 
 | Role | Hire | Salary /mo | Required building | Headcount cap |
 | --- | --- | --- | --- | --- |
-| staff-scientist | 250,000 | 30,000 | building-laboratory | — |
-| staff-engineer | 300,000 | 40,000 | building-workshop | 3 |
+| staff-scientist | 250,000 | 30,000 | building-research-centre | — |
+| staff-engineer | 300,000 | 40,000 | building-production-works | 3 |
 | staff-trader | 250,000 | 20,000 | building-trade-centre | 1 |
 | staff-manager | 400,000 | 50,000 | — | 1 |
 | staff-medic | 280,000 | 30,000 | building-medical-block | 4 |
-| staff-repair-master | 300,000 | 35,000 | building-workshop | — |
+| staff-repair-master | 300,000 | 35,000 | building-production-works | — |
 
 ### Staff candidate formula
 
@@ -114,7 +114,7 @@
 
 | Module | Cost | Requirements |
 | --- | --- | --- |
-| equipment-alien-technology-capturer | 250,000 + 10 mat | building-workshop + staff-engineer |
+| equipment-alien-technology-capturer | 250,000 + 10 mat | building-production-works + staff-engineer |
 
 ## Consumables
 

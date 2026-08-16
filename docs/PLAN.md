@@ -557,6 +557,27 @@ Status: implemented on `test`.
 - [x] No code/schema change. 215 unit tests, lint, typecheck, and the production
   build pass.
 
+## Refactor Phase 1 — Terminology + typed lookups (schema v18)
+
+Status: implemented on `test`.
+
+- [x] Renamed `building-laboratory` → `building-research-centre` and
+  `building-workshop` → `building-production-works` across the typed catalog,
+  prerequisites, UI, i18n labels, and tests; canonical names are now used
+  consistently everywhere.
+- [x] New `src/content/ids.ts`: stable ID constants (`buildingId`, `staffRoleId`,
+  `weaponId`, `aircraftId`, `equipmentId`, `blueprintId`, `consumableId`,
+  `alienTechnologyId`) and typed lookup helpers (`buildingById`, …). Removed all
+  positional catalog access from `src/` (grep = 0).
+- [x] Save schema v18 with a v17→v18 migration that renames persisted building
+  IDs (`constructedBuildingIds`, `constructionQueue[].buildingId`); legacy
+  v1–v16 migrations still produce the v17 intermediate shape and the load chain
+  upgrades them (`SaveSchemaVersion` is now `number`; `isGameState(value, 17)`
+  validates intermediate saves, the current guard requires v18).
+- [x] Tests: legacy assertions updated to v18; new acceptance test "v17 save with
+  Laboratory/Workshop migrates to v18 without losing credits/materials/progress".
+  216 unit tests, lint, typecheck, and the production build pass.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

@@ -1,5 +1,21 @@
 import { createGameStore } from '../app/store';
 import { contentCatalog } from '../content/catalog';
+import {
+  alienTechnologyById,
+  alienTechnologyId,
+  blueprintById,
+  blueprintId,
+  buildingById,
+  buildingId,
+  consumableById,
+  consumableId,
+  equipmentById,
+  equipmentId,
+  staffRoleById,
+  staffRoleId,
+  weaponById,
+  weaponId,
+} from '../content/ids';
 import { validateContentCatalog } from '../content/validate';
 import { createGame } from '../game/create-game';
 import { CombatScene, type CombatRunResult } from '../game/scenes/CombatScene';
@@ -71,19 +87,17 @@ const store = createGameStore(
 );
 installShmupDebugBridge({ store, getGame: () => game });
 const initialState = store.getSnapshot();
-const prism = contentCatalog.alienTechnologies[0];
-const impulseAccelerator = contentCatalog.weapons[1];
-const splitPulseWeapon = contentCatalog.weapons[2];
+const prism = alienTechnologyById(alienTechnologyId.prism)!;
+const impulseAccelerator = weaponById(weaponId.impulseAccelerator)!;
+const splitPulseWeapon = weaponById(weaponId.splitPulse)!;
 const splitPulseWeaponId = splitPulseWeapon.id;
-const laboratory = contentCatalog.buildings[0];
-const workshop = contentCatalog.buildings[1];
-const scientistRole = contentCatalog.staffRoles[0];
-const engineerRole = contentCatalog.staffRoles[1];
-const traderRoleId = 'staff-trader';
-const managerRoleId = 'staff-manager';
-const tradeCentreBuilding = contentCatalog.buildings.find(
-  (entry) => entry.id === 'building-trade-centre',
-);
+const laboratory = buildingById(buildingId.researchCentre)!;
+const workshop = buildingById(buildingId.productionWorks)!;
+const scientistRole = staffRoleById(staffRoleId.scientist)!;
+const engineerRole = staffRoleById(staffRoleId.engineer)!;
+const traderRoleId = staffRoleId.trader;
+const managerRoleId = staffRoleId.manager;
+const tradeCentreBuilding = buildingById(buildingId.tradeCentre);
 const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
   'staff-scientist': 'staff.scientist',
   'staff-engineer': 'staff.engineer',
@@ -103,8 +117,8 @@ const TEAM_SIZE = 8;
 function isTeamRole(roleId: string): boolean {
   return TEAM_ROLE_IDS.has(roleId);
 }
-const capturerBlueprint = contentCatalog.blueprints[0];
-const capturerEquipment = contentCatalog.equipment[0];
+const capturerBlueprint = blueprintById(blueprintId.alienTechnologyCapturer)!;
+const capturerEquipment = equipmentById(equipmentId.alienTechnologyCapturer)!;
 const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
 const machineGunUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
@@ -112,16 +126,10 @@ const containmentBlueprint = contentCatalog.buildingBlueprints[0];
 const medicalBlueprint = contentCatalog.buildingBlueprints.find(
   (entry) => entry.id === 'blueprint-medical-block',
 ) ?? contentCatalog.buildingBlueprints[0];
-const quarantine = contentCatalog.buildings[2];
-const medicalBlock = contentCatalog.buildings.find(
-  (entry) => entry.id === 'building-medical-block',
-) ?? quarantine;
-const medicRole = contentCatalog.staffRoles.find(
-  (entry) => entry.id === 'staff-medic',
-) ?? contentCatalog.staffRoles[0];
-const repairMasterRole = contentCatalog.staffRoles.find(
-  (entry) => entry.id === 'staff-repair-master',
-) ?? contentCatalog.staffRoles[0];
+const quarantine = buildingById(buildingId.quarantineCentre)!;
+const medicalBlock = buildingById(buildingId.medicalBlock) ?? quarantine;
+const medicRole = staffRoleById(staffRoleId.medic)!;
+const repairMasterRole = staffRoleById(staffRoleId.repairMaster)!;
 const pilotInjurySeverityKey: Readonly<Record<string, TranslationKey>> = {
   light: 'pilot.injuryLight',
   medium: 'pilot.injuryMedium',
@@ -129,10 +137,8 @@ const pilotInjurySeverityKey: Readonly<Record<string, TranslationKey>> = {
 };
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const canisterBlueprint = contentCatalog.researchWeaponBlueprints[0];
-const rocketPodWeapon = contentCatalog.weapons.find(
-  (weapon) => weapon.visualProfile === 'rocket-pod',
-) ?? contentCatalog.weapons[4];
-const rocketsConsumable = contentCatalog.consumables[0];
+const rocketPodWeapon = weaponById(weaponId.rocketPod)!;
+const rocketsConsumable = consumableById(consumableId.rockets)!;
 
 let game: ReturnType<typeof createGame> | null = null;
 let activeScreen: 'base' | 'sortie' = 'base';
@@ -281,7 +287,7 @@ const manufactureAcceleratorUpgradeButton = byId<HTMLButtonElement>('manufacture
 
 let activeCombatWeaponId = initialState.base.equippedPrimaryWeaponIds.find(
   (weaponId): weaponId is string => weaponId !== null,
-) ?? contentCatalog.weapons[0].id;
+) ?? weaponId.pulseCannon;
 let combatWeaponSwitchAvailable = false;
 
 function renderCombatWeaponControl(): void {
@@ -1802,8 +1808,8 @@ function renderDatabank(): void {
   container.textContent = '';
 
   const buildingNameKey: Readonly<Record<string, TranslationKey>> = {
-    'building-laboratory': 'building.laboratory',
-    'building-workshop': 'building.workshop',
+    'building-research-centre': 'building.laboratory',
+    'building-production-works': 'building.workshop',
     'building-quarantine-centre': 'building.quarantine',
     'building-trade-centre': 'building.tradeCentre',
   };
@@ -3174,7 +3180,7 @@ function renderTradeCentre(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const built = state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
   const job = constructionJob(state, tradeCentreBuilding.id);
-  const workshopBuilt = state.base.constructedBuildingIds.includes('building-workshop');
+  const workshopBuilt = state.base.constructedBuildingIds.includes('building-production-works');
   tradeCentreRow.hidden = built;
   if (built || job !== undefined) {
     if (job !== undefined) {

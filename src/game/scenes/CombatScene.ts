@@ -1,5 +1,14 @@
 import Phaser from 'phaser';
 import { contentCatalog } from '../../content/catalog';
+import {
+  alienTechnologyById,
+  alienTechnologyId,
+  aircraftById,
+  aircraftId,
+  equipmentId,
+  weaponById,
+  weaponId,
+} from '../../content/ids';
 import type {
   AircraftDefinition,
   EnemyDefinition,
@@ -82,9 +91,9 @@ const PLAYER_CONTACT_KNOCKBACK = 64;
 const ELITE_CONTACT_KNOCKBACK = 46;
 const ELITE_KNOCKBACK_RECOVERY_MS = 360;
 const ELITE_DURATION_MS = ENCOUNTER_DURATION_MS - EXTRACTION_WINDOW_MS;
-const SPLIT_PULSE_MODULE_ID = contentCatalog.alienTechnologies[0].weaponTransformation.id;
-const STANDARD_WEAPON_ID = contentCatalog.weapons[0].id;
-const CAPTURER_EQUIPMENT_ID = contentCatalog.equipment[0].id;
+const SPLIT_PULSE_MODULE_ID = alienTechnologyById(alienTechnologyId.prism)!.weaponTransformation.id;
+const STANDARD_WEAPON_ID = weaponId.pulseCannon;
+const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -375,11 +384,11 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private activeAircraftVisual(): AircraftDefinition['visual'] {
-    const aircraftId = this.getActiveAircraftId();
-    const definition = aircraftId === null
+    const activeAircraftId = this.getActiveAircraftId();
+    const definition = activeAircraftId === null
       ? undefined
-      : contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
-    return definition?.visual ?? contentCatalog.aircraft[0].visual;
+      : contentCatalog.aircraft.find((entry) => entry.id === activeAircraftId);
+    return definition?.visual ?? aircraftById(aircraftId.india)!.visual;
   }
 
   private drawPlayerShip(): void {
@@ -604,7 +613,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private presentTechnologySignal(): void {
-    const technology = contentCatalog.alienTechnologies[0];
+    const technology = alienTechnologyById(alienTechnologyId.prism)!;
     this.showDecision(
       this.t('combat.artifactTitle'),
       [
@@ -629,7 +638,7 @@ export class CombatScene extends Phaser.Scene {
     if (this.runState.phase !== 'technology-choice') {
       return;
     }
-    const technology = contentCatalog.alienTechnologies[0];
+    const technology = alienTechnologyById(alienTechnologyId.prism)!;
     this.runState = decideTechnology(this.runState, technology, decision);
     this.publishActiveWeapon();
     this.closeDecision();
@@ -1047,11 +1056,11 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private currentWeapon(): WeaponDefinition {
-    const weaponId = this.runState.technologyDecision === 'install'
+    const activeWeaponId = this.runState.technologyDecision === 'install'
       ? SPLIT_PULSE_MODULE_ID
       : this.activePrimaryWeaponId();
-    const weapon = contentCatalog.weapons.find((entry) => entry.id === weaponId) ??
-      contentCatalog.weapons[0];
+    const weapon = contentCatalog.weapons.find((entry) => entry.id === activeWeaponId) ??
+      weaponById(weaponId.pulseCannon)!;
     return applyWeaponUpgrades(
       weapon,
       this.manufacturedWeaponUpgradeIds,
@@ -1622,7 +1631,7 @@ export class CombatScene extends Phaser.Scene {
         )
       ) {
         const passiveMultiplier = this.runState.technologyDecision === 'install'
-          ? contentCatalog.alienTechnologies[0].passiveEffect.armourDamageMultiplier
+          ? alienTechnologyById(alienTechnologyId.prism)!.passiveEffect.armourDamageMultiplier
           : 1;
         const contactDamage = Math.ceil(enemy.definition.contactDamage * passiveMultiplier);
         if (!this.debugInvincible) {

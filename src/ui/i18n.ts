@@ -1,4 +1,4 @@
-import { contentCatalog } from '../content/catalog';
+import { weaponId } from '../content/ids';
 import {
   loadLocale,
   saveLocale,
@@ -33,20 +33,20 @@ export function t(key: TranslationKey, params: TranslationParams = {}): string {
   return translate(locale, key, formatted);
 }
 
-export function localizedWeaponName(weaponId: string | null): string {
-  if (weaponId === null) {
+export function localizedWeaponName(id: string | null): string {
+  if (id === null) {
     return t('loadout.slotEmpty');
   }
-  if (weaponId === contentCatalog.weapons[1].id) {
+  if (id === weaponId.impulseAccelerator) {
     return t('content.impulseAccelerator');
   }
-  if (weaponId === contentCatalog.weapons[2].id) {
+  if (id === weaponId.splitPulse) {
     return t('content.splitPulse');
   }
-  if (weaponId === contentCatalog.weapons[3].id) {
+  if (id === weaponId.canisterCannon) {
     return t('content.canisterCannon');
   }
-  if (weaponId === contentCatalog.weapons[4].id) {
+  if (id === weaponId.rocketPod) {
     return t('content.rocketPod');
   }
   return t('content.standardCannon');

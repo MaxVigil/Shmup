@@ -1,8 +1,8 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 17 as const;
+export const SAVE_SCHEMA_VERSION = 18 as const;
 
-export type SaveSchemaVersion = typeof SAVE_SCHEMA_VERSION;
+export type SaveSchemaVersion = number;
 
 export interface PilotState {
   readonly id: string;

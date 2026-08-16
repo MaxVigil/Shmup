@@ -1,6 +1,7 @@
 import type { GameStore } from '../app/store';
 import { setInstantProjectsEnabled, isInstantProjectsEnabled } from '../app/store';
 import { contentCatalog } from '../content/catalog';
+import { consumableId, staffRoleId } from '../content/ids';
 import { saveGame } from '../persistence/save-repository';
 
 export interface ShmupDebugBridge {
@@ -112,13 +113,13 @@ function buildPanel(): HTMLElement {
     }
   });
   add('HIRE SCI', () => {
-    dispatch({ type: 'HIRE_STAFF', roleId: contentCatalog.staffRoles[0].id });
+    dispatch({ type: 'HIRE_STAFF', roleId: staffRoleId.scientist });
   });
   add('HIRE ENG', () => {
-    dispatch({ type: 'HIRE_STAFF', roleId: contentCatalog.staffRoles[1].id });
+    dispatch({ type: 'HIRE_STAFF', roleId: staffRoleId.engineer });
   });
   add('HIRE TRD', () => {
-    dispatch({ type: 'HIRE_STAFF', roleId: contentCatalog.staffRoles[2].id });
+    dispatch({ type: 'HIRE_STAFF', roleId: staffRoleId.trader });
   });
   add('FLEET READY', () => {
     const ids = window.__shmup?.store.getSnapshot().base.hangarSlots.filter(
@@ -133,7 +134,7 @@ function buildPanel(): HTMLElement {
     for (let index = 0; index < 20; index += 1) {
       dispatch({
         type: 'PURCHASE_CONSUMABLE',
-        consumableId: contentCatalog.consumables[0].id,
+        consumableId: consumableId.rockets,
       });
     }
   });

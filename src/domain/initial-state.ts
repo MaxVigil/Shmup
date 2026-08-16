@@ -1,13 +1,14 @@
 import type { GameState } from './model';
 import { SAVE_SCHEMA_VERSION } from './model';
 import { contentCatalog } from '../content/catalog';
+import { aircraftById, aircraftId, weaponById, weaponId } from '../content/ids';
 import { generateThreatMap } from './command-centre';
 import { generateStaffCandidates } from './staff-market';
 import { generatePilotCandidates, STARTER_PILOT_ID } from './pilot-market';
 
 export function createInitialGameState(): GameState {
-  const startingWeapon = contentCatalog.weapons[0];
-  const startingAircraft = contentCatalog.aircraft[0];
+  const startingWeapon = weaponById(weaponId.pulseCannon)!;
+  const startingAircraft = aircraftById(aircraftId.india)!;
   return {
     schemaVersion: SAVE_SCHEMA_VERSION,
     base: {

@@ -1,4 +1,11 @@
 import { contentCatalog } from '../content/catalog';
+import {
+  alienTechnologyId,
+  blueprintId,
+  buildingId,
+  equipmentId,
+  staffRoleId,
+} from '../content/ids';
 import { createInitialGameState } from '../domain/initial-state';
 import type { GameState } from '../domain/model';
 
@@ -25,15 +32,15 @@ function createStage4PlaytestState(): GameState {
       constructedBuildingIds: contentCatalog.buildings.map((building) => building.id),
       staff: [{
         id: 'staff-scientist-1',
-        roleId: contentCatalog.staffRoles[0].id,
+        roleId: staffRoleId.scientist,
         firstName: 'Playtest',
         lastName: 'Specialist',
         tier: 1,
         progressMultiplier: 1,
         salaryMultiplier: 1,
       }],
-      unlockedBlueprintIds: [contentCatalog.blueprints[0].id],
-      manufacturedEquipmentIds: [contentCatalog.equipment[0].id],
+      unlockedBlueprintIds: [blueprintId.alienTechnologyCapturer],
+      manufacturedEquipmentIds: [equipmentId.alienTechnologyCapturer],
     },
   };
 }
@@ -58,7 +65,7 @@ function createM3g2PlaytestState(): GameState {
       constructedBuildingIds: contentCatalog.buildings.map((building) => building.id),
       staff: [{
         id: 'staff-scientist-1',
-        roleId: contentCatalog.staffRoles[0].id,
+        roleId: staffRoleId.scientist,
         firstName: 'Playtest',
         lastName: 'Specialist',
         tier: 1,
@@ -77,14 +84,14 @@ function createM3g3aPlaytestState(): GameState {
       ...state.base,
       credits: 1_500,
       materials: 60,
-      preservedTechnologyIds: [contentCatalog.alienTechnologies[0].id],
+      preservedTechnologyIds: [alienTechnologyId.prism],
       constructedBuildingIds: [
-        contentCatalog.buildings[0].id,
-        contentCatalog.buildings[1].id,
+        buildingId.researchCentre,
+        buildingId.productionWorks,
       ],
       staff: [{
         id: 'staff-scientist-1',
-        roleId: contentCatalog.staffRoles[0].id,
+        roleId: staffRoleId.scientist,
         firstName: 'Playtest',
         lastName: 'Specialist',
         tier: 1,

@@ -110,7 +110,7 @@ describe('base development', () => {
     };
 
     expect(() => constructBuilding(fundedWorkshop, workshop)).toThrow(
-      'Building building-laboratory is required',
+      'Building building-research-centre is required',
     );
 
     const withCentre = {

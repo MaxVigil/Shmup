@@ -2,6 +2,24 @@
 
 Last updated: 2026-08-16
 
+## Refactor Phase 1 — Terminology + typed lookups (schema v18)
+
+Implemented on `test`.
+
+- Building IDs renamed to canonical names (`building-research-centre`,
+  `building-production-works`); the terminology mismatch (Laboratory = R&D
+  Centre, Workshop = Production Works) is gone across content, UI, i18n, tests,
+  and docs.
+- New `src/content/ids.ts` with stable ID constants and typed lookups; every
+  positional catalog access (`buildings[0]`, `staffRoles[0]`, `weapons[N]`,
+  `aircraft[N]`, …) removed from `src/`.
+- Save schema v17→v18: a versioned migration renames persisted building IDs
+  (`constructedBuildingIds`, `constructionQueue[].buildingId`) without losing
+  credits, materials, aircraft, staff, or progress. Legacy v1–v16 saves chain
+  through the upgrade.
+- No gameplay behaviour changed. 216 unit tests, lint, typecheck, and the
+  production build pass.
+
 ## Iteration 14 — Process lessons in AGENTS.md
 
 Implemented on `test`.

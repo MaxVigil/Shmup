@@ -25,22 +25,22 @@ Legend: implemented in code, prototype, planned.
 
 | Building | Cost | Prerequisites |
 | --- | --- | --- |
-| building-laboratory | 300000 cr + 10 mat | — / — |
-| building-workshop | 450000 cr + 15 mat | — / building-laboratory |
-| building-quarantine-centre | 350000 cr + 20 mat | blueprint-safe-containment / building-workshop |
-| building-trade-centre | 350000 cr + 15 mat | — / building-workshop |
-| building-medical-block | 350000 cr + 20 mat | blueprint-medical-block / building-workshop |
+| building-research-centre | 300000 cr + 10 mat | — / — |
+| building-production-works | 450000 cr + 15 mat | — / building-research-centre |
+| building-quarantine-centre | 350000 cr + 20 mat | blueprint-safe-containment / building-production-works |
+| building-trade-centre | 350000 cr + 15 mat | — / building-production-works |
+| building-medical-block | 350000 cr + 20 mat | blueprint-medical-block / building-production-works |
 
 ## Staff roles
 
 | Role | Hire cost | Required building | Headcount cap |
 | --- | --- | --- | --- |
-| staff-scientist | 250000 cr | building-laboratory | — |
-| staff-engineer | 300000 cr | building-workshop | 3 |
+| staff-scientist | 250000 cr | building-research-centre | — |
+| staff-engineer | 300000 cr | building-production-works | 3 |
 | staff-trader | 250000 cr | building-trade-centre | 1 |
 | staff-manager | 400000 cr | null | 1 |
 | staff-medic | 280000 cr | building-medical-block | 4 |
-| staff-repair-master | 300000 cr | building-workshop | — |
+| staff-repair-master | 300000 cr | building-production-works | — |
 
 ## Aircraft
 
@@ -73,16 +73,16 @@ Legend: implemented in code, prototype, planned.
 
 | Module | Cost | Requirements |
 | --- | --- | --- |
-| equipment-alien-technology-capturer | 250000 cr + 10 mat | building-workshop + staff-engineer |
+| equipment-alien-technology-capturer | 250000 cr + 10 mat | building-production-works + staff-engineer |
 
 ## Research (blueprint projects)
 
 | Blueprint | Domain | Progress | Requirements | Output |
 | --- | --- | --- | --- | --- |
-| blueprint-alien-technology-capturer | earth | 3 sorties | building-laboratory + staff-scientist | equipment equipment-alien-technology-capturer |
-| blueprint-safe-containment | earth | 3 sorties | building-laboratory + staff-scientist | building building-quarantine-centre |
-| blueprint-medical-block | earth | 3 sorties | building-laboratory + staff-scientist | building building-medical-block |
-| blueprint-canister-cannon | earth | 3 sorties | building-laboratory + staff-scientist | weapon weapon-canister-cannon + production 200000 cr |
+| blueprint-alien-technology-capturer | earth | 3 sorties | building-research-centre + staff-scientist | equipment equipment-alien-technology-capturer |
+| blueprint-safe-containment | earth | 3 sorties | building-research-centre + staff-scientist | building building-quarantine-centre |
+| blueprint-medical-block | earth | 3 sorties | building-research-centre + staff-scientist | building building-medical-block |
+| blueprint-canister-cannon | earth | 3 sorties | building-research-centre + staff-scientist | weapon weapon-canister-cannon + production 200000 cr |
 | blueprint-split-pulse-adaptation | alien | alien analysis | quarantine + lab | weapon weapon-split-pulse + production 250000 cr |
 
 ## Market blueprints

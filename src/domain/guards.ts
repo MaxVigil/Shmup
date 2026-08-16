@@ -5,8 +5,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-export function isGameState(value: unknown): value is GameState {
-  if (!isRecord(value) || value.schemaVersion !== SAVE_SCHEMA_VERSION) {
+export function isGameState(
+  value: unknown,
+  expectedVersion: number = SAVE_SCHEMA_VERSION,
+): value is GameState {
+  if (!isRecord(value) || value.schemaVersion !== expectedVersion) {
     return false;
   }
 

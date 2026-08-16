@@ -113,3 +113,25 @@ button (also two-step, then `clearGame` + reload) are both user-confirmed.
 
 **Consequence:** No accidental run aborts or save wipes; aborting is a legitimate
 risk-management tool, not a free win.
+
+## 9. Canonical building terminology + typed catalog lookups
+
+**Context:** `building-laboratory` was called "R&D Centre" in UI/docs while
+`building-workshop` was "Prototype and Production Works", and domain/UI/test
+code reached content through positional indices (`contentCatalog.buildings[0]`).
+
+**Decision:** Rename the content IDs to the canonical names
+(`building-research-centre`, `building-production-works`), introduce stable ID
+constants and typed lookup helpers in `src/content/ids.ts`, and remove all
+positional catalog access from `src/` (`buildings[N]`, `staffRoles[N]`,
+`weapons[N]`, `aircraft[N]`, `equipment[N]`, `blueprints[N]`, `consumables[N]`,
+`alienTechnologies[N]`). Bump the save schema to v18 with a v17→v18 migration
+that renames persisted building IDs (`constructedBuildingIds`,
+`constructionQueue[].buildingId`) without losing progress.
+
+**Consequence:** Content reordering can no longer silently change gameplay
+dependencies; saves stay compatible through a versioned migration; later phases
+can add buildings (Command Centre, Hangar, Warehouse, …) without positional
+assumptions. `SaveSchemaVersion` became a `number` so intermediate legacy
+migrations can validate their own version via `isGameState(value, 17)` while the
+current-save guard still requires v18.
