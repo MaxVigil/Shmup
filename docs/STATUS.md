@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-16
 
+## Iteration 13 — Master balance tables
+
+Implemented on `test`.
+
+- `npm run balance` regenerates `docs/BALANCE.md` from the catalog + domain
+  constants (economy, buildings, staff, aircraft, aircraft blueprints/upgrades,
+  weapons, enemies, equipment, consumables, loans, repair, hangar,
+  mission/month, pilots, medical, council gifts). A guard test keeps the
+  committed document in sync with the code (drift fails CI).
+- The stale `docs/ENTITIES.md`/`.xlsx` were regenerated; the catalog no longer
+  assumes Vite's `import.meta.env` is present, so the Node export scripts run
+  outside the dev server.
+- No schema change. 215 unit tests, lint, typecheck, and the production build
+  pass.
+
 ## Iteration 12 — Sticky sidebar
 
 Implemented on `test`.

@@ -524,6 +524,26 @@ Status: implemented on `test`.
 - [x] No schema change. 213 unit tests, lint, typecheck, and the production
   build pass.
 
+## Iteration 13 — Master balance tables (docs/BALANCE.md)
+
+Status: implemented on `test`.
+
+- [x] New `scripts/export-balance.mjs` (plain Node, `npm run balance`) generates
+  `docs/BALANCE.md` — a set of tables covering economy, buildings, staff (roles
+  + candidate formula), aircraft (incl. fire-rate/projectile-speed multipliers),
+  aircraft blueprints + Mark II/III upgrades, weapons + upgrades, enemies,
+  equipment, consumables, loans, repair, hangar, mission/month, pilots,
+  medical, and council gifts. `DOMAIN_BALANCE` holds the non-catalog domain
+  constants.
+- [x] `docs/ENTITIES.md`/`.xlsx` were stale (pre-×1000 values) — regenerated via
+  `npm run entities`; the catalog `imageUrl` now tolerates a missing
+  `import.meta.env` so the Node generators work.
+- [x] Guard test `tests/unit/balance-doc.test.ts`: cross-checks `DOMAIN_BALANCE`
+  against the real domain constants and asserts the generated markdown matches
+  the committed `docs/BALANCE.md` (drift fails CI).
+- [x] 215 unit tests, lint, typecheck, and the production build pass. No schema
+  change.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

@@ -1,4 +1,3 @@
-/* global Buffer */
 import { contentCatalog as c } from '../src/content/catalog.ts';
 import { deflateRawSync } from 'node:zlib';
 import { writeFileSync } from 'node:fs';

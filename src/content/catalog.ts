@@ -401,7 +401,7 @@ export const contentCatalog = {
         hullColor: 0x8fbf9f,
         accentColor: 0x2e5f4a,
         silhouette: [0, -18, 10, 4, 4, 10, -4, 10, -10, 4],
-        imageUrl: `${import.meta.env.BASE_URL}assets/india.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/india.svg`,
       },
       marketPrice: {
         minimum: 320_000,
@@ -425,7 +425,7 @@ export const contentCatalog = {
         hullColor: 0x8fd0e8,
         accentColor: 0x2e5f7a,
         silhouette: [0, -14, 14, 0, 18, 6, 12, 12, 14, 20, -14, 20, -12, 12, -18, 6, -14, 0],
-        imageUrl: `${import.meta.env.BASE_URL}assets/britain.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/britain.svg`,
       },
       marketPrice: {
         minimum: 760_000,
@@ -449,7 +449,7 @@ export const contentCatalog = {
         hullColor: 0xe0b36a,
         accentColor: 0x7a2e2e,
         silhouette: [0, -16, 6, -6, 16, -2, 14, 10, 18, 18, -18, 18, -14, 10, -16, -2, -6, -6],
-        imageUrl: `${import.meta.env.BASE_URL}assets/prc.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/prc.svg`,
       },
       marketPrice: {
         minimum: 520_000,
@@ -473,7 +473,7 @@ export const contentCatalog = {
         hullColor: 0xd7a86b,
         accentColor: 0x7a5a2e,
         silhouette: [0, -16, 12, -6, 12, 12, 0, 20, -12, 12, -12, -6],
-        imageUrl: `${import.meta.env.BASE_URL}assets/germany.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/germany.svg`,
       },
       marketPrice: {
         minimum: 820_000,
@@ -497,7 +497,7 @@ export const contentCatalog = {
         hullColor: 0xa9b7d7,
         accentColor: 0x4c5a78,
         silhouette: [0, -18, 8, -4, 14, 2, 12, 10, 16, 16, -16, 16, -12, 10, -14, 2, -8, -4],
-        imageUrl: `${import.meta.env.BASE_URL}assets/usa.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/usa.svg`,
       },
       marketPrice: {
         minimum: 1_150_000,
@@ -521,7 +521,7 @@ export const contentCatalog = {
         hullColor: 0x9dd7c7,
         accentColor: 0x2f6f63,
         silhouette: [0, -20, 5, -8, 12, 0, 6, 8, 0, 12, -6, 8, -12, 0, -5, -8],
-        imageUrl: `${import.meta.env.BASE_URL}assets/france.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/france.svg`,
       },
       marketPrice: {
         minimum: 580_000,
@@ -545,7 +545,7 @@ export const contentCatalog = {
         hullColor: 0xc4d7dd,
         accentColor: 0x3a4f5a,
         silhouette: [0, -20, 4, -8, 8, 0, 3, 8, 0, 14, -3, 8, -8, 0, -4, -8],
-        imageUrl: `${import.meta.env.BASE_URL}assets/japan.svg`,
+        imageUrl: `${import.meta.env?.BASE_URL ?? ''}assets/japan.svg`,
       },
       marketPrice: {
         minimum: 620_000,
