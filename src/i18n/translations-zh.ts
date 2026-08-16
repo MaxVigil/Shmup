@@ -415,6 +415,10 @@ export const zh = {
   'hangar.damage': '损伤 {value}%',
   'hangar.repair': '维修 · {credits}',
   'hangar.emergencyRepair': '紧急 · {credits}',
+  'hangar.repairInHouse': '机库维修 · {credits}',
+  'hangar.repairOutsourced': '外包维修 · {credits}',
+  'hangar.repairModeInHouse': '维修主管在岗：机库维修费用降低40%，且完成更快。',
+  'hangar.repairModeOutsourced': '无维修主管：维修外包给承包商，按全额收费。',
 
   'hangar.armour': '装甲 {value}',
   'hangar.speed': '速度 ×{value}',
@@ -559,6 +563,7 @@ export const zh = {
   'staff.medic': '医疗员',
   'staff.engineer': '工程师',
   'staff.trader': '贸易经理',
+  'staff.repairMaster': '维修主管',
   'blueprint.capturer': '外星技术捕获器',
   'blueprint.containment': '安全收容',
   'blueprint.canister': '罐式飞机加农炮',

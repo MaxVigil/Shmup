@@ -31,8 +31,8 @@ import { applyAircraftUpgrades } from '../domain/terrestrial-production';
 import { weaponProductionCost } from '../domain/base-projects';
 import {
   aircraftDamageValue,
-  emergencyRepairCost,
   isAircraftRepairing,
+  isInHouseRepair,
   standardRepairCost,
 } from '../domain/aircraft-integrity';
 import { tradeMargin } from '../domain/trade';
@@ -90,6 +90,7 @@ const staffRoleNameKey: Readonly<Record<string, TranslationKey>> = {
   'staff-trader': 'staff.trader',
   'staff-manager': 'staff.manager',
   'staff-medic': 'staff.medic',
+  'staff-repair-master': 'staff.repairMaster',
 };
 const capturerBlueprint = contentCatalog.blueprints[0];
 const capturerEquipment = contentCatalog.equipment[0];
@@ -106,6 +107,9 @@ const medicalBlock = contentCatalog.buildings.find(
 ) ?? quarantine;
 const medicRole = contentCatalog.staffRoles.find(
   (entry) => entry.id === 'staff-medic',
+) ?? contentCatalog.staffRoles[0];
+const repairMasterRole = contentCatalog.staffRoles.find(
+  (entry) => entry.id === 'staff-repair-master',
 ) ?? contentCatalog.staffRoles[0];
 const pilotInjurySeverityKey: Readonly<Record<string, TranslationKey>> = {
   light: 'pilot.injuryLight',
@@ -490,6 +494,7 @@ function renderBase(): void {
   renderCandidates('manager-candidates', managerRoleId);
   renderCandidates('trader-candidates', traderRoleId);
   renderCandidates('medic-candidates', medicRole.id);
+  renderCandidates('repair-master-candidates', repairMasterRole.id);
   renderStaffRoster();
   renderAircraftProduction();
   renderAircraftUpgradeResearch();
@@ -1684,6 +1689,7 @@ function renderDatabank(): void {
     'staff-scientist': 'staff.scientist',
     'staff-engineer': 'staff.engineer',
     'staff-trader': 'staff.trader',
+    'staff-repair-master': 'staff.repairMaster',
   };
   const blueprintNameKey: Readonly<Record<string, TranslationKey>> = {
     'blueprint-alien-technology-capturer': 'blueprint.capturer',
@@ -2218,11 +2224,12 @@ function renderHangarHero(): void {
   const damage = aircraftDamageValue(state.base, aircraft.id);
   const repairing = isAircraftRepairing(state.base, aircraft.id);
   const fueled = isAircraftFueled(state.base, aircraft.id);
+  const inHouseRepair = isInHouseRepair(state.base);
   const hero = h('div', { class: 'hangar-hero__model' });
   hero.innerHTML = aircraftVisualHtml(aircraft.visual);
   const info = h('div', { class: 'hangar-hero__info' });
   info.append(
-    h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
+    h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.aircraftIndia')),
     h('small', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.indiaRole')),
     h('small', null, [
       t('hangar.armour', { value: upgraded.armour }),
@@ -2235,6 +2242,13 @@ function renderHangarHero(): void {
       damage > 0 ? t('hangar.damage', { value: Math.round(damage * 100) }) : '',
     ].filter(Boolean).join(' · ')),
   );
+  if (damage > 0) {
+    info.append(h(
+      'small',
+      { class: 'hangar-hero__repair-mode' },
+      t(inHouseRepair ? 'hangar.repairModeInHouse' : 'hangar.repairModeOutsourced'),
+    ));
+  }
   if (
     upgraded.armour !== aircraft.armour ||
     upgraded.speedMultiplier !== aircraft.speedMultiplier ||
@@ -2246,13 +2260,17 @@ function renderHangarHero(): void {
   if (repairing) {
     const left = state.base.aircraftRepair[aircraft.id] ?? 0;
     if (left > 0) {
-      actions.append(h('small', null, t('hangar.repairInProgress', { sorties: left })));
+      actions.append(h('small', null, t('hangar.repairInProgress', {
+        sorties: Math.ceil(left),
+      })));
     } else {
       const cost = standardRepairCost(state.base, aircraft.id);
       const repair = h(
         'button',
         { class: 'base-action is-primary', type: 'button' },
-        t('hangar.repair', { credits: cost }),
+        t(inHouseRepair ? 'hangar.repairInHouse' : 'hangar.repairOutsourced', {
+          credits: cost,
+        }),
       );
       repair.disabled = bankrupt || state.base.credits < cost;
       repair.addEventListener('click', () => {
@@ -2269,7 +2287,9 @@ function renderHangarHero(): void {
     const standard = h(
       'button',
       { class: 'base-action is-primary', type: 'button' },
-      t('hangar.repair', { credits: standardCost }),
+      t(inHouseRepair ? 'hangar.repairInHouse' : 'hangar.repairOutsourced', {
+        credits: standardCost,
+      }),
     );
     standard.disabled = bankrupt || state.base.credits < standardCost;
     standard.addEventListener('click', () => {
@@ -2416,15 +2436,19 @@ function renderFleet(): void {
           if ((repairLeft ?? 0) > 0) {
             const note = document.createElement('small');
             note.textContent = t('hangar.repairInProgress', {
-              sorties: repairLeft ?? 0,
+              sorties: Math.ceil(repairLeft ?? 0),
             });
             actions.appendChild(note);
           } else {
+            const inHouse = isInHouseRepair(state.base);
             const standardCost = standardRepairCost(state.base, aircraft.id);
             const standard = document.createElement('button');
             standard.className = 'base-action is-primary';
             standard.type = 'button';
-            standard.textContent = t('hangar.repair', { credits: standardCost });
+            standard.textContent = t(
+              inHouse ? 'hangar.repairInHouse' : 'hangar.repairOutsourced',
+              { credits: standardCost },
+            );
             standard.disabled = bankrupt || state.base.credits < standardCost;
             standard.addEventListener('click', () => {
               store.dispatch({
@@ -2434,22 +2458,6 @@ function renderFleet(): void {
               });
             });
             actions.appendChild(standard);
-            const emergencyCost = emergencyRepairCost(state.base, aircraft.id);
-            const emergency = document.createElement('button');
-            emergency.className = 'base-action';
-            emergency.type = 'button';
-            emergency.textContent = t('hangar.emergencyRepair', {
-              credits: emergencyCost,
-            });
-            emergency.disabled = bankrupt || state.base.credits < emergencyCost;
-            emergency.addEventListener('click', () => {
-              store.dispatch({
-                type: 'REPAIR_AIRCRAFT',
-                aircraftId: aircraft.id,
-                emergency: true,
-              });
-            });
-            actions.appendChild(emergency);
           }
         }
         if (!isAircraftFueled(state.base, aircraft.id)) {
@@ -3274,15 +3282,16 @@ function renderDesignSystem(): void {
   const buttonsBlock = h('div', { class: 'design-system-grid design-system-grid--buttons' });
   buttonsBlock.append(
     buttonSample('DEFAULT', 'default'),
+    buttonSample('HOVER', 'hover', { class: 'is-hovered' }),
+    buttonSample('PRESSED', 'active', { class: 'is-pressed' }),
+    buttonSample('FOCUS', 'focus', { class: 'is-focused' }),
     buttonSample('DISABLED', 'disabled', { disabled: true }),
     buttonSample('PRIMARY', 'primary · is-primary', { class: 'is-primary' }),
     buttonSample('DANGER', 'danger · is-danger', { class: 'is-danger' }),
     buttonSample('LAUNCH', 'launch-action', { class: 'launch-action' }),
   );
-  const textButton = h('button', { class: 'text-action', type: 'button' }, 'TEXT ACTION');
   const iconButton = h('button', { class: 'icon-button', type: 'button', 'aria-expanded': 'false' }, '⚙');
   buttonsBlock.append(
-    h('div', { class: 'design-button-cell' }, textButton, h('small', null, 'text-action')),
     h('div', { class: 'design-button-cell' }, iconButton, h('small', null, 'icon-button')),
   );
   designSystemContent.append(designSection('design.buttons', buttonsBlock));

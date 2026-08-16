@@ -2,6 +2,25 @@
 
 Last updated: 2026-08-16
 
+## Iteration 5–6 — Unified buttons + Repair Master
+
+Implemented on `test`.
+
+- **Iteration 5 — unified button system:** removed the `.text-action` control
+  (CSS and the settings "Design system" button now use `base-action`). One
+  Material-style button primitive covers default, hover, pressed, focus,
+  disabled, primary, danger, and launch states; the design-system page now
+  demonstrates every state instead of the old TEXT ACTION sample. Whole UI
+  audited — every DOM action is `base-action` (+ modifiers).
+- **Iteration 6 — Repair Master role:** new `staff-repair-master` role (Works,
+  max 1, 9k salary). Without a master, repairs are outsourced at full cost;
+  with one, standard repair becomes in-house: up to 40% cheaper (floored at
+  50% cost) and repairs tick 50% faster per contribution unit. The hangar
+  labels the mode (IN-HOUSE / OUTSOURCED REPAIR) and shows a status note; the
+  duplicate emergency-repair button was removed from fleet slots.
+- No schema change: the repair master is a regular staff member. 206 unit
+  tests, lint, typecheck, and the production build pass.
+
 ## Iteration 4 — National aircraft fleet (schema v17)
 
 Implemented on `test`. The six engine-brand aircraft were replaced with seven

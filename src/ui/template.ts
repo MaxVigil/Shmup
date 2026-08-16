@@ -38,7 +38,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <option id="theme-option-industrial" value="industrial"></option>
             <option id="theme-option-terminal" value="terminal"></option>
           </select>
-          <button id="design-system-open" class="text-action settings-design" type="button"></button>
+          <button id="design-system-open" class="base-action settings-design" type="button"></button>
           <div class="system-check" role="status">
             <span class="system-check__light" aria-hidden="true"></span>
             <span id="prototype-status"></span>
@@ -338,6 +338,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <div id="manager-candidates" class="candidate-list"></div>
         <div id="trader-candidates" class="candidate-list"></div>
         <div id="medic-candidates" class="candidate-list" hidden></div>
+        <div id="repair-master-candidates" class="candidate-list"></div>
       </section>
 
       <section id="base-panel-medical" class="base-panel" role="tabpanel" aria-labelledby="base-tab-medical" hidden>

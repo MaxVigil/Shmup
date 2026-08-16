@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { StaffMemberState } from '../../src/domain/model';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import {
@@ -15,6 +16,9 @@ import {
   applySortieDamage,
   emergencyRepairCost,
   isAircraftRepairing,
+  isInHouseRepair,
+  repairCostMultiplier,
+  repairMasterContribution,
   standardRepairCost,
   startRepair,
 } from '../../src/domain/aircraft-integrity';
@@ -29,6 +33,18 @@ import { sellAircraft, sellWeapon, tradeMargin } from '../../src/domain/trade';
 import { marketWeaponPrice } from '../../src/domain/terrestrial-market';
 
 const interceptorId = contentCatalog.aircraft[0].id;
+
+function staffMember(id: string, roleId: string): StaffMemberState {
+  return {
+    id,
+    roleId,
+    firstName: 'Test',
+    lastName: 'Specialist',
+    tier: 1,
+    progressMultiplier: 1,
+    salaryMultiplier: 1,
+  };
+}
 const machineGun = contentCatalog.weapons[0];
 const accelerator = contentCatalog.weapons[1];
 const capturer = contentCatalog.equipment[0];
@@ -118,6 +134,70 @@ describe('aircraft integrity', () => {
     }
     expect(isAircraftRepairing(current, interceptorId)).toBe(false);
     expect(current.aircraftRepair[interceptorId]).toBeUndefined();
+  });
+
+  it('a Repair Master switches repairs from outsourced to cheaper in-house', () => {
+    const initial = createInitialGameState();
+    // Two full-damage sorties saturate the aircraft at damage 1.0.
+    const damaged = applySortieDamage(
+      applySortieDamage(initial.base, interceptorId, 1),
+      interceptorId,
+      1,
+    );
+    const withMaster = {
+      ...damaged,
+      staff: [staffMember('repair-master-1', 'staff-repair-master')],
+    };
+    expect(isInHouseRepair(damaged)).toBe(false);
+    expect(repairMasterContribution(damaged)).toBe(0);
+    expect(standardRepairCost(damaged, interceptorId)).toBe(100_000);
+    expect(isInHouseRepair(withMaster)).toBe(true);
+    expect(repairMasterContribution(withMaster)).toBe(1);
+    expect(repairCostMultiplier(withMaster)).toBeCloseTo(0.6);
+    expect(standardRepairCost(withMaster, interceptorId)).toBe(60_000);
+
+    const baseline = startRepair(
+      { ...damaged, credits: 500_000 },
+      interceptorId,
+      false,
+    );
+    const inHouse = startRepair(
+      { ...withMaster, credits: 500_000 },
+      interceptorId,
+      false,
+    );
+    expect(baseline.credits).toBe(400_000);
+    expect(inHouse.credits).toBe(440_000);
+    expect(baseline.aircraftRepair[interceptorId]).toBe(3);
+  });
+
+  it('a Repair Master completes a three-sortie repair in two sorties', () => {
+    const initial = createInitialGameState();
+    const damaged = applySortieDamage(
+      applySortieDamage(initial.base, interceptorId, 1),
+      interceptorId,
+      1,
+    );
+    const withMaster = {
+      ...damaged,
+      staff: [staffMember('repair-master-1', 'staff-repair-master')],
+    };
+    let baseline = startRepair(
+      { ...damaged, credits: 500_000 },
+      interceptorId,
+      false,
+    );
+    let inHouse = startRepair(
+      { ...withMaster, credits: 500_000 },
+      interceptorId,
+      false,
+    );
+    for (let index = 0; index < 2; index += 1) {
+      baseline = advanceRepairs(baseline);
+      inHouse = advanceRepairs(inHouse);
+    }
+    expect(isAircraftRepairing(baseline, interceptorId)).toBe(true);
+    expect(isAircraftRepairing(inHouse, interceptorId)).toBe(false);
   });
 });
 

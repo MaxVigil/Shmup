@@ -380,6 +380,34 @@ Status: implemented on `test`.
 - [x] Tests: catalog fleet balance, v16→v17 migration, aircraft production and
   upgrade flows against the new blueprint ids.
 
+## Iteration 5 — Unified button design system
+
+Status: implemented on `test`.
+
+- [x] Removed the `.text-action` control entirely (CSS + the settings
+  "Design system" button now uses the standard `base-action`).
+- [x] One Material-style button primitive: `base-action` with default, hover,
+  pressed, focus-visible, disabled, `is-primary`, `is-danger`, and launch
+  modifier states, demonstrated on the design-system page (removed the old
+  TEXT ACTION sample).
+- [x] Audited the whole UI: every DOM action uses `base-action` (+ modifiers);
+  `icon-button` remains only for compact square glyph controls and
+  `base-navigation button` for the tab strip.
+
+## Iteration 6 — Repair Master staff role
+
+Status: implemented on `test`.
+
+- [x] New `staff-repair-master` role (hired in the Works, max 1, 9k salary)
+  frames repair as an outsourced-vs-in-house choice: without a master, repairs
+  are outsourced to contractors at the full baseline cost; with a master they
+  become in-house — up to 40% cheaper (per contribution, floored at 50%) and
+  each completed sortie ticks 50% more repair progress per contribution unit.
+- [x] Hangar UI shows the active repair mode ("IN-HOUSE REPAIR"/"OUTSOURCED
+  REPAIR" + status note); the duplicate emergency-repair button was removed
+  from fleet slots so a single REPAIR action remains.
+- [x] Tests: cost multiplier/discount, faster repair ticks, in-house detection.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

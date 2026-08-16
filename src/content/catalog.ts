@@ -254,6 +254,13 @@ export const contentCatalog = {
       requiredBuildingId: 'building-medical-block',
       maximumHeadcount: 4,
     },
+    {
+      id: 'staff-repair-master',
+      creditCost: 220_000,
+      salaryCreditCost: 9_000,
+      requiredBuildingId: 'building-workshop',
+      maximumHeadcount: 1,
+    },
   ],
   blueprints: [
     {
