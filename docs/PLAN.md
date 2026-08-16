@@ -510,6 +510,20 @@ Status: implemented on `test`.
 - [x] No schema change. 213 unit tests, lint, typecheck, and the production
   build pass.
 
+## Iteration 12 — Sticky sidebar (plan iteration F)
+
+Status: implemented on `test`.
+
+- [x] Left tab navigation now stays in view while the content panel scrolls:
+  `align-self: start` on the sticky nav (keeps it content-height inside the grid
+  row), `top: calc(3.75rem + 0.75rem)` so it clears the sticky top bar, and the
+  `overflow: hidden` that could neutralise grid-item sticky was removed
+  (corner clipping now comes from first/last button radii instead).
+- [x] Mobile layout unchanged: at ≤820px the nav becomes the horizontal scroll
+  strip with `position: static`; button radii are reset there.
+- [x] No schema change. 213 unit tests, lint, typecheck, and the production
+  build pass.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

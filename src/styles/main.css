@@ -229,7 +229,6 @@ select:focus-visible {
   gap: 1rem;
   width: min(100%, 88rem);
   padding: 1.25rem 1rem 2.5rem;
-  align-items: start;
 }
 
 #global-hud {
@@ -239,8 +238,9 @@ select:focus-visible {
 .base-navigation {
   grid-column: 1;
   grid-row: 2;
+  align-self: start;
   position: sticky;
-  top: 1rem;
+  top: calc(3.75rem + 0.75rem);
   display: flex;
   flex-direction: column;
   border: 1px solid #223741;
@@ -264,8 +264,15 @@ select:focus-visible {
   text-transform: uppercase;
 }
 
+.base-navigation button:first-child {
+  border-top-left-radius: var(--radius-m);
+  border-top-right-radius: var(--radius-m);
+}
+
 .base-navigation button:last-child {
   border-bottom: 0;
+  border-bottom-left-radius: var(--radius-m);
+  border-bottom-right-radius: var(--radius-m);
 }
 
 .base-navigation button[data-nav-glyph="command"]::before { content: "◉"; }
@@ -1058,6 +1065,7 @@ h1 {
   .base-navigation button {
     border-bottom: 0;
     border-right: 1px solid #223741;
+    border-radius: 0;
     white-space: nowrap;
   }
   .base-navigation button:last-child {
@@ -1444,7 +1452,6 @@ h1 {
 .base-navigation {
   border-color: var(--border);
   border-radius: var(--radius-m);
-  overflow: hidden;
 }
 
 .base-navigation button {

@@ -2,6 +2,18 @@
 
 Last updated: 2026-08-16
 
+## Iteration 12 — Sticky sidebar
+
+Implemented on `test`.
+
+- The left tab navigation is now sticky below the top bar
+  (`top: calc(3.75rem + 0.75rem)`, `align-self: start`), so it stays in view
+  while a tab's content scrolls; the `overflow: hidden` that could interfere
+  with grid-item sticky was removed, and the rounded nav corners are preserved
+  with first/last button radii. The mobile horizontal tab strip is unchanged.
+- No schema change. 213 unit tests, lint, typecheck, and the production build
+  pass.
+
 ## Iteration 11 — Material buttons + full button UX audit
 
 Implemented on `test`.
