@@ -141,7 +141,7 @@ export type GameCommand =
   | { readonly type: 'PURCHASE_AIRCRAFT_BLUEPRINT'; readonly blueprintId: string }
   | { readonly type: 'MANUFACTURE_AIRCRAFT'; readonly blueprintId: string }
   | { readonly type: 'RESEARCH_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
-  | { readonly type: 'MANUFACTURE_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
+  | { readonly type: 'PRODUCE_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
   | {
       readonly type: 'MANUFACTURE_PRIMARY_WEAPON';
       readonly blueprintId: string;
@@ -497,7 +497,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           state = startAircraftUpgradeResearch(state, upgrade);
           break;
         }
-        case 'MANUFACTURE_AIRCRAFT_UPGRADE': {
+        case 'PRODUCE_AIRCRAFT_UPGRADE': {
           const upgrade = contentCatalog.aircraftUpgrades.find(
             (entry) => entry.id === command.upgradeId,
           );

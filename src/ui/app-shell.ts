@@ -1253,7 +1253,7 @@ function renderAircraftUpgradeProduction(): void {
         state.base.credits < upgrade.productionCreditCost ||
         state.base.materials < upgrade.productionMaterialCost;
       manufacture.addEventListener('click', () => {
-        store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
+        store.dispatch({ type: 'PRODUCE_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
         showToast(t('toast.productionStarted'));
       });
       row.append(manufacture);
