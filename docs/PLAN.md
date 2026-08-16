@@ -449,6 +449,20 @@ Status: implemented on `test`.
   typecheck, and the production build pass. No schema change (content +
   presentation only).
 
+## Iteration 9 — Repair Master teams + in-building hiring (plan iteration C)
+
+Status: implemented on `test`.
+
+- [x] `staff-repair-master` `maximumHeadcount` removed (1 → null): more than one
+  Repair Master team can be hired.
+- [x] Engineering (Works) panel now hosts a Repair Master hiring block: team
+  count, status note, and the same candidate pool as the Staff tab.
+- [x] Multiple teams already stack via `staffContribution`: the repair cost
+  discount is floored at 50% and every extra team adds +0.5 repair ticks per
+  completed sortie.
+- [x] Tests: two-team contribution, cost floor, and accelerated ticks. 211 unit
+  tests, lint, typecheck, and the production build pass. No schema change.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

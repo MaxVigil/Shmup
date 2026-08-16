@@ -214,6 +214,10 @@ export function buildAppTemplate(initialState: GameState): string {
             <div class="facility-row production-staff-row">
               <div><span class="loadout-row__label" id="engineers-label"></span><strong id="engineer-count"></strong><small id="engineer-note"></small></div>
             </div>
+            <div class="facility-row repair-staff-row">
+              <div><span class="loadout-row__label" id="repair-master-label"></span><strong id="repair-master-count"></strong><small id="repair-master-note"></small></div>
+            </div>
+            <div id="repair-master-candidates-works" class="candidate-list" aria-live="polite"></div>
             <h3 class="hangar-subtitle" id="aircraft-production-title"></h3>
             <div id="aircraft-production-list" class="candidate-list" aria-live="polite"></div>
             <div id="capturer-equipment-row" class="facility-row programme-equipment">

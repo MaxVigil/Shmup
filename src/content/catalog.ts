@@ -259,7 +259,7 @@ export const contentCatalog = {
       creditCost: 300_000,
       salaryCreditCost: 35_000,
       requiredBuildingId: 'building-workshop',
-      maximumHeadcount: 1,
+      maximumHeadcount: null,
     },
   ],
   blueprints: [

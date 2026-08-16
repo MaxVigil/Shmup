@@ -199,6 +199,38 @@ describe('aircraft integrity', () => {
     expect(isAircraftRepairing(baseline, interceptorId)).toBe(true);
     expect(isAircraftRepairing(inHouse, interceptorId)).toBe(false);
   });
+
+  it('lets multiple Repair Master teams share and accelerate repairs', () => {
+    const initial = createInitialGameState();
+    const damaged = applySortieDamage(
+      applySortieDamage(initial.base, interceptorId, 1),
+      interceptorId,
+      1,
+    );
+    const oneMaster = {
+      ...damaged,
+      staff: [staffMember('repair-master-1', 'staff-repair-master')],
+    };
+    const twoMasters = {
+      ...damaged,
+      staff: [
+        staffMember('repair-master-1', 'staff-repair-master'),
+        staffMember('repair-master-2', 'staff-repair-master'),
+      ],
+    };
+    expect(repairMasterContribution(oneMaster)).toBe(1);
+    expect(repairMasterContribution(twoMasters)).toBe(2);
+    // The cost discount is floored at 50% no matter how many teams.
+    expect(repairCostMultiplier(oneMaster)).toBeCloseTo(0.6);
+    expect(repairCostMultiplier(twoMasters)).toBe(0.5);
+    let single = startRepair({ ...oneMaster, credits: 500_000 }, interceptorId, false);
+    let double = startRepair({ ...twoMasters, credits: 500_000 }, interceptorId, false);
+    single = advanceRepairs(single);
+    double = advanceRepairs(double);
+    // One team ticks 1.5 per sortie; two teams tick 2.0.
+    expect(single.aircraftRepair[interceptorId]).toBeCloseTo(1.5);
+    expect(double.aircraftRepair[interceptorId]).toBe(1);
+  });
 });
 
 describe('staff market', () => {

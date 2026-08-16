@@ -2,6 +2,18 @@
 
 Last updated: 2026-08-16
 
+## Iteration 9 — Repair Master teams + in-building hiring
+
+Implemented on `test`.
+
+- Repair Master teams can now be hired directly in the Engineering (Works)
+  panel, next to the production engineers; the max-1 headcount limit is gone,
+  so several teams can share repairs. Extra teams stack via staff contribution:
+  the cost discount is floored at 50% and each team adds +0.5 repair ticks per
+  completed sortie.
+- No schema change: content + presentation only. 211 unit tests, lint,
+  typecheck, and the production build pass.
+
 ## Iteration 8 — Scrum teams + salaries
 
 Implemented on `test`.

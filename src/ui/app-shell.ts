@@ -198,6 +198,8 @@ const scientistCount = byId<HTMLElement>('scientist-count');
 const scientistNote = byId<HTMLElement>('scientist-note');
 const engineerCount = byId<HTMLElement>('engineer-count');
 const engineerNote = byId<HTMLElement>('engineer-note');
+const repairMasterCount = byId<HTMLElement>('repair-master-count');
+const repairMasterNote = byId<HTMLElement>('repair-master-note');
 const workshopStatus = byId<HTMLElement>('workshop-status');
 const workshopCost = byId<HTMLElement>('workshop-cost');
 const constructWorkshopButton = byId<HTMLButtonElement>('construct-workshop');
@@ -442,6 +444,7 @@ function renderBase(): void {
   const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
   const scientists = state.base.staff.filter((member) => member.roleId === scientistRole.id).length;
   const engineers = state.base.staff.filter((member) => member.roleId === engineerRole.id).length;
+  const repairMasters = state.base.staff.filter((member) => member.roleId === repairMasterRole.id).length;
   const researchReady = labBuilt && scientists > 0;
   const blueprintProject = state.base.researchQueue.find(
     (project) => project.blueprintId === capturerBlueprint.id,
@@ -499,6 +502,13 @@ function renderBase(): void {
       ? t('facility.engineerReady')
       : t('facility.candidatesHint')
     : t('facility.requiresWorks');
+  repairMasterCount.textContent = t('facility.repairMasterCount', { count: repairMasters });
+  repairMasterNote.textContent = workshopBuilt
+    ? repairMasters > 0
+      ? t('facility.repairMasterReady')
+      : t('facility.candidatesHint')
+    : t('facility.requiresWorks');
+  renderCandidates('repair-master-candidates-works', repairMasterRole.id);
   renderCandidates('scientist-candidates', scientistRole.id);
   renderCandidates('engineer-candidates', engineerRole.id);
   renderCandidates('manager-candidates', managerRoleId);
@@ -3508,6 +3518,7 @@ function renderLocale(): void {
   setText('construct-laboratory', 'facility.constructLab');
   setText('scientists-label', 'facility.scientists');
   setText('engineers-label', 'facility.engineers');
+  setText('repair-master-label', 'facility.repairMasterLabel');
   setText('workshop-label', 'facility.workshop');
   setText('construct-workshop', 'facility.constructWorkshop');
   setText('quarantine-label', 'facility.quarantine');
