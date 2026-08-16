@@ -193,6 +193,7 @@ const en = {
   'engineering.manufacturingTitle': 'Blueprint production',
 
   'engineering.aircraftProductionTitle': 'Aircraft production',
+  'engineering.aircraftUpgradeProductionTitle': 'Aircraft improvements production',
   'research.aircraftUpgradeTitle': 'Aircraft improvements',
 
   'market.blueprintOwned': 'Licence acquired. Local production is authorized.',
@@ -282,6 +283,9 @@ const en = {
   'upgrade.installed': 'Manufactured and integrated.',
   'upgrade.researchCost': 'Project budget: {credits} credits',
   'upgrade.awaitingProduction': 'Manufacture the upgrade in the Production Works.',
+  'upgrade.lockedResearchMarkII': 'Research Mark II first.',
+  'upgrade.lockedManufactureMarkII': 'Manufacture Mark II first.',
+  'upgrade.notResearched': 'Research it in the Research tab first.',
   'upgrade.machineEffect': 'Higher-impact ammunition gives the machine gun a decisive damage increase.',
   'upgrade.acceleratorEffect': 'The accumulator shortens the interval between heavy piercing shots.',
   'upgrade.research': 'START RESEARCH',
@@ -886,6 +890,7 @@ const uk: Record<TranslationKey, string> = {
   'engineering.manufacturingTitle': 'Виробництво за блупринтами',
 
   'engineering.aircraftProductionTitle': 'Виробництво літаків',
+  'engineering.aircraftUpgradeProductionTitle': 'Виробництво покращень літаків',
   'research.aircraftUpgradeTitle': 'Покращення літаків',
 
   'market.blueprintOwned': 'Ліцензію придбано. Місцеве виробництво дозволено.',
@@ -975,6 +980,9 @@ const uk: Record<TranslationKey, string> = {
   'upgrade.installed': 'Виготовлено та інтегровано.',
   'upgrade.researchCost': 'Бюджет проєкту: {credits} кредитів',
   'upgrade.awaitingProduction': 'Виготовте покращення у Виробничому цеху.',
+  'upgrade.lockedResearchMarkII': 'Спочатку дослідіть Mark II.',
+  'upgrade.lockedManufactureMarkII': 'Спочатку виготовте Mark II.',
+  'upgrade.notResearched': 'Спочатку дослідіть його у вкладці Дослідження.',
   'upgrade.machineEffect': 'Посилені боєприпаси відчутно збільшують шкоду кулемета.',
   'upgrade.acceleratorEffect': 'Накопичувач скорочує паузу між важкими наскрізними пострілами.',
   'upgrade.research': 'ПОЧАТИ ДОСЛІДЖЕННЯ',

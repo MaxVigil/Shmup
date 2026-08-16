@@ -58,7 +58,7 @@ export interface MonthReportState {
 export interface ProductionJobState {
   readonly id: string;
   readonly projectId: string;
-  readonly kind: 'equipment' | 'weapon' | 'upgrade' | 'aircraft';
+  readonly kind: 'equipment' | 'weapon' | 'upgrade' | 'aircraft' | 'aircraft-upgrade';
   readonly progress: number;
   readonly requiredProgress: number;
   /** Number of units produced when the job completes. */

@@ -74,7 +74,7 @@ import type { BaseState, GameState, SortieOutcome } from '../domain/model';
 import { settleSortie } from '../domain/sortie';
 import { purchaseMarketWeapon } from '../domain/terrestrial-market';
 import {
-  manufactureAircraftUpgrade,
+  startAircraftUpgradeProduction,
   purchaseMarketBlueprint,
   startAircraftUpgradeResearch,
   startWeaponUpgradeResearch,
@@ -504,7 +504,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           if (upgrade === undefined) {
             throw new Error(`Unknown aircraft upgrade ${command.upgradeId}.`);
           }
-          state = manufactureAircraftUpgrade(state, upgrade);
+          state = startAircraftUpgradeProduction(state, upgrade);
           break;
         }
         case 'MANUFACTURE_PRIMARY_WEAPON': {

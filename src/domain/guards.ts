@@ -214,7 +214,8 @@ function isProductionJob(value: unknown): boolean {
     (value.kind === 'equipment' ||
       value.kind === 'weapon' ||
       value.kind === 'upgrade' ||
-      value.kind === 'aircraft') &&
+      value.kind === 'aircraft' ||
+      value.kind === 'aircraft-upgrade') &&
     typeof value.progress === 'number' &&
     typeof value.requiredProgress === 'number' &&
     (value.quantity === undefined || typeof value.quantity === 'number')

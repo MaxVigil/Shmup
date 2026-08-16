@@ -463,6 +463,29 @@ Status: implemented on `test`.
 - [x] Tests: two-team contribution, cost floor, and accelerated ticks. 211 unit
   tests, lint, typecheck, and the production build pass. No schema change.
 
+## Iteration 10 — Aircraft upgrade chain: blueprint → queued manufacture (plan iteration D)
+
+Status: implemented on `test`.
+
+- [x] Mark II / Mark III are researched in the Research tab (laboratory +
+  scientist team) and produce a ready production blueprint; manufacturing was
+  removed from the Research tab (no more inline "MANUFACTURE" button there).
+- [x] Manufacturing now lives only in the Engineering (Works) tab as a queued
+  production job (credit + material cost, `productionSorties`, requires ≥1
+  engineer team): new `kind: 'aircraft-upgrade'` in `base-projects.ts` /
+  `guards.ts`, new `startAircraftUpgradeProduction()` (replaces the instant
+  `manufactureAircraftUpgrade`).
+- [x] Chain gates: Mark III research requires Mark II researched; Mark III
+  manufacture requires Mark II manufactured.
+- [x] Visibility: the hangar hero shows a "MARK II"/"MARK III" badge instead of
+  the generic UPGRADED chip; Engineering lists each upgrade row with its
+  researched/queued/locked state.
+- [x] Tests: queued manufacture round-trip, Mark III research gate, Mark III
+  manufacture gate, store flow through production. 213 unit tests, lint,
+  typecheck, and the production build pass. No schema change (the new
+  production `kind` is additive; `manufacturedAircraftUpgradeIds` already
+  exists in v17).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

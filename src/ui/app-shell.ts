@@ -518,6 +518,7 @@ function renderBase(): void {
   renderStaffRoster();
   renderAircraftProduction();
   renderAircraftUpgradeResearch();
+  renderAircraftUpgradeProduction();
   const workshopJob = constructionJob(state, workshop.id);
   workshopStatus.textContent = workshopJob !== undefined
     ? t('facility.constructing', {
@@ -1120,6 +1121,14 @@ function renderAircraftUpgradeResearch(): void {
     const researchProject = state.base.researchQueue.find(
       (project) => project.blueprintId === upgrade.id,
     );
+    const previousTier = upgrade.tier === 2
+      ? contentCatalog.aircraftUpgrades.find(
+          (entry) =>
+            entry.aircraftBlueprintId === upgrade.aircraftBlueprintId && entry.tier === 1,
+        )
+      : undefined;
+    const previousTierResearched = previousTier !== undefined &&
+      state.base.researchedAircraftUpgradeIds.includes(previousTier.id);
     const row = h('div', { class: 'loadout-row' });
     const label = h(
       'span',
@@ -1132,33 +1141,21 @@ function renderAircraftUpgradeResearch(): void {
     row.append(label);
     if (manufactured) {
       row.append(h('em', { class: 'status-chip is-owned' }, t('upgrade.installed')));
-    } else if (researched) {
-      const manufacture = h(
-        'button',
-        { class: 'base-action', type: 'button' },
-        t('trade.manufactureUpgrade', {
-          credits: upgrade.productionCreditCost,
-          materials: upgrade.productionMaterialCost,
-        }),
-      );
-      manufacture.disabled = bankrupt ||
-        !state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId) ||
-        !state.base.staff.some(
-          (member) => member.roleId === upgrade.requiredProductionStaffRoleId,
-        ) ||
-        state.base.credits < upgrade.productionCreditCost ||
-        state.base.materials < upgrade.productionMaterialCost;
-      manufacture.addEventListener('click', () => {
-        store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
-        showToast(t('toast.productionStarted'));
-      });
-      row.append(manufacture);
     } else if (researchProject !== undefined) {
       row.append(h('small', null, t('research.cardProgress', {
         progress: researchProject.progress,
         required: researchProject.requiredProgress,
       })));
       row.append(h('small', null, t('research.cardRequiresSorties')));
+    } else if (researched) {
+      // Research only lives here; manufacturing moves to the Engineering tab.
+      row.append(h('em', { class: 'status-chip' }, t('research.cardAwaitingProduction')));
+    } else if (upgrade.tier === 2 && !previousTierResearched) {
+      row.append(h(
+        'em',
+        { class: 'status-chip is-resting' },
+        t('upgrade.lockedResearchMarkII'),
+      ));
     } else {
       const research = h(
         'button',
@@ -1177,6 +1174,105 @@ function renderAircraftUpgradeResearch(): void {
         showToast(t('toast.researchStarted'));
       });
       row.append(research);
+    }
+    container.append(row);
+  }
+}
+
+function renderAircraftUpgradeProduction(): void {
+  const state = store.getSnapshot();
+  const bankrupt = isBankrupt(state.base.credits);
+  const container = byId<HTMLElement>('aircraft-upgrade-production-list');
+  container.textContent = '';
+  const upgrades = contentCatalog.aircraftUpgrades.filter(
+    (upgrade) => state.base.unlockedBlueprintIds.includes(upgrade.aircraftBlueprintId),
+  );
+  if (upgrades.length === 0) {
+    return;
+  }
+  for (const upgrade of upgrades) {
+    const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === upgrade.aircraftBlueprintId,
+    );
+    const aircraft = aircraftBlueprint === undefined
+      ? undefined
+      : contentCatalog.aircraft.find(
+          (entry) => entry.id === aircraftBlueprint.outputAircraftId,
+        );
+    if (aircraft === undefined) {
+      continue;
+    }
+    const researched = state.base.researchedAircraftUpgradeIds.includes(upgrade.id);
+    const manufactured = state.base.manufacturedAircraftUpgradeIds.includes(upgrade.id);
+    const productionJob = state.base.productionQueue.find(
+      (job) => job.projectId === upgrade.id,
+    );
+    const previousTier = upgrade.tier === 2
+      ? contentCatalog.aircraftUpgrades.find(
+          (entry) =>
+            entry.aircraftBlueprintId === upgrade.aircraftBlueprintId && entry.tier === 1,
+        )
+      : undefined;
+    const previousTierResearched = previousTier !== undefined &&
+      state.base.researchedAircraftUpgradeIds.includes(previousTier.id);
+    const previousTierManufactured = previousTier !== undefined &&
+      state.base.manufacturedAircraftUpgradeIds.includes(previousTier.id);
+    const row = h('div', { class: 'loadout-row' });
+    const label = h(
+      'span',
+      { class: 'loadout-row__label' },
+      `${t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')} · ${t(
+        'trade.aircraftMark',
+        { mark: upgrade.tier === 1 ? 'II' : 'III' },
+      )}`,
+    );
+    row.append(label);
+    if (manufactured) {
+      row.append(h('em', { class: 'status-chip is-owned' }, t('upgrade.installed')));
+    } else if (productionJob !== undefined) {
+      row.append(h('small', null, t('production.inProgress', {
+        progress: productionJob.progress,
+        required: productionJob.requiredProgress,
+      })));
+    } else if (researched && (upgrade.tier === 1 || previousTierManufactured)) {
+      const manufacture = h(
+        'button',
+        { class: 'base-action is-primary', type: 'button' },
+        t('trade.manufactureUpgrade', {
+          credits: upgrade.productionCreditCost,
+          materials: upgrade.productionMaterialCost,
+        }),
+      );
+      manufacture.disabled = bankrupt ||
+        !state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId) ||
+        !state.base.staff.some(
+          (member) => member.roleId === upgrade.requiredProductionStaffRoleId,
+        ) ||
+        state.base.credits < upgrade.productionCreditCost ||
+        state.base.materials < upgrade.productionMaterialCost;
+      manufacture.addEventListener('click', () => {
+        store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade.id });
+        showToast(t('toast.productionStarted'));
+      });
+      row.append(manufacture);
+    } else if (researched && upgrade.tier === 2 && !previousTierManufactured) {
+      row.append(h(
+        'em',
+        { class: 'status-chip is-resting' },
+        t('upgrade.lockedManufactureMarkII'),
+      ));
+    } else if (upgrade.tier === 2 && !previousTierResearched) {
+      row.append(h(
+        'em',
+        { class: 'status-chip is-resting' },
+        t('upgrade.lockedResearchMarkII'),
+      ));
+    } else {
+      row.append(h(
+        'em',
+        { class: 'status-chip is-resting' },
+        t('upgrade.notResearched'),
+      ));
     }
     container.append(row);
   }
@@ -2227,6 +2323,25 @@ function renderTrade(): void {
   }
 }
 
+function aircraftUpgradeMark(
+  aircraftId: string,
+  manufacturedUpgradeIds: readonly string[],
+): string | null {
+  let mark: string | null = null;
+  for (const upgrade of contentCatalog.aircraftUpgrades) {
+    const blueprint = contentCatalog.aircraftBlueprints.find(
+      (entry) => entry.id === upgrade.aircraftBlueprintId,
+    );
+    if (
+      blueprint?.outputAircraftId === aircraftId &&
+      manufacturedUpgradeIds.includes(upgrade.id)
+    ) {
+      mark = upgrade.tier === 2 ? 'III' : 'II';
+    }
+  }
+  return mark;
+}
+
 function renderHangarHero(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -2275,12 +2390,23 @@ function renderHangarHero(): void {
       t(inHouseRepair ? 'hangar.repairModeInHouse' : 'hangar.repairModeOutsourced'),
     ));
   }
+  const upgradeMark = aircraftUpgradeMark(
+    aircraft.id,
+    state.base.manufacturedAircraftUpgradeIds,
+  );
   if (
+    upgradeMark !== null ||
     upgraded.armour !== aircraft.armour ||
     upgraded.speedMultiplier !== aircraft.speedMultiplier ||
     upgraded.damageMultiplier !== aircraft.damageMultiplier
   ) {
-    info.append(h('em', { class: 'status-chip is-owned' }, t('hangar.upgraded')));
+    info.append(h(
+      'em',
+      { class: 'status-chip is-owned' },
+      upgradeMark === null
+        ? t('hangar.upgraded')
+        : t('trade.aircraftMark', { mark: upgradeMark }),
+    ));
   }
   const actions = h('div', { class: 'hangar-hero__actions' });
   if (repairing) {
@@ -3511,6 +3637,7 @@ function renderLocale(): void {
   setText('command-credit-title', 'credit.title');
   setText('command-credit-lede', 'credit.lede');
   setText('aircraft-production-title', 'engineering.aircraftProductionTitle');
+  setText('aircraft-upgrade-production-title', 'engineering.aircraftUpgradeProductionTitle');
   setText('aircraft-upgrade-research-title', 'research.aircraftUpgradeTitle');
   setText('facility-eyebrow', 'facility.eyebrow');
   setText('facility-title', 'facility.title');

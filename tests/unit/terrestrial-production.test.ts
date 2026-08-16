@@ -8,10 +8,10 @@ import { advanceBlueprintResearch } from '../../src/domain/blueprint-progression
 import {
   applyAircraftUpgrades,
   applyWeaponUpgrades,
-  manufactureAircraftUpgrade,
   manufacturePrimaryWeapon,
   manufactureWeaponUpgrade,
   purchaseMarketBlueprint,
+  startAircraftUpgradeProduction,
   startAircraftUpgradeResearch,
   startWeaponUpgradeResearch,
 } from '../../src/domain/terrestrial-production';
@@ -197,14 +197,16 @@ describe('terrestrial production', () => {
     );
     const researched = advanceBlueprintResearch(queued, scientistId);
     expect(researched.base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
-    const manufactured = manufactureAircraftUpgrade(
+    const queuedProduction = startAircraftUpgradeProduction(
       researched,
       upgrade ?? contentCatalog.aircraftUpgrades[0],
     );
-    expect(manufactured.base.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);
+    expect(queuedProduction.base.productionQueue).toHaveLength(1);
+    const manufactured = advanceProduction(queuedProduction.base);
+    expect(manufactured.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);
     const applied = applyAircraftUpgrades(
       contentCatalog.aircraft[0],
-      manufactured.base.manufacturedAircraftUpgradeIds,
+      manufactured.manufacturedAircraftUpgradeIds,
       contentCatalog.aircraftUpgrades,
     );
     expect(applied.armour).toBe(
@@ -217,6 +219,49 @@ describe('terrestrial production', () => {
     expect(applied.projectileSpeedMultiplier).toBe(
       contentCatalog.aircraft[0].projectileSpeedMultiplier,
     );
+  });
+
+  it('gates Mark III research behind Mark II research', () => {
+    const mk2 = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === 'upgrade-aircraft-india-mk2',
+    );
+    const ready = {
+      ...industrialState(),
+      base: {
+        ...industrialState().base,
+        credits: 2_500_000,
+        materials: 100,
+        unlockedBlueprintIds: [mk2?.aircraftBlueprintId ?? ''],
+      },
+    };
+    expect(() => startAircraftUpgradeResearch(
+      ready,
+      mk2 ?? contentCatalog.aircraftUpgrades[1],
+    )).toThrow('must be researched before');
+  });
+
+  it('gates Mark III manufacture behind Mark II manufacture', () => {
+    const mk1 = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === 'upgrade-aircraft-india-mk1',
+    );
+    const mk2 = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === 'upgrade-aircraft-india-mk2',
+    );
+    const ready = {
+      ...industrialState(),
+      base: {
+        ...industrialState().base,
+        credits: 2_500_000,
+        materials: 100,
+        unlockedBlueprintIds: [mk1?.aircraftBlueprintId ?? ''],
+        researchedAircraftUpgradeIds: [mk1?.id ?? '', mk2?.id ?? ''],
+      },
+    };
+    // Mark II is researched but not yet manufactured.
+    expect(() => startAircraftUpgradeProduction(
+      ready,
+      mk2 ?? contentCatalog.aircraftUpgrades[1],
+    )).toThrow('must be manufactured before');
   });
 
   it('produces any quantity of a weapon repeatedly into the warehouse', () => {

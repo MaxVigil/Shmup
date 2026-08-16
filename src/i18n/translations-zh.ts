@@ -186,6 +186,7 @@ export const zh = {
   'engineering.manufacturingTitle': '蓝图生产',
 
   'engineering.aircraftProductionTitle': '战机生产',
+  'engineering.aircraftUpgradeProductionTitle': '战机改进生产',
   'research.aircraftUpgradeTitle': '战机改进',
 
   'market.blueprintOwned': '已获得许可。本地产量已获授权。',
@@ -275,6 +276,9 @@ export const zh = {
   'upgrade.installed': '已制造并集成。',
   'upgrade.researchCost': '项目预算：{credits} 资金',
   'upgrade.awaitingProduction': '在生产厂制造该改进。',
+  'upgrade.lockedResearchMarkII': '请先研究 Mark II。',
+  'upgrade.lockedManufactureMarkII': '请先制造 Mark II。',
+  'upgrade.notResearched': '请先在研究页研究它。',
   'upgrade.machineEffect': '高冲击弹药使机枪获得决定性的伤害提升。',
   'upgrade.acceleratorEffect': '蓄能器缩短重型贯穿射击之间的间隔。',
   'upgrade.research': '开始研究',

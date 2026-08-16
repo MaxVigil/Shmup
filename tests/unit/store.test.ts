@@ -748,6 +748,10 @@ describe('game store month cycle', () => {
     }
     expect(store.getSnapshot().base.researchedAircraftUpgradeIds).toContain(upgrade?.id);
     store.dispatch({ type: 'MANUFACTURE_AIRCRAFT_UPGRADE', upgradeId: upgrade?.id ?? '' });
+    expect(store.getSnapshot().base.productionQueue).toHaveLength(1);
+    for (let index = 0; index < (upgrade?.productionSorties ?? 1); index += 1) {
+      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
+    }
     expect(store.getSnapshot().base.manufacturedAircraftUpgradeIds).toContain(upgrade?.id);
   });
 });

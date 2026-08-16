@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-16
 
+## Iteration 10 — Aircraft upgrade chain: blueprint → queued manufacture
+
+Implemented on `test`.
+
+- Mark II/Mark III research now ends in the Research tab with a "researched —
+  manufacture in the Works" status; manufacturing has moved to the Engineering
+  tab as a real queued production job (cost + sorties, ≥1 engineer team) instead
+  of an instant button. Mark III research requires Mark II research; Mark III
+  manufacture requires Mark II manufacture.
+- The hangar shows a MARK II / MARK III badge on upgraded aircraft.
+- No schema change: the new production job kind is additive. 213 unit tests,
+  lint, typecheck, and the production build pass.
+
 ## Iteration 9 — Repair Master teams + in-building hiring
 
 Implemented on `test`.

@@ -4,7 +4,7 @@ import type {
   WeaponUpgradeDefinition,
 } from '../content/model';
 import { contentCatalog } from '../content/catalog';
-import type { GameState } from './model';
+import type { GameState, ProductionJobState } from './model';
 import { marketBlueprintPrice } from './terrestrial-market';
 import { addWeaponStock } from './armory';
 
@@ -205,6 +205,20 @@ export function startAircraftUpgradeResearch(
       `Blueprint ${upgrade.aircraftBlueprintId} is required for aircraft upgrades.`,
     );
   }
+  if (upgrade.tier === 2) {
+    const previousTier = contentCatalog.aircraftUpgrades.find(
+      (entry) =>
+        entry.aircraftBlueprintId === upgrade.aircraftBlueprintId && entry.tier === 1,
+    );
+    if (
+      previousTier !== undefined &&
+      !state.base.researchedAircraftUpgradeIds.includes(previousTier.id)
+    ) {
+      throw new Error(
+        `Aircraft upgrade ${previousTier.id} must be researched before ${upgrade.id}.`,
+      );
+    }
+  }
   if (!state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId)) {
     throw new Error(
       `Building ${upgrade.requiredResearchBuildingId} is required for research.`,
@@ -242,13 +256,27 @@ export function startAircraftUpgradeResearch(
   };
 }
 
-/** Manufactures a researched aircraft upgrade in the workshop. */
-export function manufactureAircraftUpgrade(
+/** Queues the manufacture of a researched aircraft upgrade tier in the workshop. */
+export function startAircraftUpgradeProduction(
   state: GameState,
   upgrade: AircraftUpgradeDefinition,
 ): GameState {
   if (!state.base.researchedAircraftUpgradeIds.includes(upgrade.id)) {
     throw new Error(`Aircraft upgrade ${upgrade.id} has not been researched.`);
+  }
+  if (upgrade.tier === 2) {
+    const previousTier = contentCatalog.aircraftUpgrades.find(
+      (entry) =>
+        entry.aircraftBlueprintId === upgrade.aircraftBlueprintId && entry.tier === 1,
+    );
+    if (
+      previousTier !== undefined &&
+      !state.base.manufacturedAircraftUpgradeIds.includes(previousTier.id)
+    ) {
+      throw new Error(
+        `Aircraft upgrade ${previousTier.id} must be manufactured before ${upgrade.id}.`,
+      );
+    }
   }
   if (!state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId)) {
     throw new Error(
@@ -267,22 +295,30 @@ export function manufactureAircraftUpgrade(
   if (state.base.manufacturedAircraftUpgradeIds.includes(upgrade.id)) {
     throw new Error(`Aircraft upgrade ${upgrade.id} has already been manufactured.`);
   }
+  if (state.base.productionQueue.some((job) => job.projectId === upgrade.id)) {
+    throw new Error(`Aircraft upgrade ${upgrade.id} is already in production.`);
+  }
   if (
     state.base.credits < upgrade.productionCreditCost ||
     state.base.materials < upgrade.productionMaterialCost
   ) {
     throw new Error(`Insufficient resources to manufacture ${upgrade.id}.`);
   }
+  const job: ProductionJobState = {
+    id: `production-${upgrade.id}`,
+    projectId: upgrade.id,
+    kind: 'aircraft-upgrade',
+    progress: 0,
+    requiredProgress: upgrade.productionSorties,
+    quantity: 1,
+  };
   return {
     ...state,
     base: {
       ...state.base,
       credits: state.base.credits - upgrade.productionCreditCost,
       materials: state.base.materials - upgrade.productionMaterialCost,
-      manufacturedAircraftUpgradeIds: [
-        ...state.base.manufacturedAircraftUpgradeIds,
-        upgrade.id,
-      ],
+      productionQueue: [...state.base.productionQueue, job],
     },
   };
 }

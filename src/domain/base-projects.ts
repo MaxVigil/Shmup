@@ -384,6 +384,14 @@ function completeProductionJob(base: BaseState, job: ProductionJobState): BaseSt
       ],
     };
   }
+  if (job.kind === 'aircraft-upgrade') {
+    return {
+      ...base,
+      manufacturedAircraftUpgradeIds: [
+        ...new Set([...base.manufacturedAircraftUpgradeIds, job.projectId]),
+      ],
+    };
+  }
   if (job.kind === 'aircraft') {
     const blueprint = contentCatalog.aircraftBlueprints.find(
       (entry) => entry.id === job.projectId,
