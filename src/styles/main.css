@@ -1593,6 +1593,16 @@ h1 {
   outline-offset: 2px;
 }
 .base-action.is-focused:not(:disabled)::after { opacity: 0.1; }
+/* Disabled always wins over the primary/danger modifiers and the primary glow. */
+.base-action:disabled,
+.base-action.is-primary:disabled,
+.base-action.is-danger:disabled {
+  border-color: var(--border-subtle);
+  color: var(--text-low);
+  background: var(--bg-1);
+  box-shadow: none;
+  cursor: not-allowed;
+}
 
 /* -- Global strategic HUD --------------------------------------------- */
 .global-hud {
