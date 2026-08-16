@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">Britain — original VTOL strike aircraft</title>
+  <desc id="desc">Simplified game-ready top-down VTOL aircraft with compact swept wings, side nozzles and a long tail boom, using the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.42" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.8">
+    <path d="M247 690 L265 690 L263 750 Q256 766 249 750 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+    <ellipse cx="172" cy="419" rx="13" ry="28" fill="#8bcfe4" opacity="0.27" filter="url(#softGlow)"/>
+    <ellipse cx="340" cy="419" rx="13" ry="28" fill="#8bcfe4" opacity="0.27" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Long low tail and broad stabiliser make a distinct British-series profile. -->
+    <path id="tail-plane" d="M234 586 L137 692 L140 728 L238 710 L256 688 L274 710 L372 728 L375 692 L278 586 Z"
+      fill="#3d4852" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Compact dog-tooth wing differs clearly from the delta aircraft in the set. -->
+    <path id="main-wing" d="M222 324
+      L171 390 L65 533 L67 623 L190 602 L218 571
+      L256 596 L294 571 L322 602 L445 623 L447 533
+      L341 390 L290 324 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+    <path d="M218 340 L166 411 L88 534 L191 548 L236 459 Z" fill="#59656f" opacity="0.55"/>
+    <path d="M294 340 L346 411 L424 534 L321 548 L276 459 Z" fill="#59656f" opacity="0.55"/>
+
+    <!-- Wing-root pods establish the VTOL silhouette without copying real geometry. -->
+    <g id="outrigger-pods" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <path d="M110 482 Q95 508 99 574 L119 584 L128 526 Q127 496 110 482 Z"/>
+      <path d="M402 482 Q417 508 413 574 L393 584 L384 526 Q385 496 402 482 Z"/>
+    </g>
+
+    <!-- Wider shoulder body and narrower tail boom alter the reference proportions. -->
+    <path id="fuselage" d="M256 43
+      C238 70 228 109 227 151
+      L217 270 Q195 286 194 330
+      L205 448 L224 559 L237 655 L245 715
+      L256 744 L267 715 L275 655 L288 559 L307 448
+      L318 330 Q317 286 295 270 L285 151
+      C284 109 274 70 256 43 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Large rectangular shoulders carry the fictional lift system. -->
+    <path d="M218 266 Q197 276 196 321 L204 375 L234 357 L240 285 Z" fill="#59656f"/>
+    <path d="M294 266 Q315 276 316 321 L308 375 L278 357 L272 285 Z" fill="#59656f"/>
+
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M216 286 L202 309 L205 348 L235 336 L240 292 Z"/>
+      <path d="M296 286 L310 309 L307 348 L277 336 L272 292 Z"/>
+    </g>
+
+    <!-- Four articulated side nozzles are readable mechanical anchors at small scale. -->
+    <g id="vtol-nozzles" fill="#232e37" stroke="#87939a" stroke-width="2">
+      <path d="M194 374 Q169 375 163 395 L166 422 Q180 431 201 414 Z"/>
+      <path d="M202 430 Q177 435 174 457 L182 480 Q196 486 211 468 Z"/>
+      <path d="M318 374 Q343 375 349 395 L346 422 Q332 431 311 414 Z"/>
+      <path d="M310 430 Q335 435 338 457 L330 480 Q316 486 301 468 Z"/>
+      <path d="M174 394 l17 3 -3 15 -17-3 Z" fill="#d7edf0" opacity="0.72"/>
+      <path d="M321 397 l17-3 3 15 -17 3 Z" fill="#d7edf0" opacity="0.72"/>
+    </g>
+
+    <path id="canopy" d="M256 102
+      C236 120 231 153 233 202 L239 254
+      Q256 273 273 254 L279 202 C281 153 276 120 256 102 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M237 183 Q256 165 275 183" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.68"/>
+
+    <path d="M245 366 L256 350 L267 366 L269 640 L256 684 L243 640 Z" fill="#59646d" opacity="0.68"/>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.31">
+      <path d="M206 427 L142 465 L91 541"/>
+      <path d="M306 427 L370 465 L421 541"/>
+      <path d="M82 568 L190 565 L217 541"/>
+      <path d="M430 568 L322 565 L295 541"/>
+      <path d="M256 382 L256 654"/>
+      <path d="M155 443 L192 484"/>
+      <path d="M357 443 L320 484"/>
+    </g>
+
+    <g id="engines">
+      <path d="M239 643 L273 643 L269 710 Q256 732 243 710 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M247 691 L265 691 L263 716 Q256 725 249 716 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional concentric service marks use restrained British-series colours. -->
+    <g id="markings">
+      <g transform="translate(140 548)">
+        <circle r="11" fill="#526f9d"/>
+        <circle r="7" fill="#dce4e6"/>
+        <circle r="3.5" fill="#9e4f58"/>
+      </g>
+      <g transform="translate(372 548)">
+        <circle r="11" fill="#526f9d"/>
+        <circle r="7" fill="#dce4e6"/>
+        <circle r="3.5" fill="#9e4f58"/>
+      </g>
+      <path d="M247 505 h18 v30 h-18 Z" fill="none" stroke="#9e4f58" stroke-width="2" opacity="0.6"/>
+      <circle cx="256" cy="450" r="4" fill="#5bb6c2"/>
+      <path d="M249 578 l7-7 7 7 -7 7 Z" fill="#dce4e6" opacity="0.7"/>
+    </g>
+  </g>
+</svg>

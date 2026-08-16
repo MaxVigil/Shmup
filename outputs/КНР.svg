@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">Original top-down stealth interceptor concept</title>
+  <desc id="desc">Simplified game-ready aircraft silhouette inspired by a modern canard-delta layout, with altered proportions and original details.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#45505a"/>
+      <stop offset="0.46" stop-color="#737d85"/>
+      <stop offset="0.54" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.45" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-100%" y="-50%" width="300%" height="250%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <!-- Engine glow is kept separate so the game can hide or animate it. -->
+  <g id="engine-glow" opacity="0.8">
+    <path d="M205 690 L225 690 L221 749 Q215 764 209 749 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+    <path d="M287 690 L307 690 L303 749 Q297 764 291 749 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Rear fins sit under the main body to keep the outline clean at sprite scale. -->
+    <g id="tail-planes" fill="#38434d" stroke="#8a959b" stroke-width="2">
+      <path d="M201 570 L139 704 L174 723 L227 650 Z"/>
+      <path d="M311 570 L373 704 L338 723 L285 650 Z"/>
+      <path d="M207 611 L173 740 L204 714 L235 627 Z" fill="#4b5761"/>
+      <path d="M305 611 L339 740 L308 714 L277 627 Z" fill="#4b5761"/>
+    </g>
+
+    <!-- Original clipped-delta wing: shorter span and a stepped trailing edge. -->
+    <path id="main-wing" d="M225 300
+      L155 360 L48 542 L48 616 L180 654 L219 601
+      L256 625
+      L293 601 L332 654 L464 616 L464 542 L357 360 L287 300 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Forward control surfaces are swept and compact rather than triangular. -->
+    <g id="canards" fill="#59656f" stroke="#9aa4aa" stroke-width="2">
+      <path d="M216 255 L137 324 L136 355 L221 326 Z"/>
+      <path d="M296 255 L375 324 L376 355 L291 326 Z"/>
+    </g>
+
+    <!-- Central lifting body, deliberately wider and shorter than the reference. -->
+    <path id="fuselage" d="M256 34
+      C239 63 226 102 220 151
+      L211 265 L204 390 L194 565
+      L199 670 Q206 708 225 714
+      L243 706 L256 681 L269 706 L287 714
+      Q306 708 313 670 L318 565 L308 390 L301 265
+      L292 151 C286 102 273 63 256 34 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Shoulder fairings make the airframe read as twin-engine without extra detail. -->
+    <path d="M213 281 L166 364 L197 538 L222 500 L229 307 Z" fill="#4a5660" opacity="0.88"/>
+    <path d="M299 281 L346 364 L315 538 L290 500 L283 307 Z" fill="#4a5660" opacity="0.88"/>
+
+    <!-- Dark intake shapes provide contrast at 64-128 px. -->
+    <path id="left-intake" d="M212 280 L176 352 L211 342 L231 298 Z" fill="#18232c" stroke="#79868e" stroke-width="2"/>
+    <path id="right-intake" d="M300 280 L336 352 L301 342 L281 298 Z" fill="#18232c" stroke="#79868e" stroke-width="2"/>
+
+    <path id="canopy" d="M256 102
+      C235 123 231 160 235 203
+      Q239 235 256 249 Q273 235 277 203
+      C281 160 277 123 256 102 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M238 167 Q256 150 274 167" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.65"/>
+
+    <!-- Panel language is sparse so the sprite remains readable. -->
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.35">
+      <path d="M222 352 L191 452 L198 556"/>
+      <path d="M290 352 L321 452 L314 556"/>
+      <path d="M73 560 L180 588 L211 563"/>
+      <path d="M439 560 L332 588 L301 563"/>
+      <path d="M256 268 L256 634"/>
+    </g>
+
+    <g id="engines">
+      <path d="M202 642 L229 642 L234 704 Q220 724 204 706 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M283 642 L310 642 L308 706 Q292 724 278 704 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M208 688 L228 688 L225 710 Q217 718 210 708 Z" fill="#d7edf0"/>
+      <path d="M284 688 L304 688 L302 708 Q295 718 287 710 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Neutral fictional markings; no real-world insignia or manufacturer branding. -->
+    <g id="markings" fill="#dce4e6">
+      <path d="M108 579 h42 v7 h-15 l-6 9 -6-9 h-15 Z" opacity="0.85"/>
+      <path d="M362 579 h42 v7 h-15 l-6 9 -6-9 h-15 Z" opacity="0.85"/>
+      <circle cx="256" cy="316" r="5"/>
+      <path d="M246 539 l10-8 10 8 -10 8 Z" opacity="0.7"/>
+    </g>
+  </g>
+</svg>

@@ -1,6 +1,23 @@
 # Project status
 
-Last updated: 2026-08-15
+Last updated: 2026-08-16
+
+## Iteration 4 — National aircraft fleet (schema v17)
+
+Implemented on `test`. The six engine-brand aircraft were replaced with seven
+Council-nation aircraft, each rendered from its own root SVG copied to
+`public/assets/` (india, britain, prc, germany, usa, france, japan). India is
+the starter aircraft.
+
+- Schema v17 with a v16→v17 migration that resets the hangar to the starter
+  aircraft, clears old aircraft blueprint/upgrade references, and preserves
+  credits, materials, staff, buildings, weapons, and warehouse stock.
+- 7 aircraft + 7 aircraft blueprints + 14 Mk1/Mk2 upgrades in the typed
+  catalogue; PRC keeps a strong mid-tier interceptor lane; generic names
+  ("Літак КНР" / "PRC aircraft" / "中国战机") in uk/en/zh.
+- Iterations 1–3 (base management pass, mission launch flow, repeatable weapon
+  production) are also recorded in `docs/PLAN.md`. 204 unit tests, lint,
+  typecheck, and the production build pass.
 
 ## Round-8 pilot casualties & the Medical Block (schema v16)
 

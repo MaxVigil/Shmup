@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">India — original light delta interceptor</title>
+  <desc id="desc">Simplified game-ready top-down aircraft with an original cropped-delta silhouette, based on the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.42" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.82">
+    <path d="M247 690 L265 690 L263 752 Q256 767 249 752 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Compact clipped delta with a shallow central notch and altered proportions. -->
+    <path id="main-wing" d="M231 275
+      L178 335 L64 579 L69 645 L211 655 L240 610
+      L256 626 L272 610 L301 655 L443 645 L448 579
+      L334 335 L281 275 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Broad shoulder chines distinguish it from the reference aircraft. -->
+    <path d="M230 281 L166 367 L105 559 L211 575 L242 378 Z" fill="#59656f" opacity="0.62"/>
+    <path d="M282 281 L346 367 L407 559 L301 575 L270 378 Z" fill="#59656f" opacity="0.62"/>
+
+    <!-- Shortened fuselage and a wider forward body create an original light-fighter profile. -->
+    <path id="fuselage" d="M256 44
+      C239 72 227 115 224 165
+      L218 282 L225 409 L224 580
+      L236 684 L247 716 L256 738 L265 716 L276 684
+      L288 580 L287 409 L294 282 L288 165
+      C285 115 273 72 256 44 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Twin cheek intakes feed a fictional single engine. -->
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M221 290 L193 350 L227 340 L242 305 Z"/>
+      <path d="M291 290 L319 350 L285 340 L270 305 Z"/>
+    </g>
+
+    <path id="canopy" d="M256 113
+      C237 129 231 169 234 218
+      L239 272 Q256 291 273 272 L278 218
+      C281 169 275 129 256 113 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M237 199 Q256 181 275 199" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.7"/>
+
+    <!-- Raised dorsal spine adds hierarchy without relying on texture detail. -->
+    <path d="M246 300 L256 282 L266 300 L269 617 L256 657 L243 617 Z" fill="#59646d" opacity="0.72"/>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.31">
+      <path d="M224 371 L157 445 L107 567"/>
+      <path d="M288 371 L355 445 L405 567"/>
+      <path d="M83 594 L210 603 L229 578"/>
+      <path d="M429 594 L302 603 L283 578"/>
+      <path d="M256 324 L256 633"/>
+      <path d="M145 482 L194 503"/>
+      <path d="M367 482 L318 503"/>
+    </g>
+
+    <!-- Small detachable wingtip systems help the silhouette read in combat. -->
+    <g id="wingtip-systems" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <path d="M66 573 L50 617 L69 631 L82 582 Z"/>
+      <path d="M446 573 L462 617 L443 631 L430 582 Z"/>
+    </g>
+
+    <g id="engines">
+      <path d="M239 642 L273 642 L269 711 Q256 733 243 711 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M247 693 L265 693 L263 717 Q256 725 249 717 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional national accent: a minimal saffron/white/green fin flash and roundels. -->
+    <g id="markings">
+      <g transform="translate(133 570)">
+        <circle r="9" fill="#dce4e6"/>
+        <circle r="6" fill="#e99a3b"/>
+        <circle r="3" fill="#2c8a63"/>
+      </g>
+      <g transform="translate(379 570)">
+        <circle r="9" fill="#dce4e6"/>
+        <circle r="6" fill="#e99a3b"/>
+        <circle r="3" fill="#2c8a63"/>
+      </g>
+      <path d="M250 668 H262 V674 H250 Z" fill="#e99a3b"/>
+      <path d="M250 674 H262 V680 H250 Z" fill="#dce4e6"/>
+      <path d="M250 680 H262 V686 H250 Z" fill="#2c8a63"/>
+      <path d="M248 358 l8-7 8 7 -8 7 Z" fill="#dce4e6" opacity="0.72"/>
+    </g>
+  </g>
+</svg>

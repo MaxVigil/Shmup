@@ -14,6 +14,7 @@ import {
   LEGACY_V11_SAVE_KEY,
   LEGACY_V12_SAVE_KEY,
   LEGACY_V15_SAVE_KEY,
+  LEGACY_V16_SAVE_KEY,
   LEGACY_V1_SAVE_KEY,
   LEGACY_V2_SAVE_KEY,
   LEGACY_V3_SAVE_KEY,
@@ -68,7 +69,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         credits: contentCatalog.economy.startingCredits,
         materials: 23,
@@ -114,7 +115,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         constructedBuildingIds: [contentCatalog.buildings[0].id],
         staff: [{ roleId: contentCatalog.staffRoles[0].id }],
@@ -146,7 +147,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         credits: 275_000,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
@@ -178,7 +179,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         manufacturedEquipmentIds: [capturer.id],
         equippedEquipmentId: null,
@@ -205,7 +206,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, splitPulseId],
         equippedPrimaryWeaponIds: [splitPulseId, null],
@@ -230,7 +231,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         equippedPrimaryWeaponIds: [acceleratorId, null],
@@ -256,7 +257,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       base: {
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         locallyProducedWeaponIds: [],
@@ -290,7 +291,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.telemetryRecorded).toBe(true);
   });
 
@@ -321,7 +322,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.hangarSlots).toEqual([
       contentCatalog.aircraft[0].id,
       null,
@@ -343,7 +344,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.month).toBe(1);
     expect(loaded?.base.fueledAircraftIds).toEqual([contentCatalog.aircraft[0].id]);
     expect(loaded?.base.threatMap).toHaveLength(3);
@@ -361,7 +362,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.loans).toEqual([]);
   });
 
@@ -384,7 +385,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.aircraftLoadouts[contentCatalog.aircraft[0].id]).toContain(
       contentCatalog.weapons[0].id,
     );
@@ -414,7 +415,7 @@ describe('save repository', () => {
     expect(restored?.base.credits).toBe(progressed.base.credits);
   });
 
-  it('migrates a v15 save into the v16 pilot-medical schema', () => {
+  it('migrates a v15 save into the v17 pilot-medical schema', () => {
     const storage = createMemoryStorage();
     const initial = createInitialGameState();
     const v15Base: Record<string, unknown> = { ...initial.base };
@@ -428,9 +429,49 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(16);
+    expect(loaded?.schemaVersion).toBe(17);
     expect(loaded?.base.pilotInjuries).toEqual({});
     expect(loaded?.base.deadPilotIds).toEqual([]);
     expect(loaded?.base.pilotDeathMonth).toEqual({});
+  });
+
+  it('migrates a v16 save into v17 by resetting the hangar to the starter aircraft', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    const starterId = contentCatalog.aircraft[0].id;
+    storage.setItem(LEGACY_V16_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 16,
+      base: {
+        ...initial.base,
+        hangarSlots: ['aircraft-interceptor', 'aircraft-aegis'],
+        activeAircraftId: 'aircraft-aegis',
+        aircraftLoadouts: {
+          'aircraft-interceptor': [contentCatalog.weapons[0].id, null],
+          'aircraft-aegis': [contentCatalog.weapons[1].id, null, null, null],
+        },
+        unlockedBlueprintIds: [
+          'blueprint-aircraft-interceptor',
+          'blueprint-safe-containment',
+        ],
+        researchedAircraftUpgradeIds: ['upgrade-aircraft-interceptor-mk2'],
+        manufacturedAircraftUpgradeIds: ['upgrade-aircraft-interceptor-mk3'],
+      },
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(17);
+    expect(loaded?.base.hangarSlots).toEqual([starterId, null]);
+    expect(loaded?.base.activeAircraftId).toBe(starterId);
+    expect(loaded?.base.aircraftLoadouts[starterId]).toEqual([
+      contentCatalog.weapons[0].id,
+      null,
+    ]);
+    expect(loaded?.base.unlockedBlueprintIds).not.toContain(
+      'blueprint-aircraft-interceptor',
+    );
+    expect(loaded?.base.unlockedBlueprintIds).toContain('blueprint-safe-containment');
+    expect(loaded?.base.researchedAircraftUpgradeIds).toEqual([]);
+    expect(loaded?.base.manufacturedAircraftUpgradeIds).toEqual([]);
   });
 });

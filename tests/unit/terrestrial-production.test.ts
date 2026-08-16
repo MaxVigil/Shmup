@@ -137,7 +137,7 @@ describe('terrestrial production', () => {
 
   it('purchases an aircraft blueprint and manufactures the aircraft into a free hangar slot', () => {
     const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
-      (entry) => entry.id === 'blueprint-aircraft-gunship',
+      (entry) => entry.id === 'blueprint-aircraft-britain',
     );
     expect(aircraftBlueprint).toBeDefined();
     const ready = {
@@ -174,7 +174,7 @@ describe('terrestrial production', () => {
 
   it('researches and manufactures an aircraft upgrade tier keyed to its blueprint', () => {
     const upgrade = contentCatalog.aircraftUpgrades.find(
-      (entry) => entry.id === 'upgrade-aircraft-interceptor-mk2',
+      (entry) => entry.id === 'upgrade-aircraft-india-mk1',
     );
     expect(upgrade).toBeDefined();
     const ready = {

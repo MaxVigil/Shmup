@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">USA — original stealth strike fighter</title>
+  <desc id="desc">Simplified game-ready top-down stealth aircraft with an original diamond wing and split-tail silhouette, using the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c6d9d7"/>
+      <stop offset="0.38" stop-color="#718f95"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.82">
+    <path d="M241 686 L271 686 L268 750 Q256 768 244 750 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Independent swept tail planes sit below the lifting body. -->
+    <g id="tail-planes" fill="#3d4852" stroke="#929ca2" stroke-width="2">
+      <path d="M221 563 L135 662 L135 723 L222 736 L244 643 Z"/>
+      <path d="M291 563 L377 662 L377 723 L290 736 L268 643 Z"/>
+    </g>
+
+    <!-- Broad faceted diamond wing, shorter and wider than the reference. -->
+    <path id="main-wing" d="M220 258
+      L164 378 L42 493 L42 586 L190 631 L226 604
+      L256 626 L286 604 L322 631 L470 586 L470 493
+      L348 378 L292 258 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Leading-edge facets reinforce the stealth language at sprite scale. -->
+    <path d="M220 270 L164 393 L61 502 L190 548 L235 414 Z" fill="#59656f" opacity="0.56"/>
+    <path d="M292 270 L348 393 L451 502 L322 548 L277 414 Z" fill="#59656f" opacity="0.56"/>
+
+    <!-- Wide shoulders taper into a compact single-engine body. -->
+    <path id="fuselage" d="M256 39
+      C236 72 223 118 221 170
+      L210 274 L194 405 L203 559 L226 648
+      L239 701 L256 725 L273 701 L286 648
+      L309 559 L318 405 L302 274 L291 170
+      C289 118 276 72 256 39 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Original serrated shoulder roots and shallow cheek intakes. -->
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M212 277 L174 354 L216 340 L239 292 Z"/>
+      <path d="M300 277 L338 354 L296 340 L273 292 Z"/>
+    </g>
+    <path d="M204 390 L224 373 L235 392 L245 376 L256 395 L267 376 L277 392 L288 373 L308 390"
+      fill="none" stroke="#aeb6ba" stroke-width="3" opacity="0.35"/>
+
+    <!-- Wide angular canopy replaces the narrow teardrop profile. -->
+    <path id="canopy" d="M256 105
+      L235 130 L230 192 L237 249 L256 269 L275 249 L282 192
+      L277 130 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M234 180 L256 163 L278 180" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.65"/>
+
+    <!-- Raised centre chine gives the aircraft a readable spine. -->
+    <path d="M247 288 L256 274 L265 288 L270 615 L256 666 L242 615 Z" fill="#59646d" opacity="0.65"/>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.3">
+      <path d="M204 408 L127 469 L72 520"/>
+      <path d="M308 408 L385 469 L440 520"/>
+      <path d="M61 536 L190 576 L216 551"/>
+      <path d="M451 536 L322 576 L296 551"/>
+      <path d="M256 310 L256 632"/>
+      <path d="M145 470 L183 514"/>
+      <path d="M367 470 L329 514"/>
+      <path d="M218 438 L239 426 L256 438 L273 426 L294 438"/>
+    </g>
+
+    <!-- Canted fictional stabilisers produce a distinctive split-tail shape. -->
+    <g id="vertical-stabilisers" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <path d="M221 552 L178 685 L205 665 L239 582 Z"/>
+      <path d="M291 552 L334 685 L307 665 L273 582 Z"/>
+    </g>
+
+    <g id="engines">
+      <path d="M235 633 L277 633 L274 706 Q256 731 238 706 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M244 687 L268 687 L266 712 Q256 722 246 712 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional low-contrast US-series markings, without real insignia or serials. -->
+    <g id="markings" fill="#dce4e6">
+      <path d="M106 548 h46 l-8 8 h-30 Z" opacity="0.75"/>
+      <path d="M406 548 h-46 l8 8 h30 Z" opacity="0.75"/>
+      <path d="M247 343 h18 v8 h-18 Z" opacity="0.66"/>
+      <path d="M247 358 h18 v4 h-18 Z" opacity="0.45"/>
+      <path d="M248 518 l8-8 8 8 -8 8 Z" opacity="0.72"/>
+      <circle cx="87" cy="548" r="3" fill="#b64e51"/>
+      <circle cx="425" cy="548" r="3" fill="#4d9a73"/>
+    </g>
+  </g>
+</svg>

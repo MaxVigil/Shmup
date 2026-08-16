@@ -774,7 +774,7 @@ function renderBase(): void {
     ? undefined
     : contentCatalog.aircraft.find((entry) => entry.id === activeAircraftId);
   const activeAircraftName = t(
-    aircraftNameKey[activeAircraft?.id ?? ''] ?? 'content.interceptor',
+    aircraftNameKey[activeAircraft?.id ?? ''] ?? 'content.aircraftIndia',
   );
   const activeFueled = activeAircraftId !== null && isAircraftFueled(state.base, activeAircraftId);
   const activeDamage = activeAircraftId === null
@@ -850,20 +850,22 @@ function renderBase(): void {
 }
 
 const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
-  'aircraft-interceptor': 'content.interceptor',
-  'aircraft-gunship': 'content.gunship',
-  'aircraft-aegis': 'content.aegis',
-  'aircraft-yanlong': 'content.yanlong',
-  'aircraft-swift': 'content.swift',
-  'aircraft-precision': 'content.precision',
+  'aircraft-india': 'content.aircraftIndia',
+  'aircraft-britain': 'content.aircraftBritain',
+  'aircraft-prc': 'content.aircraftPrc',
+  'aircraft-germany': 'content.aircraftGermany',
+  'aircraft-usa': 'content.aircraftUsa',
+  'aircraft-france': 'content.aircraftFrance',
+  'aircraft-japan': 'content.aircraftJapan',
 };
 const aircraftRoleKey: Readonly<Record<string, TranslationKey>> = {
-  'aircraft-interceptor': 'aircraft.interceptorRole',
-  'aircraft-gunship': 'aircraft.gunshipRole',
-  'aircraft-aegis': 'aircraft.aegisRole',
-  'aircraft-yanlong': 'aircraft.yanlongRole',
-  'aircraft-swift': 'aircraft.swiftRole',
-  'aircraft-precision': 'aircraft.precisionRole',
+  'aircraft-india': 'aircraft.indiaRole',
+  'aircraft-britain': 'aircraft.britainRole',
+  'aircraft-prc': 'aircraft.prcRole',
+  'aircraft-germany': 'aircraft.germanyRole',
+  'aircraft-usa': 'aircraft.usaRole',
+  'aircraft-france': 'aircraft.franceRole',
+  'aircraft-japan': 'aircraft.japanRole',
 };
 
 function aircraftStatSummary(aircraft: { armour: number; speedMultiplier: number; damageMultiplier: number }): string {
@@ -1025,7 +1027,7 @@ function renderAircraftProduction(): void {
     const label = h(
       'span',
       { class: 'loadout-row__label' },
-      t(aircraftNameKey[aircraft.id] ?? 'content.interceptor'),
+      t(aircraftNameKey[aircraft.id] ?? 'content.aircraftIndia'),
     );
     row.append(label);
     if (job !== undefined) {
@@ -1739,7 +1741,7 @@ function renderDatabank(): void {
   const aircraftRows = contentCatalog.aircraft.map((aircraft) =>
     h('tr', null,
       h('td', { class: 'db-name' }, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
-      h('td', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole')),
+      h('td', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.indiaRole')),
       h('td', { class: 'num' }, aircraft.armour.toString()),
       h('td', { class: 'num' }, `${aircraft.speedMultiplier}×`),
       h('td', { class: 'num' }, `${aircraft.damageMultiplier}×`),
@@ -2221,7 +2223,7 @@ function renderHangarHero(): void {
   const info = h('div', { class: 'hangar-hero__info' });
   info.append(
     h('strong', null, t(aircraftNameKey[aircraft.id] ?? 'content.interceptor')),
-    h('small', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.interceptorRole')),
+    h('small', null, t(aircraftRoleKey[aircraft.id] ?? 'aircraft.indiaRole')),
     h('small', null, [
       t('hangar.armour', { value: upgraded.armour }),
       t('hangar.speed', { value: upgraded.speedMultiplier }),

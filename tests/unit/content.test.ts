@@ -197,42 +197,40 @@ describe('validateContentCatalog', () => {
   });
 
   it('balances the aircraft fleet across armour, speed, and damage', () => {
-    const interceptor = contentCatalog.aircraft[0];
-    const gunship = contentCatalog.aircraft[1];
-    const aegis = contentCatalog.aircraft[2];
-    const swift = contentCatalog.aircraft[4];
-    const precision = contentCatalog.aircraft[5];
+    const india = contentCatalog.aircraft[0];
+    const britain = contentCatalog.aircraft[1];
+    const prc = contentCatalog.aircraft[2];
+    const usa = contentCatalog.aircraft[4];
+    const japan = contentCatalog.aircraft[6];
 
-    expect(contentCatalog.aircraft).toHaveLength(6);
-    expect(interceptor.marketPrice).not.toBeNull();
+    expect(contentCatalog.aircraft).toHaveLength(7);
+    expect(india.marketPrice).not.toBeNull();
 
-    expect(gunship.armour).toBeGreaterThan(interceptor.armour);
-    expect(gunship.speedMultiplier).toBeLessThan(interceptor.speedMultiplier);
-    expect(gunship.damageMultiplier).toBeGreaterThan(interceptor.damageMultiplier);
+    expect(britain.armour).toBeGreaterThan(india.armour);
+    expect(britain.speedMultiplier).toBeLessThan(india.speedMultiplier);
+    expect(britain.damageMultiplier).toBeGreaterThan(india.damageMultiplier);
 
-    expect(aegis.armour).toBeGreaterThan(gunship.armour);
-    expect(aegis.speedMultiplier).toBeLessThan(gunship.speedMultiplier);
-    expect(aegis.damageMultiplier).toBeGreaterThan(gunship.damageMultiplier);
+    expect(usa.armour).toBeGreaterThan(britain.armour);
+    expect(usa.speedMultiplier).toBeLessThan(britain.speedMultiplier);
+    expect(usa.damageMultiplier).toBeGreaterThan(britain.damageMultiplier);
 
-    expect(aegis.marketPrice?.minimum).toBeGreaterThan(
-      gunship.marketPrice?.minimum ?? 0,
+    expect(usa.marketPrice?.minimum).toBeGreaterThan(
+      britain.marketPrice?.minimum ?? 0,
     );
 
-    expect(swift.speedMultiplier).toBeGreaterThan(interceptor.speedMultiplier);
-    expect(swift.armour).toBeLessThan(interceptor.armour);
-    expect(precision.damageMultiplier).toBeGreaterThan(
-      gunship.damageMultiplier,
-    );
-    expect(precision.weaponSlotCount).toBe(1);
+    expect(prc.speedMultiplier).toBeGreaterThan(india.speedMultiplier);
+    expect(prc.armour).toBeGreaterThan(india.armour);
+    expect(japan.damageMultiplier).toBeGreaterThan(britain.damageMultiplier);
+    expect(japan.weaponSlotCount).toBe(1);
   });
 
   it('scales refuel cost with aircraft weight and lists the Council states', () => {
-    const interceptor = contentCatalog.aircraft[0];
-    const gunship = contentCatalog.aircraft[1];
-    const aegis = contentCatalog.aircraft[2];
+    const india = contentCatalog.aircraft[0];
+    const britain = contentCatalog.aircraft[1];
+    const usa = contentCatalog.aircraft[4];
 
-    expect(gunship.refuelCreditCost).toBeGreaterThan(interceptor.refuelCreditCost);
-    expect(aegis.refuelCreditCost).toBeGreaterThan(gunship.refuelCreditCost);
+    expect(britain.refuelCreditCost).toBeGreaterThan(india.refuelCreditCost);
+    expect(usa.refuelCreditCost).toBeGreaterThan(britain.refuelCreditCost);
 
     const ids = contentCatalog.councilStates.map((state) => state.id);
     expect(ids).toContain('council-prc');

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">France — original agile multirole fighter</title>
+  <desc id="desc">Simplified game-ready top-down twin-engine canard-delta aircraft with an original flowing silhouette, using the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.42" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.82">
+    <path d="M216 689 L235 689 L232 751 Q225 767 219 751 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+    <path d="M277 689 L296 689 L293 751 Q287 767 280 751 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Flowing clipped delta with a shallow curved trailing edge. -->
+    <path id="main-wing" d="M222 288
+      C190 339 156 397 118 451 L49 536 L50 617
+      L191 622 Q224 600 256 574 Q288 600 321 622
+      L462 617 L463 536 L394 451
+      C356 397 322 339 290 288 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+    <path d="M218 307 C183 365 137 447 73 537 L191 576 L238 493 Z" fill="#59656f" opacity="0.54"/>
+    <path d="M294 307 C329 365 375 447 439 537 L321 576 L274 493 Z" fill="#59656f" opacity="0.54"/>
+
+    <!-- Small swept canards sit farther aft than on the reference. -->
+    <g id="canards" fill="#59656f" stroke="#9aa4aa" stroke-width="2">
+      <path d="M222 282 L150 337 L148 371 L230 341 Z"/>
+      <path d="M290 282 L362 337 L364 371 L282 341 Z"/>
+    </g>
+
+    <!-- Narrow nose opens into a broad blended engine body. -->
+    <path id="fuselage" d="M256 34
+      C240 62 229 101 226 145
+      L218 246 Q199 285 202 356
+      L207 493 L202 610 L205 680
+      Q213 715 231 721 L246 705 L256 681
+      L266 705 L281 721 Q299 715 307 680
+      L310 610 L305 493 L310 356
+      Q313 285 294 246 L286 145
+      C283 101 272 62 256 34 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Curved cheek channels and narrow intakes create an original face. -->
+    <path d="M219 270 Q189 323 197 409 L220 458 L239 392 L239 290 Z" fill="#4a5660" opacity="0.74"/>
+    <path d="M293 270 Q323 323 315 409 L292 458 L273 392 L273 290 Z" fill="#4a5660" opacity="0.74"/>
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M216 282 Q193 326 201 369 L225 351 L241 301 Z"/>
+      <path d="M296 282 Q319 326 311 369 L287 351 L271 301 Z"/>
+    </g>
+
+    <!-- Long two-section canopy supports reconnaissance and multirole character. -->
+    <path id="canopy" d="M256 99
+      C237 117 231 151 233 202 L238 267
+      Q256 291 274 267 L279 202 C281 151 275 117 256 99 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M236 180 Q256 162 276 180" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.68"/>
+    <path d="M238 225 Q256 210 274 225" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.52"/>
+
+    <path d="M246 310 L256 295 L266 310 L270 625 L256 670 L242 625 Z" fill="#59646d" opacity="0.66"/>
+
+    <!-- Fine wingtip rails help distinguish the silhouette without visual clutter. -->
+    <g id="wingtip-systems" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <path d="M48 522 L33 543 L35 635 L51 644 L59 612 L58 539 Z"/>
+      <path d="M464 522 L479 543 L477 635 L461 644 L453 612 L454 539 Z"/>
+      <circle cx="42" cy="553" r="4" fill="#8bcfe4" opacity="0.65"/>
+      <circle cx="470" cy="553" r="4" fill="#8bcfe4" opacity="0.65"/>
+    </g>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.31">
+      <path d="M207 407 C155 447 110 493 69 547"/>
+      <path d="M305 407 C357 447 402 493 443 547"/>
+      <path d="M67 578 L189 590 L219 560"/>
+      <path d="M445 578 L323 590 L293 560"/>
+      <path d="M256 336 L256 643"/>
+      <path d="M143 445 L183 493"/>
+      <path d="M369 445 L329 493"/>
+    </g>
+
+    <!-- Twin engine channels frame a compact central fin. -->
+    <path id="vertical-stabiliser" d="M256 490 L273 610 L266 684 L256 668 L246 684 L239 610 Z"
+      fill="#4b5761" stroke="#929ca2" stroke-width="2"/>
+
+    <g id="engines">
+      <path d="M207 639 L239 639 L240 706 Q226 727 210 707 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M273 639 L305 639 L302 707 Q286 727 272 706 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M215 688 L234 688 L232 714 Q225 723 217 714 Z" fill="#d7edf0"/>
+      <path d="M278 688 L297 688 L295 714 Q287 723 280 714 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional French-series chevrons use low-area blue, white and red accents. -->
+    <g id="markings">
+      <g transform="translate(128 552)">
+        <path d="M-17 -7 H-5 L4 0 -5 7 H-17 L-8 0 Z" fill="#526f9d"/>
+        <path d="M-4 -7 H5 L14 0 5 7 H-4 L5 0 Z" fill="#dce4e6"/>
+        <path d="M6 -7 H17 L8 0 17 7 H6 L15 0 Z" fill="#a94f58"/>
+      </g>
+      <g transform="translate(384 552)">
+        <path d="M-17 -7 H-5 L4 0 -5 7 H-17 L-8 0 Z" fill="#526f9d"/>
+        <path d="M-4 -7 H5 L14 0 5 7 H-4 L5 0 Z" fill="#dce4e6"/>
+        <path d="M6 -7 H17 L8 0 17 7 H6 L15 0 Z" fill="#a94f58"/>
+      </g>
+      <path d="M247 363 h18 v7 h-18 Z" fill="#dce4e6" opacity="0.7"/>
+      <path d="M248 529 l8-8 8 8 -8 8 Z" fill="#dce4e6" opacity="0.72"/>
+      <circle cx="256" cy="416" r="4" fill="#8bcfe4"/>
+    </g>
+  </g>
+</svg>

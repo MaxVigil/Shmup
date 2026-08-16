@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">Japan — original precision fighter</title>
+  <desc id="desc">Simplified game-ready top-down single-engine precision fighter with a broad clipped wing and wingtip sensor rails, using the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.42" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.82">
+    <path d="M245 688 L267 688 L264 751 Q256 767 248 751 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Compact butterfly-like tail plane differs from the broad main wing. -->
+    <path id="tail-plane" d="M231 577 L145 663 L146 704 L229 690 L256 665 L283 690 L366 704 L367 663 L281 577 Z"
+      fill="#3d4852" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Broad clipped wing with a broken trailing edge for a precise technical silhouette. -->
+    <path id="main-wing" d="M225 268
+      L172 350 L54 446 L55 574 L187 585 L222 553
+      L256 578 L290 553 L325 585 L457 574 L458 446
+      L340 350 L287 268 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+    <path d="M223 285 L169 367 L76 453 L188 540 L237 445 Z" fill="#59656f" opacity="0.54"/>
+    <path d="M289 285 L343 367 L436 453 L324 540 L275 445 Z" fill="#59656f" opacity="0.54"/>
+
+    <!-- Root strakes and clipped inboard trailing edges create a proprietary planform. -->
+    <path d="M220 305 L183 382 L209 511 L238 476 L242 326 Z" fill="#4a5660" opacity="0.68"/>
+    <path d="M292 305 L329 382 L303 511 L274 476 L270 326 Z" fill="#4a5660" opacity="0.68"/>
+
+    <!-- Long narrow fuselage reinforces the high-speed precision role. -->
+    <path id="fuselage" d="M256 35
+      C240 63 230 101 228 143
+      L219 254 L211 395 L218 575 L235 673
+      L246 713 L256 738 L266 713 L277 673
+      L294 575 L301 395 L293 254 L284 143
+      C282 101 272 63 256 35 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M220 277 L190 341 L221 333 L240 292 Z"/>
+      <path d="M292 277 L322 341 L291 333 L272 292 Z"/>
+    </g>
+
+    <!-- A slim faceted canopy replaces the rounded reference glazing. -->
+    <path id="canopy" d="M256 102
+      L239 125 L233 180 L238 240 L256 265 L274 240 L279 180
+      L273 125 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M237 183 L256 166 L275 183" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.68"/>
+
+    <!-- Central sensor spine doubles as a visual aiming axis. -->
+    <path d="M247 294 L256 279 L265 294 L269 622 L256 664 L243 622 Z" fill="#59646d" opacity="0.66"/>
+    <path d="M252 317 H260 V402 H252 Z" fill="#8bcfe4" opacity="0.23"/>
+
+    <!-- Wingtip rails and paired sensors make the aircraft distinct in the fleet. -->
+    <g id="wingtip-systems" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <path d="M53 438 L38 458 L39 585 L55 594 L64 564 L63 454 Z"/>
+      <path d="M459 438 L474 458 L473 585 L457 594 L448 564 L449 454 Z"/>
+      <path d="M91 420 L82 441 L84 534 L98 534 L100 441 Z"/>
+      <path d="M421 420 L430 441 L428 534 L414 534 L412 441 Z"/>
+      <circle cx="47" cy="467" r="4" fill="#8bcfe4" opacity="0.7"/>
+      <circle cx="465" cy="467" r="4" fill="#8bcfe4" opacity="0.7"/>
+    </g>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.31">
+      <path d="M212 376 L139 414 L75 467"/>
+      <path d="M300 376 L373 414 L437 467"/>
+      <path d="M70 539 L186 552 L216 527"/>
+      <path d="M442 539 L326 552 L296 527"/>
+      <path d="M256 425 L256 637"/>
+      <path d="M151 399 L188 454"/>
+      <path d="M361 399 L324 454"/>
+    </g>
+
+    <path id="vertical-stabiliser" d="M256 495 L273 606 L265 681 L256 666 L247 681 L239 606 Z"
+      fill="#4b5761" stroke="#929ca2" stroke-width="2"/>
+
+    <g id="engines">
+      <path d="M238 638 L274 638 L271 709 Q256 732 241 709 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M246 689 L266 689 L264 715 Q256 724 248 715 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional restrained Japanese-series markings; no real force insignia. -->
+    <g id="markings">
+      <circle cx="142" cy="520" r="10" fill="#dce4e6" opacity="0.88"/>
+      <circle cx="142" cy="520" r="5" fill="#a94f58"/>
+      <circle cx="370" cy="520" r="10" fill="#dce4e6" opacity="0.88"/>
+      <circle cx="370" cy="520" r="5" fill="#a94f58"/>
+      <path d="M247 352 h18 v6 h-18 Z" fill="#dce4e6" opacity="0.72"/>
+      <path d="M248 574 l8-8 8 8 -8 8 Z" fill="#dce4e6" opacity="0.72"/>
+      <path d="M250 662 H262 V681 H250 Z" fill="#a94f58" opacity="0.74"/>
+    </g>
+  </g>
+</svg>

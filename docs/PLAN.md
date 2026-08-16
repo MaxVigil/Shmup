@@ -325,6 +325,72 @@ Status: implemented on `test`, awaiting playtest before merging to `main`.
 - [x] Tests: casualty thresholds, injury/death handling, outsource pricing,
   in-house gating, medic acceleration, salary cap, v15→v16 migration.
 
+## Iteration 1 — Base management pass (schema v14)
+
+Status: implemented on `test`.
+
+- [x] Credits format threshold at 1k (`8k` for 8000), player health bar at 50%
+  alpha, single REPAIR action (emergency repair removed).
+- [x] Removed the MANDATE/FUEL/OBJECTIVE base cards and the HUD objective line;
+  credit lines moved to the Finance tab.
+- [x] Trade Centre construction moved into Engineering (the old Trade-tab-only
+  build path was a dead end) and the Trade tab is always visible with a locked
+  note until the Centre is built.
+- [x] Staff hire buttons disabled at `maximumHeadcount` with a "LIMIT REACHED"
+  chip (fixes the two-Operations-Directors UI bug).
+- [x] New base tabs: Staff / Medical / Warehouse.
+
+## Iteration 2 — Mission launch flow (schema v14)
+
+Status: implemented on `test`.
+
+- [x] Mission rows use a single "FLY MISSION" button that opens the aircraft
+  picker modal with per-aircraft readiness reasons.
+- [x] Launching is disabled with a "No aircraft is ready…" hint when the hangar
+  cannot field a sortie; all launch paths share `launchSortie()`.
+
+## Iteration 3 — Repeatable weapon production (schema v14)
+
+Status: implemented on `test`.
+
+- [x] Weapon production (accelerator, alien emitter, canister) is repeatable and
+  quantity-based: choose a batch size, per-quantity cost and disabled states,
+  and each completed batch adds the units to the warehouse.
+- [x] `ProductionJobState` carries `quantity`; `startWeaponProduction(…, quantity)`
+  and `weaponProductionCost()` drive the flow; warehouse stock counts display.
+- [x] The Medical tab is hidden until the Medical Block is built.
+
+## Iteration 4 — National aircraft fleet (schema v17)
+
+Status: implemented on `test`.
+
+- [x] Replaced the 6 engine-brand aircraft with 7 Council-nation aircraft, each
+  with its own root SVG rendered in-game (`public/assets/{india,britain,prc,
+  germany,usa,france,japan}.svg`): India light delta interceptor (starter),
+  PRC stealth interceptor, France agile multirole, Britain VTOL strike, Germany
+  variable-sweep strike, Japan precision fighter, USA stealth strike fighter.
+- [x] Balance table is typed content (armour / speed / damage / refuel / slots /
+  price); PRC offers a strong mid-tier interceptor lane; names are generic in
+  uk/en/zh ("Літак КНР" / "PRC aircraft" / "中国战机").
+- [x] Aircraft blueprints (7) and Mk1/Mk2 upgrades (14) regenerated for the new
+  fleet; starter aircraft is India.
+- [x] Schema v17 migration: v16 saves are reset to the starter aircraft, old
+  aircraft blueprint/upgrade references are cleared, and credits, materials,
+  staff, buildings, weapons, and warehouse stock are preserved.
+- [x] Tests: catalog fleet balance, v16→v17 migration, aircraft production and
+  upgrade flows against the new blueprint ids.
+
+## Future ideas (backlog)
+
+- **Scrum teams for staff (scientists, engineers, medics).** Pilots remain
+  individual hires, but research/production/medical staff are framed as a
+  "lead + team of 8–10 specialists" hired with a single click. Minimal domain
+  change: the existing staff/candidate/salary/headcount model stays; only the
+  presentation reframes a hire as a team, `maximumHeadcount` becomes "number of
+  teams", and the roster shows "Lead X · team of N" instead of individual names.
+  This makes the flat per-hire contribution and salary read naturally.
+
+
 ## Durable decisions
 
 - The PRC and the Chinese Communist Party play a key positive role in the game's

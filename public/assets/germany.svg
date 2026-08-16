@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">Germany — original variable-sweep strike aircraft</title>
+  <desc id="desc">Simplified game-ready top-down twin-engine strike aircraft with an original variable-sweep wing silhouette, using the shared Shmup aircraft style.</desc>
+  <defs>
+    <linearGradient id="hull" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#414b55"/>
+      <stop offset="0.45" stop-color="#737d85"/>
+      <stop offset="0.53" stop-color="#7d878e"/>
+      <stop offset="1" stop-color="#414b55"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#647079"/>
+      <stop offset="1" stop-color="#3d4751"/>
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7d5dc"/>
+      <stop offset="0.42" stop-color="#6e929e"/>
+      <stop offset="1" stop-color="#263d48"/>
+    </linearGradient>
+    <linearGradient id="engineGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4c1"/>
+      <stop offset="0.55" stop-color="#8bcfe4"/>
+      <stop offset="1" stop-color="#377488" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-120%" y="-40%" width="340%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <g id="engine-glow" opacity="0.82">
+    <path d="M214 689 L233 689 L230 750 Q223 766 217 750 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+    <path d="M279 689 L298 689 L295 750 Q289 766 282 750 Z" fill="url(#engineGlow)" filter="url(#softGlow)"/>
+  </g>
+
+  <g id="aircraft" stroke-linejoin="round">
+    <!-- Broad all-moving tail surfaces support the heavy strike-aircraft role. -->
+    <path id="tail-plane" d="M217 575 L123 686 L126 731 L226 702 L256 674 L286 702 L386 731 L389 686 L295 575 Z"
+      fill="#3d4852" stroke="#929ca2" stroke-width="3"/>
+
+    <!-- Variable-sweep wings are shown at an intermediate combat position. -->
+    <path id="main-wing" d="M207 346
+      L45 505 L39 565 L196 548 L235 508
+      L256 526 L277 508 L316 548 L473 565 L467 505
+      L305 346 Z"
+      fill="url(#wing)" stroke="#929ca2" stroke-width="3"/>
+    <path d="M205 359 L66 506 L191 518 L235 481 Z" fill="#59656f" opacity="0.54"/>
+    <path d="M307 359 L446 506 L321 518 L277 481 Z" fill="#59656f" opacity="0.54"/>
+
+    <!-- Pivot collars make the sweep mechanism visually explicit. -->
+    <g id="wing-pivots" fill="#4b5761" stroke="#929ca2" stroke-width="2">
+      <circle cx="205" cy="384" r="22"/>
+      <circle cx="307" cy="384" r="22"/>
+      <circle cx="205" cy="384" r="9" fill="#232e37"/>
+      <circle cx="307" cy="384" r="9" fill="#232e37"/>
+    </g>
+
+    <!-- Long central fuselage, widened over the paired engines. -->
+    <path id="fuselage" d="M256 35
+      C239 65 228 106 226 151
+      L219 253 L198 310 L195 457 L204 606
+      L204 681 Q212 716 231 722 L247 707 L256 685
+      L265 707 L281 722 Q300 716 308 681
+      L308 606 L317 457 L314 310 L293 253 L286 151
+      C284 106 273 65 256 35 Z"
+      fill="url(#hull)" stroke="#a1aaaf" stroke-width="3"/>
+
+    <!-- Rectangular shoulder intakes echo industrial German design language. -->
+    <g id="intakes" fill="#18232c" stroke="#79868e" stroke-width="2">
+      <path d="M218 268 L181 318 L185 375 L217 359 L233 286 Z"/>
+      <path d="M294 268 L331 318 L327 375 L295 359 L279 286 Z"/>
+      <path d="M188 326 H214 L209 350 H189 Z" fill="#2d3a44"/>
+      <path d="M324 326 H298 L303 350 H323 Z" fill="#2d3a44"/>
+    </g>
+
+    <!-- Two-seat angular canopy differentiates the aircraft from lighter fighters. -->
+    <path id="canopy" d="M256 101
+      C237 118 231 151 233 198 L237 266
+      Q256 289 275 266 L279 198 C281 151 275 118 256 101 Z"
+      fill="url(#canopy)" stroke="#b9c8cc" stroke-width="3"/>
+    <path d="M236 184 Q256 166 276 184" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.68"/>
+    <path d="M238 226 Q256 210 274 226" fill="none" stroke="#d4e1e3" stroke-width="2" opacity="0.58"/>
+
+    <!-- Twin engine channels remain broad and readable at sprite scale. -->
+    <path d="M213 414 L239 403 L248 431 L244 640 L223 668 L211 622 Z" fill="#4a5660" opacity="0.72"/>
+    <path d="M299 414 L273 403 L264 431 L268 640 L289 668 L301 622 Z" fill="#4a5660" opacity="0.72"/>
+
+    <g id="panel-lines" fill="none" stroke="#aeb6ba" stroke-width="2" opacity="0.31">
+      <path d="M196 407 L121 462 L61 518"/>
+      <path d="M316 407 L391 462 L451 518"/>
+      <path d="M55 538 L192 524 L221 497"/>
+      <path d="M457 538 L320 524 L291 497"/>
+      <path d="M256 315 L256 652"/>
+      <path d="M222 447 H242 V493 H222"/>
+      <path d="M290 447 H270 V493 H290"/>
+    </g>
+
+    <!-- A slim dorsal fin replaces the very tall reference tail. -->
+    <path id="vertical-stabiliser" d="M256 493 L273 610 L266 688 L256 673 L246 688 L239 610 Z"
+      fill="#4b5761" stroke="#929ca2" stroke-width="2"/>
+
+    <g id="engines">
+      <path d="M206 640 L239 640 L240 704 Q225 726 209 706 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M273 640 L306 640 L303 706 Q287 726 272 704 Z" fill="#232e37" stroke="#87939a" stroke-width="3"/>
+      <path d="M214 688 L233 688 L231 712 Q223 721 216 712 Z" fill="#d7edf0"/>
+      <path d="M279 688 L298 688 L296 712 Q289 721 281 712 Z" fill="#d7edf0"/>
+    </g>
+
+    <!-- Fictional service bars use restrained black, red and gold accents. -->
+    <g id="markings">
+      <g transform="translate(95 522)">
+        <path d="M-18 -5 H18 V5 H-18 Z" fill="#1c242b"/>
+        <path d="M-18 5 H18 V10 H-18 Z" fill="#9e4f58"/>
+        <path d="M-18 10 H18 V15 H-18 Z" fill="#c49a4a"/>
+      </g>
+      <g transform="translate(417 522)">
+        <path d="M-18 -5 H18 V5 H-18 Z" fill="#1c242b"/>
+        <path d="M-18 5 H18 V10 H-18 Z" fill="#9e4f58"/>
+        <path d="M-18 10 H18 V15 H-18 Z" fill="#c49a4a"/>
+      </g>
+      <path d="M247 359 h18 v9 h-18 Z" fill="#dce4e6" opacity="0.68"/>
+      <path d="M248 535 l8-8 8 8 -8 8 Z" fill="#dce4e6" opacity="0.72"/>
+      <circle cx="256" cy="401" r="4" fill="#c49a4a"/>
+    </g>
+  </g>
+</svg>

@@ -696,10 +696,10 @@ describe('game store month cycle', () => {
     const lab = contentCatalog.buildings[0];
     const workshop = contentCatalog.buildings[1];
     const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
-      (entry) => entry.id === 'blueprint-aircraft-gunship',
+      (entry) => entry.id === 'blueprint-aircraft-britain',
     );
     const upgrade = contentCatalog.aircraftUpgrades.find(
-      (entry) => entry.id === 'upgrade-aircraft-gunship-mk2',
+      (entry) => entry.id === 'upgrade-aircraft-britain-mk1',
     );
     expect(aircraftBlueprint).toBeDefined();
     expect(upgrade).toBeDefined();
