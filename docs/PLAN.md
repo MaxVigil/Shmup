@@ -486,6 +486,30 @@ Status: implemented on `test`.
   production `kind` is additive; `manufacturedAircraftUpgradeIds` already
   exists in v17).
 
+## Iteration 11 — Material buttons + full button UX audit (plan iteration E)
+
+Status: implemented on `test`.
+
+- [x] Material interaction logic for `base-action`: ink ripple from the pointer
+  down position (new `src/ui/ripple.ts`, delegated listener, disabled under
+  `prefers-reduced-motion`), a `currentColor` state-layer overlay for
+  hover/focus/press, resting→hover→pressed elevation via box-shadow, and
+  `touch-action: manipulation` (no double-tap zoom / click delay).
+- [x] Keyboard: native Enter/Space activation, `:focus-visible` ring, disabled
+  buttons skipped by focus (native `disabled`).
+- [x] Full button audit: every DOM action now uses the single `base-action`
+  primitive (+ `is-primary`/`is-danger`/`is-icon` modifiers); the tab strip
+  stays `base-navigation button`.
+- [x] Removed custom classes: `.launch-action`, `.return-action`,
+  `.weapon-switch-action`, `.icon-button` — replaced by `base-action`
+  (`is-primary` for launch/return, `is-icon` for the menu gear and close
+  buttons); layout slots moved to `#launch-sortie`, `.sortie-outcome
+  .base-action`, `.sortie-controls .base-action`.
+- [x] Design-system page demos updated (no LAUNCH/icon-button samples; the icon
+  variant and all states incl. state-layer overlays are shown).
+- [x] No schema change. 213 unit tests, lint, typecheck, and the production
+  build pass.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

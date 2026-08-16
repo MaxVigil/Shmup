@@ -52,6 +52,7 @@ import { byId, setText } from './dom';
 import { h } from './h';
 import { getLocale, setLocale, t, localizedWeaponName } from './i18n';
 import { buildAppTemplate } from './template';
+import { installRipples } from './ripple';
 import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../debug/debug-mode';
 import { showToast } from './toast';
 import { aircraftVisualHtml } from './ship-svg';
@@ -146,6 +147,7 @@ if (!temporaryPlaytestMode) {
 }
 
 app.innerHTML = buildAppTemplate(initialState);
+installRipples(app);
 const playtestBadge = byId<HTMLElement>("playtest-badge");
 playtestBadge.hidden = !temporaryPlaytestMode;
 playtestBadge.textContent = temporaryPlaytestMode ? t("debug.playtestBadge") : "";
@@ -3440,11 +3442,10 @@ function renderDesignSystem(): void {
     buttonSample('DISABLED', 'disabled', { disabled: true }),
     buttonSample('PRIMARY', 'primary · is-primary', { class: 'is-primary' }),
     buttonSample('DANGER', 'danger · is-danger', { class: 'is-danger' }),
-    buttonSample('LAUNCH', 'launch-action', { class: 'launch-action' }),
   );
-  const iconButton = h('button', { class: 'icon-button', type: 'button', 'aria-expanded': 'false' }, '⚙');
+  const iconButton = h('button', { class: 'base-action is-icon', type: 'button', 'aria-expanded': 'false' }, '⚙');
   buttonsBlock.append(
-    h('div', { class: 'design-button-cell' }, iconButton, h('small', null, 'icon-button')),
+    h('div', { class: 'design-button-cell' }, iconButton, h('small', null, 'base-action is-icon')),
   );
   designSystemContent.append(designSection('design.buttons', buttonsBlock));
 

@@ -14,7 +14,7 @@ export function buildAppTemplate(initialState: GameState): string {
       <div class="settings">
         <button
           id="settings-toggle"
-          class="icon-button"
+          class="base-action is-icon"
           type="button"
           aria-expanded="false"
           aria-controls="settings-menu"
@@ -279,7 +279,7 @@ export function buildAppTemplate(initialState: GameState): string {
         <p id="warden-signal-warning" class="preflight-warning" role="status" hidden></p>
         <p id="fuel-status" class="preflight-warning" role="status" hidden></p>
         <p id="preflight-mission" class="preflight-warning preflight-mission" role="status" hidden></p>
-          <button id="launch-sortie" class="base-action launch-action" type="button"></button>
+          <button id="launch-sortie" class="base-action is-primary" type="button"></button>
         </section>
         <section class="technology-lab hangar-panel" aria-labelledby="hangar-fleet-title">
           <p class="technology-lab__eyebrow" id="hangar-fleet-eyebrow"></p>
@@ -405,7 +405,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <h2 id="design-system-title"></h2>
             <p class="lede" id="design-system-lede"></p>
           </div>
-          <button id="design-system-close" class="icon-button design-system-overlay__close" type="button" aria-label="close"></button>
+          <button id="design-system-close" class="base-action is-icon design-system-overlay__close" type="button" aria-label="close"></button>
         </header>
         <div id="design-system-content" class="design-system-content"></div>
       </section>
@@ -416,7 +416,7 @@ export function buildAppTemplate(initialState: GameState): string {
             <p class="technology-lab__eyebrow" id="sortie-picker-eyebrow"></p>
             <h2 id="sortie-picker-title"></h2>
           </div>
-          <button id="sortie-picker-close" class="icon-button" type="button" aria-label="close"></button>
+          <button id="sortie-picker-close" class="base-action is-icon" type="button" aria-label="close"></button>
         </header>
         <div id="sortie-picker-list" class="candidate-list" aria-live="polite"></div>
         <p id="sortie-picker-empty" class="empty-note" hidden></p>
@@ -428,13 +428,13 @@ export function buildAppTemplate(initialState: GameState): string {
         <div id="game-root"></div>
         <div id="sortie-outcome" class="sortie-outcome" hidden>
           <p class="run-report" id="sortie-run-report" aria-live="polite"></p>
-          <button id="return-to-base" class="base-action return-action" type="button"></button>
+          <button id="return-to-base" class="base-action is-primary" type="button"></button>
         </div>
       </section>
       <aside class="sortie-controls" aria-live="polite">
         <span id="active-weapon-label"></span>
         <strong id="active-weapon-name"></strong>
-        <button id="switch-primary-weapon" class="weapon-switch-action" type="button" aria-keyshortcuts="X"></button>
+        <button id="switch-primary-weapon" class="base-action" type="button" aria-keyshortcuts="X"></button>
         <small id="weapon-switch-note"></small>
       </aside>
     </main>

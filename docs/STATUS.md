@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-16
 
+## Iteration 11 — Material buttons + full button UX audit
+
+Implemented on `test`.
+
+- `base-action` now has real Material interaction: an ink ripple from the
+  press point (respects `prefers-reduced-motion`), currentColor state-layer
+  overlays for hover/focus/press, elevation changes, and `touch-action:
+  manipulation`. Keyboard keeps native Enter/Space + a visible focus ring.
+- Whole UI audited and standardized on the single `base-action` primitive.
+  Removed the custom `.launch-action`, `.return-action`,
+  `.weapon-switch-action`, and `.icon-button` classes: launch/return are now
+  `base-action is-primary`, the menu gear and close buttons are `base-action
+  is-icon`.
+- No schema change. 213 unit tests, lint, typecheck, and the production build
+  pass.
+
 ## Iteration 10 — Aircraft upgrade chain: blueprint → queued manufacture
 
 Implemented on `test`.

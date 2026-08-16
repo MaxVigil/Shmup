@@ -179,25 +179,6 @@ select:focus-visible {
   justify-self: end;
 }
 
-.icon-button {
-  display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
-  padding: 0;
-  border: 1px solid #2a4049;
-  color: #a8c9c5;
-  background: #0b151a;
-  cursor: pointer;
-  font-size: 1.1rem;
-  place-items: center;
-}
-
-.icon-button:hover,
-.icon-button[aria-expanded="true"] {
-  border-color: #70a897;
-  color: #fff;
-}
-
 .settings-menu {
   position: absolute;
   top: calc(100% + 0.65rem);
@@ -979,13 +960,6 @@ h1 {
   line-height: 1.4;
 }
 
-.launch-action,
-.return-action {
-  width: 100%;
-  margin-top: 1.25rem;
-  border-color: #70a897;
-}
-
 .preflight-warning {
   margin: 1rem 0 0;
   padding: 0.75rem;
@@ -1027,11 +1001,6 @@ h1 {
   box-shadow: 0 1rem 3rem rgb(0 0 0 / 50%);
 }
 
-.sortie-outcome .return-action {
-  width: 100%;
-  margin-top: 0.9rem;
-}
-
 .sortie-controls {
   grid-column: 2;
   width: min(100%, 15rem);
@@ -1059,25 +1028,6 @@ h1 {
   margin-top: 0.45rem;
   color: #dceff0;
   font-size: 0.82rem;
-}
-
-.weapon-switch-action {
-  width: 100%;
-  margin-top: 0.8rem;
-  padding: 0.7rem;
-  border: 1px solid #527c71;
-  color: #aee7d3;
-  background: #11252a;
-  cursor: pointer;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.68rem;
-}
-
-.weapon-switch-action:disabled {
-  border-color: #25373e;
-  color: #53676e;
-  background: #0c171c;
-  cursor: not-allowed;
 }
 
 .sortie-controls small {
@@ -1513,6 +1463,9 @@ h1 {
 
 /* -- Buttons ---------------------------------------------------------- */
 .base-action {
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-s);
   color: var(--text);
@@ -1521,14 +1474,33 @@ h1 {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   letter-spacing: 0.04em;
-  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 22%);
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
+}
+/* Material state layer: a currentColor overlay for hover / focus / press. */
+.base-action::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
 }
 .base-action:hover:not(:disabled) {
   border-color: var(--border-accent);
   color: var(--text-hi);
   background: var(--bg-4);
+  box-shadow: 0 0.25rem 0.7rem rgb(0 0 0 / 28%);
 }
-.base-action:active:not(:disabled) { transform: translateY(1px); }
+.base-action:hover:not(:disabled)::after { opacity: 0.08; }
+.base-action:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 0.05rem 0.15rem rgb(0 0 0 / 35%);
+}
+.base-action:active:not(:disabled)::after { opacity: 0.16; }
+.base-action:focus-visible:not(:disabled)::after { opacity: 0.1; }
 .base-action:disabled {
   border-color: var(--border-subtle);
   color: var(--text-low);
@@ -1558,36 +1530,62 @@ h1 {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* Icon-only variant for glyph controls (menu gear, close buttons). */
+.base-action.is-icon {
+  display: inline-grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  place-items: center;
+  font-size: 1.1rem;
+}
+.base-action.is-icon:hover:not(:disabled),
+.base-action.is-icon[aria-expanded="true"] {
+  border-color: var(--border-accent);
+  color: var(--text-hi);
+}
+/* Full-width layout slots that were previously custom launch classes. */
+#launch-sortie {
+  width: 100%;
+  margin-top: 1.25rem;
+}
+.sortie-outcome .base-action {
+  width: 100%;
+  margin-top: 0.9rem;
+}
+.sortie-controls .base-action {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+/* Ink ripple created by src/ui/ripple.ts. */
+.base-action__ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgb(255 255 255 / 26%);
+  transform: scale(0);
+  animation: base-action-ripple 520ms ease-out forwards;
+}
+@keyframes base-action-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
 /* Design-guide demo states (style-guide page only). */
 .base-action.is-hovered:not(:disabled) {
   border-color: var(--border-accent);
   color: var(--text-hi);
   background: var(--bg-4);
 }
+.base-action.is-hovered:not(:disabled)::after { opacity: 0.08; }
 .base-action.is-pressed:not(:disabled) { transform: translateY(1px); }
+.base-action.is-pressed:not(:disabled)::after { opacity: 0.16; }
 .base-action.is-focused:not(:disabled) {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-
-/* -- Launch actions --------------------------------------------------- */
-.launch-action,
-.return-action {
-  width: 100%;
-  margin-top: 1.25rem;
-  border-color: var(--accent-dim);
-  background: linear-gradient(180deg, #14402f, #0e2e23);
-  color: #d9fff0;
-  font-weight: 600;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-}
-.launch-action:hover:not(:disabled),
-.return-action:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: linear-gradient(180deg, #1a4c38, #123a2b);
-  color: #fff;
-}
+.base-action.is-focused:not(:disabled)::after { opacity: 0.1; }
 
 /* -- Global strategic HUD --------------------------------------------- */
 .global-hud {
@@ -1620,14 +1618,6 @@ h1 {
 }
 .sortie-controls span { color: var(--text-mid); }
 .sortie-controls strong { color: var(--text-hi); }
-.weapon-switch-action {
-  border-color: var(--accent-dim);
-  border-radius: var(--radius-s);
-  background: var(--bg-3);
-  color: var(--accent-strong);
-}
-.weapon-switch-action:hover:not(:disabled) { border-color: var(--accent); color: var(--text-hi); }
-.weapon-switch-action:disabled { border-color: var(--border); color: var(--text-low); background: var(--bg-1); }
 .combat-frame { border-color: var(--border); }
 
 /* -- Trade layout ------------------------------------------------------- */
