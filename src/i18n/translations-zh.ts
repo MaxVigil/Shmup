@@ -423,6 +423,8 @@ export const zh = {
   'hangar.armour': '装甲 {value}',
   'hangar.speed': '速度 ×{value}',
   'hangar.firepower': '火力 ×{value}',
+  'hangar.fireRate': '射速 ×{value}',
+  'hangar.projectileSpeed': '弹速 ×{value}',
   'hangar.slots': '武器槽 {value}',
   'hangar.upgraded': '已升级',
   'hangar.noActiveAircraft': '未选择战机。',

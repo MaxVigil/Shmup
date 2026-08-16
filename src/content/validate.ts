@@ -305,6 +305,10 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       aircraft.armour <= 0 ||
       aircraft.speedMultiplier <= 0 ||
       aircraft.damageMultiplier <= 0 ||
+      aircraft.fireRateMultiplier <= 0 ||
+      aircraft.fireRateMultiplier > 3 ||
+      aircraft.projectileSpeedMultiplier <= 0 ||
+      aircraft.projectileSpeedMultiplier > 2 ||
       !Number.isInteger(aircraft.refuelCreditCost) ||
       aircraft.refuelCreditCost <= 0 ||
       !Number.isInteger(aircraft.weaponSlotCount) ||

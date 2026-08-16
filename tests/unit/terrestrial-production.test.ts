@@ -210,6 +210,13 @@ describe('terrestrial production', () => {
     expect(applied.armour).toBe(
       contentCatalog.aircraft[0].armour + (upgrade?.armourDelta ?? 0),
     );
+    // The aircraft multipliers pass through applyAircraftUpgrades unchanged.
+    expect(applied.fireRateMultiplier).toBe(
+      contentCatalog.aircraft[0].fireRateMultiplier,
+    );
+    expect(applied.projectileSpeedMultiplier).toBe(
+      contentCatalog.aircraft[0].projectileSpeedMultiplier,
+    );
   });
 
   it('produces any quantity of a weapon repeatedly into the warehouse', () => {

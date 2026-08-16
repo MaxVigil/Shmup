@@ -2235,6 +2235,8 @@ function renderHangarHero(): void {
       t('hangar.armour', { value: upgraded.armour }),
       t('hangar.speed', { value: upgraded.speedMultiplier }),
       t('hangar.firepower', { value: upgraded.damageMultiplier }),
+      t('hangar.fireRate', { value: upgraded.fireRateMultiplier }),
+      t('hangar.projectileSpeed', { value: upgraded.projectileSpeedMultiplier }),
       t('hangar.slots', { value: aircraft.weaponSlotCount }),
     ].join(' · ')),
     h('small', { class: 'hangar-hero__status' }, [
@@ -3874,11 +3876,19 @@ function launchSortie(): void {
               contentCatalog.aircraftUpgrades,
             );
         return upgraded === undefined
-          ? { armour: 100, speedMultiplier: 1, damageMultiplier: 1 }
+          ? {
+              armour: 100,
+              speedMultiplier: 1,
+              damageMultiplier: 1,
+              fireRateMultiplier: 1,
+              projectileSpeedMultiplier: 1,
+            }
           : {
               armour: Math.max(1, Math.round(upgraded.armour * (1 - damage))),
               speedMultiplier: upgraded.speedMultiplier * pilot.speedMultiplier,
               damageMultiplier: upgraded.damageMultiplier * pilot.damageMultiplier,
+              fireRateMultiplier: upgraded.fireRateMultiplier,
+              projectileSpeedMultiplier: upgraded.projectileSpeedMultiplier,
             };
       },
       () => store.getSnapshot().base.activeAircraftId,

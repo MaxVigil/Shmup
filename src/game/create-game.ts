@@ -20,7 +20,15 @@ export function createGame(
     readonly armour: number;
     readonly speedMultiplier: number;
     readonly damageMultiplier: number;
-  }> = () => ({ armour: 100, speedMultiplier: 1, damageMultiplier: 1 }),
+    readonly fireRateMultiplier: number;
+    readonly projectileSpeedMultiplier: number;
+  }> = () => ({
+    armour: 100,
+    speedMultiplier: 1,
+    damageMultiplier: 1,
+    fireRateMultiplier: 1,
+    projectileSpeedMultiplier: 1,
+  }),
   getActiveAircraftId: () => string | null = () => null,
   getRocketStock: () => number = () => 0,
   getLocale: () => Locale = () => 'uk',

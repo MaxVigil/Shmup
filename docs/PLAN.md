@@ -408,6 +408,29 @@ Status: implemented on `test`.
   from fleet slots so a single REPAIR action remains.
 - [x] Tests: cost multiplier/discount, faster repair ticks, in-house detection.
 
+## Iteration 7 — Aircraft fire-rate & projectile-speed multipliers (plan iteration A)
+
+Status: implemented on `test`.
+
+- [x] Two new independent `AircraftDefinition` multipliers — `fireRateMultiplier`
+  (cadence of every equipped automatic weapon) and `projectileSpeedMultiplier`
+  (bullet travel speed). Neither is derived from `damageMultiplier`; damage,
+  cadence, and projectile speed stay three separate, independently-tuned fields.
+- [x] Catalog values for all seven national aircraft (India 1.25×/1.15×, PRC
+  1.2×/1.25×, France 1.1×/1.1×, Britain/Germany 1×/1×, USA 0.85×/0.95×, Japan
+  0.8×/1.05×). The Rocket Pod stays manual and is never accelerated.
+- [x] Validation: `fireRateMultiplier` in (0, 3], `projectileSpeedMultiplier` in
+  (0, 2].
+- [x] Combat: `getAircraftStats()`/`AircraftCombatStats` carry the two fields; the
+  fire cooldown is `1000 / (shotsPerSecond × fireRate)` and shots store
+  `projectileSpeed × projectileSpeedMultiplier` (canister spread preserves its
+  cone by scaling the horizontal velocity too).
+- [x] Hangar hero shows FIRE RATE ×N and PROJECTILE SPEED ×N alongside the existing
+  stats (uk/en/zh).
+- [x] Tests: content range/independence check + `applyAircraftUpgrades` passes the
+  multipliers through unchanged. 207 unit tests, lint, typecheck, and the
+  production build pass. No schema change (content + runtime presentation only).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

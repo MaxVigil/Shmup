@@ -224,6 +224,24 @@ describe('validateContentCatalog', () => {
     expect(japan.weaponSlotCount).toBe(1);
   });
 
+  it('gives every aircraft independent fire-rate and projectile-speed multipliers', () => {
+    for (const aircraft of contentCatalog.aircraft) {
+      expect(aircraft.fireRateMultiplier).toBeGreaterThan(0);
+      expect(aircraft.fireRateMultiplier).toBeLessThanOrEqual(3);
+      expect(aircraft.projectileSpeedMultiplier).toBeGreaterThan(0);
+      expect(aircraft.projectileSpeedMultiplier).toBeLessThanOrEqual(2);
+    }
+    // The multipliers are used across the fleet, not just defaults of 1.
+    const fireRates = new Set(
+      contentCatalog.aircraft.map((aircraft) => aircraft.fireRateMultiplier),
+    );
+    const projectileSpeeds = new Set(
+      contentCatalog.aircraft.map((aircraft) => aircraft.projectileSpeedMultiplier),
+    );
+    expect(fireRates.size).toBeGreaterThan(1);
+    expect(projectileSpeeds.size).toBeGreaterThan(1);
+  });
+
   it('scales refuel cost with aircraft weight and lists the Council states', () => {
     const india = contentCatalog.aircraft[0];
     const britain = contentCatalog.aircraft[1];

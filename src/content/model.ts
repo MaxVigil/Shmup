@@ -178,6 +178,10 @@ export interface AircraftDefinition {
   readonly armour: number;
   readonly speedMultiplier: number;
   readonly damageMultiplier: number;
+  /** Independent cadence multiplier for every equipped automatic weapon. */
+  readonly fireRateMultiplier: number;
+  /** Independent projectile speed multiplier. */
+  readonly projectileSpeedMultiplier: number;
   readonly refuelCreditCost: number;
   readonly weaponSlotCount: number;
   readonly supplierCountryId: string;

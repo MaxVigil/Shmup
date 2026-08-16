@@ -2,6 +2,25 @@
 
 Last updated: 2026-08-16
 
+## Iteration 7 — Aircraft fire-rate & projectile-speed multipliers
+
+Implemented on `test`.
+
+- Two new **independent** per-aircraft multipliers: `fireRateMultiplier` (fires
+  every equipped automatic weapon faster/slower) and `projectileSpeedMultiplier`
+  (bullets travel faster/slower). They are separate fields, decoupled from
+  `damageMultiplier` — damage, cadence, and projectile speed are tuned
+  independently; DPS is never stored as a single number.
+- Catalog: India 1.25×/1.15×, PRC 1.2×/1.25×, France 1.1×/1.1×,
+  Britain/Germany 1×/1×, USA 0.85×/0.95×, Japan 0.8×/1.05× (rough balance).
+  Rocket Pod remains manual (shotsPerSecond = 0) and is unaffected.
+- Combat reads both from `getAircraftStats()`; fire cooldown becomes
+  `1000 / (shotsPerSecond × fireRateMultiplier)` and shot speed scales with the
+  projectile multiplier (canister horizontal spread scales too, preserving the
+  cone). Hangar hero lists FIRE RATE / PROJECTILE SPEED per aircraft (uk/en/zh).
+- No schema change: content + runtime presentation only. 207 unit tests, lint,
+  typecheck, and the production build pass.
+
 ## Iteration 5–6 — Unified buttons + Repair Master
 
 Implemented on `test`.

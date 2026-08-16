@@ -157,6 +157,8 @@ export interface AircraftCombatStats {
   readonly armour: number;
   readonly speedMultiplier: number;
   readonly damageMultiplier: number;
+  readonly fireRateMultiplier: number;
+  readonly projectileSpeedMultiplier: number;
 }
 
 export class CombatScene extends Phaser.Scene {
@@ -175,6 +177,8 @@ export class CombatScene extends Phaser.Scene {
   private maxArmour = DEFAULT_PLAYER_ARMOUR;
   private aircraftSpeed = PLAYER_BASE_SPEED;
   private aircraftDamageMultiplier = 1;
+  private aircraftFireRateMultiplier = 1;
+  private aircraftProjectileSpeedMultiplier = 1;
   private score = 0;
   private startingCredits = 0;
   private contractLedger: SortieContractLedger = EMPTY_SORTIE_CONTRACT;
@@ -235,6 +239,8 @@ export class CombatScene extends Phaser.Scene {
       armour: DEFAULT_PLAYER_ARMOUR,
       speedMultiplier: 1,
       damageMultiplier: 1,
+      fireRateMultiplier: 1,
+      projectileSpeedMultiplier: 1,
     }),
     private readonly getActiveAircraftId: () => string | null = () => null,
     private readonly getRocketStock: () => number = () => 0,
@@ -416,6 +422,8 @@ export class CombatScene extends Phaser.Scene {
     this.armour = this.maxArmour;
     this.aircraftSpeed = PLAYER_BASE_SPEED * stats.speedMultiplier;
     this.aircraftDamageMultiplier = stats.damageMultiplier;
+    this.aircraftFireRateMultiplier = stats.fireRateMultiplier;
+    this.aircraftProjectileSpeedMultiplier = stats.projectileSpeedMultiplier;
     this.score = 0;
     this.startingCredits = this.getAvailableCredits();
     this.contractLedger = EMPTY_SORTIE_CONTRACT;
@@ -554,7 +562,7 @@ export class CombatScene extends Phaser.Scene {
       const weapon = this.currentWeapon();
       if (weapon.shotsPerSecond > 0) {
         this.fire(weapon);
-        this.fireCooldownMs += 1000 / weapon.shotsPerSecond;
+        this.fireCooldownMs += 1000 / (weapon.shotsPerSecond * this.aircraftFireRateMultiplier);
       } else {
         this.fireCooldownMs = 1000;
       }
@@ -1072,6 +1080,7 @@ export class CombatScene extends Phaser.Scene {
 
   private fire(weapon: WeaponDefinition): void {
     const canister = weapon.visualProfile === 'canister-cannon';
+    const projectileSpeed = weapon.projectileSpeed * this.aircraftProjectileSpeedMultiplier;
     const dimensions = weapon.visualProfile === 'impulse-accelerator'
       ? { width: 9, height: 30 }
       : weapon.visualProfile === 'split-pulse'
@@ -1089,7 +1098,7 @@ export class CombatScene extends Phaser.Scene {
     }
     for (let index = 0; index < weapon.projectileCount; index += 1) {
       const offset = (index - (weapon.projectileCount - 1) / 2) * weapon.spread;
-      const vx = canister ? offset * (weapon.projectileSpeed / 210) : 0;
+      const vx = canister ? offset * (projectileSpeed / 210) : 0;
       const body = this.add.rectangle(
         this.player.x + offset,
         this.player.y - 22,
@@ -1103,7 +1112,7 @@ export class CombatScene extends Phaser.Scene {
       this.shots.push({
         body,
         damage: weapon.damage * this.aircraftDamageMultiplier,
-        projectileSpeed: weapon.projectileSpeed,
+        projectileSpeed,
         penetratesAllTargets: weapon.penetration === 'all-targets',
         hitEnemyIds: new Set<number>(),
         visualProfile: weapon.visualProfile,
