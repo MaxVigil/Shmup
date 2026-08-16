@@ -492,6 +492,24 @@ The funding-nations expansion and the round-4 playtest fixes are implemented on
   up to 15% margin from level 2 onward.
 - All 167 unit tests, lint, typecheck, and the production build pass locally.
 
+## Fixes landed on `test` (2026-08-16)
+
+- **Disabled buttons now always look disabled.** The Material button pass left a
+  specificity gap: `.base-action.is-primary` / `.is-danger` and the primary glow
+  (`.base-action.is-primary { box-shadow … }`) came after `.base-action:disabled`
+  at equal specificity, so a disabled primary/danger button kept its active
+  gradient + glow (e.g. "Construct R&D Centre" with zero materials looked
+  enabled). Added explicit `.base-action:disabled` /
+  `.base-action.is-primary:disabled` / `.base-action.is-danger:disabled`
+  overrides (muted surface, `box-shadow: none`, `cursor: not-allowed`).
+- Full static button audit: every DOM action in the game uses the single
+  `base-action` primitive with correct `disabled`/`hidden` gating. Documented
+  exceptions: the tab strip (`base-navigation button`), geoscope map pins
+  (`geo-map__marker`, own positioned-pin styling + disabled opacity), and the
+  F3 debug panel (dev-only tool with self-contained inline styling).
+  Layout-only helper classes (`end-month`, `settings-design`,
+  `settings-restart`, `.settings-restart.is-armed` two-step confirm) remain.
+
 ## Fixes landed on `test` (2026-08-13)
 
 - Action-button text (`launch-sortie`, `return-to-base`) is now re-applied on every
