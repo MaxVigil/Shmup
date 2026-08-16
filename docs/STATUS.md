@@ -492,6 +492,18 @@ The funding-nations expansion and the round-4 playtest fixes are implemented on
   up to 15% margin from level 2 onward.
 - All 167 unit tests, lint, typecheck, and the production build pass locally.
 
+- **Single "mother" button style.** Consolidated every scattered `.base-action`
+  rule (legacy block, Theme B block, the uppercase/glow block, and the terminal
+  theme's `.is-primary` gradient) into ONE source of truth: `.base-action`
+  (padding, `--border-strong` border, bright `--text-hi` text, `--bg-3`
+  surface, uppercase, elevation, ripple, state layers). `is-primary` /
+  `is-danger` are now semantic-only — they inherit the mother style and no
+  longer change colour (no green gradient, no red, no glow). The only colour
+  signal left is the transient `.settings-restart.is-armed` two-step-confirm
+  state. Enabled buttons are uniformly bright/clickable; disabled buttons are
+  uniformly muted (`--text-low`, `--bg-1`, `opacity: 0.62`, `not-allowed`,
+  no shadow).
+
 ## Fixes landed on `test` (2026-08-16)
 
 - **Disabled buttons now always look disabled.** The Material button pass left a

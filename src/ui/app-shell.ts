@@ -3440,8 +3440,8 @@ function renderDesignSystem(): void {
     buttonSample('PRESSED', 'active', { class: 'is-pressed' }),
     buttonSample('FOCUS', 'focus', { class: 'is-focused' }),
     buttonSample('DISABLED', 'disabled', { disabled: true }),
-    buttonSample('PRIMARY', 'primary · is-primary', { class: 'is-primary' }),
-    buttonSample('DANGER', 'danger · is-danger', { class: 'is-danger' }),
+    buttonSample('PRIMARY', 'semantic · is-primary (no colour)', { class: 'is-primary' }),
+    buttonSample('DANGER', 'semantic · is-danger (no colour)', { class: 'is-danger' }),
   );
   const iconButton = h('button', { class: 'base-action is-icon', type: 'button', 'aria-expanded': 'false' }, '⚙');
   buttonsBlock.append(

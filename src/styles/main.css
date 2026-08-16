@@ -920,28 +920,6 @@ h1 {
   line-height: 1.55;
 }
 
-.base-action {
-  padding: 0.7rem 0.85rem;
-  border: 1px solid #41616b;
-  color: #aee7d3;
-  background: #12242b;
-  cursor: pointer;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.67rem;
-}
-
-.base-action:hover {
-  border-color: #70a897;
-  color: #fff;
-}
-
-.base-action:disabled {
-  border-color: #2a3f48;
-  color: #8aa2ac;
-  background: #0c171c;
-  cursor: not-allowed;
-}
-
 .loadout-row {
   display: flex;
   gap: 0.75rem;
@@ -1297,15 +1275,6 @@ h1 {
 .programme-panel .facility-row {
   margin-bottom: 0.55rem;
 }
-.base-action.is-primary {
-  border-color: #70a897;
-  background: #14372e;
-  color: #d9fff0;
-  font-weight: 600;
-}
-.base-action.is-primary:hover {
-  background: #1a4538;
-}
 .fleet-slot {
   transition: transform 0.12s ease, border-color 0.12s ease;
 }
@@ -1468,19 +1437,21 @@ h1 {
   box-shadow: inset 3px 0 var(--accent);
 }
 
-/* -- Buttons ---------------------------------------------------------- */
+/* -- Buttons: single "mother" style — every action button inherits this ---- */
 .base-action {
   position: relative;
   overflow: hidden;
   touch-action: manipulation;
+  padding: 0.7rem 0.85rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-s);
-  color: var(--text);
+  color: var(--text-hi);
   background: var(--bg-3);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  letter-spacing: 0.04em;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   box-shadow: 0 1px 0 rgb(0 0 0 / 22%);
   transition: background 0.12s ease, border-color 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
 }
@@ -1497,7 +1468,6 @@ h1 {
 }
 .base-action:hover:not(:disabled) {
   border-color: var(--border-accent);
-  color: var(--text-hi);
   background: var(--bg-4);
   box-shadow: 0 0.25rem 0.7rem rgb(0 0 0 / 28%);
 }
@@ -1508,31 +1478,16 @@ h1 {
 }
 .base-action:active:not(:disabled)::after { opacity: 0.16; }
 .base-action:focus-visible:not(:disabled)::after { opacity: 0.1; }
+/* One muted, obviously-inactive look for every disabled button. */
 .base-action:disabled {
   border-color: var(--border-subtle);
   color: var(--text-low);
   background: var(--bg-1);
+  box-shadow: none;
   cursor: not-allowed;
+  opacity: 0.62;
 }
-.base-action.is-primary {
-  border-color: var(--accent-dim);
-  background: linear-gradient(180deg, #14402f, #0e2e23);
-  color: #d9fff0;
-  font-weight: 600;
-}
-.base-action.is-primary:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: linear-gradient(180deg, #1a4c38, #123a2b);
-}
-.base-action.is-danger {
-  border-color: #7d3342;
-  background: rgb(64 18 28 / 78%);
-  color: #ffd7dd;
-}
-.base-action.is-danger:hover:not(:disabled) {
-  border-color: var(--danger);
-  background: rgb(86 24 36 / 85%);
-}
+/* `is-primary` / `is-danger` are semantic-only and inherit this same style. */
 .base-action:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -1549,9 +1504,8 @@ h1 {
 .base-action.is-icon:hover:not(:disabled),
 .base-action.is-icon[aria-expanded="true"] {
   border-color: var(--border-accent);
-  color: var(--text-hi);
 }
-/* Full-width layout slots that were previously custom launch classes. */
+/* Full-width layout slots (previously custom launch classes). */
 #launch-sortie {
   width: 100%;
   margin-top: 1.25rem;
@@ -1582,7 +1536,6 @@ h1 {
 /* Design-guide demo states (style-guide page only). */
 .base-action.is-hovered:not(:disabled) {
   border-color: var(--border-accent);
-  color: var(--text-hi);
   background: var(--bg-4);
 }
 .base-action.is-hovered:not(:disabled)::after { opacity: 0.08; }
@@ -1593,16 +1546,6 @@ h1 {
   outline-offset: 2px;
 }
 .base-action.is-focused:not(:disabled)::after { opacity: 0.1; }
-/* Disabled always wins over the primary/danger modifiers and the primary glow. */
-.base-action:disabled,
-.base-action.is-primary:disabled,
-.base-action.is-danger:disabled {
-  border-color: var(--border-subtle);
-  color: var(--text-low);
-  background: var(--bg-1);
-  box-shadow: none;
-  cursor: not-allowed;
-}
 
 /* -- Global strategic HUD --------------------------------------------- */
 .global-hud {
@@ -1857,15 +1800,6 @@ h1 {
   font-size: 0.88rem;
   max-width: 46rem;
 }
-
-/* -- Buttons ------------------------------------------------------------------ */
-.base-action {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.66rem;
-}
-.base-action.is-primary { box-shadow: 0 0 0.85rem rgb(100 230 187 / 16%); }
-.base-action.is-primary:hover:not(:disabled) { box-shadow: 0 0 1.15rem rgb(100 230 187 / 26%); }
 
 /* -- Top bar ------------------------------------------------------------------- */
 .top-bar { border-bottom: 1px solid var(--border); }
@@ -2132,9 +2066,6 @@ html[data-theme="terminal"] .command-panel {
 
 html[data-theme="terminal"] .base-action {
   letter-spacing: 0.1em;
-}
-html[data-theme="terminal"] .base-action.is-primary {
-  background: linear-gradient(180deg, #0e3d22, #092b18);
 }
 html[data-theme="terminal"] .section-heading h1,
 html[data-theme="terminal"] .section-heading .lede,
