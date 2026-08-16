@@ -1,7 +1,13 @@
 import type { GameState } from './model';
 import { SAVE_SCHEMA_VERSION } from './model';
 import { contentCatalog } from '../content/catalog';
-import { aircraftById, aircraftId, weaponById, weaponId } from '../content/ids';
+import {
+  aircraftById,
+  aircraftId,
+  STARTER_BUILDING_IDS,
+  weaponById,
+  weaponId,
+} from '../content/ids';
 import { generateThreatMap } from './command-centre';
 import { generateStaffCandidates } from './staff-market';
 import { generatePilotCandidates, STARTER_PILOT_ID } from './pilot-market';
@@ -42,7 +48,7 @@ export function createInitialGameState(): GameState {
       equippedPrimaryWeaponIds: [startingWeapon.id, null],
       marketSeed: 0x3a7e2026,
       sortiesCompleted: 0,
-      constructedBuildingIds: [],
+      constructedBuildingIds: [...STARTER_BUILDING_IDS],
       staff: [],
       unlockedBlueprintIds: [],
       locallyProducedWeaponIds: [],

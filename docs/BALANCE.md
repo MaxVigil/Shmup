@@ -14,6 +14,8 @@
 
 | Building | Credits | Materials | Sorties | Upkeep /mo | Requires blueprint | Requires building |
 | --- | --- | --- | --- | --- | --- | --- |
+| building-command-centre | 400,000 | 10 | 2 | 1,000 | — | — |
+| building-hangar | 500,000 | 20 | 3 | 2,000 | — | — |
 | building-research-centre | 300,000 | 10 | 1 | 5,000 | — | — |
 | building-production-works | 450,000 | 15 | 2 | 8,000 | — | building-research-centre |
 | building-quarantine-centre | 350,000 | 20 | 2 | 6,000 | blueprint-safe-containment | building-production-works |

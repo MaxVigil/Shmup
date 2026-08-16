@@ -2,6 +2,28 @@
 
 Last updated: 2026-08-16
 
+## Refactor Phase 2 — Command Centre + Hangar + capability model (schema v19)
+
+Implemented on `test`.
+
+- Command Centre and Hangar are real starter buildings (upkeep `1,000`/`2,000` cr
+  per month; the scaled-economy validation requires `maintenanceCreditCost ≥ 1,000`)
+  with the new `BaseCapabilityId` capability model on every building.
+- New `src/domain/buildings.ts` selectors (`isBuildingOperational`,
+  `hasOperationalCapability`, `isStarterBuilding`,
+  `availableConstructionDefinitions`, …) and `STARTER_BUILDING_IDS` in
+  `src/content/ids.ts`. New campaigns and migrated v18 saves start with the
+  Command Centre + Hangar operational; UI and domain gates route through
+  `isBuildingOperational`, and medical treatment capability now comes from the
+  building capability model.
+- Save schema v18→v19: a migration provisions the starting buildings without
+  duplication; legacy v1–v17 saves chain through the same `upgradeLegacyToCurrent`
+  walk.
+- i18n labels for Command Centre, Hangar, and the previously missing Medical
+  Block in en/uk/zh.
+- 223 unit tests, lint, typecheck, and the production build pass;
+  `docs/BALANCE.md` and `docs/ENTITIES.md` regenerated.
+
 ## Refactor Phase 1 — Terminology + typed lookups (schema v18)
 
 Implemented on `test`.

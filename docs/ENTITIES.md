@@ -25,6 +25,8 @@ Legend: implemented in code, prototype, planned.
 
 | Building | Cost | Prerequisites |
 | --- | --- | --- |
+| building-command-centre | 400000 cr + 10 mat | — / — |
+| building-hangar | 500000 cr + 20 mat | — / — |
 | building-research-centre | 300000 cr + 10 mat | — / — |
 | building-production-works | 450000 cr + 15 mat | — / building-research-centre |
 | building-quarantine-centre | 350000 cr + 20 mat | blueprint-safe-containment / building-production-works |

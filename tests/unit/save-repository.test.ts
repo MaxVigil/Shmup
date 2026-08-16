@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { buildingId } from '../../src/content/ids';
+
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { createGameStore } from '../../src/app/store';
@@ -16,6 +18,7 @@ import {
   LEGACY_V15_SAVE_KEY,
   LEGACY_V16_SAVE_KEY,
   LEGACY_V17_SAVE_KEY,
+  LEGACY_V18_SAVE_KEY,
   LEGACY_V1_SAVE_KEY,
   LEGACY_V2_SAVE_KEY,
   LEGACY_V3_SAVE_KEY,
@@ -70,7 +73,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         credits: contentCatalog.economy.startingCredits,
         materials: 23,
@@ -79,7 +82,7 @@ describe('save repository', () => {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id],
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, null],
         sortiesCompleted: 0,
-        constructedBuildingIds: [],
+        constructedBuildingIds: [buildingId.commandCentre, buildingId.hangar],
         staff: [],
         unlockedBlueprintIds: [],
         locallyProducedWeaponIds: [],
@@ -116,9 +119,13 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
-        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        constructedBuildingIds: [
+          buildingId.researchCentre,
+          buildingId.commandCentre,
+          buildingId.hangar,
+        ],
         staff: [{ roleId: contentCatalog.staffRoles[0].id }],
       },
     });
@@ -140,7 +147,7 @@ describe('save repository', () => {
         preservedTechnologyIds: [],
         unlockedWeaponModuleIds: [],
         equippedWeaponModuleId: null,
-        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        constructedBuildingIds: [buildingId.researchCentre],
         staff: [{ id: 'staff-scientist-1', roleId: contentCatalog.staffRoles[0].id }],
       },
       technologyCatalog: [],
@@ -148,7 +155,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         credits: 275_000,
         researchQueue: [{ blueprintId: 'legacy-project', progress: 1, requiredProgress: 3 }],
@@ -180,7 +187,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         manufacturedEquipmentIds: [capturer.id],
         equippedEquipmentId: null,
@@ -207,7 +214,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, splitPulseId],
         equippedPrimaryWeaponIds: [splitPulseId, null],
@@ -232,7 +239,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         ownedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         equippedPrimaryWeaponIds: [acceleratorId, null],
@@ -258,7 +265,7 @@ describe('save repository', () => {
     }));
 
     expect(loadGame(storage)).toMatchObject({
-      schemaVersion: 18,
+      schemaVersion: 19,
       base: {
         equippedPrimaryWeaponIds: [contentCatalog.weapons[0].id, acceleratorId],
         locallyProducedWeaponIds: [],
@@ -292,7 +299,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.telemetryRecorded).toBe(true);
   });
 
@@ -323,7 +330,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.hangarSlots).toEqual([
       contentCatalog.aircraft[0].id,
       null,
@@ -345,7 +352,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.month).toBe(1);
     expect(loaded?.base.fueledAircraftIds).toEqual([contentCatalog.aircraft[0].id]);
     expect(loaded?.base.threatMap).toHaveLength(3);
@@ -363,7 +370,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.loans).toEqual([]);
   });
 
@@ -386,7 +393,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.aircraftLoadouts[contentCatalog.aircraft[0].id]).toContain(
       contentCatalog.weapons[0].id,
     );
@@ -402,7 +409,7 @@ describe('save repository', () => {
       ...initial,
       base: { ...initial.base, credits: 5_000_000, materials: 100 },
     });
-    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: contentCatalog.buildings[0].id });
+    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: buildingId.researchCentre });
     store.dispatch({ type: 'PURCHASE_AIRCRAFT', aircraftId: contentCatalog.aircraft[1].id });
     const progressed = store.getSnapshot();
     saveGame(storage, progressed);
@@ -430,7 +437,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.pilotInjuries).toEqual({});
     expect(loaded?.base.deadPilotIds).toEqual([]);
     expect(loaded?.base.pilotDeathMonth).toEqual({});
@@ -461,7 +468,7 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.hangarSlots).toEqual([starterId, null]);
     expect(loaded?.base.activeAircraftId).toBe(starterId);
     expect(loaded?.base.aircraftLoadouts[starterId]).toEqual([
@@ -476,7 +483,7 @@ describe('save repository', () => {
     expect(loaded?.base.manufacturedAircraftUpgradeIds).toEqual([]);
   });
 
-  it('migrates a v17 save into v18 by renaming Laboratory/Workshop IDs without losing progress', () => {
+  it('migrates a v17 save into v19 by renaming IDs and provisioning starting buildings', () => {
     const storage = createMemoryStorage();
     const initial = createInitialGameState();
     storage.setItem(LEGACY_V17_SAVE_KEY, JSON.stringify({
@@ -499,12 +506,14 @@ describe('save repository', () => {
     }));
 
     const loaded = loadGame(storage);
-    expect(loaded?.schemaVersion).toBe(18);
+    expect(loaded?.schemaVersion).toBe(19);
     expect(loaded?.base.credits).toBe(1_234_567);
     expect(loaded?.base.materials).toBe(42);
     expect(loaded?.base.constructedBuildingIds).toEqual([
       'building-research-centre',
       'building-production-works',
+      buildingId.commandCentre,
+      buildingId.hangar,
     ]);
     expect(loaded?.base.constructionQueue).toEqual([
       {
@@ -513,6 +522,56 @@ describe('save repository', () => {
         progress: 1,
         requiredProgress: 2,
       },
+    ]);
+  });
+
+  it('migrates a v18 save into v19 by provisioning the starting buildings', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    storage.setItem(LEGACY_V18_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 18,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: ['building-research-centre', 'building-production-works'],
+        constructionQueue: [],
+      },
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(19);
+    expect(loaded?.base.constructedBuildingIds).toEqual([
+      'building-research-centre',
+      'building-production-works',
+      buildingId.commandCentre,
+      buildingId.hangar,
+    ]);
+    expect(loaded?.base.credits).toBe(initial.base.credits);
+  });
+
+  it('does not duplicate starting buildings when a v18 save already has them', () => {
+    const storage = createMemoryStorage();
+    const initial = createInitialGameState();
+    storage.setItem(LEGACY_V18_SAVE_KEY, JSON.stringify({
+      ...initial,
+      schemaVersion: 18,
+      base: {
+        ...initial.base,
+        constructedBuildingIds: [
+          buildingId.commandCentre,
+          buildingId.hangar,
+          'building-research-centre',
+        ],
+        constructionQueue: [],
+      },
+    }));
+
+    const loaded = loadGame(storage);
+    expect(loaded?.schemaVersion).toBe(19);
+    expect(loaded?.base.constructedBuildingIds).toEqual([
+      buildingId.commandCentre,
+      buildingId.hangar,
+      'building-research-centre',
     ]);
   });
 });

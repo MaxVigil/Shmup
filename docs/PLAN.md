@@ -578,6 +578,32 @@ Status: implemented on `test`.
   Laboratory/Workshop migrates to v18 without losing credits/materials/progress".
   216 unit tests, lint, typecheck, and the production build pass.
 
+## Refactor Phase 2 — Command Centre + Hangar + capability model (schema v19)
+
+Status: implemented on `test`.
+
+- [x] Command Centre and Hangar are real starter buildings in the typed catalog
+  with upkeep (`1,000`/`2,000` cr per month) and capabilities
+  (`capability-mission-command` + `capability-financial-administration`,
+  `capability-aircraft-storage` + `capability-loadout`).
+- [x] New `BaseCapabilityId` union and `BuildingDefinition.capabilities` in
+  `src/content/model.ts`; every building declares its capabilities; catalog
+  validation rejects empty or unknown capability lists.
+- [x] New `src/domain/buildings.ts` selectors: `isBuildingConstructed`,
+  `isBuildingOperational`, `isStarterBuilding`, `hasOperationalCapability`,
+  `capabilitiesForBuilding`, `availableConstructionDefinitions`; single source
+  of truth `STARTER_BUILDING_IDS` in `src/content/ids.ts`.
+- [x] New campaigns start with Command Centre + Hangar operational; UI and domain
+  gates route through `isBuildingOperational` (21 UI checks + 5 production
+  gates), and `hasMedicalTreatmentCapability` reads the capability model.
+- [x] Save schema v19 with a v18→v19 migration that provisions the starting
+  buildings without duplication; legacy v1–v17 saves chain through the same
+  `upgradeLegacyToCurrent` walk.
+- [x] i18n labels for Command Centre, Hangar, and (previously missing) Medical
+  Block in en/uk/zh.
+- [x] 223 unit tests, lint, typecheck, and the production build pass;
+  `docs/BALANCE.md` and `docs/ENTITIES.md` regenerated.
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

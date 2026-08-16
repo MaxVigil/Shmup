@@ -4,6 +4,8 @@ import type {
   PilotInjuryState,
 } from './model';
 import type { RandomSource } from './rng';
+import { hasOperationalCapability } from './buildings';
+import { capabilityId } from '../content/ids';
 import { staffContribution } from './staff-market';
 
 /* =====================================================================
@@ -186,7 +188,7 @@ export function medicHealingRate(base: BaseState): number {
 
 export function hasMedicalTreatmentCapability(base: BaseState): boolean {
   return (
-    base.constructedBuildingIds.includes(MEDICAL_BLOCK_BUILDING_ID) &&
+    hasOperationalCapability(base, capabilityId.medicalTreatment) &&
     base.staff.some((member) => member.roleId === MEDIC_ROLE_ID)
   );
 }

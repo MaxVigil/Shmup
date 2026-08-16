@@ -173,6 +173,29 @@ export const contentCatalog = {
   },
   buildings: [
     {
+      id: 'building-command-centre',
+      creditCost: 400_000,
+      materialCost: 10,
+      constructionSorties: 2,
+      maintenanceCreditCost: 1_000,
+      requiredBlueprintId: null,
+      requiredBuildingId: null,
+      capabilities: [
+        'capability-mission-command',
+        'capability-financial-administration',
+      ],
+    },
+    {
+      id: 'building-hangar',
+      creditCost: 500_000,
+      materialCost: 20,
+      constructionSorties: 3,
+      maintenanceCreditCost: 2_000,
+      requiredBlueprintId: null,
+      requiredBuildingId: null,
+      capabilities: ['capability-aircraft-storage', 'capability-loadout'],
+    },
+    {
       id: 'building-research-centre',
       creditCost: 300_000,
       materialCost: 10,
@@ -180,6 +203,7 @@ export const contentCatalog = {
       maintenanceCreditCost: 5_000,
       requiredBlueprintId: null,
       requiredBuildingId: null,
+      capabilities: ['capability-research'],
     },
     {
       id: 'building-production-works',
@@ -189,6 +213,7 @@ export const contentCatalog = {
       maintenanceCreditCost: 8_000,
       requiredBlueprintId: null,
       requiredBuildingId: 'building-research-centre',
+      capabilities: ['capability-construction', 'capability-production'],
     },
     {
       id: 'building-quarantine-centre',
@@ -198,6 +223,7 @@ export const contentCatalog = {
       maintenanceCreditCost: 6_000,
       requiredBlueprintId: 'blueprint-safe-containment',
       requiredBuildingId: 'building-production-works',
+      capabilities: ['capability-alien-containment'],
     },
     {
       id: 'building-trade-centre',
@@ -207,6 +233,7 @@ export const contentCatalog = {
       maintenanceCreditCost: 6_000,
       requiredBlueprintId: null,
       requiredBuildingId: 'building-production-works',
+      capabilities: ['capability-trade'],
     },
     {
       id: 'building-medical-block',
@@ -216,6 +243,7 @@ export const contentCatalog = {
       maintenanceCreditCost: 6_000,
       requiredBlueprintId: 'blueprint-medical-block',
       requiredBuildingId: 'building-production-works',
+      capabilities: ['capability-medical-treatment'],
     },
   ],
   staffRoles: [

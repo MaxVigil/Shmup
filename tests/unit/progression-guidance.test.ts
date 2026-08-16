@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { buildingId } from '../../src/content/ids';
+
 import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
@@ -8,14 +10,14 @@ import {
 } from '../../src/domain/progression-guidance';
 
 const definitions: ProgressionDefinitions = {
-  laboratoryId: contentCatalog.buildings[0].id,
-  workshopId: contentCatalog.buildings[1].id,
+  laboratoryId: buildingId.researchCentre,
+  workshopId: buildingId.productionWorks,
   scientistRoleId: contentCatalog.staffRoles[0].id,
   engineerRoleId: contentCatalog.staffRoles[1].id,
   blueprintId: contentCatalog.blueprints[0].id,
   equipmentId: contentCatalog.equipment[0].id,
   containmentBlueprintId: contentCatalog.buildingBlueprints[0].id,
-  quarantineId: contentCatalog.buildings[2].id,
+  quarantineId: buildingId.quarantineCentre,
   adaptedBlueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
   adaptedWeaponId: contentCatalog.weapons[2].id,
 };

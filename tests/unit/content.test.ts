@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { buildingById, buildingId } from '../../src/content/ids';
 import { contentCatalog } from '../../src/content/catalog';
 import type { ContentCatalog } from '../../src/content/model';
 import { validateContentCatalog } from '../../src/content/validate';
@@ -72,7 +73,7 @@ describe('validateContentCatalog', () => {
     };
     const invalidBuilding: ContentCatalog = {
       ...contentCatalog,
-      buildings: [{ ...contentCatalog.buildings[0], materialCost: -1 }],
+      buildings: [{ ...buildingById(buildingId.researchCentre)!, materialCost: -1 }],
     };
 
     expect(() => validateContentCatalog(invalidEconomy)).toThrow(

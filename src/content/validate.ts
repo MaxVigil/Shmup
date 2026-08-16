@@ -1,4 +1,19 @@
-import type { ContentCatalog } from './model';
+import type { BaseCapabilityId, ContentCatalog } from './model';
+
+const BASE_CAPABILITY_IDS = new Set<BaseCapabilityId>([
+  'capability-mission-command',
+  'capability-research',
+  'capability-construction',
+  'capability-production',
+  'capability-aircraft-storage',
+  'capability-loadout',
+  'capability-item-storage',
+  'capability-staff-recruitment',
+  'capability-financial-administration',
+  'capability-trade',
+  'capability-medical-treatment',
+  'capability-alien-containment',
+]);
 
 function assertUniqueIds(
   groupName: string,
@@ -60,7 +75,11 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
         !catalog.buildingBlueprints.some((blueprint) =>
           blueprint.id === building.requiredBlueprintId)) ||
       (building.requiredBuildingId !== null &&
-        !catalog.buildings.some((candidate) => candidate.id === building.requiredBuildingId))
+        !catalog.buildings.some((candidate) => candidate.id === building.requiredBuildingId)) ||
+      building.capabilities.length === 0 ||
+      building.capabilities.some(
+        (capability) => !BASE_CAPABILITY_IDS.has(capability),
+      )
     ) {
       throw new Error(`Building ${building.id} has invalid construction costs.`);
     }

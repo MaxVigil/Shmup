@@ -73,6 +73,20 @@ export interface BaseEconomyDefinition {
   readonly missedEnemyPenaltyMultiplier: number;
 }
 
+export type BaseCapabilityId =
+  | 'capability-mission-command'
+  | 'capability-research'
+  | 'capability-construction'
+  | 'capability-production'
+  | 'capability-aircraft-storage'
+  | 'capability-loadout'
+  | 'capability-item-storage'
+  | 'capability-staff-recruitment'
+  | 'capability-financial-administration'
+  | 'capability-trade'
+  | 'capability-medical-treatment'
+  | 'capability-alien-containment';
+
 export interface BuildingDefinition {
   readonly id: string;
   readonly creditCost: number;
@@ -81,6 +95,8 @@ export interface BuildingDefinition {
   readonly maintenanceCreditCost: number;
   readonly requiredBlueprintId: string | null;
   readonly requiredBuildingId: string | null;
+  /** Gameplay capabilities this building provides while operational. */
+  readonly capabilities: readonly BaseCapabilityId[];
 }
 
 export interface StaffRoleDefinition {

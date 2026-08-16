@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { buildingById, buildingId } from '../../src/content/ids';
+
 import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { constructBuilding, hireStaff } from '../../src/domain/base-development';
@@ -10,8 +12,8 @@ import {
 import { createInitialGameState } from '../../src/domain/initial-state';
 import type { GameState } from '../../src/domain/model';
 
-const laboratory = contentCatalog.buildings[0];
-const workshop = contentCatalog.buildings[1];
+const laboratory = buildingById(buildingId.researchCentre)!;
+const workshop = buildingById(buildingId.productionWorks)!;
 const scientist = contentCatalog.staffRoles[0];
 const engineer = contentCatalog.staffRoles[1];
 const blueprint = contentCatalog.blueprints[0];
@@ -81,7 +83,7 @@ describe('blueprint progression', () => {
 
   it('researches a building blueprint and constructs its Quarantine Centre', () => {
     const buildingBlueprint = contentCatalog.buildingBlueprints[0];
-    const quarantine = contentCatalog.buildings[2];
+    const quarantine = buildingById(buildingId.quarantineCentre)!;
     let state: GameState = researchReadyState();
     state = startBlueprintResearch(state, buildingBlueprint);
     for (let index = 0; index < buildingBlueprint.requiredProgress; index += 1) {

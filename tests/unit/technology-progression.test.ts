@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { buildingById, buildingId } from '../../src/content/ids';
+
 import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
@@ -10,8 +12,8 @@ import {
 
 const technology = contentCatalog.alienTechnologies[0];
 const moduleId = technology.weaponTransformation.id;
-const laboratory = contentCatalog.buildings[0];
-const quarantine = contentCatalog.buildings[2];
+const laboratory = buildingById(buildingId.researchCentre)!;
+const quarantine = buildingById(buildingId.quarantineCentre)!;
 const adaptedBlueprint = contentCatalog.adaptedWeaponBlueprints[0];
 const emitter = contentCatalog.weapons[2];
 const requirements = {
@@ -42,7 +44,7 @@ function manufacturedEmitterState() {
     ...researched,
     base: {
       ...researched.base,
-      constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
+      constructedBuildingIds: [laboratory.id, quarantine.id, buildingId.productionWorks],
       staff: [
         staffMember('staff-scientist-1', requirements.staffRoleId),
         staffMember('staff-engineer-1', contentCatalog.staffRoles[1].id),
@@ -167,7 +169,7 @@ describe('technology progression', () => {
         constructedBuildingIds: [
           laboratory.id,
           quarantine.id,
-          contentCatalog.buildings[1].id,
+          buildingId.productionWorks,
         ],
       },
     };

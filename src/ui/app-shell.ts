@@ -28,6 +28,7 @@ import type {
   ProductionJobState,
 } from '../domain/model';
 import { isBankrupt, monthlyExpenses } from '../domain/operational-economy';
+import { isBuildingOperational } from '../domain/buildings';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
 import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
 import { pilotAircraftMultipliers, pilotLevel, isPilotFatigued } from '../domain/pilot-market';
@@ -449,7 +450,7 @@ function renderBase(): void {
   const acceleratorUpgradeManufactured = state.base.manufacturedWeaponUpgradeIds.includes(
     acceleratorUpgrade.id,
   );
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const labBuilt = isBuildingOperational(state.base, laboratory.id);
   const scientists = state.base.staff.filter((member) => member.roleId === scientistRole.id).length;
   const engineers = state.base.staff.filter((member) => member.roleId === engineerRole.id).length;
   const repairMasters = state.base.staff.filter((member) => member.roleId === repairMasterRole.id).length;
@@ -458,7 +459,7 @@ function renderBase(): void {
     (project) => project.blueprintId === capturerBlueprint.id,
   );
   const blueprintUnlocked = state.base.unlockedBlueprintIds.includes(capturerBlueprint.id);
-  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const workshopBuilt = isBuildingOperational(state.base, workshop.id);
   const productionReady = workshopBuilt && engineers > 0;
   const capturerManufactured = state.base.manufacturedEquipmentIds.includes(
     capturerEquipment.id,
@@ -555,7 +556,7 @@ function renderBase(): void {
   );
   const researchTab = byId<HTMLButtonElement>('base-tab-research');
   const medicalTab = byId<HTMLButtonElement>('base-tab-medical');
-  const medicalBlockBuilt = state.base.constructedBuildingIds.includes(
+  const medicalBlockBuilt = isBuildingOperational(state.base, 
     'building-medical-block',
   );
   researchTab.hidden = !labBuilt;
@@ -614,7 +615,7 @@ function renderBase(): void {
     state.base.credits < capturerEquipment.creditCost ||
     state.base.materials < capturerEquipment.materialCost
   );
-  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const quarantineBuilt = isBuildingOperational(state.base, quarantine.id);
   const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
   const emitterOwned = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeapon.id);
   technologyStatus.textContent = hasSample && !quarantineBuilt
@@ -924,7 +925,7 @@ function renderCandidates(containerId: string, roleId: string): void {
   const role = contentCatalog.staffRoles.find((entry) => entry.id === roleId);
   const facilityBuilt = role !== undefined && (
     role.requiredBuildingId === null ||
-    state.base.constructedBuildingIds.includes(role.requiredBuildingId)
+    isBuildingOperational(state.base, role.requiredBuildingId)
   );
   const headcountFull = role !== undefined &&
     role.maximumHeadcount !== null &&
@@ -1084,7 +1085,7 @@ function renderAircraftProduction(): void {
       );
       manufacture.disabled = bankrupt ||
         !state.base.hangarSlots.includes(null) ||
-        !state.base.constructedBuildingIds.includes(aircraftBlueprint.requiredBuildingId) ||
+        !isBuildingOperational(state.base, aircraftBlueprint.requiredBuildingId) ||
         !state.base.staff.some(
           (member) => member.roleId === aircraftBlueprint.requiredStaffRoleId,
         ) ||
@@ -1172,7 +1173,7 @@ function renderAircraftUpgradeResearch(): void {
       );
       research.disabled = bankrupt ||
         researchBusy ||
-        !state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId) ||
+        !isBuildingOperational(state.base, upgrade.requiredResearchBuildingId) ||
         !state.base.staff.some(
           (member) => member.roleId === upgrade.requiredStaffRoleId,
         ) ||
@@ -1252,7 +1253,7 @@ function renderAircraftUpgradeProduction(): void {
         }),
       );
       manufacture.disabled = bankrupt ||
-        !state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId) ||
+        !isBuildingOperational(state.base, upgrade.requiredProductionBuildingId) ||
         !state.base.staff.some(
           (member) => member.roleId === upgrade.requiredProductionStaffRoleId,
         ) ||
@@ -1808,10 +1809,13 @@ function renderDatabank(): void {
   container.textContent = '';
 
   const buildingNameKey: Readonly<Record<string, TranslationKey>> = {
+    'building-command-centre': 'building.commandCentre',
+    'building-hangar': 'building.hangar',
     'building-research-centre': 'building.laboratory',
     'building-production-works': 'building.workshop',
     'building-quarantine-centre': 'building.quarantine',
     'building-trade-centre': 'building.tradeCentre',
+    'building-medical-block': 'building.medicalBlock',
   };
   const staffNameKey: Readonly<Record<string, TranslationKey>> = {
     'staff-scientist': 'staff.scientist',
@@ -2032,7 +2036,7 @@ function renderTrade(): void {
   if (tradeCentreBuilding === undefined) {
     return;
   }
-  const built = state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
+  const built = isBuildingOperational(state.base, tradeCentreBuilding.id);
   if (!built) {
     const note = document.createElement('p');
     note.className = 'preflight-warning';
@@ -3005,12 +3009,12 @@ function renderCanister(): void {
   const canisterProject = state.base.researchQueue.find(
     (project) => project.blueprintId === canisterBlueprint.id,
   );
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const labBuilt = isBuildingOperational(state.base, laboratory.id);
   const scientists = state.base.staff.filter(
     (member) => member.roleId === scientistRole.id,
   ).length;
   const researchReady = labBuilt && scientists > 0;
-  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const workshopBuilt = isBuildingOperational(state.base, workshop.id);
   const engineers = state.base.staff.filter(
     (member) => member.roleId === engineerRole.id,
   ).length;
@@ -3069,16 +3073,16 @@ function renderContainment(): void {
   const containmentUnlocked = state.base.unlockedBlueprintIds.includes(
     containmentBlueprint.id,
   );
-  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const quarantineBuilt = isBuildingOperational(state.base, quarantine.id);
   const containmentProject = state.base.researchQueue.find(
     (project) => project.blueprintId === containmentBlueprint.id,
   );
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const labBuilt = isBuildingOperational(state.base, laboratory.id);
   const scientists = state.base.staff.filter(
     (member) => member.roleId === scientistRole.id,
   ).length;
   const researchReady = labBuilt && scientists > 0;
-  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const workshopBuilt = isBuildingOperational(state.base, workshop.id);
   const engineers = state.base.staff.filter(
     (member) => member.roleId === engineerRole.id,
   ).length;
@@ -3178,9 +3182,9 @@ function renderTradeCentre(): void {
   }
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
-  const built = state.base.constructedBuildingIds.includes(tradeCentreBuilding.id);
+  const built = isBuildingOperational(state.base, tradeCentreBuilding.id);
   const job = constructionJob(state, tradeCentreBuilding.id);
-  const workshopBuilt = state.base.constructedBuildingIds.includes('building-production-works');
+  const workshopBuilt = isBuildingOperational(state.base, 'building-production-works');
   tradeCentreRow.hidden = built;
   if (built || job !== undefined) {
     if (job !== undefined) {
@@ -3213,16 +3217,16 @@ function renderMedicalProgramme(): void {
   const bankrupt = isBankrupt(state.base.credits);
   const researchBusy = state.base.researchQueue.length > 0;
   const medicalUnlocked = state.base.unlockedBlueprintIds.includes(medicalBlueprint.id);
-  const medicalBuilt = state.base.constructedBuildingIds.includes(medicalBlock.id);
+  const medicalBuilt = isBuildingOperational(state.base, medicalBlock.id);
   const medicalProject = state.base.researchQueue.find(
     (project) => project.blueprintId === medicalBlueprint.id,
   );
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const labBuilt = isBuildingOperational(state.base, laboratory.id);
   const scientists = state.base.staff.filter(
     (member) => member.roleId === scientistRole.id,
   ).length;
   const researchReady = labBuilt && scientists > 0;
-  const workshopBuilt = state.base.constructedBuildingIds.includes(workshop.id);
+  const workshopBuilt = isBuildingOperational(state.base, workshop.id);
 
   medicalProgramme.hidden = !labBuilt;
   if (medicalUnlocked) {
@@ -4259,10 +4263,10 @@ function renderResearchCards(): void {
   const container = byId<HTMLElement>('research-card-grid');
   container.textContent = '';
 
-  const labBuilt = state.base.constructedBuildingIds.includes(laboratory.id);
+  const labBuilt = isBuildingOperational(state.base, laboratory.id);
   const hasScientist = state.base.staff.some((member) => member.roleId === scientistRole.id);
   const hasSample = state.base.preservedTechnologyIds.includes(prism.id);
-  const quarantineBuilt = state.base.constructedBuildingIds.includes(quarantine.id);
+  const quarantineBuilt = isBuildingOperational(state.base, quarantine.id);
   const acceleratorLocallyProduced = state.base.locallyProducedWeaponIds.includes(
     impulseAccelerator.id,
   );

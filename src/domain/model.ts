@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 18 as const;
+export const SAVE_SCHEMA_VERSION = 19 as const;
 
 export type SaveSchemaVersion = number;
 

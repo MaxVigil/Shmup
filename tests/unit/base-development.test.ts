@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
+import { buildingById, buildingId } from '../../src/content/ids';
 import { contentCatalog } from '../../src/content/catalog';
 import { constructBuilding, hireStaff } from '../../src/domain/base-development';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { dismissStaff } from '../../src/domain/staff-market';
 import { staffMember } from './test-state';
 
-const laboratory = contentCatalog.buildings[0];
+const laboratory = buildingById(buildingId.researchCentre)!;
 const scientist = contentCatalog.staffRoles[0];
-const workshop = contentCatalog.buildings[1];
+const workshop = buildingById(buildingId.productionWorks)!;
 const engineer = contentCatalog.staffRoles[1];
 
 function fundedState() {
@@ -28,7 +29,11 @@ describe('base development', () => {
 
     expect(constructed.base.credits).toBe(state.base.credits - laboratory.creditCost);
     expect(constructed.base.materials).toBe(0);
-    expect(constructed.base.constructedBuildingIds).toEqual([laboratory.id]);
+    expect(constructed.base.constructedBuildingIds).toEqual([
+      buildingId.commandCentre,
+      buildingId.hangar,
+      laboratory.id,
+    ]);
   });
 
   it('caps production engineers at the workshop headcount limit', () => {

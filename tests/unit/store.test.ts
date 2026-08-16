@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
+import { buildingById, buildingId } from '../../src/content/ids';
+
 import { staffMember } from './test-state';
 import { createGameStore, setInstantProjectsEnabled } from '../../src/app/store';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
+import { monthlyExpenses } from '../../src/domain/operational-economy';
 
 describe('game store M3a cycle', () => {
   it('delivers, researches, manufactures, and equips the preserved Prism', () => {
     const initial = createGameStore().getSnapshot();
-    const laboratory = contentCatalog.buildings[0];
-    const quarantine = contentCatalog.buildings[2];
+    const laboratory = buildingById(buildingId.researchCentre)!;
+    const quarantine = buildingById(buildingId.quarantineCentre)!;
     const scientist = contentCatalog.staffRoles[0];
     const store = createGameStore({
       ...initial,
@@ -16,7 +19,7 @@ describe('game store M3a cycle', () => {
         ...initial.base,
         credits: 2_000_000,
         materials: 100,
-        constructedBuildingIds: [laboratory.id, quarantine.id, contentCatalog.buildings[1].id],
+        constructedBuildingIds: [laboratory.id, quarantine.id, buildingId.productionWorks],
         staff: [
           staffMember('staff-scientist-1', scientist.id),
           staffMember('staff-engineer-1', contentCatalog.staffRoles[1].id),
@@ -86,12 +89,12 @@ describe('game store M3a cycle', () => {
         ...initial.base,
         credits: 3_000_000,
         materials: 100,
-        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        constructedBuildingIds: [buildingId.researchCentre],
         staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
       },
     });
-    const workshop = contentCatalog.buildings[1];
-    const quarantine = contentCatalog.buildings[2];
+    const workshop = buildingById(buildingId.productionWorks)!;
+    const quarantine = buildingById(buildingId.quarantineCentre)!;
     const containment = contentCatalog.buildingBlueprints[0];
     const technology = contentCatalog.alienTechnologies[0];
     const outcome = {
@@ -173,11 +176,11 @@ describe('game store M3a cycle', () => {
         credits: 2_000_000,
         materials: 100,
         telemetryRecorded: true,
-        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        constructedBuildingIds: [buildingId.researchCentre],
         staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
       },
     });
-    const workshop = contentCatalog.buildings[1];
+    const workshop = buildingById(buildingId.productionWorks)!;
     const engineer = contentCatalog.staffRoles[1];
     const blueprint = contentCatalog.blueprints[0];
     const equipment = contentCatalog.equipment[0];
@@ -217,8 +220,8 @@ describe('game store M3a cycle', () => {
   it('runs the market-blueprint, local-production, and Accelerator-upgrade commands', () => {
     const initialStore = createGameStore();
     const initial = initialStore.getSnapshot();
-    const centre = contentCatalog.buildings[0];
-    const works = contentCatalog.buildings[1];
+    const centre = buildingById(buildingId.researchCentre)!;
+    const works = buildingById(buildingId.productionWorks)!;
     const scientist = contentCatalog.staffRoles[0];
     const engineer = contentCatalog.staffRoles[1];
     const blueprint = contentCatalog.marketWeaponBlueprints[0];
@@ -303,7 +306,7 @@ describe('game store M3a cycle', () => {
         ...initial.base,
         credits: 2_000_000,
         materials: 100,
-        constructedBuildingIds: [contentCatalog.buildings[0].id],
+        constructedBuildingIds: [buildingId.researchCentre],
       },
     });
     const scientist = contentCatalog.staffRoles[0];
@@ -337,8 +340,8 @@ describe('game store M3a cycle', () => {
 
   it('researches and manufactures the Canister Aircraft Cannon', () => {
     const initial = createGameStore().getSnapshot();
-    const laboratory = contentCatalog.buildings[0];
-    const workshop = contentCatalog.buildings[1];
+    const laboratory = buildingById(buildingId.researchCentre)!;
+    const workshop = buildingById(buildingId.productionWorks)!;
     const scientist = contentCatalog.staffRoles[0];
     const engineer = contentCatalog.staffRoles[1];
     const blueprint = contentCatalog.researchWeaponBlueprints[0];
@@ -577,8 +580,9 @@ describe('game store month cycle', () => {
       (sum, pilot) => sum + (pilot.salaryCreditCost ?? 0),
       0,
     );
+    const upkeep = monthlyExpenses(store.getSnapshot().base).upkeep;
     expect(store.getSnapshot().base.credits).toBe(
-      before - (report?.breachPenalties ?? 0) - pilotSalaries,
+      before - (report?.breachPenalties ?? 0) - pilotSalaries - upkeep,
     );
     expect(store.getSnapshot().base.month).toBe(2);
   });
@@ -693,8 +697,8 @@ describe('game store month cycle', () => {
 
   it('buys an aircraft blueprint, manufactures the aircraft, and researches its upgrade', () => {
     const initial = createInitialGameState();
-    const lab = contentCatalog.buildings[0];
-    const workshop = contentCatalog.buildings[1];
+    const lab = buildingById(buildingId.researchCentre)!;
+    const workshop = buildingById(buildingId.productionWorks)!;
     const aircraftBlueprint = contentCatalog.aircraftBlueprints.find(
       (entry) => entry.id === 'blueprint-aircraft-britain',
     );
@@ -843,14 +847,14 @@ describe('game store rocket ammunition', () => {
 
   it('completes construction, research, and production instantly when the debug flag is on', () => {
     const initial = createInitialGameState();
-    const laboratory = contentCatalog.buildings[0];
-    const workshop = contentCatalog.buildings[1];
+    const laboratory = buildingById(buildingId.researchCentre)!;
+    const workshop = buildingById(buildingId.productionWorks)!;
     const medicalBlueprint = contentCatalog.buildingBlueprints.find(
       (entry) => entry.id === 'blueprint-medical-block',
     ) ?? contentCatalog.buildingBlueprints[0];
     const medicalBlock = contentCatalog.buildings.find(
       (entry) => entry.id === 'building-medical-block',
-    ) ?? contentCatalog.buildings[0];
+    ) ?? buildingById(buildingId.researchCentre)!;
     const store = createGameStore({
       ...initial,
       base: {

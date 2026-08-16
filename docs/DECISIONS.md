@@ -135,3 +135,23 @@ can add buildings (Command Centre, Hangar, Warehouse, …) without positional
 assumptions. `SaveSchemaVersion` became a `number` so intermediate legacy
 migrations can validate their own version via `isGameState(value, 17)` while the
 current-save guard still requires v18.
+
+## 10. Command Centre + Hangar are starter buildings with capabilities
+
+**Context:** The base previously started with zero constructed buildings and
+gameplay gating was scattered raw checks
+(`constructedBuildingIds.includes(...)`) across UI and domain.
+
+**Decision:** The typed catalog gains `building-command-centre` and
+`building-hangar` (upkeep 1,000/2,000 cr/month; the scaled-economy validation
+requires `maintenanceCreditCost ≥ 1,000`). They are operational from day one
+(`STARTER_BUILDING_IDS` in `src/content/ids.ts`) and never player-constructed.
+Every building now declares `capabilities: BaseCapabilityId[]`; domain and UI
+use the `src/domain/buildings.ts` selectors (`isBuildingOperational`,
+`hasOperationalCapability`, …) instead of raw `includes`. Save schema v19
+provisions the starting buildings via a v18→v19 migration that never duplicates.
+
+**Consequence:** Capabilities are the single source of truth for what a facility
+grants (medical treatment already routes through it); the later power/energy
+model can redefine "operational" as "constructed AND powered" without touching
+call sites; starter buildings can never appear in the construction catalog.

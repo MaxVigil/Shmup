@@ -15,12 +15,35 @@ export const alienTechnologyId = {
   prism: 'alien-prism-unclassified',
 } as const;
 export const buildingId = {
+  commandCentre: 'building-command-centre',
+  hangar: 'building-hangar',
   researchCentre: 'building-research-centre',
   productionWorks: 'building-production-works',
   quarantineCentre: 'building-quarantine-centre',
   tradeCentre: 'building-trade-centre',
   medicalBlock: 'building-medical-block',
 } as const;
+
+export const capabilityId = {
+  missionCommand: 'capability-mission-command',
+  research: 'capability-research',
+  construction: 'capability-construction',
+  production: 'capability-production',
+  aircraftStorage: 'capability-aircraft-storage',
+  loadout: 'capability-loadout',
+  itemStorage: 'capability-item-storage',
+  staffRecruitment: 'capability-staff-recruitment',
+  financialAdministration: 'capability-financial-administration',
+  trade: 'capability-trade',
+  medicalTreatment: 'capability-medical-treatment',
+  alienContainment: 'capability-alien-containment',
+} as const;
+
+/** Permanent base infrastructure that is operational from day one and never constructed by the player. */
+export const STARTER_BUILDING_IDS: readonly string[] = [
+  buildingId.commandCentre,
+  buildingId.hangar,
+];
 
 export const staffRoleId = {
   scientist: 'staff-scientist',

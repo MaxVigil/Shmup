@@ -5,6 +5,7 @@ import type {
 } from '../content/model';
 import { contentCatalog } from '../content/catalog';
 import type { GameState, ProductionJobState } from './model';
+import { isBuildingOperational } from './buildings';
 import { marketBlueprintPrice } from './terrestrial-market';
 import { addWeaponStock } from './armory';
 
@@ -50,7 +51,7 @@ export function manufacturePrimaryWeapon(
   if (!state.base.unlockedBlueprintIds.includes(blueprint.id)) {
     throw new Error(`Blueprint ${blueprint.id} is required for production.`);
   }
-  if (!state.base.constructedBuildingIds.includes(blueprint.requiredBuildingId)) {
+  if (!isBuildingOperational(state.base, blueprint.requiredBuildingId)) {
     throw new Error(`Building ${blueprint.requiredBuildingId} is required for production.`);
   }
   if (!state.base.staff.some((member) => member.roleId === blueprint.requiredStaffRoleId)) {
@@ -86,7 +87,7 @@ export function startWeaponUpgradeResearch(
   state: GameState,
   upgrade: WeaponUpgradeDefinition,
 ): GameState {
-  if (!state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId)) {
+  if (!isBuildingOperational(state.base, upgrade.requiredResearchBuildingId)) {
     throw new Error(`Building ${upgrade.requiredResearchBuildingId} is required for research.`);
   }
   if (!state.base.staff.some((member) => member.roleId === upgrade.requiredStaffRoleId)) {
@@ -145,7 +146,7 @@ export function manufactureWeaponUpgrade(
   if (!state.base.researchedWeaponUpgradeIds.includes(upgrade.id)) {
     throw new Error(`Upgrade ${upgrade.id} has not been researched.`);
   }
-  if (!state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId)) {
+  if (!isBuildingOperational(state.base, upgrade.requiredProductionBuildingId)) {
     throw new Error(`Building ${upgrade.requiredProductionBuildingId} is required for production.`);
   }
   if (!state.base.staff.some(
@@ -219,7 +220,7 @@ export function startAircraftUpgradeResearch(
       );
     }
   }
-  if (!state.base.constructedBuildingIds.includes(upgrade.requiredResearchBuildingId)) {
+  if (!isBuildingOperational(state.base, upgrade.requiredResearchBuildingId)) {
     throw new Error(
       `Building ${upgrade.requiredResearchBuildingId} is required for research.`,
     );
@@ -278,7 +279,7 @@ export function startAircraftUpgradeProduction(
       );
     }
   }
-  if (!state.base.constructedBuildingIds.includes(upgrade.requiredProductionBuildingId)) {
+  if (!isBuildingOperational(state.base, upgrade.requiredProductionBuildingId)) {
     throw new Error(
       `Building ${upgrade.requiredProductionBuildingId} is required for production.`,
     );

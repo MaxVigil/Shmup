@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { buildingId } from '../../src/content/ids';
+
 import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
@@ -19,8 +21,8 @@ import {
 const blueprint = contentCatalog.marketWeaponBlueprints[0];
 const machineUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
-const centreId = contentCatalog.buildings[0].id;
-const worksId = contentCatalog.buildings[1].id;
+const centreId = buildingId.researchCentre;
+const worksId = buildingId.productionWorks;
 const scientistId = contentCatalog.staffRoles[0].id;
 const engineerId = contentCatalog.staffRoles[1].id;
 

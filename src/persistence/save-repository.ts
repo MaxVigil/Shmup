@@ -6,6 +6,7 @@ import {
   buildingId,
   equipmentId,
   staffRoleId,
+  STARTER_BUILDING_IDS,
   weaponId,
 } from '../content/ids';
 import { generateThreatMap } from '../domain/command-centre';
@@ -14,7 +15,8 @@ import { isGameState } from '../domain/guards';
 import { SAVE_SCHEMA_VERSION } from '../domain/model';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v18';
+export const SAVE_KEY = 'shmup.save.v19';
+export const LEGACY_V18_SAVE_KEY = 'shmup.save.v18';
 export const LEGACY_V17_SAVE_KEY = 'shmup.save.v17';
 export const LEGACY_V16_SAVE_KEY = 'shmup.save.v16';
 export const LEGACY_V15_SAVE_KEY = 'shmup.save.v15';
@@ -212,7 +214,35 @@ function upgradeBuildingIdVersion(state: GameState): GameState {
   };
 }
 
-/** Legacy v17 save (old SAVE_KEY) → v18. */
+/** v18 → v19: provision the starting Command Centre and Hangar without duplication. */
+function addStartingBuildingsVersion(state: GameState): GameState {
+  const existing = new Set(state.base.constructedBuildingIds);
+  const additions = STARTER_BUILDING_IDS.filter((id) => !existing.has(id));
+  return {
+    ...state,
+    schemaVersion: 19,
+    base: {
+      ...state.base,
+      constructedBuildingIds: additions.length === 0
+        ? state.base.constructedBuildingIds
+        : [...state.base.constructedBuildingIds, ...additions],
+    },
+  };
+}
+
+/** Walks intermediate migration versions up to the current schema. */
+function upgradeLegacyToCurrent(state: GameState): GameState {
+  let current = state;
+  if (current.schemaVersion < 18) {
+    current = upgradeBuildingIdVersion(current);
+  }
+  if (current.schemaVersion < 19) {
+    current = addStartingBuildingsVersion(current);
+  }
+  return current;
+}
+
+/** Legacy v17 save (old SAVE_KEY) → current. */
 function migrateV17Save(rawSave: string | null): GameState | null {
   if (rawSave === null) {
     return null;
@@ -222,7 +252,23 @@ function migrateV17Save(rawSave: string | null): GameState | null {
     if (!isRecord(parsed) || parsed.schemaVersion !== 17 || !isRecord(parsed.base)) {
       return null;
     }
-    return upgradeBuildingIdVersion(parsed as unknown as GameState);
+    return upgradeLegacyToCurrent(parsed as unknown as GameState);
+  } catch {
+    return null;
+  }
+}
+
+/** Legacy v18 save (old SAVE_KEY) → current (provisions starting buildings). */
+function migrateV18Save(rawSave: string | null): GameState | null {
+  if (rawSave === null) {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(rawSave);
+    if (!isRecord(parsed) || parsed.schemaVersion !== 18 || !isRecord(parsed.base)) {
+      return null;
+    }
+    return upgradeLegacyToCurrent(parsed as unknown as GameState);
   } catch {
     return null;
   }
@@ -235,6 +281,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V18_SAVE_KEY, migrateV18Save],
     [LEGACY_V17_SAVE_KEY, migrateV17Save],
     [LEGACY_V16_SAVE_KEY, migrateV16Save],
     [LEGACY_V15_SAVE_KEY, migrateV15Save],
@@ -258,7 +305,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
     if (migrated !== null) {
       return migrated.schemaVersion === SAVE_SCHEMA_VERSION
         ? migrated
-        : upgradeBuildingIdVersion(migrated);
+        : upgradeLegacyToCurrent(migrated);
     }
   }
   return null;
