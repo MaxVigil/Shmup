@@ -1,6 +1,21 @@
 # Project status
 
-Last updated: 2026-08-16
+Last updated: 2026-08-18
+
+## Epic E0 — Weapons design contract
+
+Docs-only milestone on `test`.
+
+- New `docs/WEAPONS_EPIC.md`: locked arsenal contract — taxonomy (classes,
+  technology families, mounts, kinds), target content set, W1 schemas, final
+  aircraft layer (roles, loadout model, slot bonus), energy/weight hard limits,
+  canonical damage formula with a 2.0 multiplier guard, stun-capturer (option A),
+  hardcore destruction rules, Ukrainian drones, enemy homing threats, finite
+  ammunition, and the E0–E5 work breakdown.
+- `docs/DECISIONS.md`: durable decisions #11–#18.
+- `docs/GAME_SPEC.md`: "Arsenal and loadout" summary section.
+- `docs/PLAN.md`: Weapons epic section added.
+- No code/schema change; lint, typecheck, unit tests, and the production build pass.
 
 ## Refactor Phase 2 — Command Centre + Hangar + capability model (schema v19)
 

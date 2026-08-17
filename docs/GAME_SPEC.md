@@ -122,6 +122,25 @@ properties over time.
   already collected; the Settings panel can restart the whole mission after an
   explicit two-step confirmation.
 
+## Arsenal and loadout (Epic E0 contract)
+
+The full weapon/aircraft/loadout contract lives in `docs/WEAPONS_EPIC.md`. Summary of
+the locked decisions:
+
+- Weapons have three classes: `human` (manufactured, upgradeable), `hybrid` (invented
+  in R&D + manufactured in Engineering, upgradeable), and `alien` (recovered via stun;
+  never manufactured or upgraded; permanent once acquired but lost if the carrying
+  aircraft is destroyed).
+- Technology families: `human-kinetic` < `hybrid-laser` < `hybrid-plasma` < `alien` in
+  power. A fully refined human weapon (Autocannon Mk VI) stays final-boss viable.
+- Aircraft mount primary weapons (1–3 slots, auto-fire, switch with X) and hardpoint
+  items (non-auto). Weight (≤ carrying capacity) and energy draw (≤ reactor capacity)
+  are hard loadout limits.
+- Stun replaces the Alien Technology Capturer: stunning an elite is the only way to
+  recover an alien sample for research.
+- Hardcore destruction: a destroyed aircraft loses its installed weapons and pilot;
+  Abort saves everything but forfeits the bounty and nation gift.
+
 ## Recovery Council composition
 
 - The Recovery Council is an international body founded after the First Breach. The

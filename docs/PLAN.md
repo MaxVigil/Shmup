@@ -604,6 +604,29 @@ Status: implemented on `test`.
 - [x] 223 unit tests, lint, typecheck, and the production build pass;
   `docs/BALANCE.md` and `docs/ENTITIES.md` regenerated.
 
+## Weapons epic — E0 design contract (current)
+
+Status: E0 docs complete on `test`.
+
+The arsenal is being rebuilt around the data-driven taxonomy locked in
+`docs/WEAPONS_EPIC.md`: weapon classes (human/hybrid/alien), technology families,
+mounts (primary/hardpoint), variable-length Marks, weight + energy hard limits,
+stun-based alien recovery, finite ammunition, aircraft roles, and enemy homing
+threats.
+
+- [x] E0.1 — freeze the taxonomy + schemas in `docs/WEAPONS_EPIC.md`.
+- [x] E0.2 — durable decisions in `docs/DECISIONS.md` (#11–#18) and the arsenal
+  summary in `docs/GAME_SPEC.md`.
+- [ ] E1 — schema + data: `model.ts`, catalog import + numeric Mark overrides,
+  `ids.ts`, validation, save v20 migration, i18n, generator + index-navigator.
+- [ ] E2 — loadout & economy: hardpoints + weight/energy UI, finite ammunition,
+  aircraft Mark II/III.
+- [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
+  drones/mines → homing/decoys → alien.
+- [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
+  balance invariants (power curve + multiplier guard).
+- [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

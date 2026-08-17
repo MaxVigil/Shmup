@@ -155,3 +155,106 @@ provisions the starting buildings via a v18→v19 migration that never duplicate
 grants (medical treatment already routes through it); the later power/energy
 model can redefine "operational" as "constructed AND powered" without touching
 call sites; starter buildings can never appear in the construction catalog.
+
+## 11. Arsenal taxonomy: classes, technology families, mounts, kinds
+
+**Context:** The arsenal grew ad hoc: flat weapon entries with `origin: 'earth' |
+'alien'`, a separate flat upgrade list, and no mount/slot/energy/weight model.
+
+**Decision:** Adopt the three-class taxonomy (`human` / `hybrid` / `alien`),
+technology families (`human-kinetic` / `hybrid-laser` / `hybrid-plasma` / `alien`),
+mounts (`primary` ×1–3 auto-fire, `hardpoint` ×1–5 non-auto), and kinds (`weapon` /
+`auxiliary` / `module` / `consumable`). Weapons split into family + concrete Mark
+items (`weapon-autocannon` family → `weapon-autocannon-mk-4` item). Upgrade-chain
+length is data-driven, not hardcoded.
+
+**Consequence:** New weapons are data entries in the catalog; reclassifying existing
+items requires a save migration; `docs/WEAPONS_EPIC.md` is the canonical contract.
+
+## 12. Weight and energy are hard loadout limits
+
+**Context:** The player wanted a real loadout puzzle and a secondary cost beyond credits.
+
+**Decision:** Every weapon/auxiliary/module has `weight`; consumables have
+`weightPerUnit`; every aircraft has `carryingCapacity` and `reactorCapacity`.
+Installed weight (plus loaded ammunition) must not exceed carrying capacity;
+installed energy draw must not exceed reactor capacity. Both are hard limits.
+
+**Consequence:** Loadout is a constrained optimisation; the Hangar UI must surface
+both gauges and block overloads; validation guards both invariants.
+
+## 13. Multipliers stack, with a guard
+
+**Context:** Aircraft must differ noticeably; a one-slot aircraft should hit hard
+(Japan "glass cannon").
+
+**Decision:** Final damage = weapon.damage × (base + Σ mark deltas) × slot
+concentration bonus × pilot multiplier × (1 + Σ module bonuses). Marks and modules
+are additive inside their groups; only three large multiplicative layers remain
+(aircraft base, slot bonus, pilot). A guard test fails CI if any final multiplier
+exceeds 2.0.
+
+**Consequence:** Japan (1.45 base × 1.25 slot bonus) reaches 1.81 effective damage;
+runaway compounding is caught in CI.
+
+## 14. Aircraft roles and Mark philosophy
+
+**Context:** Upgrades must not homogenise the fleet.
+
+**Decision:** Each aircraft has a role (`glass-cannon`, `gunship`, `bruiser`,
+`precision`, `duelist`, `interceptor`, `workhorse`). Mark II/III stat deltas are
+additive and reinforce the role (Japan gains damage/energy, never armour; US gains
+armour/hardpoints/capacity, never speed). The slot concentration bonus stacks on top.
+
+**Consequence:** Aircraft remain distinct at every stage of progression.
+
+## 15. Hardcore destruction: weapons lost, pilot dies; Abort saves
+
+**Context:** The player asked to make the game "a little hardcore".
+
+**Decision:** If an aircraft is destroyed (armour reaches 0), all weapons installed
+on it are irreversibly lost and the pilot dies. A proactive Abort saves the
+aircraft, weapons, and pilot, but forfeits the sortie bounty and nation gift
+(existing rule). Alien equipment is never manufacturable, so its loss is final.
+
+**Consequence:** Destruction has real permanence; defeat logic must strip the
+installed loadout and kill the pilot.
+
+## 16. Stun replaces the Capturer
+
+**Context:** Recovering alien technology previously required destroying the elite
+while carrying the Alien Technology Capturer.
+
+**Decision:** Option A: a Stun module disables an elite/boss; stunning is the ONLY
+way to recover an alien sample for research (→ hybrid weapons, upgrades,
+adaptations). The Capturer device is removed.
+
+**Consequence:** M2 core-loop documentation and preflight special-equipment gating
+change; the Capturer blueprint/equipment is removed or converted.
+
+## 17. Ukrainian drones and finite ammunition
+
+**Context:** Ukraine is a drone leader in the game's world; rockets were the only
+consumable.
+
+**Decision:** All rocket/mine/drone ordnance shares one finite-ammunition system:
+Engineering produces ammunition, the player loads it before a sortie, it has weight
+and is really consumed. Ukrainian attack drones are cheap and light (50–100 per
+sortie); behaviour: nearest enemy → ram + area explosion; no enemy → circle the
+aircraft. A Heavy Combat Drone (permanent wingman) is a separate, expensive idea
+(E5.3 backlog).
+
+**Consequence:** A unified consumable/production pipeline covers rockets, homing
+missiles, torpedoes, cluster missiles, mines, drones, and decoys.
+
+## 18. Enemy homing threats and decoys
+
+**Context:** Flares/decoys need a real threat to counter.
+
+**Decision:** Add two deterministic homing missile types from the accepted draft:
+Pursuit Missile (Gunship, speed 220, 70°/s turn, 24 dmg, 6 s) and Warden Seeker
+(Warden, 185, 115°/s turn, 38 dmg, 8 s). Flares/decoys redirect them; point
+defence, dash, and sharp lateral movement are also counters.
+
+**Consequence:** Decoy values (lifetime, attraction radius, charges) get a concrete
+threat to balance against; homing stays dodgeable via limited turn rate.
