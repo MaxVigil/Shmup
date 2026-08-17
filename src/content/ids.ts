@@ -1,12 +1,17 @@
 import type {
   AircraftDefinition,
+  AircraftLoadoutEntry,
   AlienTechnologyDefinition,
+  AmmunitionDefinition,
+  AuxiliaryDefinition,
   BlueprintDefinition,
   BuildingDefinition,
   ConsumableDefinition,
   EquipmentDefinition,
+  ModuleDefinition,
   StaffRoleDefinition,
   WeaponDefinition,
+  WeaponFamilyDefinition,
 } from './model';
 import { contentCatalog } from './catalog';
 
@@ -116,4 +121,90 @@ export function blueprintById(id: string): BlueprintDefinition | undefined {
 
 export function consumableById(id: string): ConsumableDefinition | undefined {
   return contentCatalog.consumables.find((entry) => entry.id === id);
+}
+
+// ==== Weapons & Arsenal epic (E1): arsenal IDs and typed lookups ====
+
+export const weaponFamilyId = {
+  autocannon: 'weapon-autocannon',
+  heavyAutocannon: 'weapon-heavy-autocannon',
+  gatlingGun: 'weapon-gatling-gun',
+  scatterCannon: 'weapon-scatter-cannon',
+  railgun: 'weapon-railgun',
+  flakCannon: 'weapon-flak-cannon',
+  pulseLaser: 'weapon-pulse-laser',
+  plasmaMachineGun: 'weapon-plasma-machine-gun',
+  plasmaCannon: 'weapon-plasma-cannon',
+  disintegrationLance: 'weapon-disintegration-lance',
+  plasmaOrbProjector: 'weapon-plasma-orb-projector',
+  singularityProjector: 'weapon-singularity-projector',
+} as const;
+
+export const auxiliaryId = {
+  rocketPod: 'aux-rocket-pod',
+  homingMissileRack: 'aux-homing-missile-rack',
+  heavyTorpedoLauncher: 'aux-heavy-torpedo-launcher',
+  clusterMissilePod: 'aux-cluster-missile-pod',
+  ukrainianDroneSwarm: 'aux-ukrainian-drone-swarm',
+  stunModule: 'aux-stun-module',
+} as const;
+
+export const moduleId = {
+  energyShield: 'module-energy-shield',
+  directionalEnergyShield: 'module-directional-energy-shield',
+  dash: 'module-dash',
+  targetingComputer: 'module-targeting-computer',
+  repairNanobots: 'module-repair-nanobots',
+  reflectorField: 'module-reflector-field',
+} as const;
+
+export const ammunitionId = {
+  rocket: 'consumable-rocket',
+  homingMissile: 'consumable-homing-missile',
+  heavyTorpedo: 'consumable-heavy-torpedo',
+  clusterMissile: 'consumable-cluster-missile',
+  ukrainianAttackDrone: 'consumable-ukrainian-attack-drone',
+} as const;
+
+export const aircraftRole = {
+  glassCannon: 'glass-cannon',
+  gunship: 'gunship',
+  bruiser: 'bruiser',
+  precision: 'precision',
+  duelist: 'duelist',
+  interceptor: 'interceptor',
+  workhorse: 'workhorse',
+} as const;
+
+export function weaponFamilyById(
+  id: string,
+): WeaponFamilyDefinition | undefined {
+  return contentCatalog.weaponFamilies.find((entry) => entry.id === id);
+}
+
+export function auxiliaryById(id: string): AuxiliaryDefinition | undefined {
+  return contentCatalog.auxiliary.find((entry) => entry.id === id);
+}
+
+export function moduleById(id: string): ModuleDefinition | undefined {
+  return contentCatalog.modules.find((entry) => entry.id === id);
+}
+
+export function ammunitionById(id: string): AmmunitionDefinition | undefined {
+  return contentCatalog.ammunition.find((entry) => entry.id === id);
+}
+
+export function aircraftLoadoutByAircraftId(
+  aircraftId: string,
+): AircraftLoadoutEntry | undefined {
+  return contentCatalog.aircraftLoadouts.find(
+    (entry) => entry.aircraftId === aircraftId,
+  );
+}
+
+/** Concrete manufactured weapon item id for a family Mark (Mark I = base). */
+export function weaponItemId(familyId: string, mark?: number): string {
+  return mark === undefined || mark === 1
+    ? familyId
+    : `${familyId}-mk-${mark}`;
 }

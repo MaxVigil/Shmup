@@ -1,4 +1,5 @@
 import type { BaseCapabilityId, ContentCatalog } from './model';
+import { effectiveDamageMultiplier } from '../domain/loadout';
 
 const BASE_CAPABILITY_IDS = new Set<BaseCapabilityId>([
   'capability-mission-command',
@@ -483,6 +484,130 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
       `aircraft upgrade ${upgrade.id} production`,
       upgrade.productionCreditCost,
     );
+  }
+
+  validateArsenal(catalog);
+}
+
+/** Weapons & Arsenal epic (E1): invariants for the data-driven arsenal. */
+function validateArsenal(catalog: ContentCatalog): void {
+  assertUniqueIds('weaponFamilies', catalog.weaponFamilies);
+  assertUniqueIds('auxiliary', catalog.auxiliary);
+  assertUniqueIds('modules', catalog.modules);
+  assertUniqueIds('ammunition', catalog.ammunition);
+
+  const auxiliaryIds = new Set(catalog.auxiliary.map((entry) => entry.id));
+  const ammunitionIds = new Set(catalog.ammunition.map((entry) => entry.id));
+
+  for (const family of catalog.weaponFamilies) {
+    const isAlien = family.class === 'alien';
+    if (
+      family.mount !== 'primary' ||
+      family.kind !== 'weapon' ||
+      family.weight <= 0 ||
+      family.energyDraw < 0 ||
+      (isAlien &&
+        (family.technologyFamily !== 'alien' ||
+          family.marks.length !== 0 ||
+          family.acquisition !== 'alien-recovery')) ||
+      (!isAlien &&
+        (family.technologyFamily === 'alien' ||
+          family.marks.length === 0 ||
+          (family.class === 'human' &&
+            family.technologyFamily !== 'human-kinetic') ||
+          (family.class === 'hybrid' &&
+            family.technologyFamily !== 'hybrid-laser' &&
+            family.technologyFamily !== 'hybrid-plasma')))
+    ) {
+      throw new Error(`Weapon family ${family.id} violates arsenal invariants.`);
+    }
+    if (!isAlien) {
+      const marks = family.marks
+        .map((mark) => mark.mark)
+        .sort((a, b) => a - b);
+      if (marks.some((mark, index) => mark !== index + 2)) {
+        throw new Error(
+          `Weapon family ${family.id} marks must be contiguous starting at 2.`,
+        );
+      }
+    }
+  }
+
+  for (const aux of catalog.auxiliary) {
+    if (
+      aux.weight <= 0 ||
+      aux.energyDraw < 0 ||
+      aux.damage < 0 ||
+      aux.areaRadius < 0 ||
+      aux.stunDurationSeconds < 0 ||
+      aux.chargesPerSortieMin < 0 ||
+      aux.chargesPerSortieMax < aux.chargesPerSortieMin ||
+      (aux.ammoConsumableId !== null && !ammunitionIds.has(aux.ammoConsumableId)) ||
+      (aux.ammoConsumableId === null && aux.type !== 'stun') ||
+      (aux.class === 'alien' && aux.acquisition !== 'alien-recovery')
+    ) {
+      throw new Error(`Auxiliary ${aux.id} violates arsenal invariants.`);
+    }
+  }
+
+  for (const ammo of catalog.ammunition) {
+    if (
+      ammo.weightPerUnit <= 0 ||
+      ammo.costCredits < 0 ||
+      ammo.usedBy.some((id) => !auxiliaryIds.has(id))
+    ) {
+      throw new Error(`Ammunition ${ammo.id} violates arsenal invariants.`);
+    }
+  }
+
+  for (const mod of catalog.modules) {
+    if (
+      mod.weight <= 0 ||
+      mod.energyDraw < 0 ||
+      (mod.class === 'alien' && mod.acquisition !== 'alien-recovery')
+    ) {
+      throw new Error(`Module ${mod.id} violates arsenal invariants.`);
+    }
+  }
+
+  const aircraftIds = new Set(catalog.aircraft.map((entry) => entry.id));
+  for (const entry of catalog.aircraftLoadouts) {
+    const slots = entry.loadout.primarySlots;
+    if (
+      !aircraftIds.has(entry.aircraftId) ||
+      (slots !== 1 && slots !== 2 && slots !== 3) ||
+      entry.loadout.hardpointSlots <= 0 ||
+      entry.loadout.reactorCapacity <= 0 ||
+      entry.loadout.carryingCapacity <= 0
+    ) {
+      throw new Error(
+        `Aircraft loadout for ${entry.aircraftId} violates arsenal invariants.`,
+      );
+    }
+    const marks = entry.marks.map((mark) => mark.mark).sort((a, b) => a - b);
+    if (marks.some((mark, index) => mark !== index + 2)) {
+      throw new Error(
+        `Aircraft ${entry.aircraftId} marks must be contiguous starting at 2.`,
+      );
+    }
+    for (const mark of entry.marks) {
+      if (entry.role === 'glass-cannon' && (mark.statDeltas.armour ?? 0) > 0) {
+        throw new Error(
+          `Aircraft ${entry.aircraftId} (glass-cannon) Mark ${mark.mark} must not raise armour.`,
+        );
+      }
+      if (entry.role === 'gunship' && (mark.statDeltas.speedMultiplier ?? 0) > 0) {
+        throw new Error(
+          `Aircraft ${entry.aircraftId} (gunship) Mark ${mark.mark} must not raise speed.`,
+        );
+      }
+    }
+    const multiplier = effectiveDamageMultiplier(entry, 99);
+    if (multiplier > 2.0) {
+      throw new Error(
+        `Aircraft ${entry.aircraftId} final damage multiplier ${multiplier} exceeds the 2.0 guard.`,
+      );
+    }
   }
 }
 

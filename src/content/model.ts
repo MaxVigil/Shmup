@@ -293,6 +293,194 @@ export interface AircraftUpgradeDefinition {
   readonly signatureId: string | null;
 }
 
+// ==== Weapons & Arsenal epic (E1): data-driven arsenal model ====
+
+export type LocalizedText = {
+  readonly en: string;
+  readonly uk: string;
+  readonly zh: string;
+};
+
+export type WeaponClass = 'human' | 'hybrid' | 'alien';
+export type TechnologyFamily =
+  | 'human-kinetic'
+  | 'hybrid-laser'
+  | 'hybrid-plasma'
+  | 'alien';
+export type MountType = 'primary' | 'hardpoint';
+export type Kind = 'weapon' | 'auxiliary' | 'module';
+export type AuxiliaryType =
+  | 'rocket'
+  | 'homing'
+  | 'torpedo'
+  | 'cluster'
+  | 'drone'
+  | 'stun'
+  | 'mine'
+  | 'decoy';
+export type ModuleType =
+  | 'shield'
+  | 'dash'
+  | 'targeting'
+  | 'repair'
+  | 'reflector'
+  | 'other';
+export type Penetration = 'single-target' | 'all-targets';
+export type Acquisition =
+  | 'start'
+  | 'market'
+  | 'research-production'
+  | 'alien-recovery';
+
+/** Numeric, executable per-Mark stat overrides (not prose). */
+export interface WeaponStatOverrides {
+  readonly damage?: number;
+  readonly shotsPerSecond?: number;
+  readonly projectileCount?: number;
+  readonly projectileSpeed?: number;
+  readonly spreadDegrees?: number;
+  readonly energyDraw?: number;
+  readonly weight?: number;
+}
+
+export interface MarkDefinition {
+  readonly mark: number; // 2..N; Mark I is the base item itself
+  readonly researchCostCredits: number;
+  readonly productionCostCredits: number;
+  readonly productionCostMaterials: number;
+  readonly statOverrides: WeaponStatOverrides;
+  readonly flavour?: LocalizedText;
+}
+
+/** A weapon family (e.g. Autocannon). Concrete items derive as
+ *  `${family.id}-mk-${mark}` with stats = baseStats + statOverrides. */
+export interface WeaponFamilyDefinition {
+  readonly id: string;
+  readonly name: LocalizedText;
+  readonly class: WeaponClass;
+  readonly technologyFamily: TechnologyFamily;
+  readonly mount: 'primary';
+  readonly kind: 'weapon';
+  readonly baseStats: {
+    readonly damage: number;
+    readonly shotsPerSecond: number;
+    readonly projectileCount: number;
+    readonly projectileSpeed: number;
+    readonly spreadDegrees: number;
+    readonly penetration: Penetration;
+  };
+  readonly weight: number;
+  readonly energyDraw: number;
+  readonly acquisition: Acquisition;
+  readonly tier: number;
+  readonly marks: readonly MarkDefinition[]; // alien ⇒ []
+  readonly flavour?: LocalizedText;
+}
+
+export interface AuxiliaryDefinition {
+  readonly id: string;
+  readonly name: LocalizedText;
+  readonly class: WeaponClass;
+  readonly technologyFamily: TechnologyFamily;
+  readonly mount: 'hardpoint';
+  readonly kind: 'auxiliary';
+  readonly type: AuxiliaryType;
+  readonly ammoConsumableId: string | null; // null for stun
+  readonly chargesPerSortieMin: number;
+  readonly chargesPerSortieMax: number;
+  readonly trigger: 'manual' | 'automatic';
+  readonly damage: number;
+  readonly areaRadius: number;
+  readonly stunDurationSeconds: number;
+  readonly weight: number;
+  readonly energyDraw: number;
+  readonly acquisition: Acquisition;
+  readonly flavour?: LocalizedText;
+}
+
+export interface ModuleDefinition {
+  readonly id: string;
+  readonly name: LocalizedText;
+  readonly class: WeaponClass; // may be 'alien' (recovered)
+  readonly technologyFamily: TechnologyFamily;
+  readonly mount: 'hardpoint';
+  readonly kind: 'module';
+  readonly type: ModuleType;
+  readonly weight: number;
+  readonly energyDraw: number;
+  readonly effect: {
+    readonly description: string;
+    readonly params: Record<string, number>;
+  };
+  readonly acquisition: Acquisition;
+  readonly flavour?: LocalizedText;
+}
+
+export interface AmmunitionDefinition {
+  readonly id: string;
+  readonly name: LocalizedText;
+  readonly weightPerUnit: number;
+  readonly costCredits: number;
+  readonly usedBy: readonly string[]; // auxiliary ids
+}
+
+export type AircraftRole =
+  | 'glass-cannon'
+  | 'gunship'
+  | 'bruiser'
+  | 'precision'
+  | 'duelist'
+  | 'interceptor'
+  | 'workhorse';
+
+export interface AircraftMultipliers {
+  readonly damageMultiplier: number;
+  readonly fireRateMultiplier: number;
+  readonly accuracyMultiplier: number;
+}
+
+export interface AircraftBaseStats {
+  readonly armour: number;
+  readonly speedMultiplier: number;
+  readonly baseMultipliers: AircraftMultipliers; // identity, hand-set
+}
+
+export interface AircraftLoadoutModel {
+  readonly primarySlots: 1 | 2 | 3;
+  readonly hardpointSlots: number;
+  readonly reactorCapacity: number; // energy, scale 1–10
+  readonly carryingCapacity: number; // weight
+}
+
+export interface AircraftMarkUpgrade {
+  readonly mark: 2 | 3;
+  readonly name: LocalizedText;
+  readonly statDeltas: { // additive to base, role-aligned
+    readonly armour?: number;
+    readonly speedMultiplier?: number;
+    readonly damageMultiplier?: number;
+    readonly fireRateMultiplier?: number;
+    readonly accuracyMultiplier?: number;
+    readonly reactorCapacity?: number;
+    readonly hardpointSlots?: number;
+    readonly carryingCapacity?: number;
+  };
+  readonly researchCostCredits: number;
+  readonly productionCostCredits: number;
+  readonly productionCostMaterials: number;
+  readonly flavour?: LocalizedText;
+}
+
+/** Parallel loadout model for an existing aircraft (E1 additive section;
+ *  folded into AircraftDefinition when the loadout system is wired in E2). */
+export interface AircraftLoadoutEntry {
+  readonly aircraftId: string;
+  readonly role: AircraftRole;
+  readonly baseStats: AircraftBaseStats;
+  readonly loadout: AircraftLoadoutModel;
+  readonly marks: readonly AircraftMarkUpgrade[];
+}
+
 export interface ContentCatalog {
   readonly weapons: readonly WeaponDefinition[];
   readonly alienTechnologies: readonly AlienTechnologyDefinition[];
@@ -314,4 +502,9 @@ export interface ContentCatalog {
   readonly councilStates: readonly CouncilStateDefinition[];
   readonly nationGifts: Readonly<Record<string, NationGiftDefinition>>;
   readonly consumables: readonly ConsumableDefinition[];
+  readonly weaponFamilies: readonly WeaponFamilyDefinition[];
+  readonly auxiliary: readonly AuxiliaryDefinition[];
+  readonly modules: readonly ModuleDefinition[];
+  readonly ammunition: readonly AmmunitionDefinition[];
+  readonly aircraftLoadouts: readonly AircraftLoadoutEntry[];
 }

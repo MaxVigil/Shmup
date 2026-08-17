@@ -617,8 +617,12 @@ threats.
 - [x] E0.1 — freeze the taxonomy + schemas in `docs/WEAPONS_EPIC.md`.
 - [x] E0.2 — durable decisions in `docs/DECISIONS.md` (#11–#18) and the arsenal
   summary in `docs/GAME_SPEC.md`.
-- [ ] E1 — schema + data: `model.ts`, catalog import + numeric Mark overrides,
-  `ids.ts`, validation, save v20 migration, i18n, generator + index-navigator.
+- [x] E1a — schema + data layer: new `model.ts` types (weapon families + Marks,
+  auxiliary, modules, ammunition, aircraft loadouts), full first-pass catalog
+  import with numeric Mark overrides, `ids.ts` lookups, `validate.ts` arsenal
+  invariants (energy/weight/alien/marks/multiplier guard), `src/domain/loadout.ts`
+  helpers (slot bonus, effective multipliers), tests.
+- [ ] E1b — save v20 migration, i18n for new content, generator + index-navigator.
 - [ ] E2 — loadout & economy: hardpoints + weight/energy UI, finite ammunition,
   aircraft Mark II/III.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →

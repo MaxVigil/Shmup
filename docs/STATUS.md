@@ -2,6 +2,30 @@
 
 Last updated: 2026-08-18
 
+## Epic E1a — Arsenal schema + data layer
+
+Implemented on `test`.
+
+- New content model in `src/content/model.ts`: `LocalizedText`, weapon classes /
+  technology families, `WeaponFamilyDefinition` + `MarkDefinition` (numeric stat
+  overrides), `AuxiliaryDefinition`, `ModuleDefinition`, `AmmunitionDefinition`,
+  aircraft role/loadout/mark types; `ContentCatalog` gains `weaponFamilies`,
+  `auxiliary`, `modules`, `ammunition`, `aircraftLoadouts`.
+- `src/content/catalog.ts`: first-pass arsenal imported — 12 weapon families
+  (6 human, 3 hybrid laser/plasma, 3 alien) with Marks, 6 auxiliary (rocket,
+  homing, torpedo, cluster, Ukrainian drone swarm, stun), 6 modules, 5
+  ammunition types, 7 aircraft loadouts with roles + Mark II.
+- `src/content/ids.ts`: `weaponFamilyId`, `auxiliaryId`, `moduleId`,
+  `ammunitionId`, `aircraftRole`, typed lookups, `weaponItemId(family, mark)`.
+- `src/content/validate.ts`: `validateArsenal` — class/family consistency,
+  contiguous Marks, alien rules, ammo cross-references, weight/energy invariants,
+  role-aligned aircraft Mark deltas, and the 2.0 multiplier guard.
+- New `src/domain/loadout.ts`: `slotConcentrationBonus`, effective damage /
+  fire-rate / accuracy multipliers, weight + energy helpers.
+- New `tests/unit/loadout.test.ts`: slot bonus formula, Japan 1.8125/1.9375,
+  validation rejections. 233 unit tests, lint, typecheck, and the production
+  build pass. Remaining E1b: save v20 migration, i18n, generator + index.
+
 ## Epic E0 — Weapons design contract
 
 Docs-only milestone on `test`.
