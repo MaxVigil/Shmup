@@ -2,6 +2,23 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.3b — Ukrainian drone swarm in combat
+
+Implemented on `test`.
+
+- New `DroneActor` entity + `updateDrones`/`explodeDrone` in `CombatScene`:
+  - When the hardpoint Drone Swarm Module (`aux-ukrainian-drone-swarm`) is installed,
+    Space / right-click deploys one drone per shot, consuming
+    `consumable-ukrainian-attack-drone` (reported via `auxiliaryAmmoConsumed` and
+    deducted on settlement).
+  - Behaviour: if ≥1 enemy is on screen, the drone flies to the NEAREST enemy, rams it
+    and explodes with area damage; if no enemy is present, it circles the player's
+    aircraft (deterministic seeded initial orbit angle).
+- Drones are cleared on encounter reset/clear, destroyed after a 12 s lifetime.
+- 252 unit tests, lint, typecheck, and the production build pass. Human flight check on
+  `npm run dev?hardpointsReady=true` (install the Drone Swarm Module, buy drones, press
+  Space; watch the swarm circle and ram).
+
 ## Epic E3.3a — Auxiliary Rocket Pod fires with ammo
 
 Implemented on `test`.

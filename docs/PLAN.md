@@ -662,8 +662,12 @@ threats.
 - [x] E3.3a — auxiliary Rocket Pod fires in combat: the hardpoint rocket pod reuses the
   rocket path and consumes the new `consumable-rocket` ammo (per-sortie, deducted on
   settlement via `auxiliaryAmmoConsumed` + `getAmmunitionStock` callback).
-- [ ] E3.3b — other auxiliary weapons (homing/torpedo/cluster) with per-weapon stats,
-  Ukrainian drone swarm behaviour, mines.
+- [x] E3.3b — Ukrainian drone swarm: the hardpoint Drone Swarm Module fires drones
+  (Space / right-click) consuming `consumable-ukrainian-attack-drone`; drones hunt the
+  nearest enemy and ram it with an area explosion, or circle the aircraft when no
+  enemy is present.
+- [ ] E3.3c — other auxiliary weapons (homing/torpedo/cluster) with per-weapon stats,
+  mines (upward drift).
 - [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).

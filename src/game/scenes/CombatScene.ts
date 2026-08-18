@@ -81,6 +81,10 @@ const ROCKET_DAMAGE = 200;
 const ROCKET_SPEED = 820;
 /** Blast radius as a fraction of the larger screen dimension. */
 const ROCKET_BLAST_RADIUS_FRACTION = 0.4;
+const DRONE_SPEED = 300;
+const DRONE_LIFETIME_MS = 12_000;
+const DRONE_ORBIT_RADIUS = 34;
+const DRONE_ORBIT_RADIANS_PER_SECOND = 2.4;
 const ENEMY_BOUNCE_DAMPING = 0.5;
 const ENEMY_BOUND_MARGIN = 24;
 const ESCAPE_DURATION_MS = M2_FAST_MODE ? 8_000 : 35_000;
@@ -99,6 +103,7 @@ const STANDARD_WEAPON_ID = weaponId.pulseCannon;
 const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 const STUN_MODULE_ID = auxiliaryId.stunModule;
 const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
+const AUX_DRONE_SWARM_ID = auxiliaryId.ukrainianDroneSwarm;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -146,6 +151,17 @@ interface RocketActor {
   elapsedMs: number;
 }
 
+interface DroneActor {
+  readonly body: Phaser.GameObjects.Rectangle;
+  targetId: number | null;
+  state: 'circle' | 'hunt';
+  angle: number;
+  readonly speed: number;
+  readonly damage: number;
+  readonly areaRadius: number;
+  elapsedMs: number;
+}
+
 interface Star {
   readonly body: Phaser.GameObjects.Arc;
   readonly speed: number;
@@ -185,6 +201,7 @@ export class CombatScene extends Phaser.Scene {
   private readonly shots: ShotActor[] = [];
   private readonly hostileShots: HostileShot[] = [];
   private readonly rockets: RocketActor[] = [];
+  private readonly drones: DroneActor[] = [];
   private readonly enemies: EnemyActor[] = [];
   private readonly stars: Star[] = [];
   private rng!: RandomSource;
@@ -379,6 +396,14 @@ export class CombatScene extends Phaser.Scene {
         }
       });
     }
+    if (this.isDroneSwarmEquipped()) {
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireDrone());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireDrone();
+        }
+      });
+    }
   }
 
   public setPointerFollowLock(locked: boolean): void {
@@ -458,6 +483,7 @@ export class CombatScene extends Phaser.Scene {
     this.nextEnemyActorId = 1;
     this.nextVolleyId = 1;
     this.rockets.length = 0;
+    this.drones.length = 0;
     this.rocketsFired = 0;
     const chargesPerSortie = this.getRocketChargesPerSortie();
     this.rocketCharges = this.isRocketPodEquipped()
@@ -571,6 +597,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateEnemies(frameMs);
     this.updateHostileShots(frameMs);
     this.updateRockets(frameMs);
+    this.updateDrones(frameMs);
     this.resolveCollisions();
     if (this.ended) {
       return;
@@ -1869,6 +1896,10 @@ export class CombatScene extends Phaser.Scene {
       rocket.body.destroy();
     }
     this.rockets.length = 0;
+    for (const drone of this.drones) {
+      drone.body.destroy();
+    }
+    this.drones.length = 0;
     for (const enemy of this.enemies) {
       enemy.body.destroy();
       enemy.armourBarBackground?.destroy();
@@ -1997,6 +2028,146 @@ export class CombatScene extends Phaser.Scene {
     elite.body.setFillStyle(0xbfe3ff);
     this.setStatus('combat.wardenStunned');
     this.createDestructionBurst(elite.body.x, elite.body.y, 0xbfe3ff);
+  }
+
+  private isDroneSwarmEquipped(): boolean {
+    return this.equippedHardpointItemIds.includes(AUX_DRONE_SWARM_ID);
+  }
+
+  private droneSwarmAmmunitionId(): string | null {
+    return auxiliaryById(AUX_DRONE_SWARM_ID)?.ammoConsumableId ?? null;
+  }
+
+  private tryFireDrone(): void {
+    if (this.ended || this.ending !== null) {
+      return;
+    }
+    const ammoId = this.droneSwarmAmmunitionId();
+    if (ammoId === null) {
+      return;
+    }
+    const fired = this.auxiliaryAmmoConsumed[ammoId] ?? 0;
+    if (this.getAmmunitionStock(ammoId) <= fired) {
+      return;
+    }
+    const aux = auxiliaryById(AUX_DRONE_SWARM_ID);
+    const body = this.add.rectangle(
+      this.player.x,
+      this.player.y - 24,
+      8,
+      8,
+      0x9ad0ff,
+    );
+    this.drones.push({
+      body,
+      targetId: null,
+      state: 'circle',
+      angle: (this.rng.integer(0, 360) * Math.PI) / 180,
+      speed: DRONE_SPEED,
+      damage: aux?.damage ?? 28,
+      areaRadius: aux?.areaRadius ?? 28,
+      elapsedMs: 0,
+    });
+    this.auxiliaryAmmoConsumed = {
+      ...this.auxiliaryAmmoConsumed,
+      [ammoId]: fired + 1,
+    };
+    this.cameras.main.shake(40, 0.002);
+  }
+
+  private nearestEnemyId(x: number, y: number): number | null {
+    let best: EnemyActor | undefined;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (const enemy of this.enemies) {
+      if (!enemy.body.active) {
+        continue;
+      }
+      const distance = Math.hypot(enemy.body.x - x, enemy.body.y - y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = enemy;
+      }
+    }
+    return best === undefined ? null : best.actorId;
+  }
+
+  private updateDrones(deltaMs: number): void {
+    const enemies = this.enemies.filter((enemy) => enemy.body.active);
+    for (let index = this.drones.length - 1; index >= 0; index -= 1) {
+      const drone = this.drones[index];
+      if (drone === undefined) {
+        continue;
+      }
+      drone.elapsedMs += deltaMs;
+      if (drone.elapsedMs > DRONE_LIFETIME_MS) {
+        drone.body.destroy();
+        this.drones.splice(index, 1);
+        continue;
+      }
+      if (drone.state === 'circle' && enemies.length === 0) {
+        drone.angle += (deltaMs / 1000) * DRONE_ORBIT_RADIANS_PER_SECOND;
+        drone.body.x = this.player.x + Math.cos(drone.angle) * DRONE_ORBIT_RADIUS;
+        drone.body.y = this.player.y + Math.sin(drone.angle) * DRONE_ORBIT_RADIUS;
+        continue;
+      }
+      drone.state = 'hunt';
+      const target = drone.targetId === null
+        ? undefined
+        : enemies.find((enemy) => enemy.actorId === drone.targetId);
+      if (target === undefined) {
+        const next = this.nearestEnemyId(drone.body.x, drone.body.y);
+        if (next === null) {
+          drone.state = 'circle';
+          continue;
+        }
+        drone.targetId = next;
+        continue;
+      }
+      const dx = target.body.x - drone.body.x;
+      const dy = target.body.y - drone.body.y;
+      const length = Math.max(1, Math.hypot(dx, dy));
+      const step = Math.min(drone.speed * (deltaMs / 1000), length);
+      drone.body.x += (dx / length) * step;
+      drone.body.y += (dy / length) * step;
+      if (
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          drone.body.getBounds(),
+          target.body.getBounds(),
+        )
+      ) {
+        this.explodeDrone(index, drone);
+      }
+    }
+  }
+
+  private explodeDrone(index: number, drone: DroneActor): void {
+    const x = drone.body.x;
+    const y = drone.body.y;
+    drone.body.destroy();
+    this.drones.splice(index, 1);
+    this.createDestructionBurst(x, y, 0x9ad0ff);
+    this.cameras.main.shake(90, 0.006);
+    for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
+      const enemy = this.enemies[enemyIndex];
+      if (enemy === undefined || !enemy.body.active) {
+        continue;
+      }
+      const distance = Math.hypot(enemy.body.x - x, enemy.body.y - y);
+      if (distance > drone.areaRadius) {
+        continue;
+      }
+      enemy.armour -= drone.damage;
+      enemy.body.setFillStyle(0xffffff);
+      this.time.delayedCall(45, () => enemy.body.active && enemy.body.setFillStyle(
+        enemy.definition.kind === 'elite'
+          ? 0x9368c7
+          : enemy.definition.movementPattern === 'sine' ? 0xd98ba1 : 0xd6b36a,
+      ));
+      this.updateEnemyArmourBar(enemy);
+      if (enemy.armour <= 0) {
+        this.applyEnemyDefeat(enemyIndex);
+      }
+    }
   }
 
   private setStatus(key: TranslationKey, params: TranslationParams = {}): void {
