@@ -22,6 +22,8 @@ import {
 import {
   aircraftLoadoutEnergy,
   aircraftLoadoutWeight,
+  effectiveAircraftDamageMultiplier,
+  effectiveAircraftFireRateMultiplier,
   hardpointSlotsOf,
 } from '../domain/arsenal-loadout';
 import { validateContentCatalog } from '../content/validate';
@@ -4213,21 +4215,22 @@ function launchSortie(): void {
               snapshot.base.manufacturedAircraftUpgradeIds,
               contentCatalog.aircraftUpgrades,
             );
-        return upgraded === undefined
-          ? {
-              armour: 100,
-              speedMultiplier: 1,
-              damageMultiplier: 1,
-              fireRateMultiplier: 1,
-              projectileSpeedMultiplier: 1,
-            }
-          : {
-              armour: Math.max(1, Math.round(upgraded.armour * (1 - damage))),
-              speedMultiplier: upgraded.speedMultiplier * pilot.speedMultiplier,
-              damageMultiplier: upgraded.damageMultiplier * pilot.damageMultiplier,
-              fireRateMultiplier: upgraded.fireRateMultiplier,
-              projectileSpeedMultiplier: upgraded.projectileSpeedMultiplier,
-            };
+        const base = snapshot.base;
+        // Arsenal E3.1: damage/fire-rate use the data-driven multiplier model
+        // (aircraft base + Mark deltas) × slot concentration bonus, times the pilot.
+        return {
+          armour: upgraded === undefined
+            ? 100
+            : Math.max(1, Math.round(upgraded.armour * (1 - damage))),
+          speedMultiplier: (upgraded?.speedMultiplier ?? 1) * pilot.speedMultiplier,
+          damageMultiplier: aircraftId === null
+            ? 1
+            : effectiveAircraftDamageMultiplier(base, aircraftId) * pilot.damageMultiplier,
+          fireRateMultiplier: aircraftId === null
+            ? 1
+            : effectiveAircraftFireRateMultiplier(base, aircraftId),
+          projectileSpeedMultiplier: upgraded?.projectileSpeedMultiplier ?? 1,
+        };
       },
       () => store.getSnapshot().base.activeAircraftId,
       () => store.getSnapshot().base.consumableStock[rocketsConsumable.id] ?? 0,

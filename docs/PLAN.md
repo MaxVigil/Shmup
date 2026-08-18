@@ -649,8 +649,13 @@ threats.
   2.0 guard).
 - [ ] E3 — per-sortie ammunition loading/consumption and Engineering production of
   ammunition (deferred from E2); combat wiring of the arsenal.
-- [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
-  drones/mines → homing/decoys → alien.
+- [x] E3.1 — vertical slice: the data-driven multiplier model (aircraft base + Mark
+  deltas × slot concentration bonus × pilot) now drives combat damage/fire-rate via
+  `getAircraftStats` (`effectiveAircraftDamageMultiplier` /
+  `effectiveAircraftFireRateMultiplier`); Japan glass cannon hits ~1.81×.
+- [ ] E3.2 — stun (replaces Capturer): stun module stuns elite → alien recovery.
+- [ ] E3.3 — auxiliary weapons in combat (manual fire + ammo consumption), drones/mines.
+- [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).
 - [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).

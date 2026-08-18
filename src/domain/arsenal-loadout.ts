@@ -7,7 +7,10 @@ import {
   weaponFamilyById,
 } from '../content/ids';
 import { addConsumables } from './armory';
-import { effectiveDamageMultiplier } from './loadout';
+import {
+  effectiveDamageMultiplier,
+  effectiveFireRateMultiplier,
+} from './loadout';
 
 /** Legacy primary weapon id → new weapon family id (E1 reuse mapping). */
 const LEGACY_PRIMARY_TO_FAMILY: Readonly<Record<string, string>> = {
@@ -191,6 +194,18 @@ export function effectiveAircraftDamageMultiplier(
     return 1;
   }
   return effectiveDamageMultiplier(entry, aircraftMark(base, aircraftId));
+}
+
+/** Effective aircraft fire-rate multiplier using the persisted Mark level. */
+export function effectiveAircraftFireRateMultiplier(
+  base: BaseState,
+  aircraftId: string,
+): number {
+  const entry = aircraftLoadoutByAircraftId(aircraftId);
+  if (!entry) {
+    return 1;
+  }
+  return effectiveFireRateMultiplier(entry, aircraftMark(base, aircraftId));
 }
 
 // ==== Finite ammunition ====

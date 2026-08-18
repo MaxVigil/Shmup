@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.1 — Combat vertical slice: data-driven multipliers
+
+Implemented on `test`.
+
+- `arsenal-loadout.ts` gained `effectiveAircraftFireRateMultiplier` (alongside the
+  existing `effectiveAircraftDamageMultiplier`).
+- `getAircraftStats` in `app-shell` now feeds combat with the arsenal multiplier model:
+  `effectiveAircraftDamageMultiplier(base, aircraft) × pilot.damageMultiplier` for
+  damage and `effectiveAircraftFireRateMultiplier` for fire rate — i.e. (aircraft base
+  + Mark deltas) × slot concentration bonus × pilot. Japan glass cannon now deals
+  ~1.81× (Mark I) / ~1.94× (Mark II) damage in sorties.
+- Armour/speed/projectile-speed still come from the legacy aircraft-upgrade deltas
+  (marks' armour integration is a later follow-up).
+- 251 unit tests, lint, typecheck, and the production build pass. Human flight check
+  on `npm run dev` recommended.
+
 ## Epic E2b-3 UX follow-up — ammo panel clarity
 
 Implemented on `test`.
