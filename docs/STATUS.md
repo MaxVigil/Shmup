@@ -2,6 +2,24 @@
 
 Last updated: 2026-08-18
 
+## Epic E2a — Loadout domain + save schema v20
+
+Implemented on `test`.
+
+- `BaseState` gained `aircraftHardpoints` (per-aircraft hardpoint slots) and
+  `aircraftMarks` (per-aircraft Mark level ≥ 2); `SAVE_SCHEMA_VERSION` → 20.
+- Save migration **v19→v20** seeds `aircraftHardpoints: {}` / `aircraftMarks: {}`
+  (the deferred E1b migration), with a dedicated migration test.
+- New `src/domain/arsenal-loadout.ts`: hardpoint install/remove with **weight and
+  energy hard-limit enforcement** against the aircraft's carrying capacity and
+  reactor, aircraft Mark apply/clear + `effectiveAircraftDamageMultiplier`
+  (Japan Mark II = 1.9375), and legacy weapon → family weight/energy mapping.
+- `guards.ts` validates the new state fields; `initial-state.ts` seeds the starting
+  aircraft's hardpoint slots.
+- New `tests/unit/arsenal-loadout.test.ts` (install/remove, slot range, unknown item,
+  weight/energy sums, capacity-block, marks). 242 unit tests, lint, typecheck, and
+  the production build pass.
+
 ## Epic E1b — Docs generator + index-navigator
 
 Implemented on `test`.

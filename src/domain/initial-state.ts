@@ -4,6 +4,7 @@ import { contentCatalog } from '../content/catalog';
 import {
   aircraftById,
   aircraftId,
+  aircraftLoadoutByAircraftId,
   STARTER_BUILDING_IDS,
   weaponById,
   weaponId,
@@ -81,6 +82,17 @@ export function createInitialGameState(): GameState {
       weaponStock: {},
       consumableStock: {},
       aircraftModules: { [startingAircraft.id]: null },
+      aircraftHardpoints: {
+        [startingAircraft.id]: Array.from(
+          {
+            length:
+              aircraftLoadoutByAircraftId(startingAircraft.id)?.loadout
+                .hardpointSlots ?? 0,
+          },
+          () => null,
+        ),
+      },
+      aircraftMarks: {},
       aircraftDamage: {},
       aircraftRepair: {},
       staffCandidates: generateStaffCandidates(

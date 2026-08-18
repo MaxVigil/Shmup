@@ -15,7 +15,8 @@ import { isGameState } from '../domain/guards';
 import { SAVE_SCHEMA_VERSION } from '../domain/model';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v19';
+export const SAVE_KEY = 'shmup.save.v20';
+export const LEGACY_V19_SAVE_KEY = 'shmup.save.v19';
 export const LEGACY_V18_SAVE_KEY = 'shmup.save.v18';
 export const LEGACY_V17_SAVE_KEY = 'shmup.save.v17';
 export const LEGACY_V16_SAVE_KEY = 'shmup.save.v16';
@@ -169,6 +170,8 @@ function v14BaseDefaults(): Pick<
   | 'nationThanks'
   | 'researchedAircraftUpgradeIds'
   | 'manufacturedAircraftUpgradeIds'
+  | 'aircraftHardpoints'
+  | 'aircraftMarks'
 > {
   return {
     constructionQueue: [],
@@ -186,6 +189,8 @@ function v14BaseDefaults(): Pick<
     nationThanks: {},
     researchedAircraftUpgradeIds: [],
     manufacturedAircraftUpgradeIds: [],
+    aircraftHardpoints: {},
+    aircraftMarks: {},
   };
 }
 
@@ -230,6 +235,19 @@ function addStartingBuildingsVersion(state: GameState): GameState {
   };
 }
 
+/** v19 → v20: seed the arsenal loadout state (hardpoints + aircraft marks). */
+function addArsenalLoadoutStateVersion(state: GameState): GameState {
+  return {
+    ...state,
+    schemaVersion: 20,
+    base: {
+      ...state.base,
+      aircraftHardpoints: state.base.aircraftHardpoints ?? {},
+      aircraftMarks: state.base.aircraftMarks ?? {},
+    },
+  };
+}
+
 /** Walks intermediate migration versions up to the current schema. */
 function upgradeLegacyToCurrent(state: GameState): GameState {
   let current = state;
@@ -238,6 +256,9 @@ function upgradeLegacyToCurrent(state: GameState): GameState {
   }
   if (current.schemaVersion < 19) {
     current = addStartingBuildingsVersion(current);
+  }
+  if (current.schemaVersion < 20) {
+    current = addArsenalLoadoutStateVersion(current);
   }
   return current;
 }
@@ -274,6 +295,22 @@ function migrateV18Save(rawSave: string | null): GameState | null {
   }
 }
 
+/** Legacy v19 save (old SAVE_KEY) → current (seeds the arsenal loadout state). */
+function migrateV19Save(rawSave: string | null): GameState | null {
+  if (rawSave === null) {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(rawSave);
+    if (!isRecord(parsed) || parsed.schemaVersion !== 19 || !isRecord(parsed.base)) {
+      return null;
+    }
+    return upgradeLegacyToCurrent(parsed as unknown as GameState);
+  } catch {
+    return null;
+  }
+}
+
 export function loadGame(storage: KeyValueStorage): GameState | null {
   const currentSave = parseGameState(storage.getItem(SAVE_KEY));
   if (currentSave !== null) {
@@ -281,6 +318,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V19_SAVE_KEY, migrateV19Save],
     [LEGACY_V18_SAVE_KEY, migrateV18Save],
     [LEGACY_V17_SAVE_KEY, migrateV17Save],
     [LEGACY_V16_SAVE_KEY, migrateV16Save],

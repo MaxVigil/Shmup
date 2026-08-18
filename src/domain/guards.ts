@@ -80,6 +80,8 @@ export function isGameState(
     isCountRecord(value.base.weaponStock) &&
     isCountRecord(value.base.consumableStock) &&
     isNullableStringRecord(value.base.aircraftModules) &&
+    isLoadoutRecord(value.base.aircraftHardpoints) &&
+    isAircraftMarkRecord(value.base.aircraftMarks) &&
     isRatioRecord(value.base.aircraftDamage) &&
     isCountRecord(value.base.aircraftRepair) &&
     Array.isArray(value.base.staffCandidates) &&
@@ -127,6 +129,15 @@ function isCountRecord(value: unknown): boolean {
   return (
     isRecord(value) &&
     Object.values(value).every((entry) => typeof entry === 'number')
+  );
+}
+
+function isAircraftMarkRecord(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    Object.values(value).every(
+      (entry) => typeof entry === 'number' && Number.isInteger(entry) && entry >= 2,
+    )
   );
 }
 

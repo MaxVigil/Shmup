@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 19 as const;
+export const SAVE_SCHEMA_VERSION = 20 as const;
 
 export type SaveSchemaVersion = number;
 
@@ -138,6 +138,8 @@ export interface BaseState {
   readonly weaponStock: Readonly<Record<string, number>>;
   readonly consumableStock: Readonly<Record<string, number>>;
   readonly aircraftModules: Readonly<Record<string, string | null>>;
+  readonly aircraftHardpoints: Readonly<Record<string, readonly (string | null)[]>>;
+  readonly aircraftMarks: Readonly<Record<string, number>>;
   readonly aircraftDamage: Readonly<Record<string, number>>;
   readonly aircraftRepair: Readonly<Record<string, number>>;
   readonly staffCandidates: readonly StaffCandidateState[];
