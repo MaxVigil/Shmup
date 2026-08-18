@@ -4,12 +4,15 @@ Source of product truth: [Game Brief v0.1 in Notion](https://app.notion.com/p/3b
 
 ## Product core
 
-A browser vertical shmup where partly understood alien technology connects combat
-builds, informed risk, extraction, and persistent development of an international
-corporate base on Earth.
+A browser vertical shmup about designing, developing and enjoying aircraft-and-
+weapon builds — both in themselves and during sorties — supported by informed risk,
+extraction, and persistent development of an international corporate base on
+Earth.
 
 ## Player experience
 
+- Design, refine and specialise an aircraft-and-weapon build, and enjoy it both in
+  itself and under pressure.
 - Discover a clever weapon and technology combination.
 - Decide whether the expected reward justifies another dangerous encounter.
 - Infer enough about unknown technology to take an informed risk.

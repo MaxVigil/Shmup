@@ -6,8 +6,9 @@ source of truth and is referenced here.
 
 ## What this is
 
-A browser vertical shmup about informed risk, alien technology, and an international
-corporate base on Earth. See `docs/GAME_SPEC.md`.
+A browser vertical shmup about designing, developing and enjoying aircraft-and-weapon
+builds, supported by informed risk, alien technology, and an international corporate
+base on Earth. See `docs/GAME_SPEC.md`.
 
 ## Where things live
 

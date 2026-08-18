@@ -13,8 +13,8 @@ All numbers below are first-pass placeholders to be balanced through playtesting
 - Every loadout decision matters: weapons differ in attack geometry and role, not
   just DPS; aircraft differ in identity, not just slot count.
 - Sorties carry hardcore stakes: destruction is permanent; Abort is the safe exit.
-- Risk-versus-knowledge stays the core loop: stunning an elite is the only way to
-  recover alien technology.
+- Alien technology is an important supporting mechanic (not the core loop):
+  stunning an elite is the only way to recover it.
 
 ## 2. Locked taxonomy
 

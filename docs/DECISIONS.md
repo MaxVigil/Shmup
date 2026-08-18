@@ -385,3 +385,19 @@ real-time HUD screen appears.
 
 **Consequence:** New HUD values have a documented home before they are added; the
 `active-weapon` label stays DOM-owned via `onActiveWeaponChanged`.
+
+## 25. Product intent: buildcraft is the core fantasy
+
+**Context:** The repo previously framed the install-or-preserve alien-technology
+choice as the core loop ("protect this risk-versus-knowledge loop"). The product
+owner has redefined the core.
+
+**Decision:** The core fantasy is buildcraft: designing, developing and enjoying
+aircraft-and-weapon builds, both in themselves and during sorties. The
+install-or-preserve alien-technology choice is an important supporting mechanic,
+not the core fantasy, and stays a first-class, protected mechanic.
+
+**Consequence:** `AGENTS.md`, `README.md`, `docs/GAME_SPEC.md`, `docs/INDEX.md`,
+and `docs/WEAPONS_EPIC.md` are updated to match. Project rules (lore, geopolitics,
+content model, balance) live in `AGENTS.md`; Cline skills must defer to it rather
+than re-stating those rules.

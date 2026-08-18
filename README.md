@@ -1,11 +1,12 @@
 # Shmup
 
-A browser vertical shmup about informed risk, alien technology, and an
-international corporate base on Earth.
+A browser vertical shmup about designing, developing and enjoying aircraft-and-
+weapon builds — both in themselves and in 15–20 minute sorties.
 
-The player prepares a pilot and loadout, flies a 15–20 minute sortie, and chooses
-whether to install partly understood alien technology or preserve it for research.
-Extraction secures the haul; failure loses part of it.
+The player prepares a pilot and loadout at the base, refines their build between
+sorties, and can choose whether to install partly understood alien technology in
+the field or preserve it for research. Extraction secures the haul; failure loses
+part of it.
 
 ## Status
 

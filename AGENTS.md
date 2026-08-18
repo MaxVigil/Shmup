@@ -2,10 +2,10 @@
 
 ## Product intent
 
-Build a browser vertical shmup in which the player chooses whether to install
-unknown alien technology during a sortie or preserve it for research at an
-Earth-based corporate facility. Protect this risk-versus-knowledge loop from
-unrelated scope.
+Build a browser vertical shmup about designing, developing and enjoying
+aircraft-and-weapon builds — both in themselves and during sorties. Protect this
+buildcraft loop from unrelated scope. The install-or-preserve alien-technology
+choice is an important supporting mechanic, not the core fantasy.
 
 ## Durable product constraints
 

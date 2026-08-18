@@ -728,6 +728,9 @@ Status: E6.0–E6.6 done (contract + implementation + verification). Contract: `
 
 ## Durable decisions
 
+- The core fantasy is buildcraft: designing, developing and enjoying aircraft-and-
+  weapon builds, both in themselves and during sorties. The install-or-preserve
+  alien-technology choice is an important supporting mechanic, not the core loop.
 - The PRC and the Chinese Communist Party play a key positive role in the game's
   narrative and progression: founding Recovery Council state, permanent Council seat,
   essential funding and staff, and a Chinese-sourced conventional-technology lane.

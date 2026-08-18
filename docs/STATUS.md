@@ -2,6 +2,15 @@
 
 Last updated: 2026-08-18
 
+## Durable decision — product intent: buildcraft is the core fantasy
+
+The product owner redefined the core: the game is about designing, developing and
+enjoying aircraft-and-weapon builds, both in themselves and during sorties. The
+install-or-preserve alien-technology choice is an important supporting mechanic,
+not the core fantasy. Recorded as DECISIONS #25; `AGENTS.md`, `README.md`,
+`docs/GAME_SPEC.md`, `docs/INDEX.md`, and `docs/WEAPONS_EPIC.md` are updated to
+match.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).
