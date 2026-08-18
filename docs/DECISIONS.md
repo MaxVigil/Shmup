@@ -322,3 +322,22 @@ every manufactured weapon.
 **Consequence:** Destruction is now permanent and telegraphed (toast + empty
 loadout); the weapon-Mark research/production/equip pipeline and the full power-curve
 rebalance (Human < Laser < Plasma < Alien) remain E5 work.
+
+## 22. E5: balance harness, scripted playtest, 23-idea triage
+
+**Context:** E5 is explicitly "balance, playtest rounds, backlog triage (23 ideas)",
+but the first-pass arsenal numbers are placeholders and there was no structured way
+for a human to exercise the full arsenal or record results.
+
+**Decision:** Land the in-code E5 part first: the `?alienReady=true` playtest profile
+ships every auxiliary ammunition type and 50k credits (one-stop full-arsenal testbed
+with `&hardpointsReady=true&m2Fast=true`), `docs/BALANCE.md` gains a generated Mark I
+power-curve section, `docs/PLAYTEST.md` defines 10 scripted human rounds with URLs,
+actions, expected outcomes, and a result log, and `docs/IDEAS_BACKLOG.md` records the
+23-idea triage (implemented / prototype / backlog). No first-pass numbers are
+rebalanced before human rounds produce evidence; the strict
+Human < Laser < Plasma < Alien ladder is backlog idea #22, gated on playtest data.
+
+**Consequence:** The remaining E5 gate is the human playtest rounds; their notes feed
+the rebalance of the weapon-upgrade branches (#12), module combat wiring (#13), and
+the strict power curve (#22).

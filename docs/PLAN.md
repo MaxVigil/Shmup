@@ -692,7 +692,11 @@ threats.
   invariants (alien per-shot power tier above every manufactured weapon + the 2.0
   multiplier guard). The weapon-Mark research/production/equip pipeline stays a
   documented follow-up.
-- [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).
+- [~] E5 — balance, playtest rounds, backlog triage (23 ideas). In-code part done:
+  BALANCE.md gains the generated Mark I power-curve section, the `?alienReady=true`
+  profile now ships full auxiliary ammunition, `docs/PLAYTEST.md` (10 scripted human
+  rounds) and `docs/IDEAS_BACKLOG.md` (23-idea triage) land. Remaining: the human
+  playtest rounds (docs/PLAYTEST.md) and the resulting rebalance of #12/#13/#22.
 
 ## Future ideas (backlog)
 

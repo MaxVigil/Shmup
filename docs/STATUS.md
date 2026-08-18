@@ -2,6 +2,28 @@
 
 Last updated: 2026-08-18
 
+## Epic E5 — Balance, playtest rounds, backlog triage
+
+In progress on `test` (in-code part done; human rounds pending).
+
+- `scripts/export-balance.mjs` now emits a generated **Weapon power curve (Mark I)**
+  section into `docs/BALANCE.md` (per-family per-shot / DPS / max-Mark damage /
+  Mark count) — the master reference for the E5 rebalance.
+- The `?alienReady=true` playtest profile now also ships **full auxiliary
+  ammunition** (rockets, homing, torpedoes, cluster, drones, decoys, mines) and
+  50k credits, so `npm run dev?alienReady=true&hardpointsReady=true&m2Fast=true`
+  is a one-stop full-arsenal testbed.
+- New `docs/PLAYTEST.md` — 10 scripted human rounds with URLs, actions, expected
+  outcomes, and a result log (Hangar/hardpoints, primaries & Marks, auxiliary ammo
+  consumption, stun→recovery, homing+decoys, drones, mines, hardcore destruction,
+  economy & containment, insolvency).
+- New `docs/IDEAS_BACKLOG.md` — the E5.3 triage of 23 ideas with status
+  (implemented / prototype / backlog), including the full weapon-upgrade branch
+  tree (WEAPON_UPGRADES.md), module combat wiring, Heavy Combat Drone, scrum
+  teams, art search, and the strict power-curve rebalance (#22).
+- 258 unit tests, lint, typecheck, and the production build pass. **Awaiting the
+  human playtest rounds** — see `docs/PLAYTEST.md` for what to test.
+
 ## Epic E4 — Hardcore destruction, variable Marks, balance invariants
 
 Implemented on `test`.

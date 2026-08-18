@@ -161,6 +161,19 @@ export function buildBalanceMarkdown() {
   }
   push('');
 
+  push('### Weapon power curve (Mark I)');
+  push('');
+  push('| Family | Class | Per-shot | Shots/s | DPS | Max-Mark damage | Marks |');
+  push('| --- | --- | --- | --- | --- | --- | --- |');
+  for (const family of c.weaponFamilies) {
+    const lastMark = family.marks[family.marks.length - 1];
+    const maxMarkDamage = lastMark
+      ? (lastMark.statOverrides.damage ?? family.baseStats.damage)
+      : family.baseStats.damage;
+    push(`| ${family.id} | ${family.class} | ${family.baseStats.damage} | ${family.baseStats.shotsPerSecond} | ${(family.baseStats.damage * family.baseStats.shotsPerSecond).toFixed(1)} | ${maxMarkDamage} | ${family.marks.length} |`);
+  }
+  push('');
+
   push('## Enemies');
   push('');
   push('| Enemy | Kind | Armour | Speed | Contact | Score | Materials | Credits | Ranged |');

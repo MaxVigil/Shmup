@@ -339,7 +339,10 @@ when the active aircraft's armour reaches 0; the loadout loss is surfaced in the
   area blast).
 - **E4** hardcore + progression: destruction semantics, variable Marks, balance
   invariants (power curve + multiplier guard) — implemented (DECISIONS #21).
-- **E5** balance, playtest rounds, backlog triage (23 ideas).
+- **E5** balance, playtest rounds, backlog triage (23 ideas) — in progress:
+  BALANCE.md gains the generated Mark I power-curve section, the `?alienReady=true`
+  profile ships full auxiliary ammunition, and `docs/PLAYTEST.md` +
+  `docs/IDEAS_BACKLOG.md` land; human rounds are the remaining gate.
 
 ## Definition of done
 

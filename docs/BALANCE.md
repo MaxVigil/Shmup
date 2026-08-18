@@ -106,6 +106,23 @@
 | upgrade-machine-gun-reinforced-ammunition | Pulse Cannon | 140,000 / 2 sorties | 90,000 + 4 mat / 1 sorties | damage ×2, cadence ×1 |
 | upgrade-impulse-accelerator-accumulator | Impulse Accelerator | 180,000 / 2 sorties | 120,000 + 6 mat / 1 sorties | damage ×1, cadence ×1.25 |
 
+### Weapon power curve (Mark I)
+
+| Family | Class | Per-shot | Shots/s | DPS | Max-Mark damage | Marks |
+| --- | --- | --- | --- | --- | --- | --- |
+| weapon-autocannon | human | 10 | 6 | 60.0 | 22 | 5 |
+| weapon-heavy-autocannon | human | 24 | 2.4 | 57.6 | 40 | 4 |
+| weapon-gatling-gun | human | 7 | 9 | 63.0 | 10 | 4 |
+| weapon-scatter-cannon | human | 8 | 1.8 | 14.4 | 12 | 4 |
+| weapon-railgun | human | 48 | 0.75 | 36.0 | 72 | 3 |
+| weapon-flak-cannon | human | 16 | 2.2 | 35.2 | 27 | 4 |
+| weapon-pulse-laser | hybrid | 20 | 6.5 | 130.0 | 34 | 3 |
+| weapon-plasma-machine-gun | hybrid | 28 | 7.5 | 210.0 | 40 | 2 |
+| weapon-plasma-cannon | hybrid | 92 | 0.9 | 82.8 | 120 | 2 |
+| weapon-disintegration-lance | alien | 180 | 0.55 | 99.0 | 180 | 0 |
+| weapon-plasma-orb-projector | alien | 125 | 0.65 | 81.3 | 125 | 0 |
+| weapon-singularity-projector | alien | 105 | 0.4 | 42.0 | 105 | 0 |
+
 ## Enemies
 
 | Enemy | Kind | Armour | Speed | Contact | Score | Materials | Credits | Ranged |

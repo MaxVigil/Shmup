@@ -119,7 +119,7 @@ function createAlienReadyState(): GameState {
     ...state,
     base: {
       ...state.base,
-      credits: 5_000,
+      credits: 50_000,
       hangarSlots: [gunship.id, null],
       activeAircraftId: gunship.id,
       fueledAircraftIds: [gunship.id],
@@ -132,6 +132,17 @@ function createAlienReadyState(): GameState {
         [lance]: 1,
         [orb]: 1,
         [singularity]: 1,
+      },
+      // Full auxiliary ammunition so every hardpoint weapon is testable in one
+      // session (combine with ?hardpointsReady=true to install the items).
+      consumableStock: {
+        'consumable-rocket': 12,
+        'consumable-homing-missile': 10,
+        'consumable-heavy-torpedo': 4,
+        'consumable-cluster-missile': 6,
+        'consumable-ukrainian-attack-drone': 20,
+        'consumable-flare-decoy': 6,
+        'consumable-proximity-mine': 12,
       },
     },
   };

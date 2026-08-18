@@ -19,6 +19,9 @@ corporate base on Earth. See `docs/GAME_SPEC.md`.
 | Weapons & Arsenal epic contract | `docs/WEAPONS_EPIC.md` | — |
 | All game content (weapons, buildings, staff, aircraft, ...) | `src/content/catalog.ts` | `docs/ENTITIES.md` / `ENTITIES.xlsx` (`npm run entities`) |
 | Balance constants | `src/content/catalog.ts` + `src/domain/*` | `docs/BALANCE.md` (`npm run balance`) |
+| Human playtest script | `docs/PLAYTEST.md` | — |
+| Ideas backlog (E5.3 triage) | `docs/IDEAS_BACKLOG.md` | — |
+| Weapon upgrade branch designs | `docs/WEAPON_UPGRADES.md` | — |
 | Content validation | `src/content/validate.ts` | — |
 | Save schema + migrations | `src/domain/model.ts`, `src/persistence/save-repository.ts` | — |
 | Loadout helpers (slot bonus, multipliers) | `src/domain/loadout.ts` | — |
@@ -31,8 +34,13 @@ Status and task breakdown: `docs/WEAPONS_EPIC.md` + `docs/PLAN.md`.
 - **E1a** schema + data layer — done.
 - **E1b** docs generator (new ENTITIES sections) + index (this file) — done; save v20
   migration deferred to E2 (state shape unchanged so far).
-- **E2–E5** — planned: loadout & economy, combat systems, hardcore + progression,
-  balance/playtest/backlog.
+- **E2** loadout & economy (hardpoints, weight/energy, finite ammunition, aircraft
+  Marks II/III) — done.
+- **E3** combat systems (stun→recovery, auxiliary firing incl. drones/mines,
+  homing/decoys, alien primaries) — done.
+- **E4** hardcore destruction, variable Marks, balance invariants — done.
+- **E5** balance/playtest/backlog — in progress; the human rounds live in
+  `docs/PLAYTEST.md`, the 23-idea triage in `docs/IDEAS_BACKLOG.md`.
 
 ## Commands
 
