@@ -39,6 +39,7 @@ const en = {
   'toast.candidateHired': '{name} hired',
   'toast.pilotInjured': '{pilot} was wounded ({severity}).',
   'toast.pilotDied': '{pilot} died in service.',
+  'toast.aircraftDestroyed': 'AIRCRAFT DESTROYED // installed weapons and equipment are lost.',
   'toast.pilotInTreatment': '{pilot} started treatment.',
 
   'nav.base': 'Base',
@@ -716,6 +717,7 @@ const uk: Record<TranslationKey, string> = {
   'toast.candidateHired': '{name} найнято',
   'toast.pilotInjured': '{pilot} отримав поранення ({severity}).',
   'toast.pilotDied': '{pilot} загинув на службі.',
+  'toast.aircraftDestroyed': 'ЛІТАК ЗНИЩЕНО // встановлену зброю та спорядження втрачено.',
   'toast.pilotInTreatment': '{pilot} почав лікування.',
 
   'nav.base': 'База',

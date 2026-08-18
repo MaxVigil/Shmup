@@ -44,6 +44,7 @@ import {
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import {
+  destroyAircraftLoadout,
   installHardpointItem,
   purchaseAmmunition,
   removeHardpointItem,
@@ -146,6 +147,8 @@ export type GameCommand =
       readonly outcome: SortieOutcome;
       /** Fraction of the active aircraft armour lost during this sortie. */
       readonly armourLostRatio?: number;
+      /** True when the active aircraft's armour reached 0 (hardcore loss). */
+      readonly aircraftDestroyed?: boolean;
     }
   | { readonly type: 'RESEARCH_TECHNOLOGY'; readonly technologyId: string }
   | { readonly type: 'PURCHASE_MARKET_WEAPON'; readonly weaponId: string }
@@ -298,9 +301,20 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
                 activeMission.targetCountryId,
               );
           const activePilotId = state.base.activePilotId;
+          const activeAircraftId = state.base.activeAircraftId;
           const armourLost = Math.max(0, Math.min(1, command.armourLostRatio ?? 0));
+          // Hardcore rule: armour reaching 0 means the aircraft is destroyed — the
+          // pilot dies and the entire installed loadout is irreversibly lost.
+          const destroyed = command.aircraftDestroyed === true || armourLost >= 1;
           let nextBase = afterMission;
-          if (activePilotId !== null && armourLost > 0) {
+          if (destroyed) {
+            if (activePilotId !== null) {
+              nextBase = killPilot(nextBase, activePilotId, state.base.month);
+            }
+            if (activeAircraftId !== null) {
+              nextBase = destroyAircraftLoadout(nextBase, activeAircraftId);
+            }
+          } else if (activePilotId !== null && armourLost > 0) {
             const casualtySeed = (
               (state.base.marketSeed >>> 0) ^
               Math.imul(state.base.sortiesCompleted, 0x9e3779b1) ^

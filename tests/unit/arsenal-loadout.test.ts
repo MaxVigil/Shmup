@@ -2,8 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { aircraftId, ammunitionId, auxiliaryId, moduleId, weaponId } from '../../src/content/ids';
 import { advanceProduction } from '../../src/domain/base-projects';
 import {
+  addWeaponStock,
+  installModule,
+  installWeapon,
+} from '../../src/domain/armory';
+import {
   aircraftLoadoutEnergy,
   aircraftLoadoutWeight,
+  destroyAircraftLoadout,
   effectiveAircraftDamageMultiplier,
   installHardpointItem,
   purchaseAmmunition,
@@ -169,6 +175,68 @@ describe('arsenal loadout', () => {
       'upgrade-aircraft-japan-mk2',
     );
     expect(advanced.aircraftMarks['aircraft-japan']).toBe(3);
+  });
+});
+
+describe('hardcore aircraft destruction', () => {
+  it('irreversibly strips a destroyed aircraft loadout', () => {
+    const initial = createInitialGameState();
+    const withWeapon = installWeapon(
+      addWeaponStock(initial.base, weaponId.impulseAccelerator, 1),
+      aircraftId.india,
+      1,
+      weaponId.impulseAccelerator,
+    );
+    const withMine = installHardpointItem(
+      withWeapon,
+      aircraftId.india,
+      0,
+      auxiliaryId.proximityMine,
+    );
+    const withModule = installModule(
+      {
+        ...withMine,
+        manufacturedEquipmentIds: [
+          ...withMine.manufacturedEquipmentIds,
+          moduleId.energyShield,
+        ],
+      },
+      aircraftId.india,
+      moduleId.energyShield,
+    );
+    const destroyed = destroyAircraftLoadout(withModule, aircraftId.india);
+    expect(destroyed.aircraftLoadouts[aircraftId.india]).toEqual([null, null]);
+    // Installed primary weapons are removed from stock irreversibly.
+    expect(destroyed.weaponStock[weaponId.pulseCannon]).toBeUndefined();
+    expect(destroyed.weaponStock[weaponId.impulseAccelerator]).toBeUndefined();
+    // Hardpoint items, the installed module, and the active-aircraft mirror clear.
+    expect(destroyed.aircraftHardpoints[aircraftId.india]).toEqual([null, null]);
+    expect(destroyed.aircraftModules[aircraftId.india]).toBeNull();
+    expect(destroyed.manufacturedEquipmentIds).not.toContain(moduleId.energyShield);
+    expect(destroyed.equippedPrimaryWeaponIds).toEqual([null, null]);
+    expect(destroyed.equippedEquipmentId).toBeNull();
+    // A different aircraft keeps its loadout untouched.
+    const other = {
+      ...destroyed,
+      activeAircraftId: aircraftId.india,
+      aircraftLoadouts: {
+        ...destroyed.aircraftLoadouts,
+        ['aircraft-usa']: [weaponId.pulseCannon, null, null],
+      },
+    };
+    expect(other.aircraftLoadouts['aircraft-usa']).toEqual([
+      weaponId.pulseCannon,
+      null,
+      null,
+    ]);
+  });
+
+  it('leaves other hangar aircraft weapon stock alone', () => {
+    const initial = createInitialGameState();
+    const withStock = addWeaponStock(initial.base, weaponId.impulseAccelerator, 2);
+    const installed = installWeapon(withStock, aircraftId.india, 1, weaponId.impulseAccelerator);
+    const destroyed = destroyAircraftLoadout(installed, aircraftId.india);
+    expect(destroyed.weaponStock[weaponId.impulseAccelerator]).toBe(1);
   });
 });
 

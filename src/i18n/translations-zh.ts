@@ -31,6 +31,7 @@ export const zh = {
   'toast.candidateHired': '已雇佣 {name}',
   'toast.pilotInjured': '{pilot} 受伤（{severity}）。',
   'toast.pilotDied': '{pilot} 阵亡。',
+  'toast.aircraftDestroyed': '战机被摧毁 // 已安装武器与装备损失。',
   'toast.pilotInTreatment': '{pilot} 已开始治疗。',
 
   'nav.base': '基地',

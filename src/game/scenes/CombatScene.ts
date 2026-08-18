@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { contentCatalog } from '../../content/catalog';
+import { resolveWeaponFamilyItem } from '../../content/weapon-families';
 import {
   alienTechnologyById,
   alienTechnologyId,
@@ -220,6 +221,8 @@ export interface CombatRunResult {
   readonly extractionDecision: RiskExtractionState['extractionDecision'];
   readonly eliteDefeated: boolean;
   readonly armourLostRatio: number;
+  /** True when the active aircraft's armour reached 0 (hardcore loss). */
+  readonly aircraftDestroyed: boolean;
   readonly rocketsFired: number;
   readonly auxiliaryAmmoConsumed: Readonly<Record<string, number>>;
 }
@@ -1171,6 +1174,7 @@ export class CombatScene extends Phaser.Scene {
       ? SPLIT_PULSE_MODULE_ID
       : this.activePrimaryWeaponId();
     const weapon = contentCatalog.weapons.find((entry) => entry.id === activeWeaponId) ??
+      resolveWeaponFamilyItem(activeWeaponId) ??
       weaponById(weaponId.pulseCannon)!;
     return applyWeaponUpgrades(
       weapon,
@@ -2677,6 +2681,7 @@ export class CombatScene extends Phaser.Scene {
         extractionDecision: this.runState.extractionDecision,
         eliteDefeated: this.runState.eliteDefeated,
         armourLostRatio,
+        aircraftDestroyed: this.armour <= 0,
         rocketsFired: this.rocketsFired,
         auxiliaryAmmoConsumed: this.auxiliaryAmmoConsumed,
       });

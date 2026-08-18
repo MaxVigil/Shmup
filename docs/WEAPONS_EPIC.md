@@ -299,6 +299,9 @@ effectiveDamage =
   nation gift (existing rule).
 - Alien equipment is never manufacturable → its loss is final.
 
+**Implemented (E4):** `SETTLE_SORTIE` kills the pilot and runs `destroyAircraftLoadout`
+when the active aircraft's armour reaches 0; the loadout loss is surfaced in the UI.
+
 ## 11. Ukrainian drones
 
 - Consumable, deliberately cheap and light: 50–100 can be loaded per sortie.
@@ -335,7 +338,7 @@ effectiveDamage =
   piercing) and the proximity-mine auxiliary (slow upward drift, proximity fuse,
   area blast).
 - **E4** hardcore + progression: destruction semantics, variable Marks, balance
-  invariants (power curve + multiplier guard).
+  invariants (power curve + multiplier guard) — implemented (DECISIONS #21).
 - **E5** balance, playtest rounds, backlog triage (23 ideas).
 
 ## Definition of done

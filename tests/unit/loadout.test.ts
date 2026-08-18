@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { contentCatalog } from '../../src/content/catalog';
 import { weaponItemId } from '../../src/content/ids';
 import { validateContentCatalog } from '../../src/content/validate';
+import { resolveWeaponFamilyItem } from '../../src/content/weapon-families';
 import {
   effectiveDamageMultiplier,
   loadoutEnergyDraw,
@@ -186,5 +187,54 @@ describe('arsenal catalog', () => {
     expect(() =>
       validateContentCatalog({ ...contentCatalog, aircraftLoadouts }),
     ).toThrow(/2.0 guard/);
+  });
+
+  it('keeps the alien power tier above every manufactured weapon', () => {
+    const families = contentCatalog.weaponFamilies;
+    const alien = families.filter((family) => family.class === 'alien');
+    const manufacturable = families.filter((family) => family.class !== 'alien');
+    const alienMinPerShot = Math.min(
+      ...alien.map((family) => family.baseStats.damage),
+    );
+    const manufacturedMaxPerShot = Math.max(
+      ...manufacturable.map((family) => family.baseStats.damage),
+    );
+    // Per-shot Mark I power curve: Alien > Human/Laser/Plasma (E4 invariant).
+    expect(alienMinPerShot).toBeGreaterThan(manufacturedMaxPerShot);
+    // Alien weapons are never variable-Marked and never manufactured or sold.
+    for (const family of alien) {
+      expect(family.marks).toHaveLength(0);
+      expect(family.acquisition).toBe('alien-recovery');
+    }
+  });
+});
+
+describe('weapon-family items', () => {
+  it('resolves base families and Mark items into combat stats', () => {
+    const base = resolveWeaponFamilyItem('weapon-autocannon');
+    expect(base?.damage).toBe(10);
+    expect(base?.visualProfile).toBe('machine-gun');
+    expect(base?.origin).toBe('earth');
+    const mk4 = resolveWeaponFamilyItem('weapon-autocannon-mk-4');
+    expect(mk4?.damage).toBe(15);
+    expect(mk4?.projectileSpeed).toBe(660);
+    expect(mk4?.id).toBe('weapon-autocannon-mk-4');
+    const mk6 = resolveWeaponFamilyItem('weapon-autocannon-mk-6');
+    expect(mk6?.damage).toBe(22);
+    const alien = resolveWeaponFamilyItem('weapon-disintegration-lance');
+    expect(alien?.visualProfile).toBe('alien-lance');
+    expect(alien?.penetration).toBe('all-targets');
+    expect(alien?.origin).toBe('alien');
+    expect(resolveWeaponFamilyItem('weapon-does-not-exist')).toBeUndefined();
+    expect(resolveWeaponFamilyItem('weapon-autocannon-mk-99')).toBeUndefined();
+    expect(resolveWeaponFamilyItem('weapon-autocannon-mk-1')).toBeUndefined();
+  });
+
+  it('maps every family to a combat visual profile', () => {
+    for (const family of contentCatalog.weaponFamilies) {
+      const resolved = resolveWeaponFamilyItem(family.id);
+      expect(resolved).toBeDefined();
+      expect(resolved?.visualProfile).toBeDefined();
+    }
   });
 });

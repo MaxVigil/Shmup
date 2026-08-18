@@ -300,3 +300,25 @@ acquisition with no market price (never manufactured or sold).
 torpedo, cluster, drone, stun, decoy, mine) and the alien power tier usable in
 flight (via the `?alienReady=true` playtest profile) ahead of E4's acquisition and
 destruction semantics.
+
+## 21. E4: hardcore destruction, variable Marks, balance invariants
+
+**Context:** Decision #15 described hardcore destruction but the shipped
+`SETTLE_SORTIE` only rolled a probabilistic pilot casualty on armour loss; nothing
+stripped a destroyed aircraft's loadout, and weapon-family Mark items were dead data
+(no combat resolution).
+
+**Decision:** Armour reaching 0 settles as a hardcore loss: `CombatRunResult`
+reports `aircraftDestroyed`, and `SETTLE_SORTIE` (on `aircraftDestroyed` **or**
+`armourLostRatio ≥ 1`) deterministically kills the active pilot and calls the new
+`destroyAircraftLoadout`, which irreversibly loses installed primary weapons and the
+installed module, clears hardpoint slots, and zeroes the active-aircraft loadout
+mirror. Partial armour loss keeps the probabilistic casualty roll. Weapon-family
+Mark items resolve to combat stats through `resolveWeaponFamilyItem` (family
+base + Mark `statOverrides`, family-mapped visual profile), so equipped Mark items
+fire with their real stats. A guard test pins the alien per-shot power tier above
+every manufactured weapon.
+
+**Consequence:** Destruction is now permanent and telegraphed (toast + empty
+loadout); the weapon-Mark research/production/equip pipeline and the full power-curve
+rebalance (Human < Laser < Plasma < Alien) remain E5 work.

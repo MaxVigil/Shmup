@@ -4024,6 +4024,7 @@ function launchSortie(): void {
           type: 'SETTLE_SORTIE',
           outcome: result.outcome,
           armourLostRatio: result.armourLostRatio,
+          aircraftDestroyed: result.aircraftDestroyed,
         });
         if (result.rocketsFired > 0) {
           store.dispatch({
@@ -4046,6 +4047,9 @@ function launchSortie(): void {
           aircraftId: beforeSettlement.base.activeAircraftId,
           armourLostRatio: result.armourLostRatio,
         });
+        if (result.aircraftDestroyed) {
+          showToast(t('toast.aircraftDestroyed'));
+        }
         const afterSettlement = store.getSnapshot();
         toastSettlementCompletions(beforeSettlement, afterSettlement);
         const giftedNation = contentCatalog.councilStates.find(

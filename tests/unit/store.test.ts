@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aircraftId, ammunitionId, buildingById, buildingId, moduleId } from '../../src/content/ids';
+import { aircraftId, ammunitionId, buildingById, buildingId, moduleId, weaponId } from '../../src/content/ids';
 
 import { staffMember } from './test-state';
 import { createGameStore, setInstantProjectsEnabled } from '../../src/app/store';
@@ -847,6 +847,84 @@ describe('game store arsenal loadout commands', () => {
     });
     expect(store.getSnapshot().base.consumableStock[ammunitionId.rocket]).toBe(5);
     expect(store.getSnapshot().base.credits).toBe(10_000 - 40 * 5);
+  });
+
+  it('SETTLE_SORTIE with a destroyed aircraft kills the pilot and strips the loadout', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        weaponStock: { [weaponId.impulseAccelerator]: 1 },
+      },
+    });
+    store.dispatch({
+      type: 'EQUIP_PRIMARY_WEAPON',
+      weaponId: weaponId.impulseAccelerator,
+      slotIndex: 1,
+    });
+    expect(store.getSnapshot().base.equippedPrimaryWeaponIds).toEqual([
+      weaponId.pulseCannon,
+      weaponId.impulseAccelerator,
+    ]);
+    const activePilot = initial.base.activePilotId!;
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: false,
+        materialsFound: 10,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+      armourLostRatio: 1,
+      aircraftDestroyed: true,
+    });
+    const snapshot = store.getSnapshot();
+    expect(snapshot.base.deadPilotIds).toContain(activePilot);
+    expect(snapshot.base.activePilotId).toBeNull();
+    expect(snapshot.base.aircraftLoadouts[aircraftId.india]).toEqual([null, null]);
+    expect(snapshot.base.equippedPrimaryWeaponIds).toEqual([null, null]);
+    expect(snapshot.base.weaponStock[weaponId.impulseAccelerator]).toBeUndefined();
+  });
+
+  it('treats armourLostRatio 1 as an aircraft loss even without the flag', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        weaponStock: { [weaponId.impulseAccelerator]: 1 },
+      },
+    });
+    store.dispatch({
+      type: 'EQUIP_PRIMARY_WEAPON',
+      weaponId: weaponId.impulseAccelerator,
+      slotIndex: 1,
+    });
+    const activePilot = initial.base.activePilotId!;
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: false,
+        materialsFound: 10,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+      armourLostRatio: 1,
+    });
+    const snapshot = store.getSnapshot();
+    expect(snapshot.base.deadPilotIds).toContain(activePilot);
+    expect(snapshot.base.aircraftLoadouts[aircraftId.india]).toEqual([null, null]);
   });
 });
 

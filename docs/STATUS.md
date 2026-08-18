@@ -2,6 +2,37 @@
 
 Last updated: 2026-08-18
 
+## Epic E4 — Hardcore destruction, variable Marks, balance invariants
+
+Implemented on `test`.
+
+- **Hardcore destruction semantics (DECISIONS #15/#21).** When the active
+  aircraft's armour reaches 0 the sortie is settled as a hardcore loss:
+  `CombatRunResult` now reports `aircraftDestroyed`, and `SETTLE_SORTIE` reacts to
+  `aircraftDestroyed === true` **or** `armourLostRatio >= 1` by deterministically
+  killing the active pilot and calling the new `destroyAircraftLoadout` — installed
+  primary weapons and the installed module are irreversibly lost, hardpoint slots
+  clear, and the active-aircraft loadout mirror zeroes. Partial armour loss keeps
+  the existing probabilistic casualty roll. Abort (the safe exit) still saves the
+  aircraft, weapons, and pilot. The Hangar/toast flow surfaces the loss via
+  `toast.aircraftDestroyed` (en/uk/zh) alongside the existing `toast.pilotDied`.
+- **Variable Marks.** New `src/content/weapon-families.ts` →
+  `resolveWeaponFamilyItem(id)` turns a family id (`weapon-autocannon`) or a concrete
+  Mark item (`weapon-autocannon-mk-4`) into the legacy combat `WeaponDefinition`
+  with the Mark `statOverrides` applied and the family's visual profile mapped;
+  unknown ids/marks resolve to `undefined`. `CombatScene.currentWeapon()` now falls
+  back to it after the legacy catalog lookup, so equipped Mark items actually fire
+  with their Mark stats. (The weapon-Mark research/production/equip pipeline itself
+  remains a documented follow-up.)
+- **Balance invariants.** New guard test keeps the alien power tier above every
+  manufactured weapon on Mark I per-shot damage (Alien ≥ 105 > manufactured ≤ 92)
+  and asserts alien families carry no Marks and are never manufacturable; the 2.0
+  final-multiplier guard test remains in place.
+- 258 unit tests, lint, typecheck, and the production build pass. Human flight
+  check: let the Warden or a Pursuit Missile volley destroy your aircraft on
+  `npm run dev?m2Fast=true` and watch the loadout empty, the pilot die, and the
+  destroyed toast fire.
+
 ## Epic E3.4c — Alien weapons in combat + proximity mines
 
 Implemented on `test`.

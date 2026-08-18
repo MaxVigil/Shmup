@@ -685,8 +685,13 @@ threats.
   ascending mine (Space / right-click) that detonates in an area blast when an enemy
   closes inside its proximity radius, consuming `consumable-proximity-mine`;
   `?alienReady=true` playtest profile grants the alien primaries for flight checks.
-- [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
-  balance invariants (power curve + multiplier guard).
+- [x] E4 — hardcore + progression: destruction semantics (armour 0 → deterministic
+  pilot death + irreversibly lost installed loadout via `destroyAircraftLoadout`,
+  DECISIONS #15/#21), variable Marks (weapon-family Mark items resolve to combat
+  stats via `resolveWeaponFamilyItem`, including legacy catalog fallback), balance
+  invariants (alien per-shot power tier above every manufactured weapon + the 2.0
+  multiplier guard). The weapon-Mark research/production/equip pipeline stays a
+  documented follow-up.
 - [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).
 
 ## Future ideas (backlog)

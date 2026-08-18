@@ -266,3 +266,51 @@ export function purchaseAmmunition(
     },
   };
 }
+
+/** Hardcore destruction semantics (DECISIONS #15/#21): an aircraft destroyed in
+ *  combat loses its entire installed loadout irreversibly — primary weapons are
+ *  lost (they were already removed from warehouse stock when installed), hardpoint
+ *  items are cleared, and the installed module is destroyed — and the active-aircraft
+ *  loadout mirror is zeroed. */
+export function destroyAircraftLoadout(
+  base: BaseState,
+  aircraftId: string,
+): BaseState {
+  const loadout = base.aircraftLoadouts[aircraftId] ?? [];
+  const aircraftLoadouts = {
+    ...base.aircraftLoadouts,
+    [aircraftId]: loadout.map(() => null),
+  };
+  const hardpointSlots = base.aircraftHardpoints[aircraftId];
+  const aircraftHardpoints = hardpointSlots === undefined
+    ? base.aircraftHardpoints
+    : { ...base.aircraftHardpoints, [aircraftId]: hardpointSlots.map(() => null) };
+  let aircraftModules = base.aircraftModules;
+  let manufacturedEquipmentIds = base.manufacturedEquipmentIds;
+  const installedModule = base.aircraftModules[aircraftId] ?? null;
+  if (installedModule !== null) {
+    aircraftModules = { ...base.aircraftModules, [aircraftId]: null };
+    const moduleIndex = manufacturedEquipmentIds.indexOf(installedModule);
+    if (moduleIndex !== -1) {
+      manufacturedEquipmentIds = [
+        ...manufacturedEquipmentIds.slice(0, moduleIndex),
+        ...manufacturedEquipmentIds.slice(moduleIndex + 1),
+      ];
+    }
+  }
+  let equippedPrimaryWeaponIds = base.equippedPrimaryWeaponIds;
+  let equippedEquipmentId = base.equippedEquipmentId;
+  if (base.activeAircraftId === aircraftId) {
+    equippedPrimaryWeaponIds = loadout.map(() => null);
+    equippedEquipmentId = null;
+  }
+  return {
+    ...base,
+    aircraftLoadouts,
+    aircraftHardpoints,
+    aircraftModules,
+    manufacturedEquipmentIds,
+    equippedPrimaryWeaponIds,
+    equippedEquipmentId,
+  };
+}
