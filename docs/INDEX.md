@@ -27,6 +27,7 @@ base on Earth. See `docs/GAME_SPEC.md`.
 | Save schema + migrations | `src/domain/model.ts`, `src/persistence/save-repository.ts` | — |
 | Loadout helpers (slot bonus, multipliers) | `src/domain/loadout.ts` | — |
 | UX/UI epic contract | `docs/UXUI_EPIC.md` | — |
+| Missions & UX/UI epic contract | `docs/MISSIONS_EPIC.md` | — |
 
 ## Arsenal epic (E0–E5)
 
