@@ -698,6 +698,21 @@ threats.
   rounds) and `docs/IDEAS_BACKLOG.md` (23-idea triage) land. Remaining: the human
   playtest rounds (docs/PLAYTEST.md) and the resulting rebalance of #12/#13/#22.
 
+## UX/UI epic — E6 (current)
+
+Status: E6.0–E6.2 done; E6.3–E6.6 staged. Contract: `docs/UXUI_EPIC.md`.
+
+- [x] E6.0 — `docs/UXUI_EPIC.md` contract + DECISIONS #23 + INDEX registration.
+- [x] E6.1 — overlay stack: `src/ui/overlay.ts` (DOM-free push/pop/remove) wired
+  in `app-shell.ts`; unified Escape; `body.has-overlay` scroll lock; unit tests.
+- [x] E6.2 — focus management: initial focus, Tab trap, focus restore for all
+  `aria-modal` dialogs and the settings menu.
+- [ ] E6.3 — safe-area insets + text-size option + colour-independent status +
+  reduce-shake/reduce-flash toggle.
+- [ ] E6.4 — HUD ownership contract (DECISIONS #24) + optional consolidation.
+- [ ] E6.5 — toast `role="status"`/`aria-live` + i18n overflow hardening.
+- [ ] E6.6 — verification (keyboard-only/gamepad/resize/reduced-motion checks).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

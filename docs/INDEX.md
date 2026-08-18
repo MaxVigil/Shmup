@@ -25,6 +25,7 @@ corporate base on Earth. See `docs/GAME_SPEC.md`.
 | Content validation | `src/content/validate.ts` | — |
 | Save schema + migrations | `src/domain/model.ts`, `src/persistence/save-repository.ts` | — |
 | Loadout helpers (slot bonus, multipliers) | `src/domain/loadout.ts` | — |
+| UX/UI epic contract | `docs/UXUI_EPIC.md` | — |
 
 ## Arsenal epic (E0–E5)
 
@@ -41,6 +42,18 @@ Status and task breakdown: `docs/WEAPONS_EPIC.md` + `docs/PLAN.md`.
 - **E4** hardcore destruction, variable Marks, balance invariants — done.
 - **E5** balance/playtest/backlog — in progress; the human rounds live in
   `docs/PLAYTEST.md`, the 23-idea triage in `docs/IDEAS_BACKLOG.md`.
+
+## UX/UI epic (E6)
+
+Status and task breakdown: `docs/UXUI_EPIC.md` + `docs/PLAN.md`.
+
+- **E6.0** design contract + decisions — done.
+- **E6.1** overlay stack — done.
+- **E6.2** focus management — done.
+- **E6.3** safe-area + accessibility options — pending.
+- **E6.4** HUD ownership contract — pending.
+- **E6.5** toast/a11y + i18n overflow — pending.
+- **E6.6** verification & regression — pending.
 
 ## Commands
 

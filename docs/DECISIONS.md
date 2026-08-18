@@ -341,3 +341,27 @@ Human < Laser < Plasma < Alien ladder is backlog idea #22, gated on playtest dat
 **Consequence:** The remaining E5 gate is the human playtest rounds; their notes feed
 the rebalance of the weapon-upgrade branches (#12), module combat wiring (#13), and
 the strict power curve (#22).
+
+## 23. E6: overlay stack, focus management, accessibility baseline
+
+**Context:** The management UI managed overlays with scattered `hidden = true`
+toggles and three separate Escape paths (a `window` keydown for the
+design-system and sortie-picker overlays, a `document` keydown for the settings
+menu). Every `aria-modal` dialog (month report, design system, sortie picker)
+opened without initial focus, let Tab leave the dialog, and restored no focus on
+close. No safe-area insets or text-size option existed, and some status was
+conveyed by colour alone.
+
+**Decision:** Introduce a single DOM-free overlay stack (`src/ui/overlay.ts`) —
+push/pop/remove over opaque ids with a subscription — wired in `app-shell.ts`
+to map ids to elements and own visibility, focus, and the sortie-pause side
+effect of the settings menu. All modal dialogs now receive initial focus, trap
+Tab while open, and restore focus to the trigger on close; Escape is handled in
+one place and the top overlay owns input while open. `body.has-overlay` locks
+page scroll for the duration of an overlay. The epic's accessibility baseline
+(E6.3) covers safe-area insets, a text-size option, colour-independent status,
+and a reduce-shake/reduce-flash toggle.
+
+**Consequence:** E6 closes with a single overlay owner and keyboard-safe
+dialogs; the HUD ownership split is recorded separately (#24) before any
+consolidation, and the overlay-stack state machine is unit-tested.

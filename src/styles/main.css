@@ -84,6 +84,11 @@ body.is-sortie-active {
   overflow: hidden;
 }
 
+/* E6: lock the page scroll while any modal overlay is open. */
+body.has-overlay {
+  overflow: hidden;
+}
+
 body.is-sortie-active .top-bar {
   position: fixed;
   top: 0;

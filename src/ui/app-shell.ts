@@ -80,6 +80,7 @@ import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../deb
 import { showToast } from './toast';
 import { aircraftVisualHtml } from './ship-svg';
 import { hardpointsPlaytestMode, resolveInitialState, temporaryPlaytestMode } from './playtest';
+import { createOverlayStack, type OverlayId } from './overlay';
 
 validateContentCatalog(contentCatalog);
 
@@ -284,10 +285,159 @@ const acceleratorUpgradeProductionStatus = byId<HTMLElement>('accelerator-upgrad
 const acceleratorUpgradeProductionNote = byId<HTMLElement>('accelerator-upgrade-production-note');
 const manufactureAcceleratorUpgradeButton = byId<HTMLButtonElement>('manufacture-accelerator-upgrade');
 
+/* ---------------------------------------------------------------------
+   E6 overlay stack — one push/pop owner for the modal dialogs and the
+   settings menu. The pure ordering state machine lives in `./overlay`;
+   this shell maps ids to elements and owns visibility, focus, and the
+   sortie pause side effects.
+   --------------------------------------------------------------------- */
+
+const overlays = createOverlayStack();
+const overlayElements: Readonly<Record<OverlayId, HTMLElement>> = {
+  settings: settingsMenu,
+  'month-report': monthReportPanel,
+  'design-system': designSystemOverlay,
+  'sortie-picker': sortiePickerOverlay,
+};
+
+/** Focus remembered per overlay so closing restores the trigger that opened it. */
+const lastFocusedElement = new Map<OverlayId, HTMLElement | null>();
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]),' +
+  ' textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableIn(container: HTMLElement): readonly HTMLElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+  ).filter((element) => element.closest('[hidden]') === null);
+}
+
+function focusOverlayInitial(id: OverlayId): void {
+  const element = overlayElements[id];
+  if (element === undefined) {
+    return;
+  }
+  const preferred = element.querySelector<HTMLElement>('[data-overlay-focus]');
+  (preferred ?? focusableIn(element)[0])?.focus();
+}
+
+/** Falls back to the always-visible settings toggle when the saved trigger is hidden. */
+function visibleFocusTarget(saved: HTMLElement | null): HTMLElement | null {
+  if (saved !== null && saved.isConnected && saved.closest('[hidden]') === null) {
+    return saved;
+  }
+  return settingsToggle;
+}
+
+function restoreOverlayFocus(saved: HTMLElement | null): void {
+  visibleFocusTarget(saved)?.focus();
+}
+
+function publishOverlayState(): void {
+  document.body.classList.toggle('has-overlay', overlays.size > 0);
+}
+
+function trapFocusIn(container: HTMLElement, event: KeyboardEvent): void {
+  const focusable = focusableIn(container);
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (first === undefined || last === undefined) {
+    event.preventDefault();
+    return;
+  }
+  const active = document.activeElement;
+  if (active === null || active === document.body || active === container) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+    return;
+  }
+  if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 let activeCombatWeaponId = initialState.base.equippedPrimaryWeaponIds.find(
   (weaponId): weaponId is string => weaponId !== null,
 ) ?? weaponId.pulseCannon;
 let combatWeaponSwitchAvailable = false;
+
+function setSettingsPaused(paused: boolean): void {
+  if (game === null || activeScreen !== 'sortie') {
+    return;
+  }
+  const scene = game.scene.getScene('combat');
+  if (scene instanceof CombatScene) {
+    scene.setPauseReason('settings', paused);
+  }
+}
+
+function removeOverlayEntry(id: OverlayId): void {
+  if (!overlays.contains(id)) {
+    return;
+  }
+  const saved = lastFocusedElement.get(id) ?? null;
+  overlays.remove(id);
+  lastFocusedElement.delete(id);
+  restoreOverlayFocus(saved);
+}
+
+function openOverlay(id: OverlayId): void {
+  if (overlays.contains(id)) {
+    return;
+  }
+  const element = overlayElements[id];
+  if (element === undefined) {
+    return;
+  }
+  const active = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+  lastFocusedElement.set(id, active);
+  overlays.push(id);
+  element.hidden = false;
+  if (id === 'settings') {
+    settingsToggle.setAttribute('aria-expanded', 'true');
+    setSettingsPaused(true);
+  }
+  focusOverlayInitial(id);
+}
+
+function closeOverlay(id: OverlayId): void {
+  if (!overlays.contains(id)) {
+    return;
+  }
+  if (id === 'month-report') {
+    // Store-driven: dismissing routes through the store; renderMonthReport
+    // removes the stack entry and restores focus once the report is cleared.
+    store.dispatch({ type: 'DISMISS_MONTH_REPORT' });
+    return;
+  }
+  const element = overlayElements[id];
+  if (element === undefined) {
+    return;
+  }
+  element.hidden = true;
+  if (id === 'settings') {
+    settingsToggle.setAttribute('aria-expanded', 'false');
+    setSettingsPaused(false);
+  }
+  removeOverlayEntry(id);
+}
+
+function closeTopOverlay(): void {
+  const topId = overlays.topId;
+  if (topId !== null) {
+    closeOverlay(topId);
+  }
+}
+
+// Keep the page scroll locked exactly while any overlay is open.
+overlays.subscribe(publishOverlayState);
 
 function renderCombatWeaponControl(): void {
   activeWeaponName.textContent = localizedWeaponName(activeCombatWeaponId);
@@ -1594,7 +1744,16 @@ function renderMonthReport(): void {
   const report = store.getSnapshot().base.monthReport;
   monthReportPanel.hidden = report === null;
   if (report === null) {
+    removeOverlayEntry('month-report');
     return;
+  }
+  if (!overlays.contains('month-report')) {
+    const active = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    lastFocusedElement.set('month-report', active);
+    overlays.push('month-report');
+    focusOverlayInitial('month-report');
   }
   monthReportEyebrow.textContent = t('report.eyebrow');
   monthReportTitle.textContent = t('report.title', { month: report.month });
@@ -2824,18 +2983,22 @@ function renderSortiePicker(): void {
     fly.disabled = !ready;
     fly.addEventListener('click', () => {
       store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
-      sortiePickerOverlay.hidden = true;
+      closeOverlay('sortie-picker');
       launchSortie();
     });
     actions.append(fly);
     row.append(actions);
     list.append(row);
   }
+  const firstAction = list.querySelector<HTMLElement>(
+    '.candidate-row__actions .base-action',
+  );
+  firstAction?.setAttribute('data-overlay-focus', '');
 }
 
 function openSortiePicker(): void {
   renderSortiePicker();
-  sortiePickerOverlay.hidden = false;
+  openOverlay('sortie-picker');
 }
 
 function renderCommand(): void {
@@ -3802,6 +3965,9 @@ function renderLocale(): void {
 }
 
 function showScreen(screen: 'base' | 'sortie'): void {
+  for (const id of [...overlays.order]) {
+    closeOverlay(id);
+  }
   activeScreen = screen;
   document.body.classList.toggle('is-sortie-active', screen === 'sortie');
   baseScreen.hidden = screen !== 'base';
@@ -3978,32 +4144,21 @@ restartProgrammeButton.addEventListener('click', () => {
 });
 
 designSystemOpenButton.addEventListener('click', () => {
-  settingsMenu.hidden = true;
-  settingsToggle.setAttribute('aria-expanded', 'false');
+  closeOverlay('settings');
   renderDesignSystem();
-  designSystemOverlay.hidden = false;
+  openOverlay('design-system');
 });
 
 designSystemCloseButton.addEventListener('click', () => {
-  designSystemOverlay.hidden = true;
+  closeOverlay('design-system');
 });
 
 byId<HTMLButtonElement>('sortie-picker-close').addEventListener('click', () => {
-  sortiePickerOverlay.hidden = true;
-});
-
-window.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !designSystemOverlay.hidden) {
-    designSystemOverlay.hidden = true;
-  }
-  if (event.key === 'Escape' && !sortiePickerOverlay.hidden) {
-    sortiePickerOverlay.hidden = true;
-  }
+  closeOverlay('sortie-picker');
 });
 
 function launchSortie(): void {
-  settingsMenu.hidden = true;
-  settingsToggle.setAttribute('aria-expanded', 'false');
+  closeOverlay('settings');
   lastRunResult = null;
   lastSettlementSummary = null;
   lastThanksLine = null;
@@ -4155,30 +4310,12 @@ returnToBaseButton.addEventListener('click', () => {
 });
 
 settingsToggle.addEventListener('click', () => {
-  const open = Boolean(settingsMenu.hidden);
-  settingsMenu.hidden = !open;
-  settingsToggle.setAttribute('aria-expanded', String(open));
-  if (game !== null && activeScreen === 'sortie') {
-    const scene = game.scene.getScene('combat');
-    if (scene instanceof CombatScene) {
-      scene.setPauseReason('settings', open);
-    }
+  if (overlays.contains('settings')) {
+    closeOverlay('settings');
+  } else {
+    openOverlay('settings');
   }
 });
-
-function closeSettingsMenu(): void {
-  if (settingsMenu.hidden) {
-    return;
-  }
-  settingsMenu.hidden = true;
-  settingsToggle.setAttribute('aria-expanded', 'false');
-  if (game !== null && activeScreen === 'sortie') {
-    const scene = game.scene.getScene('combat');
-    if (scene instanceof CombatScene) {
-      scene.setPauseReason('settings', false);
-    }
-  }
-}
 
 localeSelect.addEventListener('change', () => {
   const nextLocale = localeSelect.value;
@@ -4283,14 +4420,27 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('click', (event) => {
   const target = event.target;
-  if (target instanceof Node && !settingsMenu.contains(target) && !settingsToggle.contains(target)) {
-    closeSettingsMenu();
+  if (
+    overlays.contains('settings') &&
+    target instanceof Node &&
+    !settingsMenu.contains(target) &&
+    !settingsToggle.contains(target)
+  ) {
+    closeOverlay('settings');
   }
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    closeSettingsMenu();
+  const topOverlayId = overlays.topId;
+  if (topOverlayId !== null) {
+    const topOverlayElement = overlayElements[topOverlayId];
+    if (event.key === 'Tab' && topOverlayElement !== undefined) {
+      trapFocusIn(topOverlayElement, event);
+    }
+    if (event.key === 'Escape') {
+      closeTopOverlay();
+      event.preventDefault();
+    }
     return;
   }
   if (event.code === 'KeyP' && !event.repeat && activeScreen === 'sortie' && game !== null) {

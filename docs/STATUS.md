@@ -2,6 +2,28 @@
 
 Last updated: 2026-08-18
 
+## Epic E6 — UX/UI hygiene & accessibility
+
+Implemented on `test` (E6.0–E6.2).
+
+- **Overlay stack (`src/ui/overlay.ts`).** A DOM-free push/pop/remove stack over
+  opaque ids with a subscription, wired in `app-shell.ts` to map ids to elements
+  and own visibility, focus, and the sortie-pause side effect of the settings
+  menu. The scattered `hidden = true` toggles and the three separate Escape
+  paths collapsed into one: while an overlay is top it owns input (Escape
+  closes it; Tab is trapped inside); `body.has-overlay` locks the page scroll.
+- **Focus management.** Every `aria-modal` dialog (month report, design system,
+  sortie picker) now receives initial focus (`[data-overlay-focus]` or the first
+  focusable), traps Tab while open, and restores focus to the trigger on close
+  (falling back to the always-visible settings toggle).
+- **Store-driven month report.** The month-report panel enters the stack when it
+  appears and leaves through `DISMISS_MONTH_REPORT`, keeping the store
+  authoritative.
+- 266 unit tests (8 new for the overlay stack), lint, typecheck, and the
+  production build pass. Human check: open settings/design system/sortie
+  picker with the keyboard, press Tab (trapped), Escape (closes, focus
+  returns), and confirm the month report stays dismissible.
+
 ## Epic E5 — Balance, playtest rounds, backlog triage
 
 In progress on `test` (in-code part done; human rounds pending).
