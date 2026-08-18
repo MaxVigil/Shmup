@@ -325,6 +325,8 @@ export const zh = {
   'arsenal.playtestNote': '测试模式——所有挂点装备可用。',
   'arsenal.ammoTitle': '弹药',
   'arsenal.buy': '购买 {count} · {credits}',
+  'arsenal.feeds': '用于{auxiliary}',
+  'arsenal.combatNote': '辅助武器的实战射击将在 E3 阶段实现。',
   'sortie.activeWeapon': '当前主武器',
   'sortie.switchWeapon': '[X] 切换武器',
   'sortie.switchReady': '两个主武器槽均在线。',

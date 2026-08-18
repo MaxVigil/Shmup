@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-18
 
+## Epic E2b-3 UX follow-up — ammo panel clarity
+
+Implemented on `test`.
+
+- Hangar AMMUNITION rows now show which auxiliary weapon each ammunition type feeds
+  (`arsenal.feeds`, localized) and a note that combat firing lands in E3
+  (`arsenal.combatNote`) — the new auxiliary hardpoint weapons have no combat
+  behaviour yet, so this is expected rather than a bug.
+- Clarifies the transitional duplication: Trade sells the legacy `consumable-rockets`
+  for the legacy primary Rocket Pod; the Hangar panel sells the new `ammunition` types
+  for the new hardpoint auxiliary weapons (weight is counted only for ammo tied to an
+  installed auxiliary on the active aircraft).
+
 ## Epic E2b-3b — Aircraft Mark II/III pipeline
 
 Implemented on `test`.

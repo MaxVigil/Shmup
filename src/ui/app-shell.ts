@@ -1529,6 +1529,10 @@ function renderArsenalHardpoints(): void {
   const ammoHeading = document.createElement('strong');
   ammoHeading.textContent = t('arsenal.ammoTitle');
   container.appendChild(ammoHeading);
+  const combatNote = document.createElement('p');
+  combatNote.className = 'lede';
+  combatNote.textContent = t('arsenal.combatNote');
+  container.appendChild(combatNote);
   const bankrupt = isBankrupt(state.base.credits);
   for (const ammo of contentCatalog.ammunition) {
     const row = document.createElement('div');
@@ -1541,6 +1545,13 @@ function renderArsenalHardpoints(): void {
     count.textContent = `×${stock} · ${ammo.weightPerUnit * stock} wt`;
     row.appendChild(label);
     row.appendChild(count);
+    const feeds = document.createElement('small');
+    feeds.textContent = t('arsenal.feeds', {
+      auxiliary: ammo.usedBy
+        .map((auxId) => localizedArsenalItemName(auxId))
+        .join(', '),
+    });
+    row.appendChild(feeds);
     const buy = document.createElement('button');
     buy.className = 'base-action';
     buy.type = 'button';
