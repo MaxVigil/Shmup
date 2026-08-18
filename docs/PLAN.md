@@ -659,7 +659,11 @@ threats.
   elite recovers the artefact without the Capturer (Capturer kept as a fallback for
   now). New `getEquippedHardpointItemIds` combat callback.
 - [ ] E3.2b — full Capturer removal (equipment/blueprint/UI/i18n/save migration).
-- [ ] E3.3 — auxiliary weapons in combat (manual fire + ammo consumption), drones/mines.
+- [x] E3.3a — auxiliary Rocket Pod fires in combat: the hardpoint rocket pod reuses the
+  rocket path and consumes the new `consumable-rocket` ammo (per-sortie, deducted on
+  settlement via `auxiliaryAmmoConsumed` + `getAmmunitionStock` callback).
+- [ ] E3.3b — other auxiliary weapons (homing/torpedo/cluster) with per-weapon stats,
+  Ukrainian drone swarm behaviour, mines.
 - [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).

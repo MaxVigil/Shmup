@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.3a — Auxiliary Rocket Pod fires with ammo
+
+Implemented on `test`.
+
+- `CombatScene` gained `getAmmunitionStock(ammunitionId)` and `auxiliaryAmmoConsumed`;
+  `CombatRunResult` reports the consumed auxiliary ammunition. When the hardpoint
+  Rocket Pod (`aux-rocket-pod`) is installed, Space / right-click fires the rocket path
+  and consumes the new `consumable-rocket` ammo; the store deducts it on settlement.
+  The legacy primary Rocket Pod path is unchanged (still consumes `consumable-rockets`).
+- `createGame` and the `app-shell` wiring pass the ammunition stock and settle
+  `auxiliaryAmmoConsumed` via `CONSUME_SORTIE_CONSUMABLES`.
+- 252 unit tests, lint, typecheck, and the production build pass. Human flight check on
+  `npm run dev?hardpointsReady=true` (install Rocket Pod hardpoint, buy rockets, press
+  Space; rockets are consumed on settlement).
+
 ## Epic E3.2a — Stun → alien recovery
 
 Implemented on `test`.

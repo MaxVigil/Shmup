@@ -4156,6 +4156,15 @@ function launchSortie(): void {
             count: result.rocketsFired,
           });
         }
+        for (const [ammoId, count] of Object.entries(result.auxiliaryAmmoConsumed)) {
+          if (count > 0) {
+            store.dispatch({
+              type: 'CONSUME_SORTIE_CONSUMABLES',
+              consumableId: ammoId,
+              count,
+            });
+          }
+        }
         store.dispatch({
           type: 'APPLY_SORTIE_DAMAGE',
           aircraftId: beforeSettlement.base.activeAircraftId,
@@ -4239,6 +4248,8 @@ function launchSortie(): void {
         const activeId = snapshot.base.activeAircraftId;
         return activeId === null ? [] : hardpointSlotsOf(snapshot.base, activeId);
       },
+      (ammunitionId: string) =>
+        store.getSnapshot().base.consumableStock[ammunitionId] ?? 0,
       () => getLocale(),
       (weaponId, canSwitch) => {
         activeCombatWeaponId = weaponId;

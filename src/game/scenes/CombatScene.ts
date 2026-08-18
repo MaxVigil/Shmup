@@ -5,6 +5,7 @@ import {
   alienTechnologyId,
   aircraftById,
   aircraftId,
+  auxiliaryById,
   auxiliaryId,
   equipmentId,
   weaponById,
@@ -97,6 +98,7 @@ const SPLIT_PULSE_MODULE_ID = alienTechnologyById(alienTechnologyId.prism)!.weap
 const STANDARD_WEAPON_ID = weaponId.pulseCannon;
 const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 const STUN_MODULE_ID = auxiliaryId.stunModule;
+const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -163,6 +165,7 @@ export interface CombatRunResult {
   readonly eliteDefeated: boolean;
   readonly armourLostRatio: number;
   readonly rocketsFired: number;
+  readonly auxiliaryAmmoConsumed: Readonly<Record<string, number>>;
 }
 
 export interface AircraftCombatStats {
@@ -234,6 +237,7 @@ export class CombatScene extends Phaser.Scene {
   private rocketsText: Phaser.GameObjects.Text | null = null;
   private rocketCharges = 0;
   private rocketsFired = 0;
+  private auxiliaryAmmoConsumed: Readonly<Record<string, number>> = {};
   private pointerFollowLock = false;
   private endStatusKey: TranslationKey | null = null;
   private debugInvincible = false;
@@ -259,6 +263,7 @@ export class CombatScene extends Phaser.Scene {
     private readonly getActiveAircraftId: () => string | null = () => null,
     private readonly getRocketStock: () => number = () => 0,
     private readonly getEquippedHardpointItemIds: () => readonly (string | null)[] = () => [],
+    private readonly getAmmunitionStock: (ammunitionId: string) => number = () => 0,
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
       weaponId: string,
@@ -456,8 +461,9 @@ export class CombatScene extends Phaser.Scene {
     this.rocketsFired = 0;
     const chargesPerSortie = this.getRocketChargesPerSortie();
     this.rocketCharges = this.isRocketPodEquipped()
-      ? Math.min(chargesPerSortie, Math.max(0, this.getRocketStock()))
+      ? Math.min(chargesPerSortie, Math.max(0, this.getRocketStockValue()))
       : 0;
+    this.auxiliaryAmmoConsumed = {};
     this.elapsedMs = 0;
     this.fireCooldownMs = 0;
     this.spawnCooldownMs = 400;
@@ -1417,7 +1423,17 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
     this.rocketCharges -= 1;
-    this.rocketsFired += 1;
+    if (this.isAuxRocketPodEquipped()) {
+      const ammoId = this.auxRocketAmmunitionId();
+      if (ammoId !== null) {
+        this.auxiliaryAmmoConsumed = {
+          ...this.auxiliaryAmmoConsumed,
+          [ammoId]: (this.auxiliaryAmmoConsumed[ammoId] ?? 0) + 1,
+        };
+      }
+    } else {
+      this.rocketsFired += 1;
+    }
     const body = this.add.rectangle(this.player.x, this.player.y - 28, 6, 16, 0xffd98a);
     body.setStrokeStyle(1, 0xfff0b0, 0.85);
     this.rockets.push({
@@ -1437,11 +1453,30 @@ export class CombatScene extends Phaser.Scene {
     const rocketPod = contentCatalog.weapons.find(
       (weapon) => weapon.visualProfile === 'rocket-pod',
     );
-    return rocketPod !== undefined &&
-      this.equippedPrimaryWeaponIds.includes(rocketPod.id);
+    return (rocketPod !== undefined &&
+      this.equippedPrimaryWeaponIds.includes(rocketPod.id)) ||
+      this.isAuxRocketPodEquipped();
+  }
+
+  private isAuxRocketPodEquipped(): boolean {
+    return this.equippedHardpointItemIds.includes(AUX_ROCKET_POD_ID);
+  }
+
+  private auxRocketAmmunitionId(): string | null {
+    return auxiliaryById(AUX_ROCKET_POD_ID)?.ammoConsumableId ?? null;
+  }
+
+  private getRocketStockValue(): number {
+    const ammoId = this.auxRocketAmmunitionId();
+    return ammoId !== null && this.isAuxRocketPodEquipped()
+      ? this.getAmmunitionStock(ammoId)
+      : this.getRocketStock();
   }
 
   private getRocketChargesPerSortie(): number {
+    if (this.isAuxRocketPodEquipped()) {
+      return Number.MAX_SAFE_INTEGER;
+    }
     const loaded = contentCatalog.consumables.find(
       (entry) => entry.chargesPerSortie !== undefined,
     );
@@ -2072,6 +2107,7 @@ export class CombatScene extends Phaser.Scene {
         eliteDefeated: this.runState.eliteDefeated,
         armourLostRatio,
         rocketsFired: this.rocketsFired,
+        auxiliaryAmmoConsumed: this.auxiliaryAmmoConsumed,
       });
     }
   }
