@@ -11,6 +11,14 @@ not the core fantasy. Recorded as DECISIONS #25; `AGENTS.md`, `README.md`,
 `docs/GAME_SPEC.md`, `docs/INDEX.md`, and `docs/WEAPONS_EPIC.md` are updated to
 match.
 
+## Missions epic M0 — playability safety net
+
+- `?missionsReady=true` playtest profile (Iteration 0): full fleet of 7 aircraft,
+  each with a primary installed, auxiliary ammunition, one pilot per aircraft,
+  all buildings, 50k credits. Reachability invariants encoded in
+  `tests/unit/missions-ready-profile.test.ts`; PLAYTEST Round 13 scripts the
+  human check. 272 unit tests, lint, typecheck, and build pass.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

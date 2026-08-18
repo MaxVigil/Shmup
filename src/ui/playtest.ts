@@ -9,6 +9,7 @@ import {
 } from '../content/ids';
 import { createInitialGameState } from '../domain/initial-state';
 import type { GameState } from '../domain/model';
+import { createMissionsReadyState } from './playtest-profiles';
 
 const stage4PlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('stage4Ready') === 'true';
@@ -22,10 +23,13 @@ export const hardpointsPlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('hardpointsReady') === 'true';
 export const alienReadyPlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('alienReady') === 'true';
+export const missionsReadyPlaytestMode = import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get('missionsReady') === 'true';
 
 export const temporaryPlaytestMode =
   stage4PlaytestMode || insolvencyPlaytestMode || m3g2PlaytestMode ||
-  m3g3aPlaytestMode || hardpointsPlaytestMode || alienReadyPlaytestMode;
+  m3g3aPlaytestMode || hardpointsPlaytestMode || alienReadyPlaytestMode ||
+  missionsReadyPlaytestMode;
 
 function createStage4PlaytestState(): GameState {
   const state = createInitialGameState();
@@ -160,6 +164,9 @@ export function resolveInitialState(): GameState | undefined {
   }
   if (alienReadyPlaytestMode) {
     return createAlienReadyState();
+  }
+  if (missionsReadyPlaytestMode) {
+    return createMissionsReadyState();
   }
   if (stage4PlaytestMode) {
     return createStage4PlaytestState();

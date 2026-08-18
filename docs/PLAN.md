@@ -715,6 +715,17 @@ Status: E6.0–E6.6 done (contract + implementation + verification). Contract: `
 - [x] E6 follow-up — removed the Command Centre month-timeline phase bar
   (ПЛАНУВАННЯ/ВИКОНАННЯ/РОЗРАХУНОК) on request; i18n keys + CSS cleaned up.
 
+## Missions & UX/UI epic — M0 (current)
+
+Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
+
+- [x] `?missionsReady=true` playtest profile: full fleet (7 aircraft, primaries,
+  auxiliary ammunition), one pilot per aircraft, all buildings, 50k cr.
+- [x] Reachability invariants encoded in `tests/unit/missions-ready-profile.test.ts`;
+  PLAYTEST Round 13 scripts the human check.
+- [ ] M1 — domain foundation: aircraft instances, mission instances, result
+  records, schema v21 migration (next).
+
 ## Future ideas (backlog)
 
 - **Scrum teams for staff (scientists, engineers, medics).** Pilots remain

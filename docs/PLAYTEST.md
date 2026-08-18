@@ -25,6 +25,7 @@ profile is active (the PLAYTEST badge shows in the header).
 | `?m3g3aReady=true` | preserved Prism + quarantine + research | containment gate |
 | `?stage4Ready=true` | full base + credits/materials | base-wide smoke test |
 | `?m3eBankrupt=true` | zero credits | insolvency game-over |
+| `?missionsReady=true` | full fleet (7 aircraft, primaries, ammo), pilots, all buildings, 50k cr | missions epic Iteration 0 reachability |
 
 **Recommended full-arsenal URL:**
 `npm run dev?alienReady=true&hardpointsReady=true&m2Fast=true`
@@ -260,4 +261,22 @@ a Warden Seeker volley or sustained Gunship fire).
   (`role="status"`), and the sortie run report is announced (`aria-live`).
 
 **Expected:** no clipped labels at 320 px; toasts and reports announced once each.
+
+## Round 13 — Missions epic Iteration 0: playtest profile reachability
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Setup:** fresh URL, no saved progress (the profile is temporary; the PLAYTEST badge shows).
+
+**Actions:**
+- Confirm the PLAYTEST PROFILE badge is visible in the header.
+- Open the Hangar: all 7 aircraft are present, fueled, and undamaged.
+- Each aircraft shows a primary installed (slot 0 non-empty); switch the active
+  aircraft (SET ACTIVE) and re-check its primary/loadout.
+- Open Staff: 7 pilots exist and the active pilot is assigned.
+- Open the Command Centre: the month threat map lists missions.
+- Launch a sortie with the active aircraft; confirm combat starts and the primary
+  fires; exit via Abort.
+
+**Expected:** every step is reachable from the normal UI in ≤3 clicks with no debug
+flags — the Iteration 0 reachability gate for the missions epic.
 
