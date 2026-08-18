@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.4a — Enemy homing threats
+
+Implemented on `test`.
+
+- `EnemyRangedProfile` gained an optional `homing: EnemyHomingProfile`
+  (damage, speed, turn rate, lifetime, volley size/interval).
+- Gunship now fires **Pursuit Missiles** (speed 220, 70°/s turn, 24 dmg, 6 s, volley 2)
+  and Warden fires **Warden Seekers** (185, 115°/s, 38 dmg, 8 s, volley 3) instead of
+  their aimed shots.
+- `CombatScene` gained `HomingMissileActor` + `updateHomingMissiles`: turn-rate-limited
+  steering toward the player, player-hit damage (respecting invulnerability/debug),
+  lifetime and off-screen expiry, cleared on reset/encounter clear.
+- 252 unit tests, lint, typecheck, and the production build pass. Human flight check on
+  `npm run dev?m2Fast=true` (Gunship/Warden homing volleys should now curve toward you).
+
 ## Epic E3.3c — Homing / torpedo / cluster auxiliary firing
 
 Implemented on `test`.

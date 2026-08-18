@@ -14,6 +14,7 @@ import {
 import type {
   AircraftDefinition,
   EnemyDefinition,
+  EnemyHomingProfile,
   WeaponDefinition,
 } from '../../content/model';
 import { formatCredits } from '../../ui/credits';
@@ -146,6 +147,16 @@ interface HostileShot {
   readonly vy: number;
 }
 
+interface HomingMissileActor {
+  readonly body: Phaser.GameObjects.Rectangle;
+  readonly speed: number;
+  readonly turnRateRad: number;
+  readonly damage: number;
+  readonly lifetimeMs: number;
+  angle: number;
+  elapsedMs: number;
+}
+
 interface RocketActor {
   readonly body: Phaser.GameObjects.Rectangle;
   readonly targetId: number;
@@ -206,6 +217,7 @@ export class CombatScene extends Phaser.Scene {
   private movementKeys!: Record<'up' | 'down' | 'left' | 'right', Phaser.Input.Keyboard.Key>;
   private readonly shots: ShotActor[] = [];
   private readonly hostileShots: HostileShot[] = [];
+  private readonly homingMissiles: HomingMissileActor[] = [];
   private readonly rockets: RocketActor[] = [];
   private readonly drones: DroneActor[] = [];
   private readonly enemies: EnemyActor[] = [];
@@ -482,6 +494,7 @@ export class CombatScene extends Phaser.Scene {
 
   private resetEncounterState(): void {
     this.shots.length = 0;
+    this.homingMissiles.length = 0;
     this.enemies.length = 0;
     this.stars.length = 0;
     const stats = this.getAircraftStats();
@@ -610,6 +623,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateShots(frameMs);
     this.updateEnemies(frameMs);
     this.updateHostileShots(frameMs);
+    this.updateHomingMissiles(frameMs);
     this.updateRockets(frameMs);
     this.updateDrones(frameMs);
     this.resolveCollisions();
@@ -1373,13 +1387,105 @@ export class CombatScene extends Phaser.Scene {
     }
     enemy.nextShotAtMs -= deltaMs;
     if (enemy.nextShotAtMs <= 0) {
-      const targetX = Phaser.Math.Clamp(this.player.x, 36, this.scale.width - 36);
-      const targetY = this.player.y - 18;
-      const dx = targetX - enemy.body.x;
-      const dy = targetY - enemy.body.y;
-      const length = Math.max(1, Math.hypot(dx, dy));
-      this.fireHostileShot(enemy, dx / length, dy / length);
+      if (profile.homing !== undefined) {
+        const homing = profile.homing;
+        for (let index = 0; index < homing.volleySize; index += 1) {
+          this.time.delayedCall(index * homing.volleyIntervalMs, () => {
+            if (enemy.body.active) {
+              this.fireHomingMissile(enemy, homing);
+            }
+          });
+        }
+      } else {
+        const targetX = Phaser.Math.Clamp(this.player.x, 36, this.scale.width - 36);
+        const targetY = this.player.y - 18;
+        const dx = targetX - enemy.body.x;
+        const dy = targetY - enemy.body.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        this.fireHostileShot(enemy, dx / length, dy / length);
+      }
       enemy.nextShotAtMs = profile.shotIntervalMs + this.rng.integer(0, 600);
+    }
+  }
+
+  private fireHomingMissile(enemy: EnemyActor, homing: EnemyHomingProfile): void {
+    const angle = Math.atan2(
+      this.player.y - enemy.body.y,
+      this.player.x - enemy.body.x,
+    );
+    const body = this.add.rectangle(enemy.body.x, enemy.body.y, 8, 14, 0xff6b5a);
+    body.setStrokeStyle(1, 0xffe0c0, 0.8);
+    this.homingMissiles.push({
+      body,
+      speed: homing.shotSpeed,
+      turnRateRad: (homing.turnRateDegPerSec * Math.PI) / 180,
+      damage: homing.shotDamage,
+      lifetimeMs: homing.lifetimeMs,
+      angle,
+      elapsedMs: 0,
+    });
+  }
+
+  private updateHomingMissiles(deltaMs: number): void {
+    for (let index = this.homingMissiles.length - 1; index >= 0; index -= 1) {
+      const missile = this.homingMissiles[index];
+      if (missile === undefined) {
+        continue;
+      }
+      missile.elapsedMs += deltaMs;
+      if (missile.elapsedMs > missile.lifetimeMs) {
+        missile.body.destroy();
+        this.homingMissiles.splice(index, 1);
+        continue;
+      }
+      const desired = Math.atan2(
+        this.player.y - missile.body.y,
+        this.player.x - missile.body.x,
+      );
+      let delta = desired - missile.angle;
+      while (delta > Math.PI) {
+        delta -= Math.PI * 2;
+      }
+      while (delta < -Math.PI) {
+        delta += Math.PI * 2;
+      }
+      const maxTurn = missile.turnRateRad * (deltaMs / 1000);
+      missile.angle += Phaser.Math.Clamp(delta, -maxTurn, maxTurn);
+      const step = missile.speed * (deltaMs / 1000);
+      missile.body.x += Math.cos(missile.angle) * step;
+      missile.body.y += Math.sin(missile.angle) * step;
+      const hitPlayer =
+        this.invulnerableMs <= 0 &&
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          this.playerCollisionBounds(),
+          missile.body.getBounds(),
+        );
+      if (hitPlayer) {
+        const impactX = missile.body.x;
+        const impactY = missile.body.y;
+        missile.body.destroy();
+        this.homingMissiles.splice(index, 1);
+        if (!this.debugInvincible) {
+          this.armour = Math.max(0, this.armour - missile.damage);
+        }
+        this.invulnerableMs = 700;
+        this.createContactBurst(impactX, impactY);
+        this.cameras.main.shake(70, 0.004);
+        if (this.armour === 0) {
+          this.beginEnding(false, 'combat.shipLost');
+          return;
+        }
+        continue;
+      }
+      if (
+        missile.body.y > this.scale.height + 20 ||
+        missile.body.y < -40 ||
+        missile.body.x < -40 ||
+        missile.body.x > this.scale.width + 40
+      ) {
+        missile.body.destroy();
+        this.homingMissiles.splice(index, 1);
+      }
     }
   }
 
@@ -1960,6 +2066,10 @@ export class CombatScene extends Phaser.Scene {
   private clearCombatActors(): void {
     this.clearShots();
     this.clearHostileShots();
+    for (const missile of this.homingMissiles) {
+      missile.body.destroy();
+    }
+    this.homingMissiles.length = 0;
     for (const rocket of this.rockets) {
       rocket.body.destroy();
     }

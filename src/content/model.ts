@@ -48,10 +48,21 @@ export interface PilotDefinition {
 
 export type EnemyMovementPattern = 'straight' | 'sine';
 
+export interface EnemyHomingProfile {
+  readonly shotDamage: number;
+  readonly shotSpeed: number;
+  readonly turnRateDegPerSec: number;
+  readonly lifetimeMs: number;
+  readonly volleySize: number;
+  readonly volleyIntervalMs: number;
+}
+
 export interface EnemyRangedProfile {
   readonly shotDamage: number;
   readonly shotSpeed: number;
   readonly shotIntervalMs: number;
+  /** Optional self-guided missile volley fired instead of the aimed shot. */
+  readonly homing?: EnemyHomingProfile;
 }
 
 export interface EnemyDefinition {

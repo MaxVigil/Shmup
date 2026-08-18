@@ -669,7 +669,10 @@ threats.
 - [x] E3.3c — homing / torpedo / cluster auxiliary weapons fire in combat with
   per-weapon damage and blast radius (ammo consumed per shot, reported on settlement);
   mines remain a backlog item (E3.4).
-- [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
+- [x] E3.4a — enemy homing threats: Gunship fires Pursuit Missiles and Warden fires
+  Warden Seekers (turn-rate-limited homing volleys, lifetime-limited and dodgeable).
+- [ ] E3.4b — decoys/flares (redirect homing missiles), alien weapons/modules in
+  combat, mines.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).
 - [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).
