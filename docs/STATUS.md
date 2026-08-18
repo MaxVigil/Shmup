@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.3c — Homing / torpedo / cluster auxiliary firing
+
+Implemented on `test`.
+
+- `RocketActor` carries a per-shot `areaRadius`; `explodeRocket` uses it instead of the
+  constant screen-fraction. The hardpoint Rocket Pod and the legacy primary Rocket Pod
+  both fire with their own damage/blast.
+- New `tryFireMissileAuxiliary()`: when a Homing Missile Rack, Heavy Torpedo Launcher,
+  or Cluster Missile Pod is installed, Space / right-click fires one projectile with
+  the auxiliary's damage and area radius, consuming its ammunition (deducted on
+  settlement). Priority: homing → torpedo → cluster.
+- Mines (upward drift) remain a backlog item (needs catalog entries + behaviour).
+- 252 unit tests, lint, typecheck, and the production build pass. Human flight check on
+  `npm run dev?hardpointsReady=true` (install a missile auxiliary, buy its ammo, fire).
+
 ## Epic E3.3b — Ukrainian drone swarm in combat
 
 Implemented on `test`.

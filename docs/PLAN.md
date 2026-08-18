@@ -666,8 +666,9 @@ threats.
   (Space / right-click) consuming `consumable-ukrainian-attack-drone`; drones hunt the
   nearest enemy and ram it with an area explosion, or circle the aircraft when no
   enemy is present.
-- [ ] E3.3c — other auxiliary weapons (homing/torpedo/cluster) with per-weapon stats,
-  mines (upward drift).
+- [x] E3.3c — homing / torpedo / cluster auxiliary weapons fire in combat with
+  per-weapon damage and blast radius (ammo consumed per shot, reported on settlement);
+  mines remain a backlog item (E3.4).
 - [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).

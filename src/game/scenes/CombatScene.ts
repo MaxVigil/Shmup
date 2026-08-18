@@ -104,6 +104,11 @@ const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 const STUN_MODULE_ID = auxiliaryId.stunModule;
 const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
 const AUX_DRONE_SWARM_ID = auxiliaryId.ukrainianDroneSwarm;
+const AUX_MISSILE_IDS = [
+  auxiliaryId.homingMissileRack,
+  auxiliaryId.heavyTorpedoLauncher,
+  auxiliaryId.clusterMissilePod,
+] as const;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -146,6 +151,7 @@ interface RocketActor {
   readonly targetId: number;
   readonly damage: number;
   readonly speed: number;
+  readonly areaRadius: number;
   targetX: number;
   targetY: number;
   elapsedMs: number;
@@ -401,6 +407,14 @@ export class CombatScene extends Phaser.Scene {
       this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (pointer.rightButtonDown()) {
           this.tryFireDrone();
+        }
+      });
+    }
+    if (AUX_MISSILE_IDS.some((auxId) => this.equippedHardpointItemIds.includes(auxId))) {
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireMissileAuxiliary());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireMissileAuxiliary();
         }
       });
     }
@@ -1463,17 +1477,72 @@ export class CombatScene extends Phaser.Scene {
     }
     const body = this.add.rectangle(this.player.x, this.player.y - 28, 6, 16, 0xffd98a);
     body.setStrokeStyle(1, 0xfff0b0, 0.85);
+    const aux = this.isAuxRocketPodEquipped()
+      ? auxiliaryById(AUX_ROCKET_POD_ID)
+      : undefined;
+    const damage = aux?.damage ?? ROCKET_DAMAGE;
+    const areaRadius = aux?.areaRadius ??
+      Math.max(this.scale.width, this.scale.height) * ROCKET_BLAST_RADIUS_FRACTION;
     this.rockets.push({
       body,
       targetId: target.actorId,
-      damage: ROCKET_DAMAGE,
+      damage,
       speed: ROCKET_SPEED,
       targetX: target.body.x,
       targetY: target.body.y,
+      areaRadius,
       elapsedMs: 0,
     });
     this.updateRocketHud();
     this.cameras.main.shake(60, 0.003);
+  }
+
+  private tryFireMissileAuxiliary(): void {
+    if (
+      this.ended ||
+      isPaused(this.pauseState) ||
+      this.runState.phase === 'technology-choice' ||
+      this.runState.phase === 'extraction-choice'
+    ) {
+      return;
+    }
+    const elite = this.enemies.find((enemy) => enemy.definition.kind === 'elite');
+    const target = elite ?? this.acquireRocketTarget();
+    if (target === undefined) {
+      return;
+    }
+    for (const auxId of AUX_MISSILE_IDS) {
+      const aux = auxiliaryById(auxId);
+      if (aux === undefined || !this.equippedHardpointItemIds.includes(auxId)) {
+        continue;
+      }
+      const ammoId = aux.ammoConsumableId;
+      if (ammoId === null) {
+        continue;
+      }
+      const fired = this.auxiliaryAmmoConsumed[ammoId] ?? 0;
+      if (this.getAmmunitionStock(ammoId) <= fired) {
+        continue;
+      }
+      const body = this.add.rectangle(this.player.x, this.player.y - 28, 6, 16, 0xffd98a);
+      body.setStrokeStyle(1, 0xfff0b0, 0.85);
+      this.rockets.push({
+        body,
+        targetId: target.actorId,
+        damage: aux.damage,
+        speed: ROCKET_SPEED,
+        targetX: target.body.x,
+        targetY: target.body.y,
+        areaRadius: aux.areaRadius,
+        elapsedMs: 0,
+      });
+      this.auxiliaryAmmoConsumed = {
+        ...this.auxiliaryAmmoConsumed,
+        [ammoId]: fired + 1,
+      };
+      this.cameras.main.shake(60, 0.003);
+      return;
+    }
   }
 
   private isRocketPodEquipped(): boolean {
@@ -1576,8 +1645,7 @@ export class CombatScene extends Phaser.Scene {
     this.cameras.main.shake(140, 0.008);
     // The warhead blasts every enemy within a wide radius; the player's own
     // aircraft is never damaged by its own rockets.
-    const blastRadius = Math.max(this.scale.width, this.scale.height) *
-      ROCKET_BLAST_RADIUS_FRACTION;
+    const blastRadius = rocket.areaRadius;
     for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
       const enemy = this.enemies[enemyIndex];
       if (enemy === undefined) {
