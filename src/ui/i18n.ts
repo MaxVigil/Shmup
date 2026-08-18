@@ -49,5 +49,14 @@ export function localizedWeaponName(id: string | null): string {
   if (id === weaponId.rocketPod) {
     return t('content.rocketPod');
   }
+  if (id === weaponId.disintegrationLance) {
+    return t('content.disintegrationLance');
+  }
+  if (id === weaponId.plasmaOrbProjector) {
+    return t('content.plasmaOrbProjector');
+  }
+  if (id === weaponId.singularityProjector) {
+    return t('content.singularityProjector');
+  }
   return t('content.standardCannon');
 }

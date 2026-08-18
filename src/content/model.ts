@@ -10,7 +10,15 @@ export interface WeaponDefinition {
   readonly projectileSpeed: number;
   readonly spread: number;
   readonly penetration: 'single-target' | 'all-targets';
-  readonly visualProfile: 'machine-gun' | 'impulse-accelerator' | 'split-pulse' | 'canister-cannon' | 'rocket-pod';
+  readonly visualProfile:
+    | 'machine-gun'
+    | 'impulse-accelerator'
+    | 'split-pulse'
+    | 'canister-cannon'
+    | 'rocket-pod'
+    | 'alien-lance'
+    | 'alien-orb'
+    | 'alien-singularity';
   readonly marketPrice: {
     readonly minimum: number;
     readonly maximum: number;

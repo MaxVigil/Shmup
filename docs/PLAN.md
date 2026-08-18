@@ -678,7 +678,13 @@ threats.
 - [x] E3.4b — flares/decoys: the hardpoint Flare & Decoy Launcher deploys a decoy that
   attracts and absorbs enemy homing missiles (Space / right-click, consumable
   `consumable-flare-decoy`); directly counters Pursuit Missiles / Warden Seekers.
-- [ ] E3.4c — alien weapons/modules in combat, mines.
+- [x] E3.4c — alien weapons in combat + proximity mines: the three recovered alien
+  primaries (Disintegration Lance, Plasma Orb Projector, Singularity Projector) now
+  exist in the combat-ready legacy weapon catalog with dedicated projectile visuals
+  and all-targets piercing; the hardpoint Proximity Mine Launcher fires a slowly
+  ascending mine (Space / right-click) that detonates in an area blast when an enemy
+  closes inside its proximity radius, consuming `consumable-proximity-mine`;
+  `?alienReady=true` playtest profile grants the alien primaries for flight checks.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).
 - [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).

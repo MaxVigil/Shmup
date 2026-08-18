@@ -95,6 +95,9 @@
 | Split Pulse Emitter | alien | 7.5 | 6 | 2 | 620 | 12 | single-target | — |
 | Canister Aircraft Cannon | earth | 7 | 1.8 | 6 | 760 | 13 | single-target | — |
 | Rocket Pod | earth | 40 | 0 | 1 | 700 | 0 | single-target | 380,000..420,000 |
+| Disintegration Lance | alien | 180 | 0.55 | 1 | 1800 | 0 | all-targets | — |
+| Plasma Orb Projector | alien | 125 | 0.65 | 1 | 300 | 0 | all-targets | — |
+| Singularity Projector | alien | 105 | 0.4 | 1 | 260 | 0 | all-targets | — |
 
 ### Weapon upgrades
 

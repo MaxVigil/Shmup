@@ -259,6 +259,9 @@ export function validateContentCatalog(catalog: ContentCatalog): void {
         'split-pulse',
         'canister-cannon',
         'rocket-pod',
+        'alien-lance',
+        'alien-orb',
+        'alien-singularity',
       ].includes(
         weapon.visualProfile,
       ) ||

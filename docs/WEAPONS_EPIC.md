@@ -330,7 +330,10 @@ effectiveDamage =
 - **E2** loadout & economy: hardpoints + weight/energy UI, finite ammunition,
   aircraft Mark II/III.
 - **E3** combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
-  drones/mines → homing/decoys → alien.
+  drones → mines → homing/decoys → alien weapons in combat. E3.4c delivered the
+  recovered alien primaries (lance/orb/singularity projectiles with all-targets
+  piercing) and the proximity-mine auxiliary (slow upward drift, proximity fuse,
+  area blast).
 - **E4** hardcore + progression: destruction semantics, variable Marks, balance
   invariants (power curve + multiplier guard).
 - **E5** balance, playtest rounds, backlog triage (23 ideas).

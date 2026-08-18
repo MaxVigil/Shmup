@@ -65,6 +65,9 @@ export const weaponId = {
   splitPulse: 'weapon-split-pulse',
   canisterCannon: 'weapon-canister-cannon',
   rocketPod: 'weapon-rocket-pod',
+  disintegrationLance: 'weapon-disintegration-lance',
+  plasmaOrbProjector: 'weapon-plasma-orb-projector',
+  singularityProjector: 'weapon-singularity-projector',
 } as const;
 
 export const aircraftId = {
@@ -146,6 +149,7 @@ export const auxiliaryId = {
   ukrainianDroneSwarm: 'aux-ukrainian-drone-swarm',
   stunModule: 'aux-stun-module',
   flareDecoyLauncher: 'aux-flare-decoy-launcher',
+  proximityMine: 'aux-proximity-mine',
 } as const;
 
 export const moduleId = {
@@ -164,6 +168,7 @@ export const ammunitionId = {
   clusterMissile: 'consumable-cluster-missile',
   ukrainianAttackDrone: 'consumable-ukrainian-attack-drone',
   flareDecoy: 'consumable-flare-decoy',
+  proximityMine: 'consumable-proximity-mine',
 } as const;
 
 export const aircraftRole = {

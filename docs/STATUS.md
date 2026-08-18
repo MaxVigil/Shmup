@@ -2,6 +2,34 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.4c — Alien weapons in combat + proximity mines
+
+Implemented on `test`.
+
+- The three recovered alien primaries — Disintegration Lance, Plasma Orb Projector,
+  and Singularity Projector — are now combat-ready: they exist in the legacy
+  `contentCatalog.weapons` with dedicated `visualProfile`s (`alien-lance` / `alien-orb`
+  / `alien-singularity`), so `CombatScene.fire` renders a fast piercing beam, a slow
+  plasma orb, and a large singularity orb respectively. All three keep
+  `penetration: 'all-targets'` (already supported by the shot path) and carry no
+  market price (never manufactured or sold — `alien-recovery` only). i18n
+  en/uk/zh keys + `localizedWeaponName` mapping added.
+- New hardpoint auxiliary `aux-proximity-mine` (type `mine`) + ammunition
+  `consumable-proximity-mine` (weight 0.5, 55 cr). `CombatScene` gained `MineActor` +
+  `tryFireMine`/`updateMines`/`explodeMine`: Space / right-click deploys a mine that
+  drifts slowly upward, and when an enemy closes inside the proximity radius (48)
+  it detonates in an area blast (130 dmg, radius 60), consuming the mine ammunition
+  (reported via `auxiliaryAmmoConsumed`, deducted on settlement). Mines expire after
+  14 s or off-screen and are cleared on reset/clear.
+- New `?alienReady=true` playtest profile: grants the three alien primaries (stock +
+  equipped on the USA gunship) and credits for mine ammo, so a human can fly with
+  them on `npm run dev?alienReady=true`.
+- Catalog counts updated (8 auxiliary, 7 ammunition); ENTITIES.md/.xlsx and
+  BALANCE.md regenerated. 251 unit tests, lint, typecheck, and the production build
+  pass. Human flight check: `npm run dev?alienReady=true` (switch primaries with X
+  and watch the lance pierce / orbs explode) and `npm run dev?hardpointsReady=true`
+  (install the Proximity Mine Launcher, buy mine ammo, drop mines under a Gunship).
+
 ## Epic E3.4b — Flares / decoys counter homing threats
 
 Implemented on `test`.

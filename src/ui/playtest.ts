@@ -1,8 +1,11 @@
 import { contentCatalog } from '../content/catalog';
 import {
+  aircraftById,
+  aircraftId,
   alienTechnologyId,
   buildingId,
   staffRoleId,
+  weaponId,
 } from '../content/ids';
 import { createInitialGameState } from '../domain/initial-state';
 import type { GameState } from '../domain/model';
@@ -17,10 +20,12 @@ const m3g3aPlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('m3g3aReady') === 'true';
 export const hardpointsPlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('hardpointsReady') === 'true';
+export const alienReadyPlaytestMode = import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get('alienReady') === 'true';
 
 export const temporaryPlaytestMode =
   stage4PlaytestMode || insolvencyPlaytestMode || m3g2PlaytestMode ||
-  m3g3aPlaytestMode || hardpointsPlaytestMode;
+  m3g3aPlaytestMode || hardpointsPlaytestMode || alienReadyPlaytestMode;
 
 function createStage4PlaytestState(): GameState {
   const state = createInitialGameState();
@@ -103,6 +108,35 @@ function createM3g3aPlaytestState(): GameState {
   };
 }
 
+function createAlienReadyState(): GameState {
+  const state = createInitialGameState();
+  const gunship = aircraftById(aircraftId.usa)!;
+  const lance = weaponId.disintegrationLance;
+  const orb = weaponId.plasmaOrbProjector;
+  const singularity = weaponId.singularityProjector;
+  const primaryLoadout: (string | null)[] = [lance, orb, singularity];
+  return {
+    ...state,
+    base: {
+      ...state.base,
+      credits: 5_000,
+      hangarSlots: [gunship.id, null],
+      activeAircraftId: gunship.id,
+      fueledAircraftIds: [gunship.id],
+      aircraftLoadouts: {
+        ...state.base.aircraftLoadouts,
+        [gunship.id]: primaryLoadout,
+      },
+      equippedPrimaryWeaponIds: primaryLoadout,
+      weaponStock: {
+        [lance]: 1,
+        [orb]: 1,
+        [singularity]: 1,
+      },
+    },
+  };
+}
+
 export function resolveInitialState(): GameState | undefined {
   if (insolvencyPlaytestMode) {
     return createInsolvencyPlaytestState();
@@ -112,6 +146,9 @@ export function resolveInitialState(): GameState | undefined {
   }
   if (m3g3aPlaytestMode) {
     return createM3g3aPlaytestState();
+  }
+  if (alienReadyPlaytestMode) {
+    return createAlienReadyState();
   }
   if (stage4PlaytestMode) {
     return createStage4PlaytestState();

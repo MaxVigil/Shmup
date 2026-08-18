@@ -104,9 +104,13 @@ const STUN_MODULE_ID = auxiliaryId.stunModule;
 const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
 const AUX_DRONE_SWARM_ID = auxiliaryId.ukrainianDroneSwarm;
 const AUX_FLARE_DECOY_ID = auxiliaryId.flareDecoyLauncher;
+const AUX_MINE_ID = auxiliaryId.proximityMine;
 const DECOY_LIFETIME_MS = 4_000;
 const DECOY_ATTRACTION_RADIUS = 160;
 const DECOY_DRIFT_SPEED = 40;
+const MINE_DRIFT_SPEED = 55;
+const MINE_PROXIMITY_RADIUS = 48;
+const MINE_LIFETIME_MS = 14_000;
 const AUX_MISSILE_IDS = [
   auxiliaryId.homingMissileRack,
   auxiliaryId.heavyTorpedoLauncher,
@@ -188,6 +192,16 @@ interface DroneActor {
   elapsedMs: number;
 }
 
+interface MineActor {
+  readonly body: Phaser.GameObjects.Rectangle;
+  readonly damage: number;
+  readonly areaRadius: number;
+  readonly proximityRadius: number;
+  readonly driftSpeed: number;
+  readonly lifetimeMs: number;
+  elapsedMs: number;
+}
+
 interface Star {
   readonly body: Phaser.GameObjects.Arc;
   readonly speed: number;
@@ -230,6 +244,7 @@ export class CombatScene extends Phaser.Scene {
   private decoy: DecoyActor | null = null;
   private readonly rockets: RocketActor[] = [];
   private readonly drones: DroneActor[] = [];
+  private readonly mines: MineActor[] = [];
   private readonly enemies: EnemyActor[] = [];
   private readonly stars: Star[] = [];
   private rng!: RandomSource;
@@ -446,6 +461,14 @@ export class CombatScene extends Phaser.Scene {
         }
       });
     }
+    if (this.equippedHardpointItemIds.includes(AUX_MINE_ID)) {
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireMine());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireMine();
+        }
+      });
+    }
   }
 
   public setPointerFollowLock(locked: boolean): void {
@@ -528,6 +551,7 @@ export class CombatScene extends Phaser.Scene {
     this.nextVolleyId = 1;
     this.rockets.length = 0;
     this.drones.length = 0;
+    this.mines.length = 0;
     this.rocketsFired = 0;
     const chargesPerSortie = this.getRocketChargesPerSortie();
     this.rocketCharges = this.isRocketPodEquipped()
@@ -643,6 +667,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateDecoys(frameMs);
     this.updateRockets(frameMs);
     this.updateDrones(frameMs);
+    this.updateMines(frameMs);
     this.resolveCollisions();
     if (this.ended) {
       return;
@@ -1175,18 +1200,29 @@ export class CombatScene extends Phaser.Scene {
 
   private fire(weapon: WeaponDefinition): void {
     const canister = weapon.visualProfile === 'canister-cannon';
+    const alienOrb = weapon.visualProfile === 'alien-orb';
+    const alienSingularity = weapon.visualProfile === 'alien-singularity';
     const projectileSpeed = weapon.projectileSpeed * this.aircraftProjectileSpeedMultiplier;
     const dimensions = weapon.visualProfile === 'impulse-accelerator'
       ? { width: 9, height: 30 }
       : weapon.visualProfile === 'split-pulse'
         ? { width: 5, height: 18 }
-        : canister
-          ? { width: 4, height: 4 }
-          : { width: 3, height: 16 };
+        : weapon.visualProfile === 'alien-lance'
+          ? { width: 3, height: 40 }
+          : alienOrb
+            ? { width: 10, height: 10 }
+            : alienSingularity
+              ? { width: 14, height: 14 }
+              : canister
+                ? { width: 4, height: 4 }
+                : { width: 3, height: 16 };
     const colour = weapon.visualProfile === 'split-pulse'
       ? 0xc5a3ff
       : weapon.visualProfile === 'impulse-accelerator' ? 0xffc15c
-        : canister ? 0xffb46a : 0xffd98a;
+        : weapon.visualProfile === 'alien-lance' ? 0x9df5ff
+          : alienOrb ? 0x6bffd0
+            : alienSingularity ? 0xc07bff
+              : canister ? 0xffb46a : 0xffd98a;
     const volleyId = canister ? this.nextVolleyId : null;
     if (canister) {
       this.nextVolleyId += 1;
@@ -1201,8 +1237,13 @@ export class CombatScene extends Phaser.Scene {
         dimensions.height,
         colour,
       );
-      if (weapon.visualProfile === 'impulse-accelerator') {
-        body.setStrokeStyle(2, 0xfff0b0, 0.85);
+      if (
+        weapon.visualProfile === 'impulse-accelerator' ||
+        weapon.visualProfile === 'alien-lance' ||
+        weapon.visualProfile === 'alien-orb' ||
+        weapon.visualProfile === 'alien-singularity'
+      ) {
+        body.setStrokeStyle(2, 0xffffff, 0.85);
       }
       this.shots.push({
         body,
@@ -2106,6 +2147,10 @@ export class CombatScene extends Phaser.Scene {
       drone.body.destroy();
     }
     this.drones.length = 0;
+    for (const mine of this.mines) {
+      mine.body.destroy();
+    }
+    this.mines.length = 0;
     for (const enemy of this.enemies) {
       enemy.body.destroy();
       enemy.armourBarBackground?.destroy();
@@ -2390,6 +2435,108 @@ export class CombatScene extends Phaser.Scene {
     if (this.decoy.elapsedMs > this.decoy.lifetimeMs) {
       this.decoy.body.destroy();
       this.decoy = null;
+    }
+  }
+
+  private mineAmmunitionId(): string | null {
+    return auxiliaryById(AUX_MINE_ID)?.ammoConsumableId ?? null;
+  }
+
+  private tryFireMine(): void {
+    if (
+      this.ended ||
+      this.ending !== null ||
+      this.runState.phase === 'technology-choice' ||
+      this.runState.phase === 'extraction-choice'
+    ) {
+      return;
+    }
+    const ammoId = this.mineAmmunitionId();
+    if (ammoId === null) {
+      return;
+    }
+    const fired = this.auxiliaryAmmoConsumed[ammoId] ?? 0;
+    if (this.getAmmunitionStock(ammoId) <= fired) {
+      return;
+    }
+    const aux = auxiliaryById(AUX_MINE_ID);
+    const body = this.add.rectangle(
+      this.player.x,
+      this.player.y + 26,
+      10,
+      10,
+      0xffd166,
+    );
+    body.setStrokeStyle(1, 0xfff0b0, 0.9);
+    this.mines.push({
+      body,
+      damage: aux?.damage ?? 130,
+      areaRadius: aux?.areaRadius ?? 60,
+      proximityRadius: MINE_PROXIMITY_RADIUS,
+      driftSpeed: MINE_DRIFT_SPEED,
+      lifetimeMs: MINE_LIFETIME_MS,
+      elapsedMs: 0,
+    });
+    this.auxiliaryAmmoConsumed = {
+      ...this.auxiliaryAmmoConsumed,
+      [ammoId]: fired + 1,
+    };
+    this.cameras.main.shake(40, 0.002);
+  }
+
+  private updateMines(deltaMs: number): void {
+    for (let index = this.mines.length - 1; index >= 0; index -= 1) {
+      const mine = this.mines[index];
+      if (mine === undefined) {
+        continue;
+      }
+      mine.elapsedMs += deltaMs;
+      mine.body.y -= mine.driftSpeed * (deltaMs / 1000);
+      if (mine.elapsedMs > mine.lifetimeMs || mine.body.y < -30) {
+        mine.body.destroy();
+        this.mines.splice(index, 1);
+        continue;
+      }
+      // Proximity fuse: any enemy drifting within the blast radius detonates the mine.
+      const proxied = this.enemies.some(
+        (enemy) =>
+          enemy.body.active &&
+          Math.hypot(enemy.body.x - mine.body.x, enemy.body.y - mine.body.y) <=
+            mine.proximityRadius,
+      );
+      if (proxied) {
+        this.explodeMine(index, mine);
+      }
+    }
+  }
+
+  private explodeMine(index: number, mine: MineActor): void {
+    const x = mine.body.x;
+    const y = mine.body.y;
+    mine.body.destroy();
+    this.mines.splice(index, 1);
+    this.createDestructionBurst(x, y, 0xffd166);
+    this.cameras.main.shake(140, 0.008);
+    for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
+      const enemy = this.enemies[enemyIndex];
+      if (enemy === undefined || !enemy.body.active) {
+        continue;
+      }
+      const distance = Math.hypot(enemy.body.x - x, enemy.body.y - y);
+      if (distance > mine.areaRadius) {
+        continue;
+      }
+      enemy.armour -= mine.damage;
+      enemy.body.setFillStyle(0xffffff);
+      this.time.delayedCall(45, () => enemy.body.active && enemy.body.setFillStyle(
+        enemy.definition.kind === 'elite'
+          ? 0x9368c7
+          : enemy.definition.movementPattern === 'sine' ? 0xd98ba1 : 0xd6b36a,
+      ));
+      this.updateEnemyArmourBar(enemy);
+      if (enemy.armour <= 0) {
+        this.applyEnemyDefeat(enemyIndex);
+      }
     }
   }
 

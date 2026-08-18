@@ -278,3 +278,25 @@ future-proof infrastructure for a later equipment item.
 artefact recovery → containment → adaptation; the Warden "destroyed without recovery"
 ending reads `combat.wardenDestroyedNoRecovery`. Legacy saves are compatible without a
 new schema bump.
+
+## 20. E3.4c: recovered alien primaries are combat-ready; proximity mines
+
+**Context:** The three alien primary weapons existed only as weapon-family data
+(`weaponFamilies`, no marks, no market price) but could not be fired — `CombatScene`
+resolved primaries through the legacy `catalog.weapons` and needed a `visualProfile`
+to render them. The mine auxiliary from the content set had no catalog entries or
+behaviour.
+
+**Decision:** Add the alien primaries to the legacy `contentCatalog.weapons` with
+dedicated `visualProfile`s (`alien-lance`, `alien-orb`, `alien-singularity`) and
+`penetration: 'all-targets'`; combat renders them with distinct projectiles and
+piercing. Add `aux-proximity-mine` (type `mine`, hardpoint, manual trigger) with
+finite ammunition `consumable-proximity-mine`: a deployed mine drifts slowly upward
+and detonates in an area blast when an enemy enters its proximity radius. Both use
+the shared ammo-consumption/settlement path. Alien items remain `alien-recovery`
+acquisition with no market price (never manufactured or sold).
+
+**Consequence:** E3 closes with the full auxiliary type set firing (rocket, homing,
+torpedo, cluster, drone, stun, decoy, mine) and the alien power tier usable in
+flight (via the `?alienReady=true` playtest profile) ahead of E4's acquisition and
+destruction semantics.

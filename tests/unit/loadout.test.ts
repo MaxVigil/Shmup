@@ -74,10 +74,50 @@ describe('weaponItemId', () => {
 describe('arsenal catalog', () => {
   it('ships the full first-pass arsenal', () => {
     expect(contentCatalog.weaponFamilies).toHaveLength(12);
-    expect(contentCatalog.auxiliary).toHaveLength(7);
+    expect(contentCatalog.auxiliary).toHaveLength(8);
     expect(contentCatalog.modules).toHaveLength(6);
-    expect(contentCatalog.ammunition).toHaveLength(6);
+    expect(contentCatalog.ammunition).toHaveLength(7);
     expect(contentCatalog.aircraftLoadouts).toHaveLength(7);
+    expect(() => validateContentCatalog(contentCatalog)).not.toThrow();
+  });
+
+  it('ships the three recovered alien primary weapons in combat-ready legacy form', () => {
+    const lance = contentCatalog.weapons.find(
+      (weapon) => weapon.id === 'weapon-disintegration-lance',
+    )!;
+    const orb = contentCatalog.weapons.find(
+      (weapon) => weapon.id === 'weapon-plasma-orb-projector',
+    )!;
+    const singularity = contentCatalog.weapons.find(
+      (weapon) => weapon.id === 'weapon-singularity-projector',
+    )!;
+    expect(lance).toBeDefined();
+    expect(lance.penetration).toBe('all-targets');
+    expect(lance.visualProfile).toBe('alien-lance');
+    expect(lance.origin).toBe('alien');
+    expect(orb.visualProfile).toBe('alien-orb');
+    expect(singularity.visualProfile).toBe('alien-singularity');
+    // Alien weapons are never manufactured or sold: no market price.
+    for (const weapon of [lance, orb, singularity]) {
+      expect(weapon.marketPrice).toBeNull();
+      expect(weapon.damage).toBeGreaterThan(0);
+    }
+    expect(() => validateContentCatalog(contentCatalog)).not.toThrow();
+  });
+
+  it('ships the proximity mine auxiliary with finite ammunition', () => {
+    const mine = contentCatalog.auxiliary.find(
+      (entry) => entry.id === 'aux-proximity-mine',
+    )!;
+    const mineAmmo = contentCatalog.ammunition.find(
+      (entry) => entry.id === 'consumable-proximity-mine',
+    )!;
+    expect(mine.type).toBe('mine');
+    expect(mine.ammoConsumableId).toBe('consumable-proximity-mine');
+    expect(mine.chargesPerSortieMin).toBeGreaterThan(0);
+    expect(mine.areaRadius).toBeGreaterThan(0);
+    expect(mineAmmo.usedBy).toContain('aux-proximity-mine');
+    expect(mineAmmo.weightPerUnit).toBeGreaterThan(0);
     expect(() => validateContentCatalog(contentCatalog)).not.toThrow();
   });
 

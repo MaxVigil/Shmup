@@ -13,6 +13,9 @@ Legend: implemented in code, prototype, planned.
 | Split Pulse Emitter | alien | 7.5 | 6 | 2 | 620 | 12 | single-target | Research/production | — |
 | Canister Aircraft Cannon | earth | 7 | 1.8 | 6 | 760 | 13 | single-target | Research/production | — |
 | Rocket Pod | earth | 40 | 0 | 1 | 700 | 0 | single-target | Market (finished) | 380000 cr..420000 cr |
+| Disintegration Lance | alien | 180 | 0.55 | 1 | 1800 | 0 | all-targets | Research/production | — |
+| Plasma Orb Projector | alien | 125 | 0.65 | 1 | 300 | 0 | all-targets | Research/production | — |
+| Singularity Projector | alien | 105 | 0.4 | 1 | 260 | 0 | all-targets | Research/production | — |
 
 ### Weapon upgrades
 
@@ -155,6 +158,7 @@ Legend: implemented in code, prototype, planned.
 | aux-ukrainian-drone-swarm | drone | human | consumable-ukrainian-attack-drone | 50..100 | 28 | 28 | 0 | 2 | 2 | research-production |
 | aux-stun-module | stun | human | — | 0..0 | 0 | 0 | 5 | 4 | 3 | research-production |
 | aux-flare-decoy-launcher | decoy | human | consumable-flare-decoy | 3..6 | 0 | 0 | 0 | 2 | 1 | research-production |
+| aux-proximity-mine | mine | human | consumable-proximity-mine | 3..12 | 130 | 60 | 0 | 3 | 1 | market |
 
 ## Modules
 
@@ -177,6 +181,7 @@ Legend: implemented in code, prototype, planned.
 | consumable-cluster-missile | 0.9 | 100 cr | aux-cluster-missile-pod |
 | consumable-ukrainian-attack-drone | 0.06 | 6 cr | aux-ukrainian-drone-swarm |
 | consumable-flare-decoy | 0.4 | 25 cr | aux-flare-decoy-launcher |
+| consumable-proximity-mine | 0.5 | 55 cr | aux-proximity-mine |
 
 ## Aircraft loadouts
 
