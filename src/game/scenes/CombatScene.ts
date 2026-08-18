@@ -304,6 +304,7 @@ export class CombatScene extends Phaser.Scene {
   private endStatusKey: TranslationKey | null = null;
   private debugInvincible = false;
   private threatLevel = 1;
+  private reduceEffects = false;
 
   constructor(
     private readonly onRunComplete: (result: CombatRunResult) => void = () => {},
@@ -331,8 +332,29 @@ export class CombatScene extends Phaser.Scene {
       canSwitch: boolean,
     ) => void = () => {},
     private readonly getThreatLevel: () => number = () => 1,
+    private readonly getReduceEffects: () => boolean = () => false,
   ) {
     super('combat');
+  }
+
+  private shakeCamera(duration: number, intensity: number): void {
+    this.shakeCamera(
+      duration,
+      this.reduceEffects ? intensity * 0.25 : intensity,
+    );
+  }
+
+  private flashCamera(
+    duration: number,
+    red: number,
+    green: number,
+    blue: number,
+    force: boolean,
+  ): void {
+    if (this.reduceEffects) {
+      return;
+    }
+    this.flashCamera(duration, red, green, blue, force);
   }
 
   preload(): void {
@@ -535,6 +557,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private resetEncounterState(): void {
+    this.reduceEffects = this.getReduceEffects();
     this.shots.length = 0;
     this.homingMissiles.length = 0;
     this.decoy = null;
@@ -1539,7 +1562,7 @@ export class CombatScene extends Phaser.Scene {
         }
         this.invulnerableMs = 700;
         this.createContactBurst(impactX, impactY);
-        this.cameras.main.shake(70, 0.004);
+        this.shakeCamera(70, 0.004);
         if (this.armour === 0) {
           this.beginEnding(false, 'combat.shipLost');
           return;
@@ -1597,7 +1620,7 @@ export class CombatScene extends Phaser.Scene {
         }
         this.invulnerableMs = 700;
         this.createContactBurst(impactX, impactY);
-        this.cameras.main.shake(70, 0.004);
+        this.shakeCamera(70, 0.004);
         if (this.armour === 0) {
           this.beginEnding(false, 'combat.shipLost');
           return;
@@ -1669,7 +1692,7 @@ export class CombatScene extends Phaser.Scene {
       elapsedMs: 0,
     });
     this.updateRocketHud();
-    this.cameras.main.shake(60, 0.003);
+    this.shakeCamera(60, 0.003);
   }
 
   private tryFireMissileAuxiliary(): void {
@@ -1715,7 +1738,7 @@ export class CombatScene extends Phaser.Scene {
         ...this.auxiliaryAmmoConsumed,
         [ammoId]: fired + 1,
       };
-      this.cameras.main.shake(60, 0.003);
+      this.shakeCamera(60, 0.003);
       return;
     }
   }
@@ -1817,7 +1840,7 @@ export class CombatScene extends Phaser.Scene {
     rocket.body.destroy();
     this.rockets.splice(index, 1);
     this.createDestructionBurst(x, y, 0xffd98a);
-    this.cameras.main.shake(140, 0.008);
+    this.shakeCamera(140, 0.008);
     // The warhead blasts every enemy within a wide radius; the player's own
     // aircraft is never damaged by its own rockets.
     const blastRadius = rocket.areaRadius;
@@ -1975,7 +1998,7 @@ export class CombatScene extends Phaser.Scene {
         } else {
           this.applyEliteContactKnockback(enemy);
         }
-        this.cameras.main.shake(110, 0.006);
+        this.shakeCamera(110, 0.006);
         if (this.armour === 0) {
           this.beginEnding(false, 'combat.shipLost');
           return;
@@ -2066,7 +2089,7 @@ export class CombatScene extends Phaser.Scene {
       onComplete: () => flash.destroy(),
     });
     if (heavy) {
-      this.cameras.main.shake(75, 0.0025);
+      this.shakeCamera(75, 0.0025);
     }
   }
 
@@ -2323,7 +2346,7 @@ export class CombatScene extends Phaser.Scene {
       ...this.auxiliaryAmmoConsumed,
       [ammoId]: fired + 1,
     };
-    this.cameras.main.shake(40, 0.002);
+    this.shakeCamera(40, 0.002);
   }
 
   private nearestEnemyId(x: number, y: number): number | null {
@@ -2485,7 +2508,7 @@ export class CombatScene extends Phaser.Scene {
       ...this.auxiliaryAmmoConsumed,
       [ammoId]: fired + 1,
     };
-    this.cameras.main.shake(40, 0.002);
+    this.shakeCamera(40, 0.002);
   }
 
   private updateMines(deltaMs: number): void {
@@ -2520,7 +2543,7 @@ export class CombatScene extends Phaser.Scene {
     mine.body.destroy();
     this.mines.splice(index, 1);
     this.createDestructionBurst(x, y, 0xffd166);
-    this.cameras.main.shake(140, 0.008);
+    this.shakeCamera(140, 0.008);
     for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
       const enemy = this.enemies[enemyIndex];
       if (enemy === undefined || !enemy.body.active) {
@@ -2550,7 +2573,7 @@ export class CombatScene extends Phaser.Scene {
     drone.body.destroy();
     this.drones.splice(index, 1);
     this.createDestructionBurst(x, y, 0x9ad0ff);
-    this.cameras.main.shake(90, 0.006);
+    this.shakeCamera(90, 0.006);
     for (let enemyIndex = this.enemies.length - 1; enemyIndex >= 0; enemyIndex -= 1) {
       const enemy = this.enemies[enemyIndex];
       if (enemy === undefined || !enemy.body.active) {
@@ -2620,8 +2643,8 @@ export class CombatScene extends Phaser.Scene {
       this.player.setAlpha(0.12);
       this.playerArmourBarBackground.setVisible(false);
       this.playerArmourBarFill.setVisible(false);
-      this.cameras.main.shake(180, 0.012);
-      this.cameras.main.flash(120, 110, 18, 30, false);
+      this.shakeCamera(180, 0.012);
+      this.flashCamera(120, 110, 18, 30, false);
     }
   }
 

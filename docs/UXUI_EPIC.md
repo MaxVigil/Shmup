@@ -54,26 +54,31 @@ Initial focus (`[data-overlay-focus]` or first focusable), Tab trap while a
 modal is top, focus restore to the trigger (or the settings toggle) on close.
 Acceptance: keyboard-only open/close; Tab never escapes the dialog.
 
-### E6.3 — Safe-area + accessibility options (pending)
+### E6.3 — Safe-area + accessibility options (done)
 
 `env(safe-area-inset-*)` on the top bar and sortie frame; a text-size setting
-(`--text-scale`); colour-independent status (label/icon next to colour); a
-reduce-shake/reduce-flash toggle consumed by `CombatScene`.
+(`--text-scale` scaling the rem base); colour-independent status (the armour HUD
+already pairs numeric text + bar width with colour); a reduce-motion toggle
+(`shmup.reduce-effects`) that scales `CombatScene` shake to 25% and skips the
+death flash, applied from the next sortie.
 
-### E6.4 — HUD ownership contract (pending)
+### E6.4 — HUD ownership contract (done)
 
-Record the DOM-vs-Phaser HUD split and who owns the active-weapon label
-(DECISIONS #24); consolidation only if the decision demands it.
+DECISIONS #24 records the split: the DOM owns the persistent frame (top bar,
+active-weapon label, run reports); the Phaser scene owns the in-canvas HUD.
+Consolidation is deferred — decision-only.
 
-### E6.5 — Toast/a11y + i18n overflow hardening (pending)
+### E6.5 — Toast/a11y + i18n overflow hardening (done)
 
-`toast.ts` gets `role="status"` + an `aria-live` container with a stack limit;
-verify en/uk/zh labels do not overflow buttons at 320px.
+`toast.ts` container is `role="status"`/`aria-live="polite"` with a 4-toast stack
+limit; `.base-action`/`.toast` wrap long labels (`overflow-wrap: anywhere`) so
+en/uk/zh text survives a 320px viewport.
 
-### E6.6 — Verification & regression (pending)
+### E6.6 — Verification & regression (done)
 
-Keyboard-only / gamepad / resize / reduced-motion human checklist in
-`docs/PLAYTEST.md`; keep the overlay-stack unit tests green.
+UX rounds 11–12 in `docs/PLAYTEST.md` (keyboard-only overlays/focus, then
+accessibility/resize); `tests/unit/overlay.test.ts` covers the stack state
+machine.
 
 ## Definition of done
 

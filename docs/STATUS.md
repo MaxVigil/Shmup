@@ -4,7 +4,7 @@ Last updated: 2026-08-18
 
 ## Epic E6 — UX/UI hygiene & accessibility
 
-Implemented on `test` (E6.0–E6.2).
+Implemented on `test` (E6.0–E6.6).
 
 - **Overlay stack (`src/ui/overlay.ts`).** A DOM-free push/pop/remove stack over
   opaque ids with a subscription, wired in `app-shell.ts` to map ids to elements
@@ -19,10 +19,22 @@ Implemented on `test` (E6.0–E6.2).
 - **Store-driven month report.** The month-report panel enters the stack when it
   appears and leaves through `DISMISS_MONTH_REPORT`, keeping the store
   authoritative.
-- 266 unit tests (8 new for the overlay stack), lint, typecheck, and the
-  production build pass. Human check: open settings/design system/sortie
-  picker with the keyboard, press Tab (trapped), Escape (closes, focus
-  returns), and confirm the month report stays dismissible.
+- **Safe-area + accessibility (E6.3).** Top bar and sortie frame respect
+  `env(safe-area-inset-*)`; a Text size setting scales the rem-based DOM via
+  `--text-scale`; a Reduce motion effects setting (persisted in
+  `shmup.reduce-effects`) scales `CombatScene` shake to 25% and skips the death
+  flash from the next sortie; the armour HUD already pairs numbers and bar width
+  with colour.
+- **HUD ownership (E6.4).** DECISIONS #24 records the DOM-frame + Phaser
+  in-canvas split; consolidation deferred.
+- **Toast/a11y (E6.5).** Toast container is `role="status"`/`aria-live="polite"`
+  with a 4-toast stack limit; long en/uk/zh labels wrap at 320px
+  (`overflow-wrap: anywhere`).
+- **Verification (E6.6).** UX rounds 11–12 added to `docs/PLAYTEST.md`;
+  `tests/unit/overlay.test.ts` stays green.
+- 266 unit tests, lint, typecheck, and the production build pass. Human check:
+  keyboard-only overlay open/close with Tab trap and focus restore, text-size
+  scaling, and the reduce-motion toggle on a live sortie.
 
 ## Epic E5 — Balance, playtest rounds, backlog triage
 

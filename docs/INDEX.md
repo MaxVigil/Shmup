@@ -50,10 +50,10 @@ Status and task breakdown: `docs/UXUI_EPIC.md` + `docs/PLAN.md`.
 - **E6.0** design contract + decisions — done.
 - **E6.1** overlay stack — done.
 - **E6.2** focus management — done.
-- **E6.3** safe-area + accessibility options — pending.
-- **E6.4** HUD ownership contract — pending.
-- **E6.5** toast/a11y + i18n overflow — pending.
-- **E6.6** verification & regression — pending.
+- **E6.3** safe-area + accessibility options — done.
+- **E6.4** HUD ownership contract — done.
+- **E6.5** toast/a11y + i18n overflow — done.
+- **E6.6** verification & regression — done.
 
 ## Commands
 

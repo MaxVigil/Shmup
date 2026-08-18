@@ -71,6 +71,11 @@ const en = {
   'design.toast': 'TOAST',
   'theme.industrial': 'Industrial',
   'theme.terminal': 'Terminal',
+  'settings.textSize': 'Text size',
+  'settings.textSizeSm': 'Small',
+  'settings.textSizeMd': 'Medium',
+  'settings.textSizeLg': 'Large',
+  'settings.reduceEffects': 'Reduce motion effects',
 
   'toast.debugEnabled': 'Debug mode enabled - press F3',
   'toast.debugDisabled': 'Debug mode disabled',
@@ -749,6 +754,11 @@ const uk: Record<TranslationKey, string> = {
   'design.toast': 'ТОАСТ',
   'theme.industrial': 'Індустріальна',
   'theme.terminal': 'Термінал',
+  'settings.textSize': 'Розмір тексту',
+  'settings.textSizeSm': 'Малий',
+  'settings.textSizeMd': 'Середній',
+  'settings.textSizeLg': 'Великий',
+  'settings.reduceEffects': 'Зменшити ефекти руху',
 
   'toast.debugEnabled': 'Дебаг-режим увімкнено — натисніть F3',
   'toast.debugDisabled': 'Дебаг-режим вимкнено',

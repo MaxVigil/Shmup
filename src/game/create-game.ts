@@ -35,6 +35,7 @@ export function createGame(
   getLocale: () => Locale = () => 'uk',
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
   getThreatLevel: () => number = () => 1,
+  getReduceEffects: () => boolean = () => false,
 ): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -64,6 +65,7 @@ export function createGame(
       getLocale,
       onActiveWeaponChanged,
       getThreatLevel,
+      getReduceEffects,
     )],
   };
 

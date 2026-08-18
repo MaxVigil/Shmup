@@ -38,6 +38,16 @@ export function buildAppTemplate(initialState: GameState): string {
             <option id="theme-option-industrial" value="industrial"></option>
             <option id="theme-option-terminal" value="terminal"></option>
           </select>
+          <label for="text-size-select" id="text-size-label"></label>
+          <select id="text-size-select">
+            <option id="text-size-option-sm" value="sm"></option>
+            <option id="text-size-option-md" value="md"></option>
+            <option id="text-size-option-lg" value="lg"></option>
+          </select>
+          <div class="settings-option">
+            <label for="reduce-effects-toggle" id="reduce-effects-label"></label>
+            <input id="reduce-effects-toggle" type="checkbox" />
+          </div>
           <button id="design-system-open" class="base-action settings-design" type="button"></button>
           <div class="system-check" role="status">
             <span class="system-check__light" aria-hidden="true"></span>

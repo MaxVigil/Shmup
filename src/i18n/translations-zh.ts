@@ -63,6 +63,11 @@ export const zh = {
   'design.toast': '提示',
   'theme.industrial': '工业',
   'theme.terminal': '终端',
+  'settings.textSize': '字体大小',
+  'settings.textSizeSm': '小',
+  'settings.textSizeMd': '中',
+  'settings.textSizeLg': '大',
+  'settings.reduceEffects': '减少动态效果',
 
   'toast.debugEnabled': '已启用调试模式 — 按 F3',
   'toast.debugDisabled': '已禁用调试模式',

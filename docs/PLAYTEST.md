@@ -1,4 +1,4 @@
-# PLAYTEST — scripted human rounds (Weapons epic E0–E5)
+# PLAYTEST — scripted human rounds (Weapons epic E0–E5, UX epic E6)
 
 Purpose: run the arsenal through its paces before `test` is merged to `main`.
 Each round is a self-contained scenario with the URL, the setup, the actions, and
@@ -196,6 +196,8 @@ state without soft-locking.
 | 8 | | `?m2Fast=true` | |
 | 9 | | `?m3g2Ready=true` / `?m3g3aReady=true` | |
 | 10 | | `?m3eBankrupt=true` | |
+| 11 | | `?stage4Ready=true` (keyboard-only) | |
+| 12 | | `?m2Fast=true` (accessibility) | |
 
 After each round, log concrete observations (numbers that felt too strong/weak,
 visual bugs, missing feedback). The E5 balance pass uses these notes.
@@ -221,4 +223,41 @@ a Warden Seeker volley or sustained Gunship fire).
 - The aircraft hull remains and can be repaired (it is grounded, not deleted).
 - **Abort before dying** (P → Abort) keeps aircraft, weapons, and pilot intact but
   forfeits the bounty.
+
+---
+
+## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)
+
+**URL:** `?stage4Ready=true` (any full-base profile is fine)
+**Actions — keyboard-only (no mouse):**
+- Tab through the base tabs; ArrowLeft/Right/Home/End switch sections with a
+  visible focus ring.
+- Open Settings (gear); Tab stays inside the menu; Escape closes it and focus
+  returns to the gear.
+- Open DESIGN SYSTEM OVERVIEW; Tab is trapped inside the dialog; Shift+Tab cycles
+  backward; Escape closes and focus returns to the gear.
+- Open the sortie picker (LAUNCH SORTIE); the first FLY button receives focus;
+  Tab cycles the aircraft; Escape closes.
+- End the month (END MONTH → confirm): the month-report dialog focuses CONTINUE,
+  Tab is trapped, Escape dismisses it and focus returns to the base.
+
+**Expected:**
+- Exactly one Escape path: the top overlay closes first, then the one below it.
+- While an overlay is open, sortie hotkeys (P/X/E/C/1/2) are inert.
+- `body.has-overlay` is set while any overlay is open (page scroll locked).
+
+## Round 12 — UX/UI accessibility & resize (E6)
+
+**URL:** `?m2Fast=true`
+**Actions:**
+- Settings → Text size: switch Small/Medium/Large and confirm the whole DOM UI
+  rescales (rem-based).
+- Settings → Reduce motion effects: enable, launch a sortie, take hits; shake is
+  reduced to ~25% and the death flash is skipped. The toggle applies from the
+  next sortie.
+- Narrow the window to 320 px and confirm no button text is clipped (labels wrap).
+- Listen with a screen reader (VoiceOver/NVDA): toasts are announced
+  (`role="status"`), and the sortie run report is announced (`aria-live`).
+
+**Expected:** no clipped labels at 320 px; toasts and reports announced once each.
 

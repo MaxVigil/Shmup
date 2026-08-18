@@ -3832,6 +3832,11 @@ function renderLocale(): void {
   designSystemCloseButton.textContent = '✕';
   setText('theme-option-industrial', 'theme.industrial');
   setText('theme-option-terminal', 'theme.terminal');
+  setText('text-size-label', 'settings.textSize');
+  setText('text-size-option-sm', 'settings.textSizeSm');
+  setText('text-size-option-md', 'settings.textSizeMd');
+  setText('text-size-option-lg', 'settings.textSizeLg');
+  setText('reduce-effects-label', 'settings.reduceEffects');
   setText('restart-mission', 'settings.restart');
   setText('locale-option-uk', 'locale.uk');
   setText('locale-option-en', 'locale.en');
@@ -4294,6 +4299,7 @@ function launchSortie(): void {
         store.getSnapshot().base.threatMap.find(
           (mission) => mission.id === store.getSnapshot().base.activeMissionId,
         )?.threatLevel ?? 1,
+      () => isReduceEffectsEnabled(),
     );
   } else {
     game.scene.getScene('combat').scene.restart();
@@ -4348,6 +4354,51 @@ themeSelect.value = storedTheme;
 applyTheme(storedTheme);
 themeSelect.addEventListener('change', () => {
   applyTheme(themeSelect.value === 'terminal' ? 'terminal' : 'industrial');
+});
+
+const TEXT_SIZE_STORAGE_KEY = 'shmup.text-size';
+const REDUCE_EFFECTS_STORAGE_KEY = 'shmup.reduce-effects';
+type TextSize = 'sm' | 'md' | 'lg';
+const TEXT_SIZE_SCALE: Readonly<Record<TextSize, number>> = {
+  sm: 0.9,
+  md: 1,
+  lg: 1.15,
+};
+
+function applyTextSize(size: TextSize): void {
+  document.documentElement.style.setProperty(
+    '--text-scale',
+    String(TEXT_SIZE_SCALE[size] ?? 1),
+  );
+  window.localStorage.setItem(TEXT_SIZE_STORAGE_KEY, size);
+}
+
+const textSizeSelect = byId<HTMLSelectElement>('text-size-select');
+const storedTextSizeValue = window.localStorage.getItem(TEXT_SIZE_STORAGE_KEY);
+const storedTextSize: TextSize =
+  storedTextSizeValue === 'sm' || storedTextSizeValue === 'lg'
+    ? storedTextSizeValue
+    : 'md';
+textSizeSelect.value = storedTextSize;
+applyTextSize(storedTextSize);
+textSizeSelect.addEventListener('change', () => {
+  const size = textSizeSelect.value === 'sm' || textSizeSelect.value === 'lg'
+    ? textSizeSelect.value
+    : 'md';
+  applyTextSize(size);
+});
+
+function isReduceEffectsEnabled(): boolean {
+  return window.localStorage.getItem(REDUCE_EFFECTS_STORAGE_KEY) === 'true';
+}
+
+const reduceEffectsToggle = byId<HTMLInputElement>('reduce-effects-toggle');
+reduceEffectsToggle.checked = isReduceEffectsEnabled();
+reduceEffectsToggle.addEventListener('change', () => {
+  window.localStorage.setItem(
+    REDUCE_EFFECTS_STORAGE_KEY,
+    String(reduceEffectsToggle.checked),
+  );
 });
 
 let endMonthArmed = false;

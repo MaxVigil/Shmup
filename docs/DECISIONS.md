@@ -365,3 +365,23 @@ and a reduce-shake/reduce-flash toggle.
 **Consequence:** E6 closes with a single overlay owner and keyboard-safe
 dialogs; the HUD ownership split is recorded separately (#24) before any
 consolidation, and the overlay-stack state machine is unit-tested.
+
+## 24. E6.4: HUD ownership — DOM frame + Phaser in-canvas HUD
+
+**Context:** The HUD is split across two rendering systems: the DOM shell owns the
+persistent frame (top bar credits/month/route, the active-weapon label and switch
+button on the sortie screen, run reports), while the Phaser `CombatScene` owns the
+in-canvas HUD (armour bar + numeric armour, reserve, timer, rockets, status line)
+and every combat effect. This split worked but was undocumented.
+
+**Decision:** Keep the split and record it as the contract. The DOM owns the
+persistent frame and all store-driven reads; the Phaser scene owns everything
+frame-synchronised inside the canvas and reports the few cross-layer values
+(active weapon, run result, ammunition consumed) through the `createGame` getters
+and the `onRunComplete` callback. No consolidation refactor now: a single
+real-time HUD screen does not justify moving the in-canvas HUD to DOM, and the
+boundary is already the store + injected getters. Revisit only if a second
+real-time HUD screen appears.
+
+**Consequence:** New HUD values have a documented home before they are added; the
+`active-weapon` label stays DOM-owned via `onActiveWeaponChanged`.
