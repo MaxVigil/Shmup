@@ -17,9 +17,12 @@ const m3g2PlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('m3g2Ready') === 'true';
 const m3g3aPlaytestMode = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('m3g3aReady') === 'true';
+export const hardpointsPlaytestMode = import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get('hardpointsReady') === 'true';
 
 export const temporaryPlaytestMode =
-  stage4PlaytestMode || insolvencyPlaytestMode || m3g2PlaytestMode || m3g3aPlaytestMode;
+  stage4PlaytestMode || insolvencyPlaytestMode || m3g2PlaytestMode ||
+  m3g3aPlaytestMode || hardpointsPlaytestMode;
 
 function createStage4PlaytestState(): GameState {
   const state = createInitialGameState();

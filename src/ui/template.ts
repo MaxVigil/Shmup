@@ -271,6 +271,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <h2 id="hangar-loadout-title"></h2>
           <div id="hangar-hero" class="hangar-hero" aria-live="polite"></div>
           <div id="aircraft-loadout-editor" class="aircraft-loadout-editor" aria-live="polite"></div>
+          <div id="arsenal-hardpoints" class="aircraft-loadout-editor" aria-live="polite"></div>
           <div class="loadout-row">
             <div><span class="loadout-row__label" id="special-equipment-label"></span><strong id="special-equipment-status"></strong><small id="special-equipment-note"></small></div>
             <button id="toggle-special-equipment" class="base-action" type="button" hidden></button>

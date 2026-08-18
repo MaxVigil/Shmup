@@ -632,9 +632,14 @@ threats.
 - [x] E2b-1 — store commands for the arsenal loadout: `INSTALL_HARDPOINT_ITEM` /
   `REMOVE_HARDPOINT_ITEM` / `SET_AIRCRAFT_MARK` wired through the store dispatcher
   (domain + tests).
-- [ ] E2b-2 — Hangar UI (weight/energy gauges, hardpoint slots, overload blocking),
-  finite ammunition (produce → load → consume), aircraft Mark II/III research and
-  manufacture pipeline.
+- [x] E2b-2 — Hangar UI for the arsenal loadout: weight/energy gauges vs
+  carrying/reactor limits with overload warning, hardpoint slots with install/remove
+  (`INSTALL_HARDPOINT_ITEM` / `REMOVE_HARDPOINT_ITEM`), playtest flag
+  `?hardpointsReady=true` that exposes all auxiliary/module items; normal mode shows
+  a "unlocks with production" note. i18n keys en/uk/zh added. Human check on
+  `npm run dev?hardpointsReady=true` still required.
+- [ ] E2b-3 — finite ammunition (produce → load → consume) and aircraft Mark II/III
+  research/manufacture pipeline.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
   drones/mines → homing/decoys → alien.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,

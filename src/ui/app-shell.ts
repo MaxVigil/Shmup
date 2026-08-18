@@ -1,8 +1,10 @@
 import { createGameStore } from '../app/store';
 import { contentCatalog } from '../content/catalog';
 import {
+  aircraftLoadoutByAircraftId,
   alienTechnologyById,
   alienTechnologyId,
+  auxiliaryById,
   blueprintById,
   blueprintId,
   buildingById,
@@ -11,16 +13,22 @@ import {
   consumableId,
   equipmentById,
   equipmentId,
+  moduleById,
   staffRoleById,
   staffRoleId,
   weaponById,
   weaponId,
 } from '../content/ids';
+import {
+  aircraftLoadoutEnergy,
+  aircraftLoadoutWeight,
+  hardpointSlotsOf,
+} from '../domain/arsenal-loadout';
 import { validateContentCatalog } from '../content/validate';
 import { createGame } from '../game/create-game';
 import { CombatScene, type CombatRunResult } from '../game/scenes/CombatScene';
 import type { TranslationKey } from '../i18n';
-import { isLocale } from '../i18n';
+import { isLocale, localize } from '../i18n';
 import { clearGame, loadGame, saveGame } from '../persistence/save-repository';
 import type {
   ConstructionJobState,
@@ -73,7 +81,7 @@ import { installRipples } from './ripple';
 import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../debug/debug-mode';
 import { showToast } from './toast';
 import { aircraftVisualHtml } from './ship-svg';
-import { resolveInitialState, temporaryPlaytestMode } from './playtest';
+import { hardpointsPlaytestMode, resolveInitialState, temporaryPlaytestMode } from './playtest';
 
 validateContentCatalog(contentCatalog);
 
@@ -787,6 +795,7 @@ function renderBase(): void {
     state.base.materials < acceleratorUpgrade.productionMaterialCost
   );
   renderAircraftLoadout();
+  renderArsenalHardpoints();
   specialEquipmentStatus.textContent = capturerEquipped
     ? t('loadout.capturerEquipped')
     : capturerManufactured ? t('loadout.capturerStored') : t('loadout.slotEmpty');
@@ -1391,6 +1400,130 @@ function renderAircraftLoadout(): void {
   }
   if (warehouse.children.length > 0) {
     editor.appendChild(warehouse);
+  }
+}
+
+function localizedArsenalItemName(itemId: string): string {
+  const aux = auxiliaryById(itemId);
+  if (aux !== undefined) {
+    return localize(aux.name, getLocale());
+  }
+  const mod = moduleById(itemId);
+  if (mod !== undefined) {
+    return localize(mod.name, getLocale());
+  }
+  return itemId;
+}
+
+function renderArsenalHardpoints(): void {
+  const state = store.getSnapshot();
+  const container = byId<HTMLElement>('arsenal-hardpoints');
+  container.textContent = '';
+  const activeId = state.base.activeAircraftId;
+  const entry = activeId === null
+    ? undefined
+    : aircraftLoadoutByAircraftId(activeId);
+  if (activeId === null || entry === undefined) {
+    return;
+  }
+
+  const heading = document.createElement('strong');
+  heading.textContent = t('arsenal.hardpointTitle');
+  container.appendChild(heading);
+
+  const weight = aircraftLoadoutWeight(state.base, activeId);
+  const energy = aircraftLoadoutEnergy(state.base, activeId);
+  const weightLimit = entry.loadout.carryingCapacity;
+  const reactorLimit = entry.loadout.reactorCapacity;
+  const overloaded = weight > weightLimit || energy > reactorLimit;
+
+  const gauges = document.createElement('p');
+  gauges.className = 'loadout-row';
+  gauges.textContent =
+    `${t('arsenal.weight', { used: weight, capacity: weightLimit })} · ` +
+    t('arsenal.energy', { used: energy, capacity: reactorLimit });
+  container.appendChild(gauges);
+
+  if (overloaded) {
+    const warning = document.createElement('p');
+    warning.className = 'preflight-warning';
+    warning.textContent = t('arsenal.overloadWarning');
+    container.appendChild(warning);
+  }
+
+  const slots = document.createElement('div');
+  slots.className = 'loadout-slots';
+  const installed = hardpointSlotsOf(state.base, activeId);
+  installed.forEach((itemId, index) => {
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = t('loadout.primarySlot', { slot: index + 1 });
+    const name = document.createElement('strong');
+    name.textContent = itemId === null
+      ? t('arsenal.hardpointEmpty')
+      : localizedArsenalItemName(itemId);
+    row.appendChild(label);
+    row.appendChild(name);
+    if (itemId !== null) {
+      const remove = document.createElement('button');
+      remove.className = 'base-action';
+      remove.type = 'button';
+      remove.textContent = t('arsenal.remove');
+      remove.addEventListener('click', () => {
+        store.dispatch({ type: 'REMOVE_HARDPOINT_ITEM', slotIndex: index });
+      });
+      row.appendChild(remove);
+    }
+    slots.appendChild(row);
+  });
+  container.appendChild(slots);
+
+  if (hardpointsPlaytestMode) {
+    const note = document.createElement('p');
+    note.className = 'preflight-warning';
+    note.textContent = t('arsenal.playtestNote');
+    container.appendChild(note);
+    const warehouse = document.createElement('div');
+    warehouse.className = 'warehouse-install';
+    const installable = [...contentCatalog.auxiliary, ...contentCatalog.modules];
+    for (const item of installable) {
+      if (installed.includes(item.id)) {
+        continue;
+      }
+      const freeSlot = installed.indexOf(null);
+      if (freeSlot === -1) {
+        break;
+      }
+      const row = document.createElement('div');
+      row.className = 'loadout-row';
+      const label = document.createElement('span');
+      label.className = 'loadout-row__label';
+      label.textContent = localizedArsenalItemName(item.id);
+      const install = document.createElement('button');
+      install.className = 'base-action';
+      install.type = 'button';
+      install.textContent = t('arsenal.install');
+      install.addEventListener('click', () => {
+        store.dispatch({
+          type: 'INSTALL_HARDPOINT_ITEM',
+          itemId: item.id,
+          slotIndex: freeSlot,
+        });
+      });
+      row.appendChild(label);
+      row.appendChild(install);
+      warehouse.appendChild(row);
+    }
+    if (warehouse.children.length > 0) {
+      container.appendChild(warehouse);
+    }
+  } else {
+    const note = document.createElement('p');
+    note.className = 'lede';
+    note.textContent = t('arsenal.productionNote');
+    container.appendChild(note);
   }
 }
 

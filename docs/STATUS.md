@@ -2,6 +2,23 @@
 
 Last updated: 2026-08-18
 
+## Epic E2b-2 — Hangar hardpoint UI
+
+Implemented on `test`.
+
+- New Hangar preflight panel (`#arsenal-hardpoints`) rendered by
+  `renderArsenalHardpoints()`: weight/energy gauges against the aircraft's carrying
+  capacity and reactor (with an OVERLOAD warning), per-slot hardpoint rows with
+  remove buttons dispatching `REMOVE_HARDPOINT_ITEM`, and an install list
+  dispatching `INSTALL_HARDPOINT_ITEM`.
+- Install availability is gated behind the playtest flag `?hardpointsReady=true`
+  (all auxiliary + module items are listed, consistent with the existing playtest
+  profile pattern); normal mode shows an "unlocks with research/production" note
+  until the production pipeline lands (E2b-3).
+- i18n keys `arsenal.*` added in en/uk/zh; template id registered.
+- 245 unit tests, lint, typecheck, and the production build pass. Visual check on
+  `npm run dev?hardpointsReady=true` is still required by a human (per AGENTS.md).
+
 ## Epic E2b-1 — Arsenal loadout store commands
 
 Implemented on `test`.
