@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { contentCatalog } from '../../src/content/catalog';
 import { createInitialGameState } from '../../src/domain/initial-state';
 import { summarizeSortiePayoff } from '../../src/domain/sortie-payoff';
 
-const blueprintId = contentCatalog.blueprints[0].id;
+const blueprintId = 'blueprint-test';
 const outcome = {
   extracted: true,
   materialsFound: 8,

@@ -87,7 +87,9 @@ describe('validateContentCatalog', () => {
   it('rejects invalid blueprint research requirements', () => {
     const invalidCatalog: ContentCatalog = {
       ...contentCatalog,
-      blueprints: [{ ...contentCatalog.blueprints[0], requiredProgress: 0 }],
+      buildingBlueprints: contentCatalog.buildingBlueprints.map(
+        (blueprint, index) => (index === 0 ? { ...blueprint, requiredProgress: 0 } : blueprint),
+      ),
     };
 
     expect(() => validateContentCatalog(invalidCatalog)).toThrow(
@@ -95,8 +97,12 @@ describe('validateContentCatalog', () => {
     );
   });
 
-  it('classifies the Capturer as a terrestrial research programme', () => {
-    expect(contentCatalog.blueprints[0].researchDomain).toBe('earth');
+  it('classifies building blueprints as terrestrial research programmes', () => {
+    expect(
+      contentCatalog.buildingBlueprints.every(
+        (blueprint) => blueprint.researchDomain === 'earth',
+      ),
+    ).toBe(true);
   });
 
   it('defines the Impulse Accelerator as a measured piercing weapon', () => {

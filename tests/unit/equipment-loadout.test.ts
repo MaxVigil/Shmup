@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { contentCatalog } from '../../src/content/catalog';
 import { equipSpecialEquipment } from '../../src/domain/equipment-loadout';
 import { createInitialGameState } from '../../src/domain/initial-state';
 
-const capturerId = contentCatalog.equipment[0].id;
+const capturerId = 'equipment-test';
 
 describe('special-equipment loadout', () => {
   it('equips and removes manufactured equipment', () => {

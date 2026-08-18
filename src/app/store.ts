@@ -51,7 +51,6 @@ import {
 } from '../domain/arsenal-loadout';
 import { contentCatalog } from '../content/catalog';
 import {
-  blueprintId,
   buildingId,
   buildingById,
   staffRoleById,
@@ -596,12 +595,6 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           );
           if (blueprint === undefined) {
             throw new Error(`Unknown blueprint ${command.blueprintId}.`);
-          }
-          if (
-            blueprint.id === blueprintId.alienTechnologyCapturer &&
-            !state.base.telemetryRecorded
-          ) {
-            throw new Error(`Blueprint ${blueprint.id} requires Warden telemetry.`);
           }
           state = startBlueprintResearch(state, blueprint);
           break;

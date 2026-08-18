@@ -75,13 +75,11 @@ Legend: implemented in code, prototype, planned.
 
 | Module | Cost | Requirements |
 | --- | --- | --- |
-| equipment-alien-technology-capturer | 250000 cr + 10 mat | building-production-works + staff-engineer |
 
 ## Research (blueprint projects)
 
 | Blueprint | Domain | Progress | Requirements | Output |
 | --- | --- | --- | --- | --- |
-| blueprint-alien-technology-capturer | earth | 3 sorties | building-research-centre + staff-scientist | equipment equipment-alien-technology-capturer |
 | blueprint-safe-containment | earth | 3 sorties | building-research-centre + staff-scientist | building building-quarantine-centre |
 | blueprint-medical-block | earth | 3 sorties | building-research-centre + staff-scientist | building building-medical-block |
 | blueprint-canister-cannon | earth | 3 sorties | building-research-centre + staff-scientist | weapon weapon-canister-cannon + production 200000 cr |

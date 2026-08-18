@@ -285,7 +285,7 @@ effectiveDamage =
 - Only three large multiplicative layers remain: aircraft (base + marks), slot bonus, pilot.
 - **Guard test:** CI fails if any aircraft × slot bonus × pilot final multiplier exceeds 2.0.
 
-## 9. Stun-Capturer (option A)
+## 9. Stun-Capturer (option A) — implemented (E3.2a + E3.2b)
 
 - A Stun module disables an elite/boss; stunning is the ONLY way to recover an alien
   sample for research (→ hybrid weapons, upgrades, adaptations).

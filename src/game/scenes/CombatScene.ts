@@ -7,7 +7,6 @@ import {
   aircraftId,
   auxiliaryById,
   auxiliaryId,
-  equipmentId,
   weaponById,
   weaponId,
 } from '../../content/ids';
@@ -101,7 +100,6 @@ const ELITE_KNOCKBACK_RECOVERY_MS = 360;
 const ELITE_DURATION_MS = ENCOUNTER_DURATION_MS - EXTRACTION_WINDOW_MS;
 const SPLIT_PULSE_MODULE_ID = alienTechnologyById(alienTechnologyId.prism)!.weaponTransformation.id;
 const STANDARD_WEAPON_ID = weaponId.pulseCannon;
-const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 const STUN_MODULE_ID = auxiliaryId.stunModule;
 const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
 const AUX_DRONE_SWARM_ID = auxiliaryId.ukrainianDroneSwarm;
@@ -264,7 +262,6 @@ export class CombatScene extends Phaser.Scene {
   ];
   private activePrimaryWeaponSlot = 0;
   private manufacturedWeaponUpgradeIds: readonly string[] = [];
-  private equippedEquipmentId: string | null = null;
   private equippedHardpointItemIds: readonly (string | null)[] = [];
   private eliteStunned = false;
   private runState = createRiskExtractionState();
@@ -296,7 +293,6 @@ export class CombatScene extends Phaser.Scene {
       STANDARD_WEAPON_ID,
       null,
     ],
-    private readonly getEquippedEquipmentId: () => string | null = () => null,
     private readonly getAvailableCredits: () => number = () => 0,
     private readonly getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
     private readonly getSortiesCompleted: () => number = () => 0,
@@ -552,7 +548,6 @@ export class CombatScene extends Phaser.Scene {
     this.artifactRevealElapsedMs = null;
     this.equippedPrimaryWeaponIds = this.getEquippedPrimaryWeaponIds();
     this.activePrimaryWeaponSlot = this.equippedPrimaryWeaponIds[0] === null ? 1 : 0;
-    this.equippedEquipmentId = this.getEquippedEquipmentId();
     this.equippedHardpointItemIds = this.getEquippedHardpointItemIds();
     this.eliteStunned = false;
     this.manufacturedWeaponUpgradeIds = this.getManufacturedWeaponUpgradeIds();
@@ -780,20 +775,12 @@ export class CombatScene extends Phaser.Scene {
           salvage: this.runState.materialsFound,
           research: this.runState.researchFound,
         }),
-        this.t(
-          this.hasCapturerEquipped()
-            ? 'combat.extractionPrompt'
-            : 'combat.extractionPromptNoCapturer',
-        ),
+        this.t('combat.extractionPrompt'),
       ],
       [
         { label: this.t('combat.extractOption'), action: () => this.chooseExtraction('extract') },
         {
-          label: this.t(
-            this.hasCapturerEquipped()
-              ? 'combat.interceptOption'
-              : 'combat.interceptOptionNoCapturer',
-          ),
+          label: this.t('combat.interceptOption'),
           action: () => this.chooseExtraction('continue'),
         },
       ],
@@ -1833,7 +1820,7 @@ export class CombatScene extends Phaser.Scene {
       enemy.definition.creditReward,
     );
     this.showContractChange(defeatedX, defeatedY, enemy.definition.creditReward);
-    const eliteRecoveryAvailable = this.eliteStunned || this.hasCapturerEquipped();
+    const eliteRecoveryAvailable = this.eliteStunned;
     if (enemy.definition.kind === 'elite') {
       this.runState = defeatElite(
         this.runState,
@@ -1851,7 +1838,7 @@ export class CombatScene extends Phaser.Scene {
         this.clearCombatActors();
         this.artifactRevealElapsedMs = 0;
       } else {
-        this.beginEnding(true, 'combat.wardenDestroyedNoCapturer');
+        this.beginEnding(true, 'combat.wardenDestroyedNoRecovery');
       }
     }
   }
@@ -2224,10 +2211,6 @@ export class CombatScene extends Phaser.Scene {
 
   private t(key: TranslationKey, params: TranslationParams = {}): string {
     return translate(this.getLocale(), key, params);
-  }
-
-  private hasCapturerEquipped(): boolean {
-    return this.equippedEquipmentId === CAPTURER_EQUIPMENT_ID;
   }
 
   private isStunModuleEquipped(): boolean {

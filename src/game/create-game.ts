@@ -12,7 +12,6 @@ export function createGame(
     'weapon-pulse-cannon',
     null,
   ],
-  getEquippedEquipmentId: () => string | null = () => null,
   getAvailableCredits: () => number = () => 0,
   getManufacturedWeaponUpgradeIds: () => readonly string[] = () => [],
   getSortiesCompleted: () => number = () => 0,
@@ -54,7 +53,6 @@ export function createGame(
     scene: [new CombatScene(
       onRunComplete,
       getEquippedPrimaryWeaponIds,
-      getEquippedEquipmentId,
       getAvailableCredits,
       getManufacturedWeaponUpgradeIds,
       getSortiesCompleted,

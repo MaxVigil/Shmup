@@ -3,10 +3,9 @@ import { buildingById, buildingId } from '../../src/content/ids';
 
 import { staffMember } from './test-state';
 import { contentCatalog } from '../../src/content/catalog';
-import { constructBuilding, hireStaff } from '../../src/domain/base-development';
+import { constructBuilding } from '../../src/domain/base-development';
 import {
   advanceBlueprintResearch,
-  manufactureEquipment,
   startBlueprintResearch,
 } from '../../src/domain/blueprint-progression';
 import { createInitialGameState } from '../../src/domain/initial-state';
@@ -15,9 +14,7 @@ import type { GameState } from '../../src/domain/model';
 const laboratory = buildingById(buildingId.researchCentre)!;
 const workshop = buildingById(buildingId.productionWorks)!;
 const scientist = contentCatalog.staffRoles[0];
-const engineer = contentCatalog.staffRoles[1];
-const blueprint = contentCatalog.blueprints[0];
-const equipment = contentCatalog.equipment[0];
+const blueprint = contentCatalog.buildingBlueprints[0];
 
 function researchReadyState() {
   const state = createInitialGameState();
@@ -58,21 +55,6 @@ describe('blueprint progression', () => {
 
     expect(researched.base.researchQueue).toEqual([]);
     expect(researched.base.unlockedBlueprintIds).toEqual([blueprint.id]);
-  });
-
-  it('manufactures the capturer only from its blueprint and workshop', () => {
-    const researched = researchedState();
-    const withWorkshop = constructBuilding(researched, workshop);
-    const staffedWorkshop = hireStaff(withWorkshop, engineer);
-    const manufactured = manufactureEquipment(staffedWorkshop, blueprint, equipment);
-
-    expect(manufactured.base.manufacturedEquipmentIds).toEqual([equipment.id]);
-    expect(manufactured.base.credits).toBe(
-      staffedWorkshop.base.credits - equipment.creditCost,
-    );
-    expect(manufactured.base.materials).toBe(
-      staffedWorkshop.base.materials - equipment.materialCost,
-    );
   });
 
   it('rejects research without laboratory personnel', () => {

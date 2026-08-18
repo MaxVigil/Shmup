@@ -89,11 +89,45 @@ Implemented on `test`.
 - Combat: `getEquippedHardpointItemIds` callback wired from the hangar hardpoints into
   `CombatScene`; when the stun module (aux-stun-module) is equipped, Space / right-click
   stuns the Warden during the intercept (`combat.wardenStunned` status + tint). The
-  elite-defeat gate now recovers the artefact when `eliteStunned || hasCapturerEquipped`
-  (Capturer kept as a fallback; full removal is E3.2b).
-- New domain test for the stun→recovery path. 252 unit tests, lint, typecheck, and the
+  elite-defeat gate now recovers the artefact when `eliteStunned`.
+- New domain test for the stun→recovery path. 249 unit tests, lint, typecheck, and the
   production build pass. Human flight check on `npm run dev?hardpointsReady=true`
   (install the Stun Module, choose "continue" into the elite, press Space).
+
+## Epic E3.2b — Full Capturer removal (stun is the only alien-recovery path)
+
+Implemented on `test`.
+
+- Removed the Alien Technology Capturer from the content catalog (`blueprints` and
+  `equipment` sections are now empty arrays) and from `content/ids.ts`
+  (`blueprintId.alienTechnologyCapturer`, `equipmentId.alienTechnologyCapturer`).
+- Combat: `CombatScene` no longer reads an equipped special-equipment id
+  (`getEquippedEquipmentId` callback, `equippedEquipmentId` field, and
+  `hasCapturerEquipped()` removed); recovery is stun-only and the "destroyed without
+  recovery" ending key was renamed `combat.wardenDestroyedNoRecovery`.
+- UI: removed the terrestrial "Programme" (Capturer research → manufacture → equip)
+  block from the Research tab and Engineering; special-equipment slot and preflight
+  capturer warning now report an empty slot; research cards, databank rows, event
+  listeners, and template ids for the Capturer were deleted.
+- Store: dropped the `START_BLUEPRINT_RESEARCH` Warden-telemetry gate that special-cased
+  the Capturer blueprint.
+- Guidance: `progression-guidance.ts` no longer guides through a blueprint/equipment
+  chain (kinds `start-blueprint`, `advance-blueprint`, `manufacture-equipment`,
+  `equip-equipment`, `hire-engineer` removed); after workshop + telemetry it routes
+  directly to artefact recovery → containment → adaptation.
+- i18n: removed dead Capturer keys from en/uk/zh (programme.*, loadout.capturer*,
+  objective.startBlueprint/advanceBlueprint/manufacture/equip, combat.*NoCapturer,
+  research.*RequiresTelemetry, content.capturer, blueprint.capturer); report copy is now
+  generic ("Research advanced …").
+- Save compatibility: the v19→v20 migration path is unchanged; legacy saves that still
+  carry `equipment-alien-technology-capturer` / `blueprint-alien-technology-capturer`
+  keep their content and `hadCapturerProgress` still sets `telemetryRecorded` for them
+  (the old ids are checked as literals). The generic `equippedEquipmentId` /
+  `manufacturedEquipmentIds` state and `EQUIP_SPECIAL_EQUIPMENT` /
+  `MANUFACTURE_EQUIPMENT` commands remain as future-proof infrastructure.
+- Tests reworked: capturer chain tests removed from `store`/`blueprint-progression`;
+  guidance/navigation tests updated to the stun-only flow; legacy-migration tests use
+  the literal legacy ids. 249 unit tests pass.
 
 ## Epic E3.1 — Combat vertical slice: data-driven multipliers
 

@@ -91,7 +91,7 @@ describe('M2 risk and extraction flow', () => {
     );
   });
 
-  it('finishes the intercept without an artefact when no Capturer is equipped', () => {
+  it('finishes the intercept without an artefact when recovery is unavailable', () => {
     const eliteState = decideExtraction(reachExtractionChoice(), 'continue');
     const defeated = defeatElite(eliteState, elite.materialReward, false);
 

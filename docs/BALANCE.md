@@ -116,7 +116,6 @@
 
 | Module | Cost | Requirements |
 | --- | --- | --- |
-| equipment-alien-technology-capturer | 250,000 + 10 mat | building-production-works + staff-engineer |
 
 ## Consumables
 

@@ -47,7 +47,7 @@ function staffMember(id: string, roleId: string): StaffMemberState {
 }
 const machineGun = contentCatalog.weapons[0];
 const accelerator = contentCatalog.weapons[1];
-const capturer = contentCatalog.equipment[0];
+const equipment = { id: 'equipment-test' };
 
 describe('fleet armory', () => {
   it('installs and unequips weapons through warehouse stock', () => {
@@ -80,17 +80,17 @@ describe('fleet armory', () => {
       ...initial,
       base: {
         ...initial.base,
-        manufacturedEquipmentIds: [capturer.id],
+        manufacturedEquipmentIds: [equipment.id],
       },
     };
-    const installed = installModule(withModule.base, interceptorId, capturer.id);
-    expect(installed.aircraftModules[interceptorId]).toBe(capturer.id);
-    expect(moduleWarehouseCount(installed, capturer.id)).toBe(1);
-    expect(() => installModule(installed, interceptorId, capturer.id)).toThrow(
+    const installed = installModule(withModule.base, interceptorId, equipment.id);
+    expect(installed.aircraftModules[interceptorId]).toBe(equipment.id);
+    expect(moduleWarehouseCount(installed, equipment.id)).toBe(1);
+    expect(() => installModule(installed, interceptorId, equipment.id)).toThrow(
       /already has a module/,
     );
     const removed = removeWeapon(installed, interceptorId, 0);
-    expect(moduleWarehouseCount(removed, capturer.id)).toBe(1);
+    expect(moduleWarehouseCount(removed, equipment.id)).toBe(1);
   });
 
   it('syncs the active-loadout mirrors', () => {

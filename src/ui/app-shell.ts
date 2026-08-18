@@ -5,14 +5,10 @@ import {
   alienTechnologyById,
   alienTechnologyId,
   auxiliaryById,
-  blueprintById,
-  blueprintId,
   buildingById,
   buildingId,
   consumableById,
   consumableId,
-  equipmentById,
-  equipmentId,
   moduleById,
   staffRoleById,
   staffRoleId,
@@ -128,8 +124,6 @@ const TEAM_SIZE = 8;
 function isTeamRole(roleId: string): boolean {
   return TEAM_ROLE_IDS.has(roleId);
 }
-const capturerBlueprint = blueprintById(blueprintId.alienTechnologyCapturer)!;
-const capturerEquipment = equipmentById(equipmentId.alienTechnologyCapturer)!;
 const acceleratorBlueprint = contentCatalog.marketWeaponBlueprints[0];
 const machineGunUpgrade = contentCatalog.weaponUpgrades[0];
 const acceleratorUpgrade = contentCatalog.weaponUpgrades[1];
@@ -267,12 +261,6 @@ const canisterProductionRow = byId<HTMLElement>('canister-production-row');
 const canisterProductionStatus = byId<HTMLElement>('canister-production-status');
 const canisterProductionNote = byId<HTMLElement>('canister-production-note');
 const manufactureCanisterButton = byId<HTMLButtonElement>('manufacture-canister');
-const blueprintStatus = byId<HTMLElement>('blueprint-status');
-const blueprintContribution = byId<HTMLElement>('blueprint-contribution');
-const startBlueprintResearchButton = byId<HTMLButtonElement>('start-blueprint-research');
-const capturerEquipmentStatus = byId<HTMLElement>('capturer-equipment-status');
-const capturerEquipmentNote = byId<HTMLElement>('capturer-equipment-note');
-const manufactureCapturerButton = byId<HTMLButtonElement>('manufacture-capturer');
 const acceleratorProductionRow = byId<HTMLElement>('accelerator-production-row');
 const acceleratorProductionStatus = byId<HTMLElement>('accelerator-production-status');
 const acceleratorProductionNote = byId<HTMLElement>('accelerator-production-note');
@@ -465,16 +453,8 @@ function renderBase(): void {
   const engineers = state.base.staff.filter((member) => member.roleId === engineerRole.id).length;
   const repairMasters = state.base.staff.filter((member) => member.roleId === repairMasterRole.id).length;
   const researchReady = labBuilt && scientists > 0;
-  const blueprintProject = state.base.researchQueue.find(
-    (project) => project.blueprintId === capturerBlueprint.id,
-  );
-  const blueprintUnlocked = state.base.unlockedBlueprintIds.includes(capturerBlueprint.id);
   const workshopBuilt = isBuildingOperational(state.base, workshop.id);
   const productionReady = workshopBuilt && engineers > 0;
-  const capturerManufactured = state.base.manufacturedEquipmentIds.includes(
-    capturerEquipment.id,
-  );
-  const capturerEquipped = state.base.equippedEquipmentId === capturerEquipment.id;
   const researchBusy = state.base.researchQueue.length > 0;
   const technologyName = t('content.prism');
   const moduleName = t('content.splitPulse');
@@ -576,55 +556,6 @@ function renderBase(): void {
   } else if (!medicalBlockBuilt && activeBaseSection === 'medical') {
     showBaseSection('command');
   }
-  blueprintStatus.textContent = blueprintUnlocked
-    ? t('programme.complete')
-    : blueprintProject !== undefined
-      ? t('programme.active', {
-          progress: blueprintProject.progress,
-          required: blueprintProject.requiredProgress,
-        })
-      : !state.base.telemetryRecorded
-        ? t('research.blueprintRequiresTelemetry')
-        : researchReady ? t('programme.available') : t('programme.requiresLab');
-  blueprintContribution.textContent = blueprintProject === undefined
-    ? ''
-    : t('programme.contribution', { count: scientists });
-  startBlueprintResearchButton.hidden =
-    blueprintUnlocked || blueprintProject !== undefined || !state.base.telemetryRecorded;
-  startBlueprintResearchButton.disabled =
-    bankrupt || !researchReady || researchBusy ||
-    state.base.credits < capturerBlueprint.researchCreditCost;
-  const capturerJob = productionJob(state, capturerBlueprint.id);
-  capturerEquipmentStatus.textContent = capturerJob !== undefined
-    ? t('production.inProgress', {
-        progress: capturerJob.progress,
-        required: capturerJob.requiredProgress,
-      })
-    : capturerManufactured
-      ? t('programme.manufactured')
-      : !blueprintUnlocked
-        ? t('programme.needsBlueprint')
-        : !workshopBuilt
-          ? t('programme.needsWorkshop')
-          : !productionReady ? t('production.requiresEngineer') : t('programme.ready');
-  capturerEquipmentNote.textContent = capturerManufactured
-    ? t(capturerEquipped ? 'programme.equippedNote' : 'programme.loadoutNote')
-    : blueprintUnlocked && workshopBuilt
-      ? t('programme.manufactureCost', {
-          credits: capturerEquipment.creditCost,
-          materials: capturerEquipment.materialCost,
-        })
-      : '';
-  manufactureCapturerButton.hidden = capturerManufactured;
-  byId<HTMLElement>('capturer-equipment-row').hidden = !blueprintUnlocked;
-  manufactureCapturerButton.disabled = (
-    bankrupt ||
-    capturerJob !== undefined ||
-    !blueprintUnlocked ||
-    !productionReady ||
-    state.base.credits < capturerEquipment.creditCost ||
-    state.base.materials < capturerEquipment.materialCost
-  );
   const quarantineBuilt = isBuildingOperational(state.base, quarantine.id);
   const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
   const emitterOwned = state.base.ownedPrimaryWeaponIds.includes(splitPulseWeapon.id);
@@ -798,21 +729,10 @@ function renderBase(): void {
   );
   renderAircraftLoadout();
   renderArsenalHardpoints();
-  specialEquipmentStatus.textContent = capturerEquipped
-    ? t('loadout.capturerEquipped')
-    : capturerManufactured ? t('loadout.capturerStored') : t('loadout.slotEmpty');
-  specialEquipmentNote.textContent = capturerEquipped
-    ? t('loadout.recoveryEnabled')
-    : t('loadout.recoveryDisabled');
-  toggleSpecialEquipmentButton.hidden = !capturerManufactured;
-  toggleSpecialEquipmentButton.disabled = bankrupt;
-  toggleSpecialEquipmentButton.textContent = capturerEquipped
-    ? t('loadout.unequipCapturer')
-    : t('loadout.equipCapturer');
-  preflightWarning.textContent = capturerEquipped
-    ? t('loadout.preflightReady')
-    : t('loadout.preflightWarning');
-  preflightWarning.classList.toggle('is-ready', capturerEquipped);
+  specialEquipmentStatus.textContent = t('loadout.slotEmpty');
+  specialEquipmentNote.textContent = '';
+  toggleSpecialEquipmentButton.hidden = true;
+  preflightWarning.hidden = true;
   wardenSignalWarning.hidden = state.base.sortiesCompleted < 1;
   wardenSignalWarning.textContent = t('base.wardenSignal');
   const activeAircraftId = state.base.activeAircraftId;
@@ -1298,12 +1218,10 @@ function renderAircraftUpgradeProduction(): void {
   }
 }
 
-const moduleNameKey: Readonly<Record<string, TranslationKey>> = {
-  'equipment-alien-technology-capturer': 'content.capturer',
-};
+const moduleNameKey: Readonly<Record<string, TranslationKey>> = {};
 
 function localizedModuleName(moduleId: string): string {
-  return t(moduleNameKey[moduleId] ?? 'content.capturer');
+  return moduleNameKey[moduleId] === undefined ? moduleId : t(moduleNameKey[moduleId]);
 }
 
 function renderAircraftLoadout(): void {
@@ -2001,7 +1919,6 @@ function renderDatabank(): void {
     'staff-repair-master': 'staff.repairMaster',
   };
   const blueprintNameKey: Readonly<Record<string, TranslationKey>> = {
-    'blueprint-alien-technology-capturer': 'blueprint.capturer',
     'blueprint-safe-containment': 'blueprint.containment',
     'blueprint-canister-cannon': 'blueprint.canister',
     'blueprint-split-pulse-adaptation': 'blueprint.adapted',
@@ -2100,7 +2017,7 @@ function renderDatabank(): void {
       prerequisites.push(t(buildingNameKey[building.requiredBuildingId] ?? 'building.laboratory'));
     }
     if (building.requiredBlueprintId !== null) {
-      prerequisites.push(t(blueprintNameKey[building.requiredBlueprintId] ?? 'blueprint.capturer'));
+      prerequisites.push(t(blueprintNameKey[building.requiredBlueprintId] ?? 'blueprint.containment'));
     }
     return h('tr', null,
       h('td', { class: 'db-name' }, t(buildingNameKey[building.id] ?? 'building.laboratory')),
@@ -2131,18 +2048,6 @@ function renderDatabank(): void {
     'databank.colOutput',
   ] as const;
   const blueprintRows = [
-    ...contentCatalog.blueprints.map((blueprint) =>
-      h('tr', null,
-        h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.capturer')),
-        h('td', { class: 'is-earth' }, t('databank.originEarth')),
-        h('td', { class: 'num' }, `${blueprint.requiredProgress} sorties`),
-        h('td', null, [
-          t(buildingNameKey[blueprint.requiredBuildingId] ?? 'building.laboratory'),
-          t(staffNameKey[blueprint.requiredStaffRoleId] ?? 'staff.scientist'),
-        ].join(' + ')),
-        h('td', null, t('content.capturer')),
-      ),
-    ),
     ...contentCatalog.buildingBlueprints.map((blueprint) =>
       h('tr', null,
         h('td', { class: 'db-name' }, t(blueprintNameKey[blueprint.id] ?? 'blueprint.containment')),
@@ -3861,11 +3766,6 @@ function renderLocale(): void {
   setText('containment-eyebrow', 'containment.eyebrow');
   setText('containment-title', 'containment.title');
   setText('start-containment-research', 'containment.start');
-  setText('programme-eyebrow', 'programme.eyebrow');
-  setText('capturer-programme-title', 'programme.title');
-  setText('start-blueprint-research', 'programme.start');
-  setText('capturer-equipment-label', 'programme.equipment');
-  setText('manufacture-capturer', 'programme.manufacture');
   setText('accelerator-production-label', 'production.acceleratorSample');
   setText('manufacture-accelerator', 'production.manufactureSample');
   setText('alien-emitter-production-label', 'alienProduction.label');
@@ -3994,14 +3894,6 @@ switchPrimaryWeaponButton.addEventListener('click', () => {
   }
 });
 
-toggleSpecialEquipmentButton.addEventListener('click', () => {
-  const equipped = store.getSnapshot().base.equippedEquipmentId === capturerEquipment.id;
-  store.dispatch({
-    type: 'EQUIP_SPECIAL_EQUIPMENT',
-    equipmentId: equipped ? null : capturerEquipment.id,
-  });
-});
-
 byId<HTMLButtonElement>('purchase-hangar-slot').addEventListener('click', () => {
   store.dispatch({ type: 'PURCHASE_HANGAR_SLOT' });
 });
@@ -4014,14 +3906,6 @@ constructLaboratoryButton.addEventListener('click', () => {
 constructWorkshopButton.addEventListener('click', () => {
   store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
   showToast(t('toast.constructionStarted'));
-});
-
-startBlueprintResearchButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'START_BLUEPRINT_RESEARCH',
-    blueprintId: capturerBlueprint.id,
-  });
-  showToast(t('toast.researchStarted'));
 });
 
 startContainmentResearchButton.addEventListener('click', () => {
@@ -4079,14 +3963,6 @@ manufactureCanisterButton.addEventListener('click', () => {
     type: 'MANUFACTURE_RESEARCH_WEAPON',
     blueprintId: canisterBlueprint.id,
     quantity: readProductionQuantity(productionQtyCanister),
-  });
-  showToast(t('toast.productionStarted'));
-});
-
-manufactureCapturerButton.addEventListener('click', () => {
-  store.dispatch({
-    type: 'MANUFACTURE_EQUIPMENT',
-    equipmentId: capturerEquipment.id,
   });
   showToast(t('toast.productionStarted'));
 });
@@ -4192,7 +4068,7 @@ function launchSortie(): void {
         lastSettlementSummary = summarizeSortiePayoff(
           beforeSettlement,
           afterSettlement,
-          capturerBlueprint.id,
+          '',
           result.outcome,
         );
         showToast(t('toast.sortieComplete', {
@@ -4203,7 +4079,6 @@ function launchSortie(): void {
         renderCombatWeaponControl();
       },
       () => store.getSnapshot().base.equippedPrimaryWeaponIds,
-      () => store.getSnapshot().base.equippedEquipmentId,
       () => store.getSnapshot().base.credits,
       () => store.getSnapshot().base.manufacturedWeaponUpgradeIds,
       () => store.getSnapshot().base.sortiesCompleted,
@@ -4493,15 +4368,6 @@ function renderResearchCards(): void {
     cards.push({ title, domain, status, requirements, progress, outcome, visible });
   };
 
-  pushBlueprint(
-    capturerBlueprint.id,
-    t('programme.title'),
-    'earth',
-    state.base.telemetryRecorded === false
-      ? t('research.cardRequiresTelemetry')
-      : labBuilt && hasScientist ? t('research.cardReady') : t('research.cardRequiresLab'),
-    t('programme.equipment'),
-  );
   pushBlueprint(
     containmentBlueprint.id,
     t('containment.title'),

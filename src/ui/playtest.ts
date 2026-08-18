@@ -1,9 +1,7 @@
 import { contentCatalog } from '../content/catalog';
 import {
   alienTechnologyId,
-  blueprintId,
   buildingId,
-  equipmentId,
   staffRoleId,
 } from '../content/ids';
 import { createInitialGameState } from '../domain/initial-state';
@@ -42,8 +40,8 @@ function createStage4PlaytestState(): GameState {
         progressMultiplier: 1,
         salaryMultiplier: 1,
       }],
-      unlockedBlueprintIds: [blueprintId.alienTechnologyCapturer],
-      manufacturedEquipmentIds: [equipmentId.alienTechnologyCapturer],
+      unlockedBlueprintIds: [],
+      manufacturedEquipmentIds: [],
     },
   };
 }

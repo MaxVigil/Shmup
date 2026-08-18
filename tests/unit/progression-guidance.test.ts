@@ -13,9 +13,6 @@ const definitions: ProgressionDefinitions = {
   laboratoryId: buildingId.researchCentre,
   workshopId: buildingId.productionWorks,
   scientistRoleId: contentCatalog.staffRoles[0].id,
-  engineerRoleId: contentCatalog.staffRoles[1].id,
-  blueprintId: contentCatalog.blueprints[0].id,
-  equipmentId: contentCatalog.equipment[0].id,
   containmentBlueprintId: contentCatalog.buildingBlueprints[0].id,
   quarantineId: buildingId.quarantineCentre,
   adaptedBlueprintId: contentCatalog.adaptedWeaponBlueprints[0].id,
@@ -23,7 +20,7 @@ const definitions: ProgressionDefinitions = {
 };
 
 describe('progression guidance', () => {
-  it('guides a fresh profile through each Capturer prerequisite in order', () => {
+  it('guides a fresh profile through buildings, staff, and the warden signal', () => {
     const initial = createInitialGameState();
     expect(getProgressionObjective(initial, definitions).kind).toBe('build-laboratory');
 
@@ -42,64 +39,14 @@ describe('progression guidance', () => {
     };
     expect(getProgressionObjective(staffed, definitions).kind).toBe('build-workshop');
 
-    const researching = {
+    const withWorkshop = {
       ...staffed,
       base: {
         ...staffed.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [
-          ...staffed.base.staff,
-          staffMember('engineer-1', definitions.engineerRoleId),
-        ],
-        researchQueue: [{ blueprintId: definitions.blueprintId, progress: 1, requiredProgress: 3 }],
-        telemetryRecorded: true,
       },
     };
-    expect(getProgressionObjective(researching, definitions)).toMatchObject({
-      kind: 'advance-blueprint',
-      progress: 1,
-      requiredProgress: 3,
-    });
-  });
-
-  it('ends with equipping the manufactured Capturer and recovering an artefact', () => {
-    const initial = createInitialGameState();
-    const ready = {
-      ...initial,
-      base: {
-        ...initial.base,
-        constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [
-          staffMember('scientist-1', definitions.scientistRoleId),
-          staffMember('engineer-1', definitions.engineerRoleId),
-        ],
-        unlockedBlueprintIds: [definitions.blueprintId],
-        manufacturedEquipmentIds: [definitions.equipmentId],
-        telemetryRecorded: true,
-      },
-    };
-
-    expect(getProgressionObjective(ready, definitions).kind).toBe('equip-equipment');
-    expect(getProgressionObjective({
-      ...ready,
-      base: { ...ready.base, equippedEquipmentId: definitions.equipmentId },
-    }, definitions).kind).toBe('recover-artefact');
-  });
-
-  it('requires a lead engineer before manufacturing a researched blueprint', () => {
-    const initial = createInitialGameState();
-    const withoutEngineer = {
-      ...initial,
-      base: {
-        ...initial.base,
-        constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
-        unlockedBlueprintIds: [definitions.blueprintId],
-        telemetryRecorded: true,
-      },
-    };
-
-    expect(getProgressionObjective(withoutEngineer, definitions).kind).toBe('hire-engineer');
+    expect(getProgressionObjective(withWorkshop, definitions).kind).toBe('await-warden-signal');
   });
 
   it('routes a recovered sample through the containment chain', () => {
@@ -109,13 +56,7 @@ describe('progression guidance', () => {
       base: {
         ...initial.base,
         constructedBuildingIds: [definitions.laboratoryId, definitions.workshopId],
-        staff: [
-          staffMember('scientist-1', definitions.scientistRoleId),
-          staffMember('engineer-1', definitions.engineerRoleId),
-        ],
-        unlockedBlueprintIds: [definitions.blueprintId],
-        manufacturedEquipmentIds: [definitions.equipmentId],
-        equippedEquipmentId: definitions.equipmentId,
+        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
         preservedTechnologyIds: [contentCatalog.alienTechnologies[0].id],
         telemetryRecorded: true,
       },
@@ -144,10 +85,7 @@ describe('progression guidance', () => {
       base: {
         ...researching.base,
         researchQueue: [],
-        unlockedBlueprintIds: [
-          definitions.blueprintId,
-          definitions.containmentBlueprintId,
-        ],
+        unlockedBlueprintIds: [definitions.containmentBlueprintId],
       },
     };
     expect(getProgressionObjective(unlocked, definitions).kind).toBe('construct-quarantine');
@@ -177,17 +115,8 @@ describe('progression guidance', () => {
           definitions.workshopId,
           definitions.quarantineId,
         ],
-        staff: [
-          staffMember('scientist-1', definitions.scientistRoleId),
-          staffMember('engineer-1', definitions.engineerRoleId),
-        ],
-        unlockedBlueprintIds: [
-          definitions.blueprintId,
-          definitions.containmentBlueprintId,
-          definitions.adaptedBlueprintId,
-        ],
-        manufacturedEquipmentIds: [definitions.equipmentId],
-        equippedEquipmentId: definitions.equipmentId,
+        staff: [staffMember('scientist-1', definitions.scientistRoleId)],
+        unlockedBlueprintIds: [definitions.adaptedBlueprintId],
         telemetryRecorded: true,
       },
     };
@@ -220,7 +149,7 @@ describe('progression guidance', () => {
     expect(getProgressionObjective(equipped, definitions).kind).toBe('recover-artefact');
   });
 
-  it('waits for Warden telemetry before opening the Capturer programme', () => {
+  it('waits for Warden telemetry before opening the research chain', () => {
     const initial = createInitialGameState();
     const staffed = {
       ...initial,
@@ -236,6 +165,6 @@ describe('progression guidance', () => {
       ...staffed,
       base: { ...staffed.base, telemetryRecorded: true },
     };
-    expect(getProgressionObjective(withTelemetry, definitions).kind).toBe('start-blueprint');
+    expect(getProgressionObjective(withTelemetry, definitions).kind).toBe('recover-artefact');
   });
 });

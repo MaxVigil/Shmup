@@ -167,56 +167,6 @@ describe('game store M3a cycle', () => {
     );
   });
 
-  it('researches, constructs, and manufactures the Capturer across sorties', () => {
-    const initial = createGameStore().getSnapshot();
-    const store = createGameStore({
-      ...initial,
-      base: {
-        ...initial.base,
-        credits: 2_000_000,
-        materials: 100,
-        telemetryRecorded: true,
-        constructedBuildingIds: [buildingId.researchCentre],
-        staff: [staffMember('scientist-1', contentCatalog.staffRoles[0].id)],
-      },
-    });
-    const workshop = buildingById(buildingId.productionWorks)!;
-    const engineer = contentCatalog.staffRoles[1];
-    const blueprint = contentCatalog.blueprints[0];
-    const equipment = contentCatalog.equipment[0];
-    const outcome = {
-      extracted: true,
-      materialsFound: 10,
-      researchFound: 0,
-      preservedTechnologyIds: [],
-      targetsDestroyed: 25,
-      targetsBreached: 0,
-      creditsEarned: 300_000,
-      creditsPenalized: 0,
-      wardenSignalDetected: false,
-    } as const;
-
-    store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
-    for (let index = 0; index < blueprint.requiredProgress; index += 1) {
-      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    }
-    expect(store.getSnapshot().base.unlockedBlueprintIds).toEqual([blueprint.id]);
-
-    store.dispatch({ type: 'CONSTRUCT_BUILDING', buildingId: workshop.id });
-    for (let index = 0; index < 2; index += 1) {
-      store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    }
-    expect(store.getSnapshot().base.constructedBuildingIds).toContain(workshop.id);
-
-    store.dispatch({ type: 'HIRE_STAFF', roleId: engineer.id });
-    store.dispatch({ type: 'MANUFACTURE_EQUIPMENT', equipmentId: equipment.id });
-    store.dispatch({ type: 'SETTLE_SORTIE', outcome });
-    expect(store.getSnapshot().base.manufacturedEquipmentIds).toEqual([equipment.id]);
-
-    store.dispatch({ type: 'EQUIP_SPECIAL_EQUIPMENT', equipmentId: equipment.id });
-    expect(store.getSnapshot().base.equippedEquipmentId).toBe(equipment.id);
-  });
-
   it('runs the market-blueprint, local-production, and Accelerator-upgrade commands', () => {
     const initialStore = createGameStore();
     const initial = initialStore.getSnapshot();
@@ -296,46 +246,6 @@ describe('game store M3a cycle', () => {
       });
     }
     expect(store.getSnapshot().base.manufacturedWeaponUpgradeIds).toEqual([upgrade.id]);
-  });
-
-  it('gates the Capturer project behind recorded Warden telemetry', () => {
-    const initial = createGameStore().getSnapshot();
-    const store = createGameStore({
-      ...initial,
-      base: {
-        ...initial.base,
-        credits: 2_000_000,
-        materials: 100,
-        constructedBuildingIds: [buildingId.researchCentre],
-      },
-    });
-    const scientist = contentCatalog.staffRoles[0];
-    const blueprint = contentCatalog.blueprints[0];
-
-    store.dispatch({ type: 'HIRE_STAFF', roleId: scientist.id });
-
-    expect(() =>
-      store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id }),
-    ).toThrow('requires Warden telemetry');
-
-    store.dispatch({
-      type: 'SETTLE_SORTIE',
-      outcome: {
-        extracted: true,
-        materialsFound: 10,
-        researchFound: 0,
-        preservedTechnologyIds: [],
-        targetsDestroyed: 20,
-        targetsBreached: 0,
-        creditsEarned: 200_000,
-        creditsPenalized: 0,
-        wardenSignalDetected: true,
-      },
-    });
-    expect(store.getSnapshot().base.telemetryRecorded).toBe(true);
-
-    store.dispatch({ type: 'START_BLUEPRINT_RESEARCH', blueprintId: blueprint.id });
-    expect(store.getSnapshot().base.researchQueue[0]?.blueprintId).toBe(blueprint.id);
   });
 
   it('researches and manufactures the Canister Aircraft Cannon', () => {

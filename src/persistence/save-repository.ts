@@ -2,9 +2,7 @@ import { contentCatalog } from '../content/catalog';
 import {
   aircraftById,
   aircraftId,
-  blueprintId,
   buildingId,
-  equipmentId,
   staffRoleId,
   STARTER_BUILDING_IDS,
   weaponId,
@@ -454,8 +452,8 @@ function normalizeResearchQueue(value: readonly unknown[]): BaseState['researchQ
 }
 
 function hadCapturerProgress(base: Record<string, unknown>): boolean {
-  const capturerBlueprintId = blueprintId.alienTechnologyCapturer;
-  const capturerEquipmentId = equipmentId.alienTechnologyCapturer;
+  const capturerBlueprintId = 'blueprint-alien-technology-capturer';
+  const capturerEquipmentId = 'equipment-alien-technology-capturer';
   const unlocked = Array.isArray(base.unlockedBlueprintIds)
     ? (base.unlockedBlueprintIds as readonly unknown[])
     : [];

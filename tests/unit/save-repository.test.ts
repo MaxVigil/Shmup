@@ -171,7 +171,7 @@ describe('save repository', () => {
   it('migrates manufactured Capturer progress from v4 into an empty loadout slot', () => {
     const storage = createMemoryStorage();
     const initial = createInitialGameState();
-    const capturer = contentCatalog.equipment[0];
+    const capturer = { id: 'equipment-alien-technology-capturer' };
     storage.setItem(LEGACY_V4_SAVE_KEY, JSON.stringify({
       ...initial,
       schemaVersion: 4,
@@ -296,7 +296,7 @@ describe('save repository', () => {
       schemaVersion: 8,
       base: {
         ...v8Base,
-        unlockedBlueprintIds: [contentCatalog.blueprints[0].id],
+        unlockedBlueprintIds: ['blueprint-alien-technology-capturer'],
       },
     }));
 

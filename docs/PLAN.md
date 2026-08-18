@@ -658,7 +658,11 @@ threats.
   right-click during the elite intercept and stuns the Warden; defeating a stunned
   elite recovers the artefact without the Capturer (Capturer kept as a fallback for
   now). New `getEquippedHardpointItemIds` combat callback.
-- [ ] E3.2b — full Capturer removal (equipment/blueprint/UI/i18n/save migration).
+- [x] E3.2b — full Capturer removal: the Alien Technology Capturer
+  (equipment/blueprint/UI/i18n/combat-gate) is deleted from the catalog and ids; stun is
+  the only alien-recovery path. Legacy saves keep their content (`hadCapturerProgress`
+  still sets telemetry for old ids); the generic special-equipment state and commands
+  stay as future-proof infrastructure.
 - [x] E3.3a — auxiliary Rocket Pod fires in combat: the hardpoint rocket pod reuses the
   rocket path and consumes the new `consumable-rocket` ammo (per-sortie, deducted on
   settlement via `auxiliaryAmmoConsumed` + `getAmmunitionStock` callback).

@@ -78,11 +78,9 @@ export const aircraftId = {
 } as const;
 
 export const equipmentId = {
-  alienTechnologyCapturer: 'equipment-alien-technology-capturer',
 } as const;
 
 export const blueprintId = {
-  alienTechnologyCapturer: 'blueprint-alien-technology-capturer',
 } as const;
 
 export const consumableId = {

@@ -1,4 +1,8 @@
-import type { ContentCatalog } from './model';
+import type {
+  BlueprintDefinition,
+  ContentCatalog,
+  EquipmentDefinition,
+} from './model';
 
 export const contentCatalog = {
   weapons: [
@@ -306,17 +310,7 @@ export const contentCatalog = {
       maximumHeadcount: null,
     },
   ],
-  blueprints: [
-    {
-      id: 'blueprint-alien-technology-capturer',
-      researchDomain: 'earth',
-      requiredProgress: 3,
-      researchCreditCost: 120_000,
-      requiredBuildingId: 'building-research-centre',
-      requiredStaffRoleId: 'staff-scientist',
-      outputEquipmentId: 'equipment-alien-technology-capturer',
-    },
-  ],
+  blueprints: [] as readonly BlueprintDefinition[],
   buildingBlueprints: [
     {
       id: 'blueprint-safe-containment',
@@ -365,16 +359,7 @@ export const contentCatalog = {
       requiredProductionStaffRoleId: 'staff-engineer',
     },
   ],
-  equipment: [
-    {
-      id: 'equipment-alien-technology-capturer',
-      creditCost: 250_000,
-      materialCost: 10,
-      productionSorties: 1,
-      requiredBuildingId: 'building-production-works',
-      requiredStaffRoleId: 'staff-engineer',
-    },
-  ],
+  equipment: [] as readonly EquipmentDefinition[],
   marketWeaponBlueprints: [
     {
       id: 'blueprint-impulse-accelerator-production',

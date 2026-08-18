@@ -154,13 +154,6 @@ export function buildAppTemplate(initialState: GameState): string {
                 <button id="research-canister" class="base-action" type="button"></button>
               </article>
             </div>
-            <div class="special-project">
-              <p class="technology-lab__eyebrow" id="programme-eyebrow"></p>
-              <h3 id="capturer-programme-title"></h3>
-              <p id="blueprint-status" class="technology-lab__status"></p>
-              <small id="blueprint-contribution" class="programme-note"></small>
-              <button id="start-blueprint-research" class="base-action" type="button"></button>
-            </div>
             <div class="containment-programme" id="containment-programme" hidden>
               <p class="technology-lab__eyebrow" id="containment-eyebrow"></p>
               <h3 id="containment-title"></h3>
@@ -222,10 +215,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <div id="aircraft-production-list" class="candidate-list" aria-live="polite"></div>
             <h3 class="hangar-subtitle" id="aircraft-upgrade-production-title"></h3>
             <div id="aircraft-upgrade-production-list" class="candidate-list" aria-live="polite"></div>
-            <div id="capturer-equipment-row" class="facility-row programme-equipment">
-              <div><span class="loadout-row__label" id="capturer-equipment-label"></span><strong id="capturer-equipment-status"></strong><small id="capturer-equipment-note"></small></div>
-              <button id="manufacture-capturer" class="base-action is-primary" type="button"></button>
-            </div>
             <div id="accelerator-production-row" class="facility-row programme-equipment" hidden>
               <div><span class="loadout-row__label" id="accelerator-production-label"></span><strong id="accelerator-production-status"></strong><small id="accelerator-production-note"></small></div>
               <div class="production-qty">

@@ -5,13 +5,15 @@ describe('base information architecture', () => {
   it.each([
     ['build-laboratory', 'engineering'],
     ['hire-scientist', 'research'],
-    ['hire-engineer', 'engineering'],
-    ['start-blueprint', 'research'],
-    ['advance-blueprint', 'research'],
     ['build-workshop', 'engineering'],
-    ['manufacture-equipment', 'engineering'],
-    ['equip-equipment', 'hangar'],
     ['recover-artefact', 'hangar'],
+    ['start-containment', 'research'],
+    ['advance-containment', 'research'],
+    ['construct-quarantine', 'engineering'],
+    ['analyse-sample', 'research'],
+    ['manufacture-adapted-weapon', 'engineering'],
+    ['equip-adapted-weapon', 'hangar'],
+    ['await-warden-signal', 'hangar'],
   ] as const)('routes %s to %s', (objective, section) => {
     expect(sectionForObjective(objective)).toBe(section);
   });

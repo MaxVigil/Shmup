@@ -3,12 +3,7 @@ import type { GameState } from './model';
 export type ProgressionObjectiveKind =
   | 'build-laboratory'
   | 'hire-scientist'
-  | 'hire-engineer'
-  | 'start-blueprint'
-  | 'advance-blueprint'
   | 'build-workshop'
-  | 'manufacture-equipment'
-  | 'equip-equipment'
   | 'recover-artefact'
   | 'start-containment'
   | 'advance-containment'
@@ -21,10 +16,7 @@ export type ProgressionObjectiveKind =
 export interface ProgressionDefinitions {
   readonly laboratoryId: string;
   readonly scientistRoleId: string;
-  readonly engineerRoleId: string;
-  readonly blueprintId: string;
   readonly workshopId: string;
-  readonly equipmentId: string;
   readonly containmentBlueprintId: string;
   readonly quarantineId: string;
   readonly adaptedBlueprintId: string;
@@ -52,27 +44,6 @@ export function getProgressionObjective(
   }
   if (!state.base.telemetryRecorded) {
     return { kind: 'await-warden-signal', progress: null, requiredProgress: null };
-  }
-  if (!state.base.unlockedBlueprintIds.includes(definitions.blueprintId)) {
-    const project = state.base.researchQueue.find(
-      (entry) => entry.blueprintId === definitions.blueprintId,
-    );
-    return project === undefined
-      ? { kind: 'start-blueprint', progress: null, requiredProgress: null }
-      : {
-          kind: 'advance-blueprint',
-          progress: project.progress,
-          requiredProgress: project.requiredProgress,
-        };
-  }
-  if (!state.base.manufacturedEquipmentIds.includes(definitions.equipmentId)) {
-    if (!state.base.staff.some((member) => member.roleId === definitions.engineerRoleId)) {
-      return { kind: 'hire-engineer', progress: null, requiredProgress: null };
-    }
-    return { kind: 'manufacture-equipment', progress: null, requiredProgress: null };
-  }
-  if (state.base.equippedEquipmentId !== definitions.equipmentId) {
-    return { kind: 'equip-equipment', progress: null, requiredProgress: null };
   }
   const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(
     definitions.adaptedBlueprintId,

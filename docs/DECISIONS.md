@@ -258,3 +258,23 @@ defence, dash, and sharp lateral movement are also counters.
 
 **Consequence:** Decoy values (lifetime, attraction radius, charges) get a concrete
 threat to balance against; homing stays dodgeable via limited turn rate.
+
+## 19. Capturer removed: stun is the only alien-recovery path (implemented)
+
+**Context:** Decision #11 chose the stun-Capturer model with the Capturer device kept
+as a transitional fallback.
+
+**Decision:** The Alien Technology Capturer is fully removed from the shipped build —
+catalog (`blueprints`/`equipment` are empty), `content/ids.ts`, CombatScene recovery
+gating, the Research/Engineering UI, template, i18n (en/uk/zh), and the store's
+blueprint telemetry gate. Stunning the Warden is the only way to recover alien
+technology. Legacy saves that still carry the old Capturer ids keep their content
+(`hadCapturerProgress` still derives `telemetryRecorded` from them); the generic
+`equippedEquipmentId` / `manufacturedEquipmentIds` state and
+`EQUIP_SPECIAL_EQUIPMENT` / `MANUFACTURE_EQUIPMENT` commands remain as
+future-proof infrastructure for a later equipment item.
+
+**Consequence:** `progression-guidance` routes workshop + telemetry directly to
+artefact recovery → containment → adaptation; the Warden "destroyed without recovery"
+ending reads `combat.wardenDestroyedNoRecovery`. Legacy saves are compatible without a
+new schema bump.
