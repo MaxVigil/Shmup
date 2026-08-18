@@ -323,6 +323,8 @@ export const zh = {
   'arsenal.overloadWarning': '超载——请移除装备或重新配置。',
   'arsenal.productionNote': '辅助武器与模块将在研究/生产阶段解锁（规划中）。',
   'arsenal.playtestNote': '测试模式——所有挂点装备可用。',
+  'arsenal.ammoTitle': '弹药',
+  'arsenal.buy': '购买 {count} · {credits}',
   'sortie.activeWeapon': '当前主武器',
   'sortie.switchWeapon': '[X] 切换武器',
   'sortie.switchReady': '两个主武器槽均在线。',

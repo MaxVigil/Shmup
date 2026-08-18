@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aircraftId, buildingById, buildingId, moduleId } from '../../src/content/ids';
+import { aircraftId, ammunitionId, buildingById, buildingId, moduleId } from '../../src/content/ids';
 
 import { staffMember } from './test-state';
 import { createGameStore, setInstantProjectsEnabled } from '../../src/app/store';
@@ -922,6 +922,21 @@ describe('game store arsenal loadout commands', () => {
     expect(store.getSnapshot().base.aircraftMarks[aircraftId.india]).toBe(2);
     store.dispatch({ type: 'SET_AIRCRAFT_MARK', mark: 1 });
     expect(store.getSnapshot().base.aircraftMarks[aircraftId.india]).toBeUndefined();
+  });
+
+  it('purchases ammunition through the store', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: { ...initial.base, credits: 10_000 },
+    });
+    store.dispatch({
+      type: 'PURCHASE_AMMUNITION',
+      ammunitionId: ammunitionId.rocket,
+      count: 5,
+    });
+    expect(store.getSnapshot().base.consumableStock[ammunitionId.rocket]).toBe(5);
+    expect(store.getSnapshot().base.credits).toBe(10_000 - 40 * 5);
   });
 });
 

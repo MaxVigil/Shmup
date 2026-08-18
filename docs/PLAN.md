@@ -638,8 +638,12 @@ threats.
   `?hardpointsReady=true` that exposes all auxiliary/module items; normal mode shows
   a "unlocks with production" note. i18n keys en/uk/zh added. Human check on
   `npm run dev?hardpointsReady=true` still required.
-- [ ] E2b-3 — finite ammunition (produce → load → consume) and aircraft Mark II/III
-  research/manufacture pipeline.
+- [x] E2b-3a — finite ammunition foundation: `purchaseAmmunition` (market purchase
+  into the shared stock, credit check), ammunition weight in the aircraft loadout
+  (`aircraftAmmunitionWeight`), `PURCHASE_AMMUNITION` store command, Hangar ammo
+  stock/buy rows (i18n en/uk/zh).
+- [ ] E2b-3b — per-sortie ammunition loading/consumption, Engineering production of
+  ammunition, and the aircraft Mark II/III research/manufacture → apply pipeline.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
   drones/mines → homing/decoys → alien.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,

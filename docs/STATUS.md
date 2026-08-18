@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-18
 
+## Epic E2b-3a — Finite ammunition foundation
+
+Implemented on `test`.
+
+- `arsenal-loadout.ts` gained `purchaseAmmunition` (credit-checked market purchase
+  into the shared `consumableStock`), `ammunitionStock` / `ammunitionWeightOf` /
+  `aircraftAmmunitionWeight`; `aircraftLoadoutWeight` now includes stocked ammunition
+  for installed auxiliary weapons.
+- `GameCommand` gained `PURCHASE_AMMUNITION` (store dispatch + tests).
+- Hangar `#arsenal-hardpoints` panel now shows an AMMUNITION section: per-type stock
+  and weight plus a buy button (disabled when bankrupt/insufficient credits). i18n
+  keys `arsenal.ammoTitle` / `arsenal.buy` in en/uk/zh.
+- 249 unit tests, lint, typecheck, and the production build pass. Remaining E2b-3b:
+  per-sortie loading/consumption, Engineering production, aircraft Mark II/III
+  research/manufacture pipeline.
+
 ## Epic E2b-2 — Hangar hardpoint UI
 
 Implemented on `test`.

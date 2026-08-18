@@ -1,10 +1,12 @@
-import type { BaseState } from './model';
+import type { BaseState, GameState } from './model';
 import {
   aircraftLoadoutByAircraftId,
+  ammunitionById,
   auxiliaryById,
   moduleById,
   weaponFamilyById,
 } from '../content/ids';
+import { addConsumables } from './armory';
 import { effectiveDamageMultiplier } from './loadout';
 
 /** Legacy primary weapon id → new weapon family id (E1 reuse mapping). */
@@ -53,7 +55,8 @@ function hardpointItemEnergy(itemId: string): number {
   return mod ? mod.energyDraw : 0;
 }
 
-/** Total installed weight of an aircraft: primary weapons + hardpoint items. */
+/** Total installed weight of an aircraft: primary weapons + hardpoint items
+ *  + loaded ammunition for installed auxiliary weapons. */
 export function aircraftLoadoutWeight(
   base: BaseState,
   aircraftId: string,
@@ -66,7 +69,7 @@ export function aircraftLoadoutWeight(
     (sum, id) => (id === null ? sum : sum + hardpointItemWeight(id)),
     0,
   );
-  return primary + hardpoints;
+  return primary + hardpoints + aircraftAmmunitionWeight(base, aircraftId);
 }
 
 /** Total installed energy draw of an aircraft. */
@@ -188,4 +191,63 @@ export function effectiveAircraftDamageMultiplier(
     return 1;
   }
   return effectiveDamageMultiplier(entry, aircraftMark(base, aircraftId));
+}
+
+// ==== Finite ammunition ====
+
+export function ammunitionStock(base: BaseState, ammunitionId: string): number {
+  return base.consumableStock[ammunitionId] ?? 0;
+}
+
+/** Weight of the currently stocked ammunition units. */
+export function ammunitionWeightOf(
+  base: BaseState,
+  ammunitionId: string,
+): number {
+  const ammo = ammunitionById(ammunitionId);
+  const stock = ammunitionStock(base, ammunitionId);
+  return ammo === undefined ? 0 : ammo.weightPerUnit * stock;
+}
+
+/** Total ammunition weight carried by an aircraft's installed auxiliary weapons. */
+export function aircraftAmmunitionWeight(
+  base: BaseState,
+  aircraftId: string,
+): number {
+  return hardpointSlotsOf(base, aircraftId).reduce((sum, itemId) => {
+    if (itemId === null) {
+      return sum;
+    }
+    const aux = auxiliaryById(itemId);
+    if (aux === undefined || aux.ammoConsumableId === null) {
+      return sum;
+    }
+    return sum + ammunitionWeightOf(base, aux.ammoConsumableId);
+  }, 0);
+}
+
+/** Buys ammunition units from the recovery budget into the shared stock. */
+export function purchaseAmmunition(
+  state: GameState,
+  ammunitionId: string,
+  count: number,
+): GameState {
+  const ammo = ammunitionById(ammunitionId);
+  if (ammo === undefined) {
+    throw new Error(`Unknown ammunition ${ammunitionId}.`);
+  }
+  if (!Number.isInteger(count) || count <= 0) {
+    throw new RangeError('Ammunition count must be a positive integer.');
+  }
+  const cost = ammo.costCredits * count;
+  if (state.base.credits < cost) {
+    throw new Error(`Ammunition ${ammunitionId} requires ${cost} credits.`);
+  }
+  return {
+    ...state,
+    base: {
+      ...addConsumables(state.base, ammunitionId, count),
+      credits: state.base.credits - cost,
+    },
+  };
 }

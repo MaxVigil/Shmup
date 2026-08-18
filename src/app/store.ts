@@ -45,6 +45,7 @@ import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import {
   installHardpointItem,
+  purchaseAmmunition,
   removeHardpointItem,
   setAircraftMark,
 } from '../domain/arsenal-loadout';
@@ -234,6 +235,11 @@ export type GameCommand =
     }
   | { readonly type: 'REMOVE_HARDPOINT_ITEM'; readonly slotIndex: number }
   | { readonly type: 'SET_AIRCRAFT_MARK'; readonly mark: number }
+  | {
+      readonly type: 'PURCHASE_AMMUNITION';
+      readonly ammunitionId: string;
+      readonly count: number;
+    }
   | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
   | { readonly type: 'DEBUG_COMPLETE_RESEARCH' };
 
@@ -913,6 +919,13 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           };
           break;
         }
+        case 'PURCHASE_AMMUNITION':
+          state = purchaseAmmunition(
+            state,
+            command.ammunitionId,
+            command.count,
+          );
+          break;
       }
 
       if (instantProjectsEnabled) {

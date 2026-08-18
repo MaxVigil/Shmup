@@ -1525,6 +1525,37 @@ function renderArsenalHardpoints(): void {
     note.textContent = t('arsenal.productionNote');
     container.appendChild(note);
   }
+
+  const ammoHeading = document.createElement('strong');
+  ammoHeading.textContent = t('arsenal.ammoTitle');
+  container.appendChild(ammoHeading);
+  const bankrupt = isBankrupt(state.base.credits);
+  for (const ammo of contentCatalog.ammunition) {
+    const row = document.createElement('div');
+    row.className = 'loadout-row';
+    const label = document.createElement('span');
+    label.className = 'loadout-row__label';
+    label.textContent = localize(ammo.name, getLocale());
+    const count = document.createElement('strong');
+    const stock = state.base.consumableStock[ammo.id] ?? 0;
+    count.textContent = `×${stock} · ${ammo.weightPerUnit * stock} wt`;
+    row.appendChild(label);
+    row.appendChild(count);
+    const buy = document.createElement('button');
+    buy.className = 'base-action';
+    buy.type = 'button';
+    buy.textContent = t('arsenal.buy', { count: 1, credits: ammo.costCredits });
+    buy.disabled = bankrupt || state.base.credits < ammo.costCredits;
+    buy.addEventListener('click', () => {
+      store.dispatch({
+        type: 'PURCHASE_AMMUNITION',
+        ammunitionId: ammo.id,
+        count: 1,
+      });
+    });
+    row.appendChild(buy);
+    container.appendChild(row);
+  }
 }
 
 function renderWarehouse(): void {
