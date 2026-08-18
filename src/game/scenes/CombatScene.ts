@@ -105,6 +105,10 @@ const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
 const STUN_MODULE_ID = auxiliaryId.stunModule;
 const AUX_ROCKET_POD_ID = auxiliaryId.rocketPod;
 const AUX_DRONE_SWARM_ID = auxiliaryId.ukrainianDroneSwarm;
+const AUX_FLARE_DECOY_ID = auxiliaryId.flareDecoyLauncher;
+const DECOY_LIFETIME_MS = 4_000;
+const DECOY_ATTRACTION_RADIUS = 160;
+const DECOY_DRIFT_SPEED = 40;
 const AUX_MISSILE_IDS = [
   auxiliaryId.homingMissileRack,
   auxiliaryId.heavyTorpedoLauncher,
@@ -145,6 +149,13 @@ interface HostileShot {
   readonly damage: number;
   readonly vx: number;
   readonly vy: number;
+}
+
+interface DecoyActor {
+  readonly body: Phaser.GameObjects.Rectangle;
+  readonly attractionRadius: number;
+  readonly lifetimeMs: number;
+  elapsedMs: number;
 }
 
 interface HomingMissileActor {
@@ -218,6 +229,7 @@ export class CombatScene extends Phaser.Scene {
   private readonly shots: ShotActor[] = [];
   private readonly hostileShots: HostileShot[] = [];
   private readonly homingMissiles: HomingMissileActor[] = [];
+  private decoy: DecoyActor | null = null;
   private readonly rockets: RocketActor[] = [];
   private readonly drones: DroneActor[] = [];
   private readonly enemies: EnemyActor[] = [];
@@ -430,6 +442,14 @@ export class CombatScene extends Phaser.Scene {
         }
       });
     }
+    if (this.equippedHardpointItemIds.includes(AUX_FLARE_DECOY_ID)) {
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireDecoy());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireDecoy();
+        }
+      });
+    }
   }
 
   public setPointerFollowLock(locked: boolean): void {
@@ -495,6 +515,7 @@ export class CombatScene extends Phaser.Scene {
   private resetEncounterState(): void {
     this.shots.length = 0;
     this.homingMissiles.length = 0;
+    this.decoy = null;
     this.enemies.length = 0;
     this.stars.length = 0;
     const stats = this.getAircraftStats();
@@ -624,6 +645,7 @@ export class CombatScene extends Phaser.Scene {
     this.updateEnemies(frameMs);
     this.updateHostileShots(frameMs);
     this.updateHomingMissiles(frameMs);
+    this.updateDecoys(frameMs);
     this.updateRockets(frameMs);
     this.updateDrones(frameMs);
     this.resolveCollisions();
@@ -1438,10 +1460,13 @@ export class CombatScene extends Phaser.Scene {
         this.homingMissiles.splice(index, 1);
         continue;
       }
-      const desired = Math.atan2(
-        this.player.y - missile.body.y,
-        this.player.x - missile.body.x,
-      );
+      const decoy = this.decoy;
+      const decoyActive = decoy !== null &&
+        Math.hypot(decoy.body.x - missile.body.x, decoy.body.y - missile.body.y) <=
+          decoy.attractionRadius;
+      const targetX = decoyActive ? decoy!.body.x : this.player.x;
+      const targetY = decoyActive ? decoy!.body.y : this.player.y;
+      const desired = Math.atan2(targetY - missile.body.y, targetX - missile.body.x);
       let delta = desired - missile.angle;
       while (delta > Math.PI) {
         delta -= Math.PI * 2;
@@ -1454,6 +1479,18 @@ export class CombatScene extends Phaser.Scene {
       const step = missile.speed * (deltaMs / 1000);
       missile.body.x += Math.cos(missile.angle) * step;
       missile.body.y += Math.sin(missile.angle) * step;
+      if (
+        decoyActive &&
+        Phaser.Geom.Intersects.RectangleToRectangle(
+          missile.body.getBounds(),
+          decoy!.body.getBounds(),
+        )
+      ) {
+        missile.body.destroy();
+        this.homingMissiles.splice(index, 1);
+        this.createDestructionBurst(missile.body.x, missile.body.y, 0xffc15c);
+        continue;
+      }
       const hitPlayer =
         this.invulnerableMs <= 0 &&
         Phaser.Geom.Intersects.RectangleToRectangle(
@@ -2070,6 +2107,10 @@ export class CombatScene extends Phaser.Scene {
       missile.body.destroy();
     }
     this.homingMissiles.length = 0;
+    if (this.decoy !== null) {
+      this.decoy.body.destroy();
+      this.decoy = null;
+    }
     for (const rocket of this.rockets) {
       rocket.body.destroy();
     }
@@ -2315,6 +2356,57 @@ export class CombatScene extends Phaser.Scene {
       ) {
         this.explodeDrone(index, drone);
       }
+    }
+  }
+
+  private decoyAmmunitionId(): string | null {
+    return auxiliaryById(AUX_FLARE_DECOY_ID)?.ammoConsumableId ?? null;
+  }
+
+  private tryFireDecoy(): void {
+    if (this.ended || this.ending !== null) {
+      return;
+    }
+    const ammoId = this.decoyAmmunitionId();
+    if (ammoId === null) {
+      return;
+    }
+    const fired = this.auxiliaryAmmoConsumed[ammoId] ?? 0;
+    if (this.getAmmunitionStock(ammoId) <= fired) {
+      return;
+    }
+    if (this.decoy !== null) {
+      this.decoy.body.destroy();
+    }
+    const body = this.add.rectangle(
+      this.player.x,
+      this.player.y - 30,
+      6,
+      6,
+      0xffc15c,
+    );
+    body.setStrokeStyle(1, 0xffe8a0, 0.9);
+    this.decoy = {
+      body,
+      attractionRadius: DECOY_ATTRACTION_RADIUS,
+      lifetimeMs: DECOY_LIFETIME_MS,
+      elapsedMs: 0,
+    };
+    this.auxiliaryAmmoConsumed = {
+      ...this.auxiliaryAmmoConsumed,
+      [ammoId]: fired + 1,
+    };
+  }
+
+  private updateDecoys(deltaMs: number): void {
+    if (this.decoy === null) {
+      return;
+    }
+    this.decoy.elapsedMs += deltaMs;
+    this.decoy.body.y -= DECOY_DRIFT_SPEED * (deltaMs / 1000);
+    if (this.decoy.elapsedMs > this.decoy.lifetimeMs) {
+      this.decoy.body.destroy();
+      this.decoy = null;
     }
   }
 

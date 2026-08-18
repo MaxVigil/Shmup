@@ -147,6 +147,7 @@ export const auxiliaryId = {
   clusterMissilePod: 'aux-cluster-missile-pod',
   ukrainianDroneSwarm: 'aux-ukrainian-drone-swarm',
   stunModule: 'aux-stun-module',
+  flareDecoyLauncher: 'aux-flare-decoy-launcher',
 } as const;
 
 export const moduleId = {
@@ -164,6 +165,7 @@ export const ammunitionId = {
   heavyTorpedo: 'consumable-heavy-torpedo',
   clusterMissile: 'consumable-cluster-missile',
   ukrainianAttackDrone: 'consumable-ukrainian-attack-drone',
+  flareDecoy: 'consumable-flare-decoy',
 } as const;
 
 export const aircraftRole = {

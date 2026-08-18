@@ -156,6 +156,7 @@ Legend: implemented in code, prototype, planned.
 | aux-cluster-missile-pod | cluster | human | consumable-cluster-missile | 2..6 | 105 | 105 | 0 | 5 | 2 | research-production |
 | aux-ukrainian-drone-swarm | drone | human | consumable-ukrainian-attack-drone | 50..100 | 28 | 28 | 0 | 2 | 2 | research-production |
 | aux-stun-module | stun | human | — | 0..0 | 0 | 0 | 5 | 4 | 3 | research-production |
+| aux-flare-decoy-launcher | decoy | human | consumable-flare-decoy | 3..6 | 0 | 0 | 0 | 2 | 1 | research-production |
 
 ## Modules
 
@@ -177,6 +178,7 @@ Legend: implemented in code, prototype, planned.
 | consumable-heavy-torpedo | 1 | 120 cr | aux-heavy-torpedo-launcher |
 | consumable-cluster-missile | 0.9 | 100 cr | aux-cluster-missile-pod |
 | consumable-ukrainian-attack-drone | 0.06 | 6 cr | aux-ukrainian-drone-swarm |
+| consumable-flare-decoy | 0.4 | 25 cr | aux-flare-decoy-launcher |
 
 ## Aircraft loadouts
 

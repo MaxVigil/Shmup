@@ -2,6 +2,21 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.4b — Flares / decoys counter homing threats
+
+Implemented on `test`.
+
+- New hardpoint auxiliary `aux-flare-decoy-launcher` (type `decoy`) + ammunition
+  `consumable-flare-decoy` (weight 0.4, 25 cr); ids added.
+- `CombatScene`: `DecoyActor` + `tryFireDecoy`/`updateDecoys` — Space / right-click
+  deploys a decoy (lifetime 4 s, attraction radius 160, slow upward drift), consuming
+  the decoy ammunition. Enemy homing missiles within the attraction radius steer toward
+  the decoy and are absorbed by it (destroyed) instead of hitting the player.
+- Catalog counts updated in tests (7 auxiliary, 6 ammunition); ENTITIES regenerated.
+- 252 unit tests, lint, typecheck, and the production build pass. Human flight check on
+  `npm run dev?hardpointsReady=true&m2Fast=true` (deploy decoys under Pursuit Missile
+  volleys and watch them divert).
+
 ## Epic E3.4a — Enemy homing threats
 
 Implemented on `test`.

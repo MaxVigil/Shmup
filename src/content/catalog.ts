@@ -1317,6 +1317,25 @@ export const contentCatalog = {
       energyDraw: 3,
       acquisition: 'research-production',
     },
+    {
+      id: 'aux-flare-decoy-launcher',
+      name: { en: 'Flare & Decoy Launcher', uk: 'Пускова установка пасток і теплових пасток', zh: '诱饵弹发射器' },
+      class: 'human',
+      technologyFamily: 'human-kinetic',
+      mount: 'hardpoint',
+      kind: 'auxiliary',
+      type: 'decoy',
+      ammoConsumableId: 'consumable-flare-decoy',
+      chargesPerSortieMin: 3,
+      chargesPerSortieMax: 6,
+      trigger: 'manual',
+      damage: 0,
+      areaRadius: 0,
+      stunDurationSeconds: 0,
+      weight: 2,
+      energyDraw: 1,
+      acquisition: 'research-production',
+    },
   ],
   modules: [
     {
@@ -1404,6 +1423,7 @@ export const contentCatalog = {
     { id: 'consumable-heavy-torpedo', name: { en: 'Heavy Torpedo', uk: 'Важка торпеда', zh: '重型鱼雷' }, weightPerUnit: 1.0, costCredits: 120, usedBy: ['aux-heavy-torpedo-launcher'] },
     { id: 'consumable-cluster-missile', name: { en: 'Cluster Missile', uk: 'Касетна ракета', zh: '集束导弹' }, weightPerUnit: 0.9, costCredits: 100, usedBy: ['aux-cluster-missile-pod'] },
     { id: 'consumable-ukrainian-attack-drone', name: { en: 'Ukrainian Attack Drone', uk: 'Український ударний дрон', zh: '乌克兰攻击无人机' }, weightPerUnit: 0.06, costCredits: 6, usedBy: ['aux-ukrainian-drone-swarm'] },
+    { id: 'consumable-flare-decoy', name: { en: 'Flare / Decoy', uk: 'Пастка / Теплова пастка', zh: '诱饵弹' }, weightPerUnit: 0.4, costCredits: 25, usedBy: ['aux-flare-decoy-launcher'] },
   ],
   aircraftLoadouts: [
     {

@@ -671,8 +671,10 @@ threats.
   mines remain a backlog item (E3.4).
 - [x] E3.4a — enemy homing threats: Gunship fires Pursuit Missiles and Warden fires
   Warden Seekers (turn-rate-limited homing volleys, lifetime-limited and dodgeable).
-- [ ] E3.4b — decoys/flares (redirect homing missiles), alien weapons/modules in
-  combat, mines.
+- [x] E3.4b — flares/decoys: the hardpoint Flare & Decoy Launcher deploys a decoy that
+  attracts and absorbs enemy homing missiles (Space / right-click, consumable
+  `consumable-flare-decoy`); directly counters Pursuit Missiles / Warden Seekers.
+- [ ] E3.4c — alien weapons/modules in combat, mines.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,
   balance invariants (power curve + multiplier guard).
 - [ ] E5 — balance, playtest rounds, backlog triage (23 ideas).

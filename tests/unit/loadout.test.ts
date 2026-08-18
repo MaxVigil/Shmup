@@ -74,9 +74,9 @@ describe('weaponItemId', () => {
 describe('arsenal catalog', () => {
   it('ships the full first-pass arsenal', () => {
     expect(contentCatalog.weaponFamilies).toHaveLength(12);
-    expect(contentCatalog.auxiliary).toHaveLength(6);
+    expect(contentCatalog.auxiliary).toHaveLength(7);
     expect(contentCatalog.modules).toHaveLength(6);
-    expect(contentCatalog.ammunition).toHaveLength(5);
+    expect(contentCatalog.ammunition).toHaveLength(6);
     expect(contentCatalog.aircraftLoadouts).toHaveLength(7);
     expect(() => validateContentCatalog(contentCatalog)).not.toThrow();
   });
