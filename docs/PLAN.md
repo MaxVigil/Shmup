@@ -642,8 +642,13 @@ threats.
   into the shared stock, credit check), ammunition weight in the aircraft loadout
   (`aircraftAmmunitionWeight`), `PURCHASE_AMMUNITION` store command, Hangar ammo
   stock/buy rows (i18n en/uk/zh).
-- [ ] E2b-3b — per-sortie ammunition loading/consumption, Engineering production of
-  ammunition, and the aircraft Mark II/III research/manufacture → apply pipeline.
+- [x] E2b-3b — aircraft Mark II/III research/manufacture → apply: Mark III data added
+  to all 7 aircraft loadouts; `completeProductionJob` sets the aircraft mark when an
+  aircraft-upgrade job finishes (tier 1 → Mark II, tier 2 → Mark III);
+  `effectiveAircraftDamageMultiplier` reflects it (Japan Mark III = 1.9875, inside the
+  2.0 guard).
+- [ ] E3 — per-sortie ammunition loading/consumption and Engineering production of
+  ammunition (deferred from E2); combat wiring of the arsenal.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →
   drones/mines → homing/decoys → alien.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,

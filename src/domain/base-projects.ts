@@ -2,6 +2,7 @@ import { contentCatalog } from '../content/catalog';
 import type { EquipmentDefinition } from '../content/model';
 import type { BaseState, ConstructionJobState, GameState, ProductionJobState } from './model';
 import { addWeaponStock } from './armory';
+import { setAircraftMark } from './arsenal-loadout';
 import { operationsSpeedMultiplier, staffContribution } from './staff-market';
 
 /* =====================================================================
@@ -385,12 +386,29 @@ function completeProductionJob(base: BaseState, job: ProductionJobState): BaseSt
     };
   }
   if (job.kind === 'aircraft-upgrade') {
-    return {
+    let next: BaseState = {
       ...base,
       manufacturedAircraftUpgradeIds: [
         ...new Set([...base.manufacturedAircraftUpgradeIds, job.projectId]),
       ],
     };
+    const upgrade = contentCatalog.aircraftUpgrades.find(
+      (entry) => entry.id === job.projectId,
+    );
+    if (upgrade !== undefined) {
+      const blueprint = contentCatalog.aircraftBlueprints.find(
+        (entry) => entry.id === upgrade.aircraftBlueprintId,
+      );
+      if (blueprint !== undefined) {
+        const mark = upgrade.tier === 1 ? 2 : 3;
+        for (const aircraftId of next.hangarSlots) {
+          if (aircraftId === blueprint.outputAircraftId) {
+            next = setAircraftMark(next, aircraftId, mark);
+          }
+        }
+      }
+    }
+    return next;
   }
   if (job.kind === 'aircraft') {
     const blueprint = contentCatalog.aircraftBlueprints.find(

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { aircraftId, ammunitionId, auxiliaryId, moduleId, weaponId } from '../../src/content/ids';
+import { advanceProduction } from '../../src/domain/base-projects';
 import {
   aircraftLoadoutEnergy,
   aircraftLoadoutWeight,
@@ -102,8 +103,17 @@ describe('arsenal loadout', () => {
 
     const cleared = setAircraftMark(marked, aircraftId.japan, 1);
     expect(cleared.aircraftMarks[aircraftId.japan]).toBeUndefined();
-    expect(() => setAircraftMark(initial.base, aircraftId.japan, 3)).toThrow(
-      /has no Mark 3/,
+    expect(() => setAircraftMark(initial.base, aircraftId.japan, 4)).toThrow(
+      /has no Mark 4/,
+    );
+  });
+
+  it('applies Mark III when defined and stays within the 2.0 guard', () => {
+    const initial = createInitialGameState();
+    const marked = setAircraftMark(initial.base, aircraftId.japan, 3);
+    expect(marked.aircraftMarks[aircraftId.japan]).toBe(3);
+    expect(effectiveAircraftDamageMultiplier(marked, aircraftId.japan)).toBeCloseTo(
+      1.9875,
     );
   });
 
@@ -138,6 +148,27 @@ describe('arsenal loadout', () => {
     );
     // Pulse Cannon (3) + Rocket Pod (3) + 10 rockets (0.7 each)
     expect(aircraftLoadoutWeight(withPod, aircraftId.india)).toBeCloseTo(13);
+  });
+
+  it('applies the aircraft Mark when an aircraft upgrade finishes production', () => {
+    const initial = createInitialGameState();
+    const base = {
+      ...initial.base,
+      hangarSlots: ['aircraft-india', 'aircraft-japan'],
+      productionQueue: [{
+        id: 'production-upgrade-aircraft-japan-mk2',
+        projectId: 'upgrade-aircraft-japan-mk2',
+        kind: 'aircraft-upgrade' as const,
+        progress: 1,
+        requiredProgress: 2,
+        quantity: 1,
+      }],
+    };
+    const advanced = advanceProduction(base);
+    expect(advanced.manufacturedAircraftUpgradeIds).toContain(
+      'upgrade-aircraft-japan-mk2',
+    );
+    expect(advanced.aircraftMarks['aircraft-japan']).toBe(3);
   });
 });
 

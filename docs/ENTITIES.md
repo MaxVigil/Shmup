@@ -182,11 +182,11 @@ Legend: implemented in code, prototype, planned.
 
 | Aircraft | Role | Armour | Speed x | dmg x / fire x / acc x | 1° slots | Hardpoints | Reactor | Capacity | Marks |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| aircraft-india | workhorse | 80 | 1.15 | 0.95 / 1 / 1 | 2 | 2 | 12 | 15 | Mk2 |
-| aircraft-britain | bruiser | 125 | 0.92 | 1.15 / 0.95 / 1.05 | 3 | 4 | 16 | 25 | Mk2 |
-| aircraft-prc | interceptor | 90 | 1.3 | 1.05 / 1.1 / 1 | 2 | 3 | 14 | 18 | Mk2 |
-| aircraft-germany | precision | 135 | 1 | 1.1 / 1 / 1.1 | 3 | 4 | 17 | 28 | Mk2 |
-| aircraft-usa | gunship | 165 | 0.88 | 1.25 / 0.95 / 0.95 | 3 | 5 | 17 | 32 | Mk2 |
-| aircraft-france | duelist | 105 | 1.2 | 1.05 / 1.05 / 1.1 | 2 | 3 | 14 | 19 | Mk2 |
-| aircraft-japan | glass-cannon | 100 | 1.1 | 1.45 / 1.05 / 1.1 | 1 | 2 | 13 | 16 | Mk2 |
+| aircraft-india | workhorse | 80 | 1.15 | 0.95 / 1 / 1 | 2 | 2 | 12 | 15 | Mk2, Mk3 |
+| aircraft-britain | bruiser | 125 | 0.92 | 1.15 / 0.95 / 1.05 | 3 | 4 | 16 | 25 | Mk2, Mk3 |
+| aircraft-prc | interceptor | 90 | 1.3 | 1.05 / 1.1 / 1 | 2 | 3 | 14 | 18 | Mk2, Mk3 |
+| aircraft-germany | precision | 135 | 1 | 1.1 / 1 / 1.1 | 3 | 4 | 17 | 28 | Mk2, Mk3 |
+| aircraft-usa | gunship | 165 | 0.88 | 1.25 / 0.95 / 0.95 | 3 | 5 | 17 | 32 | Mk2, Mk3 |
+| aircraft-france | duelist | 105 | 1.2 | 1.05 / 1.05 / 1.1 | 2 | 3 | 14 | 19 | Mk2, Mk3 |
+| aircraft-japan | glass-cannon | 100 | 1.1 | 1.45 / 1.05 / 1.1 | 1 | 2 | 13 | 16 | Mk2, Mk3 |
 

@@ -1397,6 +1397,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 2, hardpointSlots: 2, reactorCapacity: 12, carryingCapacity: 15 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { armour: 5, speedMultiplier: 0.02, damageMultiplier: 0.02, fireRateMultiplier: 0.02, accuracyMultiplier: 0.02 }, researchCostCredits: 80_000, productionCostCredits: 50_000, productionCostMaterials: 4 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { armour: 5, speedMultiplier: 0.02, damageMultiplier: 0.02, fireRateMultiplier: 0.02, accuracyMultiplier: 0.02 }, researchCostCredits: 130_000, productionCostCredits: 80_000, productionCostMaterials: 6 },
       ],
     },
     {
@@ -1406,6 +1407,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 3, hardpointSlots: 4, reactorCapacity: 16, carryingCapacity: 25 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { armour: 20, carryingCapacity: 8 }, researchCostCredits: 140_000, productionCostCredits: 90_000, productionCostMaterials: 6 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { armour: 25, carryingCapacity: 10 }, researchCostCredits: 220_000, productionCostCredits: 140_000, productionCostMaterials: 8 },
       ],
     },
     {
@@ -1415,6 +1417,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 2, hardpointSlots: 3, reactorCapacity: 14, carryingCapacity: 18 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { speedMultiplier: 0.08, reactorCapacity: 2 }, researchCostCredits: 110_000, productionCostCredits: 70_000, productionCostMaterials: 5 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { speedMultiplier: 0.08, reactorCapacity: 2 }, researchCostCredits: 180_000, productionCostCredits: 110_000, productionCostMaterials: 7 },
       ],
     },
     {
@@ -1424,6 +1427,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 3, hardpointSlots: 4, reactorCapacity: 17, carryingCapacity: 28 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { accuracyMultiplier: 0.05, damageMultiplier: 0.05 }, researchCostCredits: 150_000, productionCostCredits: 95_000, productionCostMaterials: 6 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { accuracyMultiplier: 0.05, damageMultiplier: 0.05 }, researchCostCredits: 230_000, productionCostCredits: 150_000, productionCostMaterials: 8 },
       ],
     },
     {
@@ -1433,6 +1437,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 3, hardpointSlots: 5, reactorCapacity: 17, carryingCapacity: 32 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { armour: 25, hardpointSlots: 1, carryingCapacity: 8 }, researchCostCredits: 180_000, productionCostCredits: 120_000, productionCostMaterials: 8 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { armour: 35, hardpointSlots: 1, carryingCapacity: 10 }, researchCostCredits: 280_000, productionCostCredits: 190_000, productionCostMaterials: 10 },
       ],
     },
     {
@@ -1442,6 +1447,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 2, hardpointSlots: 3, reactorCapacity: 14, carryingCapacity: 19 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { speedMultiplier: 0.08, accuracyMultiplier: 0.05 }, researchCostCredits: 110_000, productionCostCredits: 70_000, productionCostMaterials: 5 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { speedMultiplier: 0.08, accuracyMultiplier: 0.05 }, researchCostCredits: 180_000, productionCostCredits: 110_000, productionCostMaterials: 7 },
       ],
     },
     {
@@ -1451,6 +1457,7 @@ export const contentCatalog = {
       loadout: { primarySlots: 1, hardpointSlots: 2, reactorCapacity: 13, carryingCapacity: 16 },
       marks: [
         { mark: 2, name: { en: 'Mark II', uk: 'Mark II', zh: 'Mark II' }, statDeltas: { damageMultiplier: 0.1, reactorCapacity: 2 }, researchCostCredits: 130_000, productionCostCredits: 85_000, productionCostMaterials: 5 },
+        { mark: 3, name: { en: 'Mark III', uk: 'Mark III', zh: 'Mark III' }, statDeltas: { damageMultiplier: 0.04, reactorCapacity: 1 }, researchCostCredits: 210_000, productionCostCredits: 140_000, productionCostMaterials: 7 },
       ],
     },
   ],

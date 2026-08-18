@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-18
 
+## Epic E2b-3b — Aircraft Mark II/III pipeline
+
+Implemented on `test`.
+
+- Catalog `aircraftLoadouts` gained **Mark III** (mark 3) entries for all 7 aircraft
+  (role-aligned deltas; Japan Mark III capped so the final multiplier stays inside the
+  2.0 guard at 1.9875). `docs/ENTITIES.md` / `.xlsx` regenerated.
+- `base-projects.completeProductionJob` now sets the aircraft mark when an
+  `aircraft-upgrade` production job finishes: tier 1 → Mark II, tier 2 → Mark III
+  (applied to every hangar aircraft of the upgraded model). `SET_AIRCRAFT_MARK` was
+  already the apply path; `effectiveAircraftDamageMultiplier` reflects the Mark.
+- New tests: Mark III apply + effective multiplier, mark set on upgrade production
+  completion. 251 unit tests, lint, typecheck, and the production build pass.
+- Deferred to E3: per-sortie ammunition loading/consumption, Engineering production of
+  ammunition, and combat wiring of the arsenal multipliers.
+
 ## Epic E2b-3a — Finite ammunition foundation
 
 Implemented on `test`.
