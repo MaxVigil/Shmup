@@ -215,6 +215,40 @@ sheets.push({ name: 'Market blueprints', rows: [
   ...c.marketWeaponBlueprints.map((b) => { const w = weaponById(b.weaponId); return [b.id, w ? w.name : b.weaponId, b.minimumSorties, cr(b.marketPrice.minimum) + '..' + cr(b.marketPrice.maximum), cr(b.productionCreditCost) + ' + ' + mtr(b.productionMaterialCost)]; }),
 ]});
 
+sheets.push({ name: 'Weapon families', rows: [
+  ['Family', 'Class', 'Tech family', 'Damage', 'Shots/s', 'Projectiles', 'Speed', 'Spread', 'Penetration', 'Weight', 'Energy', 'Acquisition', 'Marks'],
+  ...c.weaponFamilies.map((f) => [f.id, f.class, f.technologyFamily, f.baseStats.damage, f.baseStats.shotsPerSecond, f.baseStats.projectileCount, f.baseStats.projectileSpeed, f.baseStats.spreadDegrees, f.baseStats.penetration, f.weight, f.energyDraw, f.acquisition, f.marks.length === 0 ? '\u2014' : f.marks.map((m) => 'Mk' + m.mark).join(', ')]),
+]});
+
+sheets.push({ name: 'Weapon Marks', rows: [
+  ['Item', 'Mark', 'Research cost', 'Production cost', 'Overrides'],
+  ...c.weaponFamilies.flatMap((f) => f.marks.map((m) => [f.id + '-mk-' + m.mark, m.mark, cr(m.researchCostCredits), cr(m.productionCostCredits) + ' + ' + mtr(m.productionCostMaterials), Object.entries(m.statOverrides).map(([k, v]) => k + '=' + v).join(', ') || '\u2014'])),
+]});
+
+sheets.push({ name: 'Auxiliary', rows: [
+  ['Auxiliary', 'Type', 'Class', 'Ammo', 'Charges', 'Damage', 'Radius', 'Stun s', 'Weight', 'Energy', 'Acquisition'],
+  ...c.auxiliary.map((a) => [a.id, a.type, a.class, dash(a.ammoConsumableId), a.chargesPerSortieMin + '..' + a.chargesPerSortieMax, a.damage, a.areaRadius, a.stunDurationSeconds, a.weight, a.energyDraw, a.acquisition]),
+]});
+
+sheets.push({ name: 'Modules', rows: [
+  ['Module', 'Type', 'Class', 'Weight', 'Energy', 'Effect', 'Acquisition'],
+  ...c.modules.map((m) => [m.id, m.type, m.class, m.weight, m.energyDraw, m.effect.description, m.acquisition]),
+]});
+
+sheets.push({ name: 'Ammunition', rows: [
+  ['Ammo', 'Weight/unit', 'Cost', 'Used by'],
+  ...c.ammunition.map((a) => [a.id, a.weightPerUnit, cr(a.costCredits), a.usedBy.join(', ')]),
+]});
+
+sheets.push({ name: 'Aircraft loadouts', rows: [
+  ['Aircraft', 'Role', 'Armour', 'Speed x', 'dmg/fire/acc x', '1° slots', 'Hardpoints', 'Reactor', 'Capacity', 'Marks'],
+  ...c.aircraftLoadouts.map((e) => {
+    const b = e.baseStats;
+    const m = b.baseMultipliers;
+    return [e.aircraftId, e.role, b.armour, b.speedMultiplier, m.damageMultiplier + ' / ' + m.fireRateMultiplier + ' / ' + m.accuracyMultiplier, e.loadout.primarySlots, e.loadout.hardpointSlots, e.loadout.reactorCapacity, e.loadout.carryingCapacity, e.marks.length === 0 ? '\u2014' : e.marks.map((mk) => 'Mk' + mk.mark).join(', ')];
+  }),
+]});
+
 const zipEntries = [
   { name: '[Content_Types].xml', data: contentTypesXml(sheets.length) },
   { name: '_rels/.rels', data: rootRelsXml() },

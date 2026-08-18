@@ -622,7 +622,10 @@ threats.
   import with numeric Mark overrides, `ids.ts` lookups, `validate.ts` arsenal
   invariants (energy/weight/alien/marks/multiplier guard), `src/domain/loadout.ts`
   helpers (slot bonus, effective multipliers), tests.
-- [ ] E1b — save v20 migration, i18n for new content, generator + index-navigator.
+- [x] E1b — docs generator + index-navigator: `ENTITIES.md`/`.xlsx` now cover weapon
+  families + Marks, auxiliary, modules, ammunition, aircraft loadouts; new
+  `docs/INDEX.md`; `localize()` i18n helper; ENTITIES drift guard test. Save v20
+  migration deferred to E2 (the persisted state shape is unchanged so far).
 - [ ] E2 — loadout & economy: hardpoints + weight/energy UI, finite ammunition,
   aircraft Mark II/III.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →

@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-18
 
+## Epic E1b — Docs generator + index-navigator
+
+Implemented on `test`.
+
+- `scripts/export-entities.mjs` refactored to export `buildEntitiesMarkdown()` and now
+  emits the full arsenal: weapon families + Marks (numeric overrides), auxiliary,
+  modules, ammunition, aircraft loadouts — in addition to the existing sections.
+- `scripts/export-entities-xlsx.mjs` gained matching sheets (Weapon families, Weapon
+  Marks, Auxiliary, Modules, Ammunition, Aircraft loadouts).
+- `docs/ENTITIES.md` / `.xlsx` regenerated via `npm run entities`; `BALANCE.md` unchanged.
+- New `docs/INDEX.md` — project map / navigator without duplicating content data.
+- `src/i18n/index.ts` gained `localize()` for arsenal `LocalizedText`; tested.
+- New guard test `tests/unit/entities-doc.test.ts` fails CI if `ENTITIES.md` drifts.
+- Save v20 migration deliberately deferred to E2: the persisted `GameState` shape did
+  not change in E1 (the arsenal lives in the typed catalog), so a bump would be a no-op.
+
 ## Epic E1a — Arsenal schema + data layer
 
 Implemented on `test`.

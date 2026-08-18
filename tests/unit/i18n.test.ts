@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_LOCALE,
   loadLocale,
+  localize,
   LOCALE_STORAGE_KEY,
   saveLocale,
   translate,
@@ -47,5 +48,12 @@ describe('localization', () => {
     expect(translate('zh', 'base.title', {})).toBe('国际回收总局');
     expect(translate('zh', 'combat.armour', { value: '075' })).toBe('装甲 075');
     expect(translate('zh', 'baseNav.hangar', {})).toBe('机库');
+  });
+
+  it('resolves arsenal LocalizedText into the active locale', () => {
+    const text = { en: 'Autocannon', uk: 'Автогармата', zh: '自动炮' };
+    expect(localize(text, 'uk')).toBe('Автогармата');
+    expect(localize(text, 'en')).toBe('Autocannon');
+    expect(localize(text, 'zh')).toBe('自动炮');
   });
 });

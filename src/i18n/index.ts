@@ -1,4 +1,5 @@
 import { zh } from './translations-zh';
+import type { LocalizedText } from '../content/model';
 
 export type Locale = 'uk' | 'en' | 'zh';
 
@@ -1431,4 +1432,16 @@ export function translate(
     const value = params[name];
     return value === undefined ? placeholder : String(value);
   });
+}
+
+/** Resolves an arsenal catalog LocalizedText into the active locale. */
+export function localize(text: LocalizedText, locale: Locale): string {
+  switch (locale) {
+    case 'zh':
+      return text.zh;
+    case 'en':
+      return text.en;
+    default:
+      return text.uk;
+  }
 }

@@ -2,8 +2,9 @@ import { contentCatalog as c } from '../src/content/catalog.ts';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const L = [];
-const push = (line) => L.push(line);
+export function buildEntitiesMarkdown() {
+  const L = [];
+  const push = (line) => L.push(line);
 
 const weaponById = (id) => c.weapons.find((w) => w.id === id);
 const cr = (n) => String(n) + ' cr';
@@ -126,4 +127,63 @@ for (const b of c.marketWeaponBlueprints) {
 }
 push('');
 
-writeFileSync(resolve(import.meta.dirname, '..', 'docs', 'ENTITIES.md'), L.join('\n') + '\n');
+  push('## Weapon families (E1 arsenal)');
+  push('');
+  push('| Family | Class | Tech family | Damage | Shots/s | Projectiles | Speed | Spread | Penetration | Weight | Energy | Acquisition | Marks |');
+  push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const f of c.weaponFamilies) {
+    const marks = f.marks.length === 0 ? '\u2014' : f.marks.map((m) => 'Mk' + m.mark).join(', ');
+    push('| ' + f.id + ' | ' + f.class + ' | ' + f.technologyFamily + ' | ' + f.baseStats.damage + ' | ' + f.baseStats.shotsPerSecond + ' | ' + f.baseStats.projectileCount + ' | ' + f.baseStats.projectileSpeed + ' | ' + f.baseStats.spreadDegrees + ' | ' + f.baseStats.penetration + ' | ' + f.weight + ' | ' + f.energyDraw + ' | ' + f.acquisition + ' | ' + marks + ' |');
+  }
+  push('');
+  push('### Weapon Marks');
+  push('');
+  push('| Item | Mark | Research cost | Production cost | Overrides |');
+  push('| --- | --- | --- | --- | --- |');
+  for (const f of c.weaponFamilies) {
+    for (const m of f.marks) {
+      const overrides = Object.entries(m.statOverrides).map(([k, v]) => k + '=' + v).join(', ') || '\u2014';
+      push('| ' + f.id + '-mk-' + m.mark + ' | ' + m.mark + ' | ' + cr(m.researchCostCredits) + ' | ' + cr(m.productionCostCredits) + ' + ' + mtr(m.productionCostMaterials) + ' | ' + overrides + ' |');
+    }
+  }
+  push('');
+  push('## Auxiliary (hardpoints)');
+  push('');
+  push('| Auxiliary | Type | Class | Ammo | Charges | Damage | Radius | Stun s | Weight | Energy | Acquisition |');
+  push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const a of c.auxiliary) {
+    push('| ' + a.id + ' | ' + a.type + ' | ' + a.class + ' | ' + dash(a.ammoConsumableId) + ' | ' + a.chargesPerSortieMin + '..' + a.chargesPerSortieMax + ' | ' + a.damage + ' | ' + a.areaRadius + ' | ' + a.stunDurationSeconds + ' | ' + a.weight + ' | ' + a.energyDraw + ' | ' + a.acquisition + ' |');
+  }
+  push('');
+  push('## Modules');
+  push('');
+  push('| Module | Type | Class | Weight | Energy | Effect | Acquisition |');
+  push('| --- | --- | --- | --- | --- | --- | --- |');
+  for (const m of c.modules) {
+    push('| ' + m.id + ' | ' + m.type + ' | ' + m.class + ' | ' + m.weight + ' | ' + m.energyDraw + ' | ' + m.effect.description + ' | ' + m.acquisition + ' |');
+  }
+  push('');
+  push('## Ammunition');
+  push('');
+  push('| Ammo | Weight/unit | Cost | Used by |');
+  push('| --- | --- | --- | --- |');
+  for (const a of c.ammunition) {
+    push('| ' + a.id + ' | ' + a.weightPerUnit + ' | ' + cr(a.costCredits) + ' | ' + a.usedBy.join(', ') + ' |');
+  }
+  push('');
+  push('## Aircraft loadouts');
+  push('');
+  push('| Aircraft | Role | Armour | Speed x | dmg x / fire x / acc x | 1\u00b0 slots | Hardpoints | Reactor | Capacity | Marks |');
+  push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const e of c.aircraftLoadouts) {
+    const b = e.baseStats;
+    const mult = b.baseMultipliers;
+    const marks = e.marks.length === 0 ? '\u2014' : e.marks.map((m) => 'Mk' + m.mark).join(', ');
+    push('| ' + e.aircraftId + ' | ' + e.role + ' | ' + b.armour + ' | ' + b.speedMultiplier + ' | ' + mult.damageMultiplier + ' / ' + mult.fireRateMultiplier + ' / ' + mult.accuracyMultiplier + ' | ' + e.loadout.primarySlots + ' | ' + e.loadout.hardpointSlots + ' | ' + e.loadout.reactorCapacity + ' | ' + e.loadout.carryingCapacity + ' | ' + marks + ' |');
+  }
+  push('');
+
+  return L.join('\n') + '\n';
+}
+
+writeFileSync(resolve(import.meta.dirname, '..', 'docs', 'ENTITIES.md'), buildEntitiesMarkdown());
