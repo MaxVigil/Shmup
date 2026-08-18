@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildingById, buildingId } from '../../src/content/ids';
+import { aircraftId, buildingById, buildingId, moduleId } from '../../src/content/ids';
 
 import { staffMember } from './test-state';
 import { createGameStore, setInstantProjectsEnabled } from '../../src/app/store';
@@ -883,6 +883,45 @@ describe('game store rocket ammunition', () => {
     } finally {
       setInstantProjectsEnabled(false);
     }
+  });
+});
+
+describe('game store arsenal loadout commands', () => {
+  it('installs and removes hardpoint items on the active aircraft', () => {
+    const store = createGameStore();
+    store.dispatch({
+      type: 'INSTALL_HARDPOINT_ITEM',
+      itemId: moduleId.energyShield,
+      slotIndex: 0,
+    });
+    expect(store.getSnapshot().base.aircraftHardpoints[aircraftId.india]).toEqual([
+      moduleId.energyShield,
+      null,
+    ]);
+    store.dispatch({ type: 'REMOVE_HARDPOINT_ITEM', slotIndex: 0 });
+    expect(store.getSnapshot().base.aircraftHardpoints[aircraftId.india]).toEqual([
+      null,
+      null,
+    ]);
+  });
+
+  it('rejects an out-of-range hardpoint slot', () => {
+    const store = createGameStore();
+    expect(() =>
+      store.dispatch({
+        type: 'INSTALL_HARDPOINT_ITEM',
+        itemId: moduleId.dash,
+        slotIndex: 2,
+      }),
+    ).toThrow(/out of range/);
+  });
+
+  it('sets and clears an aircraft mark on the active aircraft', () => {
+    const store = createGameStore();
+    store.dispatch({ type: 'SET_AIRCRAFT_MARK', mark: 2 });
+    expect(store.getSnapshot().base.aircraftMarks[aircraftId.india]).toBe(2);
+    store.dispatch({ type: 'SET_AIRCRAFT_MARK', mark: 1 });
+    expect(store.getSnapshot().base.aircraftMarks[aircraftId.india]).toBeUndefined();
   });
 });
 

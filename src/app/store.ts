@@ -43,6 +43,11 @@ import {
 } from '../domain/pilot-medical';
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
+import {
+  installHardpointItem,
+  removeHardpointItem,
+  setAircraftMark,
+} from '../domain/arsenal-loadout';
 import { contentCatalog } from '../content/catalog';
 import {
   blueprintId,
@@ -222,6 +227,13 @@ export type GameCommand =
   | { readonly type: 'TREAT_PILOT_MEDICAL'; readonly pilotId: string }
   | { readonly type: 'MANUFACTURE_EQUIPMENT'; readonly equipmentId: string }
   | { readonly type: 'EQUIP_SPECIAL_EQUIPMENT'; readonly equipmentId: string | null }
+  | {
+      readonly type: 'INSTALL_HARDPOINT_ITEM';
+      readonly itemId: string;
+      readonly slotIndex: number;
+    }
+  | { readonly type: 'REMOVE_HARDPOINT_ITEM'; readonly slotIndex: number }
+  | { readonly type: 'SET_AIRCRAFT_MARK'; readonly mark: number }
   | { readonly type: 'DEBUG_GRANT'; readonly credits?: number; readonly materials?: number; readonly research?: number }
   | { readonly type: 'DEBUG_COMPLETE_RESEARCH' };
 
@@ -857,6 +869,48 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             ? removeModule(state.base, aircraftId)
             : installModule(state.base, aircraftId, command.equipmentId);
           state = { ...state, base: syncActiveLoadout(base) };
+          break;
+        }
+        case 'INSTALL_HARDPOINT_ITEM': {
+          const aircraftId = state.base.activeAircraftId;
+          if (aircraftId === null) {
+            throw new Error('No active aircraft.');
+          }
+          state = {
+            ...state,
+            base: installHardpointItem(
+              state.base,
+              aircraftId,
+              command.slotIndex,
+              command.itemId,
+            ),
+          };
+          break;
+        }
+        case 'REMOVE_HARDPOINT_ITEM': {
+          const aircraftId = state.base.activeAircraftId;
+          if (aircraftId === null) {
+            throw new Error('No active aircraft.');
+          }
+          state = {
+            ...state,
+            base: removeHardpointItem(
+              state.base,
+              aircraftId,
+              command.slotIndex,
+            ),
+          };
+          break;
+        }
+        case 'SET_AIRCRAFT_MARK': {
+          const aircraftId = state.base.activeAircraftId;
+          if (aircraftId === null) {
+            throw new Error('No active aircraft.');
+          }
+          state = {
+            ...state,
+            base: setAircraftMark(state.base, aircraftId, command.mark),
+          };
           break;
         }
       }

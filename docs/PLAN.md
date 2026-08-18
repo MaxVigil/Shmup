@@ -629,7 +629,10 @@ threats.
 - [x] E2a — loadout domain + save v20: `aircraftHardpoints` / `aircraftMarks` state,
   hardpoint install/remove with weight + energy hard-limit enforcement, aircraft Mark
   apply + effective multiplier, save migration v19→v20 (deferred from E1b).
-- [ ] E2b — Hangar UI (weight/energy gauges, hardpoint slots, overload blocking),
+- [x] E2b-1 — store commands for the arsenal loadout: `INSTALL_HARDPOINT_ITEM` /
+  `REMOVE_HARDPOINT_ITEM` / `SET_AIRCRAFT_MARK` wired through the store dispatcher
+  (domain + tests).
+- [ ] E2b-2 — Hangar UI (weight/energy gauges, hardpoint slots, overload blocking),
   finite ammunition (produce → load → consume), aircraft Mark II/III research and
   manufacture pipeline.
 - [ ] E3 — combat systems: vertical slice → stun (replaces Capturer) → auxiliary →

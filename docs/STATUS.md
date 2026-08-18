@@ -2,6 +2,19 @@
 
 Last updated: 2026-08-18
 
+## Epic E2b-1 — Arsenal loadout store commands
+
+Implemented on `test`.
+
+- `GameCommand` gained `INSTALL_HARDPOINT_ITEM`, `REMOVE_HARDPOINT_ITEM`, and
+  `SET_AIRCRAFT_MARK`, dispatched through `createGameStore` against the active
+  aircraft (weight/energy enforcement from `arsenal-loadout` applies on install).
+- New store tests: install/remove hardpoint item on the active aircraft, out-of-range
+  slot rejection, set/clear aircraft mark. 245 unit tests, lint, typecheck, and the
+  production build pass.
+- Remaining E2b-2: Hangar UI (weight/energy gauges, hardpoint slots, overload
+  blocking), finite ammunition pipeline, aircraft Mark II/III research/manufacture.
+
 ## Epic E2a — Loadout domain + save schema v20
 
 Implemented on `test`.
