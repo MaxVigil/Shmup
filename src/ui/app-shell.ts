@@ -4234,6 +4234,11 @@ function launchSortie(): void {
       },
       () => store.getSnapshot().base.activeAircraftId,
       () => store.getSnapshot().base.consumableStock[rocketsConsumable.id] ?? 0,
+      () => {
+        const snapshot = store.getSnapshot();
+        const activeId = snapshot.base.activeAircraftId;
+        return activeId === null ? [] : hardpointSlotsOf(snapshot.base, activeId);
+      },
       () => getLocale(),
       (weaponId, canSwitch) => {
         activeCombatWeaponId = weaponId;

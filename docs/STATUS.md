@@ -2,6 +2,22 @@
 
 Last updated: 2026-08-18
 
+## Epic E3.2a — Stun → alien recovery
+
+Implemented on `test`.
+
+- `risk-extraction.ts`: `RiskExtractionState` gained `eliteStunned` and `stunElite()`;
+  a stunned-then-defeated elite reaches `technology-choice` (recovery) without the
+  Capturer.
+- Combat: `getEquippedHardpointItemIds` callback wired from the hangar hardpoints into
+  `CombatScene`; when the stun module (aux-stun-module) is equipped, Space / right-click
+  stuns the Warden during the intercept (`combat.wardenStunned` status + tint). The
+  elite-defeat gate now recovers the artefact when `eliteStunned || hasCapturerEquipped`
+  (Capturer kept as a fallback; full removal is E3.2b).
+- New domain test for the stun→recovery path. 252 unit tests, lint, typecheck, and the
+  production build pass. Human flight check on `npm run dev?hardpointsReady=true`
+  (install the Stun Module, choose "continue" into the elite, press Space).
+
 ## Epic E3.1 — Combat vertical slice: data-driven multipliers
 
 Implemented on `test`.

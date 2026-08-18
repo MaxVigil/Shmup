@@ -653,7 +653,12 @@ threats.
   deltas × slot concentration bonus × pilot) now drives combat damage/fire-rate via
   `getAircraftStats` (`effectiveAircraftDamageMultiplier` /
   `effectiveAircraftFireRateMultiplier`); Japan glass cannon hits ~1.81×.
-- [ ] E3.2 — stun (replaces Capturer): stun module stuns elite → alien recovery.
+- [x] E3.2a — stun → alien recovery (additive): `RiskExtractionState.eliteStunned` +
+  `stunElite()`; the stun module (aux-stun-module, hardpoint) fires via Space /
+  right-click during the elite intercept and stuns the Warden; defeating a stunned
+  elite recovers the artefact without the Capturer (Capturer kept as a fallback for
+  now). New `getEquippedHardpointItemIds` combat callback.
+- [ ] E3.2b — full Capturer removal (equipment/blueprint/UI/i18n/save migration).
 - [ ] E3.3 — auxiliary weapons in combat (manual fire + ammo consumption), drones/mines.
 - [ ] E3.4 — enemy homing threats + decoys, alien weapons/modules.
 - [ ] E4 — hardcore + progression: destruction semantics, variable Marks,

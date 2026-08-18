@@ -10,6 +10,7 @@ import {
   defeatElite,
   failRun,
   offerExtraction,
+  stunElite,
   toSortieOutcome,
 } from '../../src/domain/risk-extraction';
 import { settleSortie } from '../../src/domain/sortie';
@@ -98,6 +99,16 @@ describe('M2 risk and extraction flow', () => {
     expect(defeated.eliteDefeated).toBe(true);
     expect(defeated.technologyDecision).toBeNull();
     expect(toSortieOutcome(defeated).preservedTechnologyIds).toEqual([]);
+  });
+
+  it('recovers the artefact when the elite was stunned before defeat', () => {
+    const eliteState = decideExtraction(reachExtractionChoice(), 'continue');
+    const stunned = stunElite(eliteState);
+    expect(stunned.eliteStunned).toBe(true);
+    const defeated = defeatElite(stunned, elite.materialReward, stunned.eliteStunned);
+
+    expect(defeated.phase).toBe('technology-choice');
+    expect(defeated.eliteDefeated).toBe(true);
   });
 
   it('applies partial loss to salvage when the ship is lost during the intercept', () => {

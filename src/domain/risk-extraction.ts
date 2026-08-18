@@ -24,6 +24,7 @@ export interface RiskExtractionState {
   readonly materialsFound: number;
   readonly researchFound: number;
   readonly eliteDefeated: boolean;
+  readonly eliteStunned: boolean;
   readonly extracted: boolean | null;
   readonly wardenSignalDetected: boolean;
 }
@@ -38,6 +39,7 @@ export function createRiskExtractionState(): RiskExtractionState {
     materialsFound: 0,
     researchFound: 0,
     eliteDefeated: false,
+    eliteStunned: false,
     extracted: null,
     wardenSignalDetected: false,
   };
@@ -129,6 +131,15 @@ export function defeatElite(
     eliteDefeated: true,
     extracted: canRecoverTechnology ? null : true,
   };
+}
+
+/** Arsenal E3.2a: the player's stun module disables the elite before recovery. */
+export function stunElite(state: RiskExtractionState): RiskExtractionState {
+  assertPhase(state, 'elite');
+  if (state.eliteStunned) {
+    return state;
+  }
+  return { ...state, eliteStunned: true };
 }
 
 export function forceExtraction(state: RiskExtractionState): RiskExtractionState {

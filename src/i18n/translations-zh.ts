@@ -667,6 +667,7 @@ export const zh = {
   'combat.wardenApproach': '拦截航线已锁定 // 清理空域',
   'combat.wardenWarning': '警告 // 守卫者正在接近',
   'combat.wardenDestroyed': '守卫者已摧毁 // 神器已回收',
+  'combat.wardenStunned': '守卫者已眩晕——摧毁它以回收神器。',
   'combat.wardenDestroyedNoCapturer': '守卫者已摧毁 // 神器信号已丢失',
   'combat.artifactSecured': '神器已保护 // 撤离完成',
   'combat.forcedExtraction': '强制撤离完成',

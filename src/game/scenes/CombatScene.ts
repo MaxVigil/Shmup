@@ -5,6 +5,7 @@ import {
   alienTechnologyId,
   aircraftById,
   aircraftId,
+  auxiliaryId,
   equipmentId,
   weaponById,
   weaponId,
@@ -48,6 +49,7 @@ import {
   forceExtraction,
   offerExtraction,
   recordWardenSignal,
+  stunElite,
   toSortieOutcome,
   type RiskExtractionState,
   type TechnologyDecision,
@@ -94,6 +96,7 @@ const ELITE_DURATION_MS = ENCOUNTER_DURATION_MS - EXTRACTION_WINDOW_MS;
 const SPLIT_PULSE_MODULE_ID = alienTechnologyById(alienTechnologyId.prism)!.weaponTransformation.id;
 const STANDARD_WEAPON_ID = weaponId.pulseCannon;
 const CAPTURER_EQUIPMENT_ID = equipmentId.alienTechnologyCapturer;
+const STUN_MODULE_ID = auxiliaryId.stunModule;
 
 interface ShotActor {
   readonly body: Phaser.GameObjects.Rectangle;
@@ -212,6 +215,8 @@ export class CombatScene extends Phaser.Scene {
   private activePrimaryWeaponSlot = 0;
   private manufacturedWeaponUpgradeIds: readonly string[] = [];
   private equippedEquipmentId: string | null = null;
+  private equippedHardpointItemIds: readonly (string | null)[] = [];
+  private eliteStunned = false;
   private runState = createRiskExtractionState();
   private decisionLayer: Phaser.GameObjects.Container | null = null;
   private pauseLayer: Phaser.GameObjects.Container | null = null;
@@ -253,6 +258,7 @@ export class CombatScene extends Phaser.Scene {
     }),
     private readonly getActiveAircraftId: () => string | null = () => null,
     private readonly getRocketStock: () => number = () => 0,
+    private readonly getEquippedHardpointItemIds: () => readonly (string | null)[] = () => [],
     private readonly getLocale: () => Locale = () => 'uk',
     private readonly onActiveWeaponChanged: (
       weaponId: string,
@@ -360,6 +366,14 @@ export class CombatScene extends Phaser.Scene {
       });
       this.input.keyboard?.on('keydown-F', () => this.togglePointerFollow());
     }
+    if (this.isStunModuleEquipped()) {
+      this.input.keyboard?.on('keydown-SPACE', () => this.tryFireStun());
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (pointer.rightButtonDown()) {
+          this.tryFireStun();
+        }
+      });
+    }
   }
 
   public setPointerFollowLock(locked: boolean): void {
@@ -459,6 +473,8 @@ export class CombatScene extends Phaser.Scene {
     this.equippedPrimaryWeaponIds = this.getEquippedPrimaryWeaponIds();
     this.activePrimaryWeaponSlot = this.equippedPrimaryWeaponIds[0] === null ? 1 : 0;
     this.equippedEquipmentId = this.getEquippedEquipmentId();
+    this.equippedHardpointItemIds = this.getEquippedHardpointItemIds();
+    this.eliteStunned = false;
     this.manufacturedWeaponUpgradeIds = this.getManufacturedWeaponUpgradeIds();
     this.runState = createRiskExtractionState();
     this.publishActiveWeapon();
@@ -1544,11 +1560,12 @@ export class CombatScene extends Phaser.Scene {
       enemy.definition.creditReward,
     );
     this.showContractChange(defeatedX, defeatedY, enemy.definition.creditReward);
+    const eliteRecoveryAvailable = this.eliteStunned || this.hasCapturerEquipped();
     if (enemy.definition.kind === 'elite') {
       this.runState = defeatElite(
         this.runState,
         enemy.definition.materialReward,
-        this.hasCapturerEquipped(),
+        eliteRecoveryAvailable,
       );
     } else {
       this.runState = addMaterials(this.runState, enemy.definition.materialReward);
@@ -1556,7 +1573,7 @@ export class CombatScene extends Phaser.Scene {
     this.destroyEnemy(enemyIndex);
     if (enemy.definition.kind === 'elite') {
       this.createDestructionBurst(defeatedX, defeatedY, 0xd9a7ff);
-      if (this.hasCapturerEquipped()) {
+      if (eliteRecoveryAvailable) {
         this.setStatus('combat.wardenDestroyed');
         this.clearCombatActors();
         this.artifactRevealElapsedMs = 0;
@@ -1926,6 +1943,25 @@ export class CombatScene extends Phaser.Scene {
 
   private hasCapturerEquipped(): boolean {
     return this.equippedEquipmentId === CAPTURER_EQUIPMENT_ID;
+  }
+
+  private isStunModuleEquipped(): boolean {
+    return this.equippedHardpointItemIds.includes(STUN_MODULE_ID);
+  }
+
+  private tryFireStun(): void {
+    if (this.ended || this.ending !== null || this.runState.phase !== 'elite') {
+      return;
+    }
+    const elite = this.enemies.find((enemy) => enemy.definition.kind === 'elite');
+    if (elite === undefined || this.eliteStunned) {
+      return;
+    }
+    this.eliteStunned = true;
+    this.runState = stunElite(this.runState);
+    elite.body.setFillStyle(0xbfe3ff);
+    this.setStatus('combat.wardenStunned');
+    this.createDestructionBurst(elite.body.x, elite.body.y, 0xbfe3ff);
   }
 
   private setStatus(key: TranslationKey, params: TranslationParams = {}): void {
