@@ -1334,30 +1334,7 @@ h1 {
   object-fit: contain;
 }
 
-/* U5 — Command geoscope + monthly timeline */
-.month-timeline {
-  display: flex;
-  gap: 0.4rem;
-  margin: 0.5rem 0 0.9rem;
-}
-.month-timeline__phase {
-  flex: 1;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #223741;
-  border-radius: 0.25rem;
-  color: #607781;
-  background: rgb(5 12 16 / 70%);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-}
-.month-timeline__phase.is-active {
-  color: #ffd28a;
-  border-color: #6e5a36;
-  background: rgb(60 46 18 / 45%);
-}
+/* U5 — Command geoscope */
 .geo-map {
   position: relative;
   height: 11rem;

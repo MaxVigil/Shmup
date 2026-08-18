@@ -712,6 +712,8 @@ Status: E6.0–E6.6 done (contract + implementation + verification). Contract: `
 - [x] E6.4 — HUD ownership contract (DECISIONS #24); consolidation deferred.
 - [x] E6.5 — toast `role="status"`/`aria-live` + 4-toast stack + overflow-wrap.
 - [x] E6.6 — verification: `docs/PLAYTEST.md` rounds 11–12 + overlay unit tests.
+- [x] E6 follow-up — removed the Command Centre month-timeline phase bar
+  (ПЛАНУВАННЯ/ВИКОНАННЯ/РОЗРАХУНОК) on request; i18n keys + CSS cleaned up.
 
 ## Future ideas (backlog)
 

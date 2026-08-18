@@ -36,7 +36,7 @@ import type {
 import { isBankrupt, monthlyExpenses } from '../domain/operational-economy';
 import { isBuildingOperational } from '../domain/buildings';
 import { HANGAR_SLOT_COST, marketAircraftPrice } from '../domain/hangar';
-import { isAircraftFueled, missionBounty, MONTH_SORTIE_LENGTH } from '../domain/command-centre';
+import { isAircraftFueled, missionBounty } from '../domain/command-centre';
 import { pilotAircraftMultipliers, pilotLevel, isPilotFatigued } from '../domain/pilot-market';
 import {
   hasMedicalTreatmentCapability,
@@ -3006,30 +3006,6 @@ function renderCommand(): void {
   byId<HTMLElement>('command-month-eyebrow').textContent = t('command.monthEyebrow', {
     month: state.base.month,
   });
-  const monthProgress = state.base.sortiesCompleted % MONTH_SORTIE_LENGTH;
-  const timeline = byId<HTMLElement>('month-timeline');
-  timeline.textContent = '';
-  const phases = [
-    {
-      key: 'command.phasePlan',
-      active: monthProgress === 0 && state.base.monthReport === null,
-    },
-    {
-      key: 'command.phaseExecute',
-      active: monthProgress > 0 && state.base.monthReport === null,
-    },
-    {
-      key: 'command.phaseSettle',
-      active: state.base.monthReport !== null,
-    },
-  ] as const;
-  for (const phase of phases) {
-    const segment = document.createElement('span');
-    segment.className = 'month-timeline__phase' + (phase.active ? ' is-active' : '');
-    segment.textContent = t(phase.key as TranslationKey);
-    timeline.appendChild(segment);
-  }
-
   const geoMap = byId<HTMLElement>('geo-map');
   geoMap.textContent = '';
   const geoPositions: Readonly<Record<string, { left: number; top: number }>> = {

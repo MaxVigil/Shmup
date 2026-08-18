@@ -100,7 +100,6 @@ export function buildAppTemplate(initialState: GameState): string {
             <p class="technology-lab__eyebrow" id="command-month-eyebrow"></p>
             <h2 id="command-month-title"></h2>
             <p class="lede" id="command-month-summary"></p>
-            <div id="month-timeline" class="month-timeline" aria-live="polite"></div>
             <div id="geo-map" class="geo-map" aria-live="polite"></div>
             <div id="threat-map-list" class="threat-map" aria-live="polite"></div>
             <button id="end-month" class="base-action is-primary end-month" type="button"></button>

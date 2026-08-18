@@ -32,6 +32,11 @@ Implemented on `test` (E6.0–E6.6).
   (`overflow-wrap: anywhere`).
 - **Verification (E6.6).** UX rounds 11–12 added to `docs/PLAYTEST.md`;
   `tests/unit/overlay.test.ts` stays green.
+- **Command timeline removed (E6 follow-up).** The month-timeline phase bar
+  (ПЛАНУВАННЯ/ВИКОНАННЯ/РОЗРАХУНОК) was removed from the Command Centre on
+  request; the `command.phasePlan/Execute/Settle` i18n keys and the
+  `.month-timeline` CSS were cleaned up. Lint, typecheck, 266 tests, and the
+  production build stay green.
 - 266 unit tests, lint, typecheck, and the production build pass. Human check:
   keyboard-only overlay open/close with Tab trap and focus restore, text-size
   scaling, and the reduce-motion toggle on a live sortie.
