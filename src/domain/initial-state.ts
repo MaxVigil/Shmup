@@ -127,6 +127,7 @@ export function createInitialGameState(): GameState {
       constructionQueue: [],
       productionQueue: [],
       resolvedThreatIds: [],
+      missionResults: [],
       pilotCandidates: generatePilotCandidates(0x3a7e2026, 1),
       pilotXp: {},
       pilotFatigue: {},

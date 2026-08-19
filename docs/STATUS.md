@@ -32,6 +32,15 @@ match.
 - 278 unit tests, lint, typecheck, and build pass. PLAYTEST Round 14 scripts the
   human check.
 
+## Missions epic M1b — mission result foundation
+
+- `MissionResultRecord` (immutable, written once at settlement) + outcome taxonomy
+  (`success` / `partial-success` / `objective-failed-extracted` / `destroyed`;
+  `aborted` reserved for the retreat redesign) + `missionStatus` derivation
+  (`available` / `active` / `resolved` / `expired`) — MISSIONS_EPIC §1.1.
+- Domain-only foundation (no new UI yet); the mission map consumes it from
+  Iteration 3. 284 unit tests, lint, typecheck, and build pass.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

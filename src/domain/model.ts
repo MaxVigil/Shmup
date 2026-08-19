@@ -43,6 +43,33 @@ export interface AircraftHistoryRecord {
   readonly eliteKills: number;
 }
 
+/**
+ * Mission outcome taxonomy (MISSIONS_EPIC §1.1, design spec §9.3). `aborted` is
+ * produced by the retreat redesign (Iteration 6); until then the settlement maps
+ * to the other four kinds.
+ */
+export type MissionOutcomeKind =
+  | 'success'
+  | 'partial-success'
+  | 'aborted'
+  | 'objective-failed-extracted'
+  | 'destroyed';
+
+/** Immutable sortie-settlement record driving aircraft/pilot history, Archive, reports. */
+export interface MissionResultRecord {
+  readonly id: string;
+  readonly missionId: string;
+  readonly missionType: string;        // baseline 'sweep'; full MissionType comes in Iteration 3
+  readonly month: number;
+  readonly aircraftId: string | null;
+  readonly pilotId: string | null;
+  readonly outcome: MissionOutcomeKind;
+  readonly targetsDestroyed: number;
+  readonly targetsBreached: number;
+  readonly extracted: boolean;
+  readonly wardenSignalDetected: boolean;
+}
+
 export type PilotInjurySeverity = 'light' | 'medium' | 'severe';
 
 export interface PilotInjuryState {
@@ -177,6 +204,7 @@ export interface BaseState {
   readonly constructionQueue: readonly ConstructionJobState[];
   readonly productionQueue: readonly ProductionJobState[];
   readonly resolvedThreatIds: readonly string[];
+  readonly missionResults: readonly MissionResultRecord[];
   readonly pilotCandidates: readonly PilotCandidateState[];
   readonly pilotXp: Readonly<Record<string, number>>;
   readonly pilotFatigue: Readonly<Record<string, number>>;

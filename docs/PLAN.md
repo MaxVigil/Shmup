@@ -726,8 +726,10 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
 - [x] M1a — aircraft instance layer: `aircraftInstances` + `aircraftHistory`
   (callsign, per-aircraft pilot assignment, terminal destroyed state), schema v21
   migration, permanent loss frees the bay (MISSIONS_EPIC §1.2).
-- [ ] M1b — mission instances + `MissionResultRecord` + status derivation; fold
-  the per-type maps into instances (next).
+- [x] M1b — mission result foundation: `MissionResultRecord` + outcome taxonomy +
+  status derivation, written once at settlement (MISSIONS_EPIC §1.1).
+- [ ] M2 — information architecture: 7 top-level sections; Finance→Market,
+  Medical→Personnel, Warehouse→shared drawer, Databank→Settings (next).
 
 ## Future ideas (backlog)
 

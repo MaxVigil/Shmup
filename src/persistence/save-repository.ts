@@ -174,6 +174,7 @@ function v14BaseDefaults(): Pick<
   | 'aircraftMarks'
   | 'aircraftInstances'
   | 'aircraftHistory'
+  | 'missionResults'
 > {
   return {
     constructionQueue: [],
@@ -195,6 +196,7 @@ function v14BaseDefaults(): Pick<
     aircraftMarks: {},
     aircraftInstances: {},
     aircraftHistory: {},
+    missionResults: [],
   };
 }
 

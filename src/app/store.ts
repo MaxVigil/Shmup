@@ -49,6 +49,7 @@ import {
   recordAircraftSortie,
   unassignPilotFromAircraft,
 } from '../domain/aircraft-instances';
+import { appendMissionResult, deriveMissionOutcome } from '../domain/missions';
 import {
   installHardpointItem,
   purchaseAmmunition,
@@ -318,6 +319,25 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           // pilot dies and the entire installed loadout is irreversibly lost.
           const destroyed = command.aircraftDestroyed === true || armourLost >= 1;
           let nextBase = afterMission;
+          if (activeMission !== undefined) {
+            nextBase = appendMissionResult(nextBase, {
+              id: `result-${activeMission.id}-${state.base.sortiesCompleted + 1}`,
+              missionId: activeMission.id,
+              missionType: 'sweep',
+              month: state.base.month,
+              aircraftId: activeAircraftId,
+              pilotId: activePilotId,
+              outcome: deriveMissionOutcome({
+                destroyed,
+                extracted: command.outcome.extracted,
+                targetsBreached: command.outcome.targetsBreached,
+              }),
+              targetsDestroyed: command.outcome.targetsDestroyed,
+              targetsBreached: command.outcome.targetsBreached,
+              extracted: command.outcome.extracted,
+              wardenSignalDetected: command.outcome.wardenSignalDetected,
+            });
+          }
           if (destroyed) {
             if (activePilotId !== null) {
               nextBase = killPilot(nextBase, activePilotId, state.base.month);
