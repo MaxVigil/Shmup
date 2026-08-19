@@ -745,7 +745,10 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
 - [x] M6 — retreat redesign: danger ladder (50%/25%/10% armour warnings), abort
   now settles as the `aborted` outcome (bounty/gift forfeited, mission
   unresolved, fuel consumed).
-- [ ] M7 — Intel loop: IntelFact acquisition, briefing integration (next).
+- [x] M7 — Intel loop: `IntelFact` records on settlement with confidence from the
+  outcome; briefing KNOWN row shows the best recorded confidence; Archive lists
+  intel records.
+- [ ] M8 — aircraft history + archive records (next).
 
 ## Future ideas (backlog)
 

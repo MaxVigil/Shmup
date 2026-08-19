@@ -70,6 +70,18 @@ export interface MissionResultRecord {
   readonly wardenSignalDetected: boolean;
 }
 
+export type IntelConfidence = 'confirmed' | 'likely' | 'possible' | 'unknown';
+
+/** Structured intelligence fact (MISSIONS_EPIC §8). */
+export interface IntelFact {
+  readonly id: string;
+  readonly category: 'enemy' | 'weapon' | 'hazard' | 'objective' | 'reinforcement';
+  /** Subject key — for now the target country id of the mission that produced it. */
+  readonly subjectId: string;
+  readonly confidence: IntelConfidence;
+  readonly source: 'observation' | 'recon' | 'research' | 'council' | 'market';
+}
+
 export type PilotInjurySeverity = 'light' | 'medium' | 'severe';
 
 export interface PilotInjuryState {
@@ -205,6 +217,7 @@ export interface BaseState {
   readonly productionQueue: readonly ProductionJobState[];
   readonly resolvedThreatIds: readonly string[];
   readonly missionResults: readonly MissionResultRecord[];
+  readonly intelFacts: readonly IntelFact[];
   readonly pilotCandidates: readonly PilotCandidateState[];
   readonly pilotXp: Readonly<Record<string, number>>;
   readonly pilotFatigue: Readonly<Record<string, number>>;

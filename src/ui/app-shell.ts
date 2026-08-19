@@ -2307,6 +2307,23 @@ function renderArchive(): void {
     row.append(strong, span);
     container.appendChild(row);
   }
+  if (state.base.intelFacts.length > 0) {
+    const header = document.createElement('strong');
+    header.textContent = t('archive.intelRecords');
+    container.appendChild(header);
+    for (const fact of state.base.intelFacts) {
+      const stateDefinition = contentCatalog.councilStates.find(
+        (entry) => entry.id === fact.subjectId,
+      );
+      const label = stateDefinition === undefined
+        ? fact.subjectId
+        : t(stateDefinition.nameKey as TranslationKey);
+      const row = document.createElement('article');
+      row.className = 'threat-row';
+      row.textContent = `${label} · ${t(`intel.confidence.${fact.confidence}` as TranslationKey)}`;
+      container.appendChild(row);
+    }
+  }
 }
 
 function renderTrade(): void {
@@ -3317,6 +3334,13 @@ function missionTypeTestsKey(type: string): TranslationKey {
   }
 }
 
+const INTEL_CONFIDENCE_RANK: Readonly<Record<string, number>> = {
+  unknown: 1,
+  possible: 2,
+  likely: 3,
+  confirmed: 4,
+};
+
 function renderBriefing(): void {
   const briefing = byId<HTMLElement>('mission-briefing');
   byId<HTMLElement>('briefing-eyebrow').textContent = t('briefing.eyebrow');
@@ -3343,14 +3367,27 @@ function renderBriefing(): void {
   grid.textContent = '';
   const objectiveKey = missionTypeObjectiveKey(mission.type);
   const testsKey = missionTypeTestsKey(mission.type);
+  const intelForCountry = state.base.intelFacts.filter(
+    (fact) => fact.subjectId === mission.targetCountryId,
+  );
+  const bestConfidence = intelForCountry.length === 0
+    ? null
+    : intelForCountry.reduce<string>(
+        (best, fact) =>
+          (INTEL_CONFIDENCE_RANK[fact.confidence] ?? 1) > (INTEL_CONFIDENCE_RANK[best] ?? 1)
+            ? fact.confidence
+            : best,
+        'unknown',
+      );
   const rows: ReadonlyArray<readonly [string, string]> = [
     [t('briefing.objective'), t(objectiveKey)],
     [t('briefing.location'), `${t(`missionType.${mission.type}` as TranslationKey)} · ${t('briefing.locationValue', { country })}`],
-    [t('briefing.known'), state.base.missionResults.some(
-      (record) => record.missionId === mission.id,
-    )
-      ? t('briefing.knownContact')
-      : t('briefing.knownNone')],
+    [t('briefing.known'), bestConfidence === null
+      ? t('briefing.knownNone')
+      : t('briefing.knownValue', {
+          country,
+          confidence: t(`intel.confidence.${bestConfidence}` as TranslationKey),
+        })],
     [t('briefing.unknown'), t('briefing.unknownValue')],
     [t('briefing.tests'), t(testsKey)],
     [t('briefing.reward'), t('briefing.rewardValue', {

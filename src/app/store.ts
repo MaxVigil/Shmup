@@ -49,7 +49,11 @@ import {
   recordAircraftSortie,
   unassignPilotFromAircraft,
 } from '../domain/aircraft-instances';
-import { appendMissionResult, deriveMissionOutcome } from '../domain/missions';
+import {
+  appendMissionResult,
+  deriveMissionOutcome,
+  recordMissionIntel,
+} from '../domain/missions';
 import {
   installHardpointItem,
   purchaseAmmunition,
@@ -332,6 +336,12 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           const destroyed = command.aircraftDestroyed === true || armourLost >= 1;
           let nextBase = afterMission;
           if (activeMission !== undefined) {
+            const outcome = deriveMissionOutcome({
+              destroyed,
+              aborted: command.aborted === true,
+              extracted: command.outcome.extracted,
+              targetsBreached: command.outcome.targetsBreached,
+            });
             nextBase = appendMissionResult(nextBase, {
               id: `result-${activeMission.id}-${state.base.sortiesCompleted + 1}`,
               missionId: activeMission.id,
@@ -339,17 +349,18 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               month: state.base.month,
               aircraftId: activeAircraftId,
               pilotId: activePilotId,
-              outcome: deriveMissionOutcome({
-                destroyed,
-                aborted: command.aborted === true,
-                extracted: command.outcome.extracted,
-                targetsBreached: command.outcome.targetsBreached,
-              }),
+              outcome,
               targetsDestroyed: command.outcome.targetsDestroyed,
               targetsBreached: command.outcome.targetsBreached,
               extracted: command.outcome.extracted,
               wardenSignalDetected: command.outcome.wardenSignalDetected,
             });
+            nextBase = recordMissionIntel(
+              nextBase,
+              activeMission.id,
+              activeMission.targetCountryId,
+              outcome,
+            );
           }
           if (destroyed) {
             if (activePilotId !== null) {

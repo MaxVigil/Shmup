@@ -321,6 +321,19 @@ in the month report and the resolved-mission state.
 **Expected:** the danger ladder is readable and colour-coded; an abort settles as
 `aborted` (visible in the mission result record) with explicit penalties.
 
+## Round 20 — Intel loop (M7)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Actions:**
+- Fly a sortie in a sector and extract successfully.
+- Return to Operations and open the briefing for that sector: the KNOWN row shows
+  “Prior contact in {country} — confidence confirmed”.
+- Open Archive: the INTEL RECORDS section lists each observed theatre with its
+  confidence.
+
+**Expected:** successful sorties raise confidence to `confirmed`, aborted ones to
+`possible`; the briefing and the archive reflect the recorded intel.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

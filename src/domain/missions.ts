@@ -1,5 +1,10 @@
 import type { MissionState } from '../content/model';
-import type { BaseState, MissionOutcomeKind, MissionResultRecord } from './model';
+import type {
+  BaseState,
+  IntelFact,
+  MissionOutcomeKind,
+  MissionResultRecord,
+} from './model';
 
 /** Mission lifecycle status (MISSIONS_EPIC §1.1) — derived, never stored. */
 export type MissionStatus = 'available' | 'active' | 'resolved' | 'expired';
@@ -52,4 +57,27 @@ export function appendMissionResult(
   record: MissionResultRecord,
 ): BaseState {
   return { ...base, missionResults: [...base.missionResults, record] };
+}
+
+/** Records an observation fact for a mission's theatre (M7, MISSIONS_EPIC §8.2). */
+export function recordMissionIntel(
+  base: BaseState,
+  missionId: string,
+  countryId: string,
+  outcome: MissionOutcomeKind,
+): BaseState {
+  const confidence: IntelFact['confidence'] = outcome === 'success'
+    ? 'confirmed'
+    : outcome === 'partial-success'
+      ? 'likely'
+      : 'possible';
+  const fact: IntelFact = {
+    id: `intel-${missionId}`,
+    category: 'enemy',
+    subjectId: countryId,
+    confidence,
+    source: 'observation',
+  };
+  const remaining = base.intelFacts.filter((entry) => entry.id !== fact.id);
+  return { ...base, intelFacts: [...remaining, fact] };
 }

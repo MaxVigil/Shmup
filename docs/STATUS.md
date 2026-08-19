@@ -96,6 +96,16 @@ match.
 - 287 unit tests, lint, typecheck, and build pass. PLAYTEST Round 19 scripts the
   retreat + danger-ladder check.
 
+## Missions epic M7 — Intel loop
+
+- `IntelFact` records (category/subject/confidence/source) are written at
+  settlement: success → `confirmed`, partial → `likely`, abort/fail → `possible`.
+- The briefing KNOWN row now shows the best recorded confidence for the theatre;
+  the Archive adds an INTEL RECORDS section listing each observed theatre with
+  its confidence.
+- 290 unit tests, lint, typecheck, and build pass. PLAYTEST Round 20 scripts the
+  intel-loop check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

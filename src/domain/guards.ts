@@ -29,6 +29,7 @@ export function isGameState(
     isAircraftInstanceRecord(value.base.aircraftInstances) &&
     isAircraftHistoryRecord(value.base.aircraftHistory) &&
     Array.isArray(value.base.missionResults) &&
+    Array.isArray(value.base.intelFacts) &&
     Array.isArray(value.base.researchQueue) &&
     Array.isArray(value.base.preservedTechnologyIds) &&
     Array.isArray(value.base.ownedPrimaryWeaponIds) &&
