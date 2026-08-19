@@ -233,6 +233,8 @@ export interface CombatRunResult {
   readonly aircraftDestroyed: boolean;
   readonly rocketsFired: number;
   readonly auxiliaryAmmoConsumed: Readonly<Record<string, number>>;
+  /** True when the sortie was aborted via the retreat flow (M6). */
+  readonly aborted: boolean;
 }
 
 export interface AircraftCombatStats {
@@ -297,7 +299,9 @@ export class CombatScene extends Phaser.Scene {
   private endingText: Phaser.GameObjects.Text | null = null;
   private pauseState: PauseState = EMPTY_PAUSE_STATE;
   private abortArmed = false;
+  private runAborted = false;
   private armourText!: Phaser.GameObjects.Text;
+  private dangerText!: Phaser.GameObjects.Text;
   private reserveText!: Phaser.GameObjects.Text;
   private timeText!: Phaser.GameObjects.Text;
   private statusText!: Phaser.GameObjects.Text;
@@ -438,6 +442,7 @@ export class CombatScene extends Phaser.Scene {
     this.reserveText = this.createHudText(width - 20, 18, '').setOrigin(1, 0);
     this.timeText = this.createHudText(width / 2, 18, '03:00').setOrigin(0.5, 0);
     this.createHudText(width / 2, 40, this.missionObjective()).setOrigin(0.5);
+    this.dangerText = this.createHudText(width / 2, 60, '').setOrigin(0.5);
     this.statusText = this.add
       .text(
         width / 2,
@@ -603,6 +608,7 @@ export class CombatScene extends Phaser.Scene {
     this.eliteElapsedMs = 0;
     this.invulnerableMs = 0;
     this.ended = false;
+    this.runAborted = false;
     this.eliteSpawned = false;
     this.completionPublished = false;
     this.ending = null;
@@ -1099,6 +1105,7 @@ export class CombatScene extends Phaser.Scene {
     if (this.ended || this.ending !== null || this.runState.phase !== 'combat') {
       return;
     }
+    this.runAborted = true;
     this.runState = abortRun(this.runState);
     this.setPauseReason('manual', false);
     this.beginEnding(true, 'combat.aborted');
@@ -1181,6 +1188,23 @@ export class CombatScene extends Phaser.Scene {
   private updatePlayerArmourBar(): void {
     const armourRatio = Phaser.Math.Clamp(this.armour / this.maxArmour, 0, 1);
     const fillColour = armourRatio > 0.5 ? 0x70d6b3 : armourRatio > 0.25 ? 0xf2c66d : 0xf07178;
+
+    this.armourText.setColor(
+      armourRatio > 0.5 ? '#b7d9d2' : armourRatio > 0.25 ? '#f2c66d' : '#f07178',
+    );
+    // Danger ladder (M6, design spec §9.1): advisory → critical → destruction imminent.
+    let dangerKey: TranslationKey | null = null;
+    if (armourRatio <= 0.1) {
+      dangerKey = 'combat.dangerImminent';
+    } else if (armourRatio <= 0.25) {
+      dangerKey = 'combat.dangerCritical';
+    } else if (armourRatio <= 0.5) {
+      dangerKey = 'combat.dangerAdvisory';
+    }
+    this.dangerText.setText(dangerKey === null ? '' : this.t(dangerKey));
+    this.dangerText.setColor(
+      dangerKey === null ? '#b7d9d2' : armourRatio <= 0.1 ? '#f07178' : '#f2c66d',
+    );
 
     this.playerArmourBarBackground.setPosition(
       this.player.x,
@@ -2723,6 +2747,7 @@ export class CombatScene extends Phaser.Scene {
         aircraftDestroyed: this.armour <= 0,
         rocketsFired: this.rocketsFired,
         auxiliaryAmmoConsumed: this.auxiliaryAmmoConsumed,
+        aborted: this.runAborted,
       });
     }
   }

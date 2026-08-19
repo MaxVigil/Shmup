@@ -85,6 +85,17 @@ match.
 - 287 unit tests, lint, typecheck, and build pass. PLAYTEST Round 18 scripts the
   mission-type check.
 
+## Missions epic M6 — retreat redesign
+
+- Danger ladder in combat: advisory at 50% armour, critical retreat warning at
+  25%, “destruction imminent” at 10% — colour-coded HUD line tied to the armour
+  text.
+- The abort/retreat flow now settles as the `aborted` outcome in the mission
+  result record; bounty and nation gift are forfeited, the mission stays
+  unresolved, and fuel is consumed (explicit retreat penalty).
+- 287 unit tests, lint, typecheck, and build pass. PLAYTEST Round 19 scripts the
+  retreat + danger-ladder check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

@@ -155,6 +155,8 @@ export type GameCommand =
       readonly armourLostRatio?: number;
       /** True when the active aircraft's armour reached 0 (hardcore loss). */
       readonly aircraftDestroyed?: boolean;
+      /** True when the sortie was aborted via the retreat flow (M6). */
+      readonly aborted?: boolean;
     }
   | { readonly type: 'RESEARCH_TECHNOLOGY'; readonly technologyId: string }
   | { readonly type: 'PURCHASE_MARKET_WEAPON'; readonly weaponId: string }
@@ -339,6 +341,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               pilotId: activePilotId,
               outcome: deriveMissionOutcome({
                 destroyed,
+                aborted: command.aborted === true,
                 extracted: command.outcome.extracted,
                 targetsBreached: command.outcome.targetsBreached,
               }),

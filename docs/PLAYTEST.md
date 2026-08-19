@@ -307,6 +307,20 @@ aircraft; the mission context survives the hangar detour.
 settlement differences (interception gift gating, escort breach) are observable
 in the month report and the resolved-mission state.
 
+## Round 19 — Retreat & danger ladder (M6)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Actions:**
+- Fly a sortie and take damage: at ~50% armour the HUD shows the advisory, at
+  ~25% the critical retreat warning, at ~10% “destruction imminent”.
+- Open the pause menu and confirm the two-step Abort (retreat).
+- Return to the base and check the run report / archive: the mission result is
+  `aborted`, bounty and gift are forfeited, the mission stays unresolved, fuel
+  was consumed.
+
+**Expected:** the danger ladder is readable and colour-coded; an abort settles as
+`aborted` (visible in the mission result record) with explicit penalties.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

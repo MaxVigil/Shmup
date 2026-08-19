@@ -61,6 +61,9 @@ describe('mission outcome derivation', () => {
     expect(
       deriveMissionOutcome({ destroyed: false, extracted: false, targetsBreached: 0 }),
     ).toBe('objective-failed-extracted');
+    expect(
+      deriveMissionOutcome({ destroyed: false, aborted: true, extracted: false, targetsBreached: 0 }),
+    ).toBe('aborted');
   });
 });
 

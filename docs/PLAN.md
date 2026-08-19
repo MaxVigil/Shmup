@@ -742,7 +742,10 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
   missions; type shown in cards/briefing/readiness and as a HUD objective line;
   type-aware settlement (interception gift gating on the Warden, escort
   unresolved on breach).
-- [ ] M6 — retreat redesign + outcome taxonomy (next).
+- [x] M6 — retreat redesign: danger ladder (50%/25%/10% armour warnings), abort
+  now settles as the `aborted` outcome (bounty/gift forfeited, mission
+  unresolved, fuel consumed).
+- [ ] M7 — Intel loop: IntelFact acquisition, briefing integration (next).
 
 ## Future ideas (backlog)
 

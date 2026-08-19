@@ -4499,6 +4499,7 @@ function launchSortie(): void {
           outcome: result.outcome,
           armourLostRatio: result.armourLostRatio,
           aircraftDestroyed: result.aircraftDestroyed,
+          aborted: result.aborted,
         });
         if (result.rocketsFired > 0) {
           store.dispatch({

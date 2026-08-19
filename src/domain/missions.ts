@@ -24,17 +24,21 @@ export function missionStatus(
 
 export interface OutcomeSource {
   readonly destroyed: boolean;
+  /** True when the sortie was aborted via the retreat flow (M6). */
+  readonly aborted?: boolean;
   readonly extracted: boolean;
   readonly targetsBreached: number;
 }
 
 /**
  * Maps settlement signals to the outcome taxonomy (MISSIONS_EPIC §1.1).
- * `aborted` is reserved for the retreat redesign (Iteration 6).
  */
 export function deriveMissionOutcome(source: OutcomeSource): MissionOutcomeKind {
   if (source.destroyed) {
     return 'destroyed';
+  }
+  if (source.aborted === true) {
+    return 'aborted';
   }
   if (!source.extracted) {
     return 'objective-failed-extracted';
