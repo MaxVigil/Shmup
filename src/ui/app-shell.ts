@@ -149,7 +149,7 @@ const rocketsConsumable = consumableById(consumableId.rockets)!;
 
 let game: ReturnType<typeof createGame> | null = null;
 let activeScreen: 'base' | 'sortie' = 'base';
-let activeBaseSection: BaseSection = 'command';
+let activeBaseSection: BaseSection = 'operations';
 let lastRunResult: CombatRunResult | null = null;
 let lastSettlementSummary: SortiePayoffSummary | null = null;
 let lastThanksLine: string | null = null;
@@ -500,11 +500,24 @@ function renderReports(): void {
 }
 
 function isBaseSection(value: string | undefined): value is BaseSection {
-  return value === 'command' || value === 'research' ||
-    value === 'engineering' || value === 'hangar' || value === 'trade' ||
-    value === 'finance' || value === 'staff' || value === 'medical' ||
+  return value === 'operations' || value === 'research' ||
+    value === 'engineering' || value === 'hangar' || value === 'market' ||
+    value === 'personnel' || value === 'archive' ||
     value === 'warehouse' || value === 'databank';
 }
+
+/** Section → panels shown when the section is active (MISSIONS_EPIC §3.1). */
+const SECTION_PANEL_IDS: Readonly<Record<BaseSection, readonly string[]>> = {
+  operations: ['base-panel-command'],
+  hangar: ['base-panel-hangar'],
+  research: ['base-panel-research'],
+  engineering: ['base-panel-engineering'],
+  market: ['base-panel-trade', 'base-panel-finance'],
+  personnel: ['base-panel-staff', 'base-panel-medical'],
+  archive: ['base-panel-archive'],
+  warehouse: ['base-panel-warehouse'],
+  databank: ['base-panel-databank'],
+};
 
 function showBaseSection(section: BaseSection): void {
   activeBaseSection = section;
@@ -513,8 +526,9 @@ function showBaseSection(section: BaseSection): void {
     button.setAttribute('aria-selected', String(selected));
     button.tabIndex = selected ? 0 : -1;
   }
+  const visible = new Set(SECTION_PANEL_IDS[section]);
   for (const panel of basePanels) {
-    panel.hidden = panel.id !== `base-panel-${section}`;
+    panel.hidden = !visible.has(panel.id);
   }
 }
 
@@ -696,16 +710,9 @@ function renderBase(): void {
     state.base.materials < workshop.materialCost
   );
   const researchTab = byId<HTMLButtonElement>('base-tab-research');
-  const medicalTab = byId<HTMLButtonElement>('base-tab-medical');
-  const medicalBlockBuilt = isBuildingOperational(state.base, 
-    'building-medical-block',
-  );
   researchTab.hidden = !labBuilt;
-  medicalTab.hidden = !medicalBlockBuilt;
   if (!labBuilt && activeBaseSection === 'research') {
-    showBaseSection('command');
-  } else if (!medicalBlockBuilt && activeBaseSection === 'medical') {
-    showBaseSection('command');
+    showBaseSection('operations');
   }
   const quarantineBuilt = isBuildingOperational(state.base, quarantine.id);
   const adaptedUnlocked = state.base.unlockedBlueprintIds.includes(adaptedBlueprint.id);
@@ -964,6 +971,7 @@ function renderBase(): void {
   renderCommand();
   renderMonthReport();
   renderDatabank();
+  renderArchive();
 }
 
 const aircraftNameKey: Readonly<Record<string, TranslationKey>> = {
@@ -2269,6 +2277,36 @@ function renderDatabank(): void {
     container.append(section);
   }
 }
+function renderArchive(): void {
+  const container = byId<HTMLElement>('archive-records');
+  container.textContent = '';
+  const state = store.getSnapshot();
+  const missionsFlown = state.base.missionResults.length;
+  const missionsResolved = state.base.missionResults.filter(
+    (record) => record.outcome === 'success' || record.outcome === 'partial-success',
+  ).length;
+  const fleet = Object.keys(state.base.aircraftInstances).length;
+  const lost = Object.values(state.base.aircraftHistory).filter(
+    (history) => history.destroyedMonth !== null,
+  ).length;
+  const rows: ReadonlyArray<readonly [string, string]> = [
+    [t('archive.missionsFlown'), missionsFlown.toString()],
+    [t('archive.missionsResolved'), missionsResolved.toString()],
+    [t('archive.fleetAircraft'), fleet.toString()],
+    [t('archive.aircraftLost'), lost.toString()],
+  ];
+  for (const [label, value] of rows) {
+    const row = document.createElement('article');
+    row.className = 'threat-row';
+    const strong = document.createElement('strong');
+    strong.textContent = label;
+    const span = document.createElement('span');
+    span.textContent = value;
+    row.append(strong, span);
+    container.appendChild(row);
+  }
+}
+
 function renderTrade(): void {
   const state = store.getSnapshot();
   const bankrupt = isBankrupt(state.base.credits);
@@ -3739,12 +3777,13 @@ function renderDesignSystem(): void {
 
   const tabs = h('div', { class: 'base-navigation design-nav', role: 'tablist' });
   const tabSamples: ReadonlyArray<readonly [string, string, boolean]> = [
-    ['command', 'COMMAND', true],
+    ['operations', 'OPERATIONS', true],
+    ['hangar', 'HANGAR', false],
     ['research', 'RESEARCH', false],
     ['engineering', 'ENGINEERING', false],
-    ['hangar', 'HANGAR', false],
-    ['trade', 'TRADE', false],
-    ['databank', 'DATABANK', false],
+    ['market', 'MARKET', false],
+    ['personnel', 'PERSONNEL', false],
+    ['archive', 'ARCHIVE', false],
   ];
   for (const [section, label, selected] of tabSamples) {
     tabs.append(h('button', {
@@ -3826,16 +3865,20 @@ function renderLocale(): void {
   setText('route-base', 'nav.base');
   setText('route-sortie', 'nav.sortie');
   baseNavigation.setAttribute('aria-label', t('baseNav.aria'));
-  setText('base-tab-command', 'baseNav.command');
+  setText('base-tab-operations', 'baseNav.operations');
+  setText('base-tab-hangar', 'baseNav.hangar');
   setText('base-tab-research', 'baseNav.research');
   setText('base-tab-engineering', 'baseNav.engineering');
-  setText('base-tab-hangar', 'baseNav.hangar');
-  setText('base-tab-trade', 'baseNav.trade');
-  setText('base-tab-finance', 'baseNav.finance');
-  setText('base-tab-databank', 'baseNav.databank');
-  setText('base-tab-staff', 'baseNav.staff');
-  setText('base-tab-medical', 'baseNav.medical');
-  setText('base-tab-warehouse', 'baseNav.warehouse');
+  setText('base-tab-market', 'baseNav.market');
+  setText('base-tab-personnel', 'baseNav.personnel');
+  setText('base-tab-archive', 'baseNav.archive');
+  setText('archive-section-eyebrow', 'archive.eyebrow');
+  setText('archive-section-title', 'archive.title');
+  setText('archive-section-lede', 'archive.lede');
+  setText('archive-note', 'archive.note');
+  setText('archive-open-databank', 'archive.openDatabank');
+  setText('open-warehouse-hangar', 'baseNav.warehouse');
+  setText('open-warehouse-market', 'baseNav.warehouse');
   setText('finance-section-eyebrow', 'finance.eyebrow');
   setText('finance-section-title', 'finance.heading');
   setText('finance-section-lede', 'finance.lede');
@@ -4039,6 +4082,18 @@ for (const [index, button] of baseTabButtons.entries()) {
   });
 }
 
+byId<HTMLButtonElement>('archive-open-databank').addEventListener('click', () => {
+  showBaseSection('databank');
+});
+
+byId<HTMLButtonElement>('open-warehouse-hangar').addEventListener('click', () => {
+  showBaseSection('warehouse');
+});
+
+byId<HTMLButtonElement>('open-warehouse-market').addEventListener('click', () => {
+  showBaseSection('warehouse');
+});
+
 researchTechnologyButton.addEventListener('click', () => {
   store.dispatch({ type: 'RESEARCH_TECHNOLOGY', technologyId: prism.id });
   showToast(t('toast.researchStarted'));
@@ -4166,7 +4221,7 @@ restartProgrammeButton.addEventListener('click', () => {
   sortieInProgress = false;
   store.dispatch({ type: 'RESET' });
   showScreen('base');
-  showBaseSection('command');
+  showBaseSection('operations');
   renderReports();
 });
 
@@ -4332,7 +4387,7 @@ launchSortieButton.addEventListener('click', launchSortie);
 
 returnToBaseButton.addEventListener('click', () => {
   showScreen('base');
-  showBaseSection('command');
+  showBaseSection('operations');
   renderBase();
   renderReports();
 });

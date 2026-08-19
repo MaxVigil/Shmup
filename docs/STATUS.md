@@ -41,6 +41,16 @@ match.
 - Domain-only foundation (no new UI yet); the mission map consumes it from
   Iteration 3. 284 unit tests, lint, typecheck, and build pass.
 
+## Missions epic M2 — information architecture
+
+- 7 top-level sections (Operations / Hangar / Research / Engineering / Market /
+  Personnel / Archive); Finance folds into Market, Medical into Personnel;
+  Warehouse becomes a shared drawer reachable from Hangar and Market; Databank
+  stays a technical entity reference reachable from Archive.
+- Archive is a campaign-records stub (counters) that grows with Iterations 7–8.
+- 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 15 scripts the
+  nav reachability check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

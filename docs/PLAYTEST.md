@@ -248,6 +248,20 @@ a Warden Seeker volley or sustained Gunship fire).
   dead, and the lost machine's record (acquired month, missions, destroyed month)
   survives in the archive/history.
 
+## Round 15 — Base information architecture (M2)
+
+**URL:** `?missionsReady=true`
+**Actions:**
+- Confirm exactly 7 top-level tabs: Operations, Hangar, Research, Engineering,
+  Market, Personnel, Archive.
+- Operations shows the threat map and month report; Market shows trade + finance;
+  Personnel shows staff + medical; Archive shows campaign counters.
+- Open Warehouse from the Hangar and from Market; open the technical reference
+  (Databank) from Archive.
+
+**Expected:** every previous screen is reachable within two clicks; no tab or
+screen is orphaned; the nav is keyboard-accessible (Arrow keys, Home/End).
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

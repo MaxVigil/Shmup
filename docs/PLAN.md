@@ -728,8 +728,11 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
   migration, permanent loss frees the bay (MISSIONS_EPIC §1.2).
 - [x] M1b — mission result foundation: `MissionResultRecord` + outcome taxonomy +
   status derivation, written once at settlement (MISSIONS_EPIC §1.1).
-- [ ] M2 — information architecture: 7 top-level sections; Finance→Market,
-  Medical→Personnel, Warehouse→shared drawer, Databank→Settings (next).
+- [x] M2 — information architecture: 7 top-level sections (Operations/Hangar/
+  Research/Engineering/Market/Personnel/Archive); Finance→Market, Medical→
+  Personnel, Warehouse→shared drawer (from Hangar/Market), Databank→technical
+  reference from Settings/Archive.
+- [ ] M3 — Operations mission map + briefing (next).
 
 ## Future ideas (backlog)
 

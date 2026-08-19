@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { sectionForObjective } from '../../src/domain/base-navigation';
+import { NAV_SECTIONS, sectionForObjective } from '../../src/domain/base-navigation';
 
 describe('base information architecture', () => {
+  it('exposes exactly seven top-level navigation sections (MISSIONS_EPIC §3.1)', () => {
+    expect(NAV_SECTIONS).toEqual([
+      'operations',
+      'hangar',
+      'research',
+      'engineering',
+      'market',
+      'personnel',
+      'archive',
+    ]);
+  });
+
   it.each([
     ['build-laboratory', 'engineering'],
     ['hire-scientist', 'research'],

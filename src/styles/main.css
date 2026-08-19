@@ -970,6 +970,12 @@ h1 {
   border-top: 1px solid #1b2b33;
 }
 
+.loadout-row__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
 .loadout-row strong {
   display: block;
   color: #b7d9d2;

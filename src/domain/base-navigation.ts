@@ -1,16 +1,32 @@
 import type { ProgressionObjectiveKind } from './progression-guidance';
 
+/**
+ * Top-level base sections (MISSIONS_EPIC §3, design spec v0.2 §3.1). Seven
+ * sections appear in the nav; `warehouse` and `databank` are hidden sections
+ * reached through access points (warehouse = shared inventory drawer;
+ * databank = technical entity reference from Settings/Archive).
+ */
 export type BaseSection =
-  | 'command'
+  | 'operations'
+  | 'hangar'
   | 'research'
   | 'engineering'
-  | 'hangar'
-  | 'trade'
-  | 'finance'
-  | 'staff'
-  | 'medical'
+  | 'market'
+  | 'personnel'
+  | 'archive'
   | 'warehouse'
   | 'databank';
+
+/** The seven sections that appear as top-level navigation tabs. */
+export const NAV_SECTIONS: readonly BaseSection[] = [
+  'operations',
+  'hangar',
+  'research',
+  'engineering',
+  'market',
+  'personnel',
+  'archive',
+];
 
 export function sectionForObjective(kind: ProgressionObjectiveKind): BaseSection {
   switch (kind) {

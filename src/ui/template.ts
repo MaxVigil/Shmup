@@ -68,16 +68,13 @@ export function buildAppTemplate(initialState: GameState): string {
       </section>
 
       <nav id="base-navigation" class="base-navigation" role="tablist">
-        <button id="base-tab-command" type="button" role="tab" data-base-section="command" data-nav-glyph="command" aria-controls="base-panel-command" aria-selected="true"></button>
+        <button id="base-tab-operations" type="button" role="tab" data-base-section="operations" data-nav-glyph="operations" aria-controls="base-panel-command" aria-selected="true"></button>
+        <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" data-nav-glyph="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
         <button id="base-tab-research" type="button" role="tab" data-base-section="research" data-nav-glyph="research" aria-controls="base-panel-research" aria-selected="false"></button>
         <button id="base-tab-engineering" type="button" role="tab" data-base-section="engineering" data-nav-glyph="engineering" aria-controls="base-panel-engineering" aria-selected="false"></button>
-        <button id="base-tab-hangar" type="button" role="tab" data-base-section="hangar" data-nav-glyph="hangar" aria-controls="base-panel-hangar" aria-selected="false"></button>
-        <button id="base-tab-trade" type="button" role="tab" data-base-section="trade" data-nav-glyph="trade" aria-controls="base-panel-trade" aria-selected="false"></button>
-        <button id="base-tab-finance" type="button" role="tab" data-base-section="finance" data-nav-glyph="finance" aria-controls="base-panel-finance" aria-selected="false"></button>
-        <button id="base-tab-staff" type="button" role="tab" data-base-section="staff" data-nav-glyph="staff" aria-controls="base-panel-staff" aria-selected="false"></button>
-        <button id="base-tab-medical" type="button" role="tab" data-base-section="medical" data-nav-glyph="medical" aria-controls="base-panel-medical" aria-selected="false"></button>
-        <button id="base-tab-warehouse" type="button" role="tab" data-base-section="warehouse" data-nav-glyph="warehouse" aria-controls="base-panel-warehouse" aria-selected="false"></button>
-        <button id="base-tab-databank" type="button" role="tab" data-base-section="databank" data-nav-glyph="databank" aria-controls="base-panel-databank" aria-selected="false"></button>
+        <button id="base-tab-market" type="button" role="tab" data-base-section="market" data-nav-glyph="market" aria-controls="base-panel-trade" aria-selected="false"></button>
+        <button id="base-tab-personnel" type="button" role="tab" data-base-section="personnel" data-nav-glyph="personnel" aria-controls="base-panel-staff" aria-selected="false"></button>
+        <button id="base-tab-archive" type="button" role="tab" data-base-section="archive" data-nav-glyph="archive" aria-controls="base-panel-archive" aria-selected="false"></button>
       </nav>
 
       <div id="global-hud" class="global-hud">
@@ -288,7 +285,10 @@ export function buildAppTemplate(initialState: GameState): string {
           <div class="fleet-slots" id="hangar-slots-list" aria-live="polite"></div>
           <div class="loadout-row hangar-slot-expand">
             <div><span class="loadout-row__label" id="hangar-slot-label"></span><strong id="hangar-slot-cost"></strong><small id="hangar-slot-note"></small></div>
-            <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
+            <div class="loadout-row__actions">
+              <button id="open-warehouse-hangar" class="base-action" type="button"></button>
+              <button id="purchase-hangar-slot" class="base-action" type="button" hidden></button>
+            </div>
           </div>
         </section>
           <section class="technology-lab hangar-panel hangar-panel--pilots" aria-labelledby="hangar-pilots-title">
@@ -309,6 +309,7 @@ export function buildAppTemplate(initialState: GameState): string {
           <p class="eyebrow" id="trade-section-eyebrow"></p>
           <h1 id="trade-section-title"></h1>
           <p class="lede" id="trade-section-lede"></p>
+          <button id="open-warehouse-market" class="base-action" type="button"></button>
         </header>
         <div id="trade-content" class="trade-content">
           <div id="trade-dynamic" class="trade-dynamic"></div>
@@ -388,6 +389,17 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <p id="databank-note" class="databank-note"></p>
         <div id="databank-tables" class="databank-tables"></div>
+      </section>
+
+      <section id="base-panel-archive" class="base-panel" role="tabpanel" aria-labelledby="base-tab-archive" hidden>
+        <header class="section-heading">
+          <p class="eyebrow" id="archive-section-eyebrow"></p>
+          <h1 id="archive-section-title"></h1>
+          <p class="lede" id="archive-section-lede"></p>
+        </header>
+        <p id="archive-note" class="databank-note"></p>
+        <div id="archive-records" class="threat-map" aria-live="polite"></div>
+        <button id="archive-open-databank" class="base-action is-primary" type="button"></button>
       </section>
 
       <section id="month-report-panel" class="month-report-panel" hidden role="dialog" aria-modal="true" aria-labelledby="month-report-title">
