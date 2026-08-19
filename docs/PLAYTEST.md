@@ -358,6 +358,23 @@ in LOST AIRCRAFT and is gone from the fleet.
 **Expected:** wishlist state persists across renders (and reloads); compare shows
 both sides of the trade-off.
 
+## Round 23 — Mission-type balance gate (M10)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Actions:**
+- List the four mission types and their primary build demands (from the
+  briefing):
+  - Sweep → sustained fire; Interception → burst damage; Escort → threat
+    control; Recon → mobility.
+- Fly a Sweep and an Interception with the same gunship: confirm the gunship
+  feels strong at Sweep but sluggish at Interception (burst/speed demand).
+- Fly a Recon with the heavy gunship and then with the fast interceptor: confirm
+  Recon rewards mobility.
+
+**Expected:** no single aircraft is clearly optimal for all four types; each type
+presents a distinct build demand (deterministic gate: the four primaries in
+`mission-capabilities.ts` are distinct).
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

@@ -752,7 +752,9 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
   Hangar hero; LOST AIRCRAFT section in the Archive.
 - [x] M9 — market strengthening: wishlist toggles on weapon/aircraft cards with
   highlight; compare-with-fleet on aircraft offers.
-- [ ] M10 — balance + human playtests (next).
+- [x] M10 — balance gate + playtests: deterministic per-type capability demands
+  (4 distinct primaries), PLAYTEST Round 23. **Missions & UX/UI epic M0–M10
+  complete.**
 
 ## Future ideas (backlog)
 

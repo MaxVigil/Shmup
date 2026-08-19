@@ -57,6 +57,23 @@ Status and task breakdown: `docs/UXUI_EPIC.md` + `docs/PLAN.md`.
 - **E6.5** toast/a11y + i18n overflow — done.
 - **E6.6** verification & regression — done.
 
+## Missions & UX/UI epic (M0–M10)
+
+Status and task breakdown: `docs/MISSIONS_EPIC.md` + `docs/PLAN.md`.
+
+- **M0** playability safety net (`?missionsReady=true`) — done.
+- **M1** domain foundation: aircraft instances + permanent loss (M1a), mission
+  result records (M1b) — done.
+- **M2** information architecture (7 sections) — done.
+- **M3** Operations mission map + briefing — done.
+- **M4** hybrid preparation flow + readiness check — done.
+- **M5** mission wave 1 (types) — done.
+- **M6** retreat redesign + aborted outcome — done.
+- **M7** Intel loop — done.
+- **M8** aircraft history + archive records — done.
+- **M9** market wishlist + compare-with-fleet — done.
+- **M10** balance gate + playtests — done. Epic complete.
+
 ## Commands
 
 - Install: `npm ci` · Dev: `npm run dev`

@@ -126,6 +126,15 @@ match.
 - 292 unit tests, lint, typecheck, and build pass. PLAYTEST Round 22 scripts the
   market check.
 
+## Missions epic M10 — balance gate (final)
+
+- `mission-capabilities.ts` declares each wave-1 mission type's primary build
+  demand; a unit test gates that all four primaries are distinct — no single
+  aircraft is optimal for every mission (MISSIONS_EPIC §7.3).
+- PLAYTEST Round 23 scripts the human cross-type balance check.
+- **Missions & UX/UI epic M0–M10 complete.** 293 unit tests, lint, typecheck,
+  and the production build pass.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).
