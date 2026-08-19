@@ -735,8 +735,10 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
 - [x] M3 — Operations mission map + briefing: selecting a mission opens a
   briefing with objective, theatre, known/unknown Intel, capability demands,
   reward/failure preview, and ready-aircraft list.
-- [ ] M4 — hybrid preparation flow: compare aircraft, “Prepare in Hangar” with
-  pinned mission context, final readiness check (next).
+- [x] M4 — hybrid preparation flow: final readiness check before launch
+  (mission/aircraft/pilot/build summary, warnings, Launch/Back) and pinned
+  mission context in the Hangar with “back to briefing”.
+- [ ] M5 — mission wave 1: Sweep, Interception, Escort, Recon (next).
 
 ## Future ideas (backlog)
 

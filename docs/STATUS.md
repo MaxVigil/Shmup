@@ -61,6 +61,18 @@ match.
 - 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 16 scripts the
   briefing check.
 
+## Missions epic M4 — hybrid preparation flow
+
+- Final readiness check before launch: from the sortie picker, FLY opens a
+  confirmation sheet with mission (country/threat/bounty), aircraft (callsign),
+  pilot, build summary (primary, hardpoints, ammo), and warnings (low ammo,
+  no mission) with Launch/Back.
+- Pinned mission context in the Hangar: preparing from the briefing keeps the
+  contract visible with a “back to briefing” path; the loop
+  briefing → hangar → readiness → launch works end-to-end.
+- 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 17 scripts the
+  preparation-loop check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

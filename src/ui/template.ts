@@ -266,6 +266,11 @@ export function buildAppTemplate(initialState: GameState): string {
       </section>
 
       <section id="base-panel-hangar" class="base-panel" role="tabpanel" aria-labelledby="base-tab-hangar" hidden>
+        <section id="hangar-pinned-mission" class="hangar-pinned" aria-live="polite" hidden>
+          <span id="hangar-pinned-mission-text"></span>
+          <span id="hangar-pinned-hint"></span>
+          <button id="hangar-back-to-briefing" class="base-action" type="button"></button>
+        </section>
         <header class="section-heading">
           <p class="eyebrow" id="hangar-section-eyebrow"></p>
           <h1 id="hangar-section-title"></h1>
@@ -442,6 +447,16 @@ export function buildAppTemplate(initialState: GameState): string {
         </header>
         <div id="sortie-picker-list" class="candidate-list" aria-live="polite"></div>
         <p id="sortie-picker-empty" class="empty-note" hidden></p>
+        <section id="readiness-check" class="technology-lab readiness-check" hidden aria-labelledby="readiness-title">
+          <p class="technology-lab__eyebrow" id="readiness-eyebrow"></p>
+          <h3 id="readiness-title"></h3>
+          <dl id="readiness-grid" class="briefing-grid"></dl>
+          <div id="readiness-warnings" class="readiness-warnings" aria-live="polite"></div>
+          <div class="briefing-actions">
+            <button id="readiness-back" class="base-action" type="button"></button>
+            <button id="readiness-launch" class="base-action is-primary" type="button"></button>
+          </div>
+        </section>
       </section>
     </main>
 

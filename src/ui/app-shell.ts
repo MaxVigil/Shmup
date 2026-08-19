@@ -150,6 +150,7 @@ const rocketsConsumable = consumableById(consumableId.rockets)!;
 let game: ReturnType<typeof createGame> | null = null;
 let activeScreen: 'base' | 'sortie' = 'base';
 let activeBaseSection: BaseSection = 'operations';
+let pendingLaunchAircraftId: string | null = null;
 let lastRunResult: CombatRunResult | null = null;
 let lastSettlementSummary: SortiePayoffSummary | null = null;
 let lastThanksLine: string | null = null;
@@ -963,6 +964,7 @@ function renderBase(): void {
   renderResearchCards();
   renderCanister();
   renderFleet();
+  renderHangarPinnedContext();
   renderWarehouse();
   renderPilots();
   renderTrade();
@@ -3066,9 +3068,8 @@ function renderSortiePicker(): void {
     );
     fly.disabled = !ready;
     fly.addEventListener('click', () => {
-      store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
-      closeOverlay('sortie-picker');
-      launchSortie();
+      pendingLaunchAircraftId = aircraftId;
+      showReadinessCheck();
     });
     actions.append(fly);
     row.append(actions);
@@ -3080,7 +3081,105 @@ function renderSortiePicker(): void {
   firstAction?.setAttribute('data-overlay-focus', '');
 }
 
+function showReadinessCheck(): void {
+  renderReadinessCheck();
+  sortiePickerList.hidden = true;
+  sortiePickerEmpty.hidden = true;
+  byId<HTMLElement>('readiness-check').hidden = false;
+  byId<HTMLButtonElement>('readiness-launch').focus();
+}
+
+function showSortieList(): void {
+  pendingLaunchAircraftId = null;
+  byId<HTMLElement>('readiness-check').hidden = true;
+  sortiePickerList.hidden = false;
+  const empty = sortiePickerEmpty;
+  empty.hidden = hasReadyAircraft(store.getSnapshot());
+}
+
+function renderReadinessCheck(): void {
+  const state = store.getSnapshot();
+  const aircraftId = pendingLaunchAircraftId;
+  byId<HTMLElement>('readiness-eyebrow').textContent = t('readiness.eyebrow');
+  byId<HTMLElement>('readiness-title').textContent = t('readiness.title');
+  byId<HTMLButtonElement>('readiness-back').textContent = t('readiness.back');
+  byId<HTMLButtonElement>('readiness-launch').textContent = t('readiness.launch');
+  const grid = byId<HTMLElement>('readiness-grid');
+  grid.textContent = '';
+  const aircraft = aircraftId === null
+    ? undefined
+    : contentCatalog.aircraft.find((entry) => entry.id === aircraftId);
+  const mission = state.base.activeMissionId === null
+    ? undefined
+    : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
+  const stateDefinition = mission === undefined
+    ? undefined
+    : contentCatalog.councilStates.find((entry) => entry.id === mission.targetCountryId);
+  const country = stateDefinition === undefined
+    ? ''
+    : t(stateDefinition.nameKey as TranslationKey);
+  const instance = aircraftId === null ? undefined : aircraftInstanceMeta(state.base, aircraftId);
+  const assignedPilot = instance === undefined || instance.assignedPilotId === null
+    ? undefined
+    : state.base.pilots.find((pilot) => pilot.id === instance.assignedPilotId);
+  const primary = aircraftId === null ? undefined : state.base.aircraftLoadouts[aircraftId]?.[0];
+  const primaryName = primary === undefined || primary === null
+    ? '—'
+    : localizedWeaponName(primary);
+  const hardpoints = aircraftId === null
+    ? 0
+    : (state.base.aircraftHardpoints[aircraftId]?.filter((item) => item !== null).length ?? 0);
+  const ammo = Object.values(state.base.consumableStock).reduce((sum, count) => sum + count, 0);
+  const rows: ReadonlyArray<readonly [string, string]> = [
+    [t('readiness.mission'), mission === undefined
+      ? t('readiness.noMission')
+      : t('readiness.missionValue', {
+          country,
+          threat: mission.threatLevel,
+          bounty: missionBounty(mission),
+        })],
+    [t('readiness.aircraft'), aircraft === undefined
+      ? '—'
+      : t('readiness.aircraftValue', {
+          callsign: instance?.callsign ?? aircraft.id,
+          name: t(aircraftNameKey[aircraft.id] ?? 'content.interceptor'),
+        })],
+    [t('readiness.pilot'), assignedPilot === undefined
+      ? t('readiness.pilotNone')
+      : t('readiness.pilotValue', {
+          pilot: `${assignedPilot.firstName ?? ''} ${assignedPilot.lastName ?? ''}`.trim(),
+        })],
+    [t('readiness.build'), t('readiness.buildValue', {
+      primary: primaryName,
+      hardpoints,
+      ammo,
+    })],
+  ];
+  for (const [term, detail] of rows) {
+    const dt = document.createElement('dt');
+    dt.textContent = term;
+    const dd = document.createElement('dd');
+    dd.textContent = detail;
+    grid.append(dt, dd);
+  }
+  const warnings: string[] = [];
+  if (ammo === 0) {
+    warnings.push(t('readiness.warningAmmo'));
+  }
+  if (mission === undefined) {
+    warnings.push(t('readiness.warningNoMission'));
+  }
+  const warningsEl = byId<HTMLElement>('readiness-warnings');
+  warningsEl.textContent = warnings.length === 0
+    ? t('readiness.warningsNone')
+    : warnings.join(' · ');
+  warningsEl.classList.toggle('is-warning', warnings.length > 0);
+}
+
 function openSortiePicker(): void {
+  pendingLaunchAircraftId = null;
+  byId<HTMLElement>('readiness-check').hidden = true;
+  sortiePickerList.hidden = false;
   renderSortiePicker();
   openOverlay('sortie-picker');
 }
@@ -3246,6 +3345,31 @@ function renderBriefing(): void {
     count: ready.length,
     list: readyNames.join(', ') || '—',
   });
+}
+
+function renderHangarPinnedContext(): void {
+  const pinned = byId<HTMLElement>('hangar-pinned-mission');
+  const state = store.getSnapshot();
+  const mission = state.base.activeMissionId === null
+    ? undefined
+    : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
+  pinned.hidden = mission === undefined;
+  if (mission === undefined) {
+    return;
+  }
+  const stateDefinition = contentCatalog.councilStates.find(
+    (entry) => entry.id === mission.targetCountryId,
+  );
+  const country = stateDefinition === undefined
+    ? mission.targetCountryId
+    : t(stateDefinition.nameKey as TranslationKey);
+  byId<HTMLElement>('hangar-pinned-mission-text').textContent = t('hangar.pinnedMission', {
+    country,
+    threat: mission.threatLevel,
+    bounty: missionBounty(mission),
+  });
+  byId<HTMLElement>('hangar-pinned-hint').textContent = t('hangar.pinnedHint');
+  byId<HTMLButtonElement>('hangar-back-to-briefing').textContent = t('hangar.backToBriefing');
 }
 
 function renderCredit(): void {
@@ -4158,6 +4282,24 @@ byId<HTMLButtonElement>('briefing-compare').addEventListener('click', () => {
 
 byId<HTMLButtonElement>('briefing-hangar').addEventListener('click', () => {
   showBaseSection('hangar');
+});
+
+byId<HTMLButtonElement>('readiness-back').addEventListener('click', () => {
+  showSortieList();
+});
+
+byId<HTMLButtonElement>('readiness-launch').addEventListener('click', () => {
+  const aircraftId = pendingLaunchAircraftId;
+  if (aircraftId === null) {
+    return;
+  }
+  store.dispatch({ type: 'SET_ACTIVE_AIRCRAFT', aircraftId });
+  closeOverlay('sortie-picker');
+  launchSortie();
+});
+
+byId<HTMLButtonElement>('hangar-back-to-briefing').addEventListener('click', () => {
+  showBaseSection('operations');
 });
 
 researchTechnologyButton.addEventListener('click', () => {

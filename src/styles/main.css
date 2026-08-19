@@ -534,6 +534,39 @@ select:focus-visible {
   margin-top: 0.75rem;
 }
 
+.readiness-check {
+  margin-top: 0.75rem;
+}
+
+.readiness-warnings {
+  color: #dfe9f3;
+  font-size: 0.82rem;
+}
+
+.readiness-warnings.is-warning {
+  color: #e0b36a;
+}
+
+.hangar-pinned {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(224, 179, 106, 0.4);
+  border-radius: 0.4rem;
+  background: rgba(224, 179, 106, 0.08);
+  margin-bottom: 0.75rem;
+}
+
+.hangar-pinned span {
+  font-size: 0.82rem;
+}
+
+.hangar-pinned button {
+  margin-left: auto;
+}
+
 .fleet-slot__actions {
   display: flex;
   gap: 0.4rem;

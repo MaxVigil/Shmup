@@ -276,6 +276,21 @@ screen is orphaned; the nav is keyboard-accessible (Arrow keys, Home/End).
 (bounty + gift) matches the mission; ready list shows callsigns; after a prior
 sortie in the sector the Intel row switches to “prior contact”.
 
+## Round 17 — Hybrid preparation flow (M4)
+
+**URL:** `?missionsReady=true`
+**Actions:**
+- Select a mission → briefing → `Prepare in Hangar`.
+- The Hangar shows the pinned mission card; change the loadout/ammo if needed;
+  `Back to briefing` returns to Operations.
+- From the briefing use `Compare aircraft` → pick a ready aircraft → `FLY`.
+- The final readiness check shows mission, aircraft (callsign), pilot, build
+  summary, and warnings; confirm `LAUNCH` (or `BACK`).
+
+**Expected:** the loop briefing → hangar → readiness → launch works end-to-end;
+`BACK` returns to the aircraft list; `LAUNCH` starts the sortie with the selected
+aircraft; the mission context survives the hangar detour.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)
