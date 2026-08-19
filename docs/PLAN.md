@@ -748,7 +748,9 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
 - [x] M7 — Intel loop: `IntelFact` records on settlement with confidence from the
   outcome; briefing KNOWN row shows the best recorded confidence; Archive lists
   intel records.
-- [ ] M8 — aircraft history + archive records (next).
+- [x] M8 — aircraft history + archive records: per-sortie timeline events in the
+  Hangar hero; LOST AIRCRAFT section in the Archive.
+- [ ] M9 — market strengthening: rotation/stock/wishlist/compare (next).
 
 ## Future ideas (backlog)
 

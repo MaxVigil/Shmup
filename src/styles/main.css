@@ -567,6 +567,24 @@ select:focus-visible {
   margin-left: auto;
 }
 
+.aircraft-timeline {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.aircraft-timeline__title {
+  color: #6f8792;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.aircraft-timeline small {
+  color: #dfe9f3;
+}
+
 .fleet-slot__actions {
   display: flex;
   gap: 0.4rem;

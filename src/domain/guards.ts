@@ -295,7 +295,8 @@ function isAircraftHistoryRecord(value: unknown): boolean {
       typeof entry.legacyImported === 'boolean' &&
       typeof entry.missions === 'number' &&
       typeof entry.kills === 'number' &&
-      typeof entry.eliteKills === 'number',
+      typeof entry.eliteKills === 'number' &&
+      Array.isArray(entry.events),
   );
 }
 

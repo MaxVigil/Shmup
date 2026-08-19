@@ -41,6 +41,15 @@ export interface AircraftHistoryRecord {
   readonly missions: number;
   readonly kills: number;
   readonly eliteKills: number;
+  /** Chronological sortie timeline (M8, MISSIONS_EPIC §6.3). */
+  readonly events: readonly AircraftSortieEvent[];
+}
+
+/** One sortie on an aircraft's timeline. */
+export interface AircraftSortieEvent {
+  readonly month: number;
+  readonly outcome: MissionOutcomeKind | null;
+  readonly missionType: string;
 }
 
 /**

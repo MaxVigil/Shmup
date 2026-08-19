@@ -334,14 +334,14 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
           // Hardcore rule: armour reaching 0 means the aircraft is destroyed — the
           // pilot dies and the entire installed loadout is irreversibly lost.
           const destroyed = command.aircraftDestroyed === true || armourLost >= 1;
+          const settlementOutcome = deriveMissionOutcome({
+            destroyed,
+            aborted: command.aborted === true,
+            extracted: command.outcome.extracted,
+            targetsBreached: command.outcome.targetsBreached,
+          });
           let nextBase = afterMission;
           if (activeMission !== undefined) {
-            const outcome = deriveMissionOutcome({
-              destroyed,
-              aborted: command.aborted === true,
-              extracted: command.outcome.extracted,
-              targetsBreached: command.outcome.targetsBreached,
-            });
             nextBase = appendMissionResult(nextBase, {
               id: `result-${activeMission.id}-${state.base.sortiesCompleted + 1}`,
               missionId: activeMission.id,
@@ -349,7 +349,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               month: state.base.month,
               aircraftId: activeAircraftId,
               pilotId: activePilotId,
-              outcome,
+              outcome: settlementOutcome,
               targetsDestroyed: command.outcome.targetsDestroyed,
               targetsBreached: command.outcome.targetsBreached,
               extracted: command.outcome.extracted,
@@ -359,7 +359,7 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               nextBase,
               activeMission.id,
               activeMission.targetCountryId,
-              outcome,
+              settlementOutcome,
             );
           }
           if (destroyed) {
@@ -392,6 +392,11 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               missions: 1,
               kills: command.outcome.targetsDestroyed,
               eliteKills: command.outcome.wardenSignalDetected ? 1 : 0,
+              event: {
+                month: state.base.month,
+                outcome: settlementOutcome,
+                missionType: activeMission?.type ?? 'sweep',
+              },
             });
           }
           state = {

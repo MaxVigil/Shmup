@@ -2324,6 +2324,24 @@ function renderArchive(): void {
       container.appendChild(row);
     }
   }
+  const lostRecords = Object.values(state.base.aircraftHistory).filter(
+    (record) => record.destroyedMonth !== null,
+  );
+  if (lostRecords.length > 0) {
+    const header = document.createElement('strong');
+    header.textContent = t('archive.lostAircraft');
+    container.appendChild(header);
+    for (const record of lostRecords) {
+      const row = document.createElement('article');
+      row.className = 'threat-row';
+      row.textContent = [
+        record.callsign,
+        t('archive.acquired', { month: record.acquiredMonth }),
+        t('archive.destroyed', { month: record.destroyedMonth ?? '?' }),
+      ].join(' · ');
+      container.appendChild(row);
+    }
+  }
 }
 
 function renderTrade(): void {
@@ -2777,6 +2795,23 @@ function renderHangarHero(): void {
     actions.append(refuel);
   }
   container.append(hero, info, actions);
+  const historyInstance = aircraftInstanceMeta(state.base, aircraft.id);
+  const historyRecord = historyInstance === undefined
+    ? undefined
+    : state.base.aircraftHistory[historyInstance.historyId];
+  if (historyRecord !== undefined && historyRecord.events.length > 0) {
+    const timeline = h(
+      'div',
+      { class: 'aircraft-timeline' },
+      h('strong', { class: 'aircraft-timeline__title' }, t('hangar.historyTitle')),
+      ...historyRecord.events.map((event) => h('small', null, [
+        t('hud.month', { month: event.month }),
+        t(`missionType.${event.missionType}` as TranslationKey),
+        event.outcome === null ? '—' : event.outcome,
+      ].join(' · '))),
+    );
+    container.append(timeline);
+  }
 }
 
 function toastSettlementCompletions(before: GameState, after: GameState): void {

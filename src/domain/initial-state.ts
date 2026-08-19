@@ -64,6 +64,7 @@ export function createInitialGameState(): GameState {
           missions: 0,
           kills: 0,
           eliteKills: 0,
+          events: [],
         },
       },
       researchQueue: [],

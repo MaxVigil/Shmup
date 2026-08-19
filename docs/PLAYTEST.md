@@ -334,6 +334,18 @@ in the month report and the resolved-mission state.
 **Expected:** successful sorties raise confidence to `confirmed`, aborted ones to
 `possible`; the briefing and the archive reflect the recorded intel.
 
+## Round 21 — Aircraft history & archive records (M8)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Actions:**
+- Fly a few sorties with the same aircraft; return to the Hangar: the hero shows
+  the SERVICE HISTORY timeline (month · mission type · outcome per sortie).
+- Destroy an aircraft (let armour reach 0); open Archive: the LOST AIRCRAFT
+  section lists the machine with its acquired and lost months.
+
+**Expected:** the timeline grows with each sortie; a destroyed aircraft appears
+in LOST AIRCRAFT and is gone from the fleet.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

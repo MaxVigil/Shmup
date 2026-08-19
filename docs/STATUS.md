@@ -106,6 +106,16 @@ match.
 - 290 unit tests, lint, typecheck, and build pass. PLAYTEST Round 20 scripts the
   intel-loop check.
 
+## Missions epic M8 — aircraft history + archive records
+
+- Per-sortie timeline events (`AircraftSortieEvent`: month/outcome/mission type)
+  appended to each aircraft's history; the Hangar hero shows the active machine's
+  SERVICE HISTORY.
+- The Archive gains a LOST AIRCRAFT section listing destroyed machines
+  (callsign, acquired month, lost month).
+- 291 unit tests, lint, typecheck, and build pass. PLAYTEST Round 21 scripts the
+  history check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

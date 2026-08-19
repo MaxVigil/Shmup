@@ -5,6 +5,7 @@ import {
   assignPilotToAircraft,
   destroyAircraft,
   ensureAircraftInstance,
+  recordAircraftSortie,
   unassignPilotFromAircraft,
 } from '../../src/domain/aircraft-instances';
 import { aircraftId } from '../../src/content/ids';
@@ -59,5 +60,22 @@ describe('aircraft instances (MISSIONS_EPIC §1.2)', () => {
     expect(base.aircraftInstances[aircraftId.india]!.assignedPilotId).toBeNull();
     expect(base.aircraftHistory[historyId]!.destroyedMonth).toBe(3);
     expect(base.activeAircraftId).toBeNull();
+  });
+
+  it('appends a sortie event to the aircraft timeline (M8)', () => {
+    const initial = createInitialGameState();
+    const base = recordAircraftSortie(initial.base, aircraftId.india, {
+      missions: 1,
+      kills: 2,
+      event: { month: 1, outcome: 'success', missionType: 'sweep' },
+    });
+    const historyId = initial.base.aircraftInstances[aircraftId.india]!.historyId;
+    expect(base.aircraftHistory[historyId]!.missions).toBe(1);
+    expect(base.aircraftHistory[historyId]!.events).toHaveLength(1);
+    expect(base.aircraftHistory[historyId]!.events[0]).toMatchObject({
+      month: 1,
+      outcome: 'success',
+      missionType: 'sweep',
+    });
   });
 });

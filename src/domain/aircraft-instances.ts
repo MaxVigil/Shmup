@@ -1,4 +1,4 @@
-import type { AircraftInstanceMeta, BaseState } from './model';
+import type { AircraftInstanceMeta, AircraftSortieEvent, BaseState } from './model';
 import { aircraftById } from '../content/ids';
 import { destroyAircraftLoadout } from './arsenal-loadout';
 
@@ -63,6 +63,7 @@ export function ensureAircraftInstance(
         missions: 0,
         kills: 0,
         eliteKills: 0,
+        events: [],
       },
     },
   };
@@ -199,6 +200,8 @@ export interface SortieHistoryDeltas {
   readonly missions?: number;
   readonly kills?: number;
   readonly eliteKills?: number;
+  /** Optional sortie event appended to the aircraft timeline (M8). */
+  readonly event?: AircraftSortieEvent;
 }
 
 /** Appends sortie outcomes to an aircraft's history record (event-backed stub). */
@@ -224,6 +227,9 @@ export function recordAircraftSortie(
         missions: history.missions + (deltas.missions ?? 0),
         kills: history.kills + (deltas.kills ?? 0),
         eliteKills: history.eliteKills + (deltas.eliteKills ?? 0),
+        events: deltas.event === undefined
+          ? history.events
+          : [...history.events, deltas.event],
       },
     },
   };
