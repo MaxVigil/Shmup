@@ -26,6 +26,8 @@ export function isGameState(
     (typeof value.base.activePilotId === 'string' ||
       value.base.activePilotId === null) &&
     Array.isArray(value.base.pilots) &&
+    isAircraftInstanceRecord(value.base.aircraftInstances) &&
+    isAircraftHistoryRecord(value.base.aircraftHistory) &&
     Array.isArray(value.base.researchQueue) &&
     Array.isArray(value.base.preservedTechnologyIds) &&
     Array.isArray(value.base.ownedPrimaryWeaponIds) &&
@@ -251,6 +253,43 @@ function isPilotCandidate(value: unknown): boolean {
     typeof value.progressMultiplier === 'number' &&
     typeof value.salaryMultiplier === 'number' &&
     typeof value.originCountryId === 'string'
+  );
+}
+
+function isAircraftInstanceRecord(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return Object.values(value).every(
+    (entry) =>
+      isRecord(entry) &&
+      typeof entry.id === 'string' &&
+      typeof entry.definitionId === 'string' &&
+      typeof entry.callsign === 'string' &&
+      (entry.assignedPilotId === null || typeof entry.assignedPilotId === 'string') &&
+      (entry.status === 'ready' ||
+        entry.status === 'damaged' ||
+        entry.status === 'destroyed') &&
+      typeof entry.historyId === 'string',
+  );
+}
+
+function isAircraftHistoryRecord(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return Object.values(value).every(
+    (entry) =>
+      isRecord(entry) &&
+      typeof entry.id === 'string' &&
+      typeof entry.definitionId === 'string' &&
+      typeof entry.callsign === 'string' &&
+      typeof entry.acquiredMonth === 'number' &&
+      (entry.destroyedMonth === null || typeof entry.destroyedMonth === 'number') &&
+      typeof entry.legacyImported === 'boolean' &&
+      typeof entry.missions === 'number' &&
+      typeof entry.kills === 'number' &&
+      typeof entry.eliteKills === 'number',
   );
 }
 

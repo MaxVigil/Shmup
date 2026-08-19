@@ -19,6 +19,19 @@ match.
   `tests/unit/missions-ready-profile.test.ts`; PLAYTEST Round 13 scripts the
   human check. 272 unit tests, lint, typecheck, and build pass.
 
+## Missions epic M1a — aircraft instance layer
+
+- `aircraftInstances` + `aircraftHistory` in the domain: callsign, per-aircraft
+  pilot assignment, terminal `destroyed` state (MISSIONS_EPIC §1.2). Schema v21
+  migration provisions instances from legacy hangar slots.
+- Permanent loss now removes the aircraft from the fleet (bay freed) and seals an
+  immutable history/archive record; the hull is no longer repairable after
+  destruction.
+- Hangar UI shows callsigns and a per-aircraft pilot select (uk/en/zh); new store
+  commands `ASSIGN_PILOT_TO_AIRCRAFT` / `UNASSIGN_PILOT_FROM_AIRCRAFT`.
+- 278 unit tests, lint, typecheck, and build pass. PLAYTEST Round 14 scripts the
+  human check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

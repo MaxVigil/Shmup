@@ -10,10 +10,12 @@ import {
 import { generateThreatMap } from '../domain/command-centre';
 import { generateStaffCandidates } from '../domain/staff-market';
 import { isGameState } from '../domain/guards';
+import { assignPilotToAircraft, ensureAircraftInstance } from '../domain/aircraft-instances';
 import { SAVE_SCHEMA_VERSION } from '../domain/model';
 import type { BaseState, GameState } from '../domain/model';
 
-export const SAVE_KEY = 'shmup.save.v20';
+export const SAVE_KEY = 'shmup.save.v21';
+export const LEGACY_V20_SAVE_KEY = 'shmup.save.v20';
 export const LEGACY_V19_SAVE_KEY = 'shmup.save.v19';
 export const LEGACY_V18_SAVE_KEY = 'shmup.save.v18';
 export const LEGACY_V17_SAVE_KEY = 'shmup.save.v17';
@@ -170,6 +172,8 @@ function v14BaseDefaults(): Pick<
   | 'manufacturedAircraftUpgradeIds'
   | 'aircraftHardpoints'
   | 'aircraftMarks'
+  | 'aircraftInstances'
+  | 'aircraftHistory'
 > {
   return {
     constructionQueue: [],
@@ -189,6 +193,8 @@ function v14BaseDefaults(): Pick<
     manufacturedAircraftUpgradeIds: [],
     aircraftHardpoints: {},
     aircraftMarks: {},
+    aircraftInstances: {},
+    aircraftHistory: {},
   };
 }
 
@@ -246,6 +252,26 @@ function addArsenalLoadoutStateVersion(state: GameState): GameState {
   };
 }
 
+/** v20 → v21: provision per-aircraft instances + history records (M1a, MISSIONS_EPIC §1.2). */
+function addAircraftInstancesVersion(state: GameState): GameState {
+  let base = state.base;
+  const month = base.month ?? 1;
+  for (const definitionId of base.hangarSlots) {
+    if (definitionId === null) {
+      continue;
+    }
+    base = ensureAircraftInstance(base, definitionId, month, { legacyImported: true });
+  }
+  if (base.activeAircraftId !== null && base.activePilotId !== null) {
+    try {
+      base = assignPilotToAircraft(base, base.activeAircraftId, base.activePilotId);
+    } catch {
+      // Unknown/conflicting legacy pilot: keep the active-pilot mirror untouched.
+    }
+  }
+  return { ...state, schemaVersion: 21, base };
+}
+
 /** Walks intermediate migration versions up to the current schema. */
 function upgradeLegacyToCurrent(state: GameState): GameState {
   let current = state;
@@ -257,6 +283,9 @@ function upgradeLegacyToCurrent(state: GameState): GameState {
   }
   if (current.schemaVersion < 20) {
     current = addArsenalLoadoutStateVersion(current);
+  }
+  if (current.schemaVersion < 21) {
+    current = addAircraftInstancesVersion(current);
   }
   return current;
 }
@@ -309,6 +338,22 @@ function migrateV19Save(rawSave: string | null): GameState | null {
   }
 }
 
+/** Legacy v20 save (old SAVE_KEY) → current (provisions aircraft instances, M1a). */
+function migrateV20Save(rawSave: string | null): GameState | null {
+  if (rawSave === null) {
+    return null;
+  }
+  try {
+    const parsed: unknown = JSON.parse(rawSave);
+    if (!isRecord(parsed) || parsed.schemaVersion !== 20 || !isRecord(parsed.base)) {
+      return null;
+    }
+    return upgradeLegacyToCurrent(parsed as unknown as GameState);
+  } catch {
+    return null;
+  }
+}
+
 export function loadGame(storage: KeyValueStorage): GameState | null {
   const currentSave = parseGameState(storage.getItem(SAVE_KEY));
   if (currentSave !== null) {
@@ -316,6 +361,7 @@ export function loadGame(storage: KeyValueStorage): GameState | null {
   }
 
   const migrations: readonly [string, (raw: string | null) => GameState | null][] = [
+    [LEGACY_V20_SAVE_KEY, migrateV20Save],
     [LEGACY_V19_SAVE_KEY, migrateV19Save],
     [LEGACY_V18_SAVE_KEY, migrateV18Save],
     [LEGACY_V17_SAVE_KEY, migrateV17Save],

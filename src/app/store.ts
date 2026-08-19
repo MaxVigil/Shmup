@@ -44,7 +44,12 @@ import {
 import { marketConsumablePrice, marketWeaponPrice } from '../domain/terrestrial-market';
 import { sellAircraft, sellWeapon } from '../domain/trade';
 import {
-  destroyAircraftLoadout,
+  assignPilotToAircraft,
+  destroyAircraft,
+  recordAircraftSortie,
+  unassignPilotFromAircraft,
+} from '../domain/aircraft-instances';
+import {
   installHardpointItem,
   purchaseAmmunition,
   removeHardpointItem,
@@ -225,6 +230,12 @@ export type GameCommand =
   | { readonly type: 'DISMISS_MONTH_REPORT' }
   | { readonly type: 'HIRE_PILOT'; readonly candidateId: string }
   | { readonly type: 'ASSIGN_PILOT'; readonly pilotId: string }
+  | {
+      readonly type: 'ASSIGN_PILOT_TO_AIRCRAFT';
+      readonly aircraftId: string;
+      readonly pilotId: string;
+    }
+  | { readonly type: 'UNASSIGN_PILOT_FROM_AIRCRAFT'; readonly aircraftId: string }
   | { readonly type: 'REST_PILOT'; readonly pilotId: string }
   | { readonly type: 'TREAT_PILOT_OUTSOURCE'; readonly pilotId: string; readonly countryId: string }
   | { readonly type: 'TREAT_PILOT_MEDICAL'; readonly pilotId: string }
@@ -312,7 +323,9 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               nextBase = killPilot(nextBase, activePilotId, state.base.month);
             }
             if (activeAircraftId !== null) {
-              nextBase = destroyAircraftLoadout(nextBase, activeAircraftId);
+              // Permanent loss (MISSIONS_EPIC §1.2): the aircraft leaves the fleet
+              // (bay freed, loadout lost, pilot released); only its history survives.
+              nextBase = destroyAircraft(nextBase, activeAircraftId, state.base.month);
             }
           } else if (activePilotId !== null && armourLost > 0) {
             const casualtySeed = (
@@ -329,6 +342,13 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
               : casualty === null
                 ? nextBase
                 : applyPilotInjury(nextBase, activePilotId, casualty);
+          }
+          if (activeAircraftId !== null && !destroyed) {
+            nextBase = recordAircraftSortie(nextBase, activeAircraftId, {
+              missions: 1,
+              kills: command.outcome.targetsDestroyed,
+              eliteKills: command.outcome.wardenSignalDetected ? 1 : 0,
+            });
           }
           state = {
             ...state,
@@ -439,6 +459,24 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
         }
         case 'ASSIGN_PILOT': {
           state = { ...state, base: assignPilot(state.base, command.pilotId) };
+          break;
+        }
+        case 'ASSIGN_PILOT_TO_AIRCRAFT': {
+          state = {
+            ...state,
+            base: assignPilotToAircraft(
+              state.base,
+              command.aircraftId,
+              command.pilotId,
+            ),
+          };
+          break;
+        }
+        case 'UNASSIGN_PILOT_FROM_AIRCRAFT': {
+          state = {
+            ...state,
+            base: unassignPilotFromAircraft(state.base, command.aircraftId),
+          };
           break;
         }
         case 'REST_PILOT': {

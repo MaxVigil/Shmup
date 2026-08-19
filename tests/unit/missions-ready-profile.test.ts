@@ -41,6 +41,15 @@ describe('missionsReady playtest profile (reachability gate)', () => {
     expect(state.base.pilots.some((p) => p.id === state.base.activePilotId)).toBe(true);
   });
 
+  it('provisions an instance + history record for every fleet aircraft', () => {
+    const state = createMissionsReadyState();
+    expect(Object.keys(state.base.aircraftInstances)).toHaveLength(MISSIONS_READY_FLEET.length);
+    for (const id of MISSIONS_READY_FLEET) {
+      expect(state.base.aircraftInstances[id]).toBeDefined();
+      expect(state.base.aircraftInstances[id]!.assignedPilotId).not.toBeNull();
+    }
+  });
+
   it('keeps a populated mission map and no active mission', () => {
     const state = createMissionsReadyState();
     expect(state.base.threatMap.length).toBeGreaterThanOrEqual(1);

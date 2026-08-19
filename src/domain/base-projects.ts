@@ -3,6 +3,7 @@ import type { EquipmentDefinition } from '../content/model';
 import type { BaseState, ConstructionJobState, GameState, ProductionJobState } from './model';
 import { addWeaponStock } from './armory';
 import { setAircraftMark } from './arsenal-loadout';
+import { ensureAircraftInstance } from './aircraft-instances';
 import { operationsSpeedMultiplier, staffContribution } from './staff-market';
 
 /* =====================================================================
@@ -436,18 +437,22 @@ function completeProductionJob(base: BaseState, job: ProductionJobState): BaseSt
       { length: aircraft.weaponSlotCount },
       () => null,
     );
-    return {
-      ...base,
-      hangarSlots,
-      aircraftLoadouts: {
-        ...base.aircraftLoadouts,
-        [aircraft.id]: loadout,
+    return ensureAircraftInstance(
+      {
+        ...base,
+        hangarSlots,
+        aircraftLoadouts: {
+          ...base.aircraftLoadouts,
+          [aircraft.id]: loadout,
+        },
+        aircraftModules: {
+          ...base.aircraftModules,
+          [aircraft.id]: null,
+        },
       },
-      aircraftModules: {
-        ...base.aircraftModules,
-        [aircraft.id]: null,
-      },
-    };
+      aircraft.id,
+      base.month,
+    );
   }
   const weapon = lookupWeaponByBlueprint(job.projectId);
   if (weapon === null) {

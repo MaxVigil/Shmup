@@ -221,9 +221,32 @@ a Warden Seeker volley or sustained Gunship fire).
 - Hangar: the flown aircraft's primary loadout is empty, hardpoints cleared,
   module (if any) gone; the pilot is in the roster as dead and `activePilotId` is
   unset (you must assign a new pilot).
-- The aircraft hull remains and can be repaired (it is grounded, not deleted).
+- Permanent loss (MISSIONS_EPIC §1.2): the aircraft **leaves the fleet** — the bay
+  is freed and the machine cannot be repaired, reactivated, or sold; only its
+  archive/history record remains.
 - **Abort before dying** (P → Abort) keeps aircraft, weapons, and pilot intact but
   forfeits the bounty.
+
+---
+
+## Round 14 — Aircraft instances & per-aircraft pilots (M1a)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Setup:** full-fleet playtest profile (temporary; the PLAYTEST badge shows).
+
+**Actions:**
+- Open the Hangar: every fleet card shows a CALLSIGN and an assigned pilot
+  (select control).
+- Change a pilot via the select, then switch the active aircraft (SET ACTIVE) and
+  confirm the sortie pilot mirrors the active machine.
+- Fly a sortie and let armour reach 0 (do NOT abort).
+
+**Expected:**
+- Each machine has a stable callsign and its own pilot; one pilot cannot be on two
+  aircraft.
+- After destruction the aircraft is gone from the fleet (bay freed), the pilot is
+  dead, and the lost machine's record (acquired month, missions, destroyed month)
+  survives in the archive/history.
 
 ---
 

@@ -1,6 +1,7 @@
 import type { AircraftDefinition } from '../content/model';
 import type { GameState } from './model';
 import { createSeededRng } from './rng';
+import { ensureAircraftInstance } from './aircraft-instances';
 
 export const STARTING_HANGAR_SLOTS = 2;
 export const HANGAR_SLOT_COST = 1_200_000;
@@ -61,19 +62,23 @@ export function purchaseAircraft(
   );
   return {
     ...state,
-    base: {
-      ...state.base,
-      credits: state.base.credits - price,
-      hangarSlots,
-      aircraftLoadouts: {
-        ...state.base.aircraftLoadouts,
-        [aircraft.id]: loadout,
+    base: ensureAircraftInstance(
+      {
+        ...state.base,
+        credits: state.base.credits - price,
+        hangarSlots,
+        aircraftLoadouts: {
+          ...state.base.aircraftLoadouts,
+          [aircraft.id]: loadout,
+        },
+        aircraftModules: {
+          ...state.base.aircraftModules,
+          [aircraft.id]: null,
+        },
       },
-      aircraftModules: {
-        ...state.base.aircraftModules,
-        [aircraft.id]: null,
-      },
-    },
+      aircraft.id,
+      state.base.month,
+    ),
   };
 }
 

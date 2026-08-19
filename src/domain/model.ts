@@ -1,6 +1,6 @@
 import type { MissionState } from '../content/model';
 
-export const SAVE_SCHEMA_VERSION = 20 as const;
+export const SAVE_SCHEMA_VERSION = 21 as const;
 
 export type SaveSchemaVersion = number;
 
@@ -14,6 +14,34 @@ export interface PilotState {
 }
 
 export type PilotSpecialization = 'speed' | 'damage' | 'recovery';
+
+/**
+ * Per-aircraft instance metadata (MISSIONS_EPIC §1.2). One instance per acquired
+ * aircraft; the instance id is stable and initially equals the definition id
+ * (one aircraft per type). Loadout/armour data still lives in the per-type maps
+ * keyed by definition id; M1b folds those maps into the instance.
+ */
+export interface AircraftInstanceMeta {
+  readonly id: string;                 // stable instance id
+  readonly definitionId: string;
+  readonly callsign: string;
+  readonly assignedPilotId: string | null;
+  readonly status: 'ready' | 'damaged' | 'destroyed';
+  readonly historyId: string;
+}
+
+/** Immutable-ish per-aircraft campaign record; destroyed aircraft live on here. */
+export interface AircraftHistoryRecord {
+  readonly id: string;
+  readonly definitionId: string;
+  readonly callsign: string;
+  readonly acquiredMonth: number;
+  readonly destroyedMonth: number | null;
+  readonly legacyImported: boolean;
+  readonly missions: number;
+  readonly kills: number;
+  readonly eliteKills: number;
+}
 
 export type PilotInjurySeverity = 'light' | 'medium' | 'severe';
 
@@ -111,6 +139,8 @@ export interface BaseState {
   readonly allocatedEnergy: number;
   readonly pilots: readonly PilotState[];
   readonly activePilotId: string | null;
+  readonly aircraftInstances: Readonly<Record<string, AircraftInstanceMeta>>;
+  readonly aircraftHistory: Readonly<Record<string, AircraftHistoryRecord>>;
   readonly researchQueue: readonly ResearchProjectState[];
   readonly preservedTechnologyIds: readonly string[];
   readonly ownedPrimaryWeaponIds: readonly string[];

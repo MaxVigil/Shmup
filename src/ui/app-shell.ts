@@ -80,6 +80,7 @@ import { installShmupDebugBridge, isDebugEnabled, setDebugEnabled } from '../deb
 import { showToast } from './toast';
 import { aircraftVisualHtml } from './ship-svg';
 import { hardpointsPlaytestMode, resolveInitialState, temporaryPlaytestMode } from './playtest';
+import { aircraftInstanceMeta } from '../domain/aircraft-instances';
 import { createOverlayStack, type OverlayId } from './overlay';
 
 validateContentCatalog(contentCatalog);
@@ -2806,6 +2807,51 @@ function renderFleet(): void {
         const name = document.createElement('strong');
         name.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
         header.appendChild(name);
+        const instance = aircraftInstanceMeta(state.base, aircraft.id);
+        if (instance !== undefined) {
+          const callsign = document.createElement('small');
+          callsign.className = 'fleet-slot__callsign';
+          callsign.textContent = t('hangar.callsign', { callsign: instance.callsign });
+          header.appendChild(callsign);
+          const assignedPilot = instance.assignedPilotId === null
+            ? undefined
+            : state.base.pilots.find((pilot) => pilot.id === instance.assignedPilotId);
+          const pilotSelect = document.createElement('select');
+          pilotSelect.className = 'fleet-slot__pilot-select';
+          pilotSelect.setAttribute('aria-label', t('hangar.assignPilot'));
+          const noPilot = document.createElement('option');
+          noPilot.value = '';
+          noPilot.textContent = t('hangar.pilotNone');
+          pilotSelect.appendChild(noPilot);
+          for (const pilot of state.base.pilots) {
+            const option = document.createElement('option');
+            option.value = pilot.id;
+            option.textContent = `${pilot.firstName ?? pilot.id} ${pilot.lastName ?? ''}`.trim();
+            option.selected = pilot.id === instance.assignedPilotId;
+            pilotSelect.appendChild(option);
+          }
+          pilotSelect.value = instance.assignedPilotId ?? '';
+          pilotSelect.addEventListener('change', () => {
+            if (pilotSelect.value === '') {
+              store.dispatch({ type: 'UNASSIGN_PILOT_FROM_AIRCRAFT', aircraftId: aircraft.id });
+            } else {
+              store.dispatch({
+                type: 'ASSIGN_PILOT_TO_AIRCRAFT',
+                aircraftId: aircraft.id,
+                pilotId: pilotSelect.value,
+              });
+            }
+          });
+          header.appendChild(pilotSelect);
+          if (assignedPilot !== undefined) {
+            const pilotChip = document.createElement('span');
+            pilotChip.className = 'status-chip is-active';
+            pilotChip.textContent = t('hangar.pilotAssigned', {
+              pilot: `${assignedPilot.firstName ?? assignedPilot.id} ${assignedPilot.lastName ?? ''}`.trim(),
+            });
+            header.appendChild(pilotChip);
+          }
+        }
         const stats = document.createElement('small');
         stats.textContent = aircraftStatSummary(aircraft);
         header.appendChild(stats);

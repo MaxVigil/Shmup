@@ -483,6 +483,23 @@ select:focus-visible {
   letter-spacing: 0.08em;
 }
 
+.fleet-slot__callsign {
+  color: #8fbf9f;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.fleet-slot__pilot-select {
+  font-size: 0.78rem;
+  max-width: 13rem;
+  background: #0b1420;
+  color: #dfe9f3;
+  border: 1px solid rgba(140, 170, 255, 0.24);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.3rem;
+}
+
 .fleet-slot__actions {
   display: flex;
   gap: 0.4rem;

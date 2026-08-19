@@ -10,6 +10,10 @@ import {
 } from '../content/ids';
 import { createInitialGameState } from '../domain/initial-state';
 import type { GameState } from '../domain/model';
+import {
+  assignPilotToAircraft,
+  ensureAircraftInstance,
+} from '../domain/aircraft-instances';
 
 /**
  * Pure playtest-profile factories (no `window`/DOM) so unit tests can import them
@@ -103,10 +107,23 @@ export function createMissionsReadyState(): GameState {
     MISSIONS_READY_PILOTS.map((pilot) => [pilot.id, 100]),
   );
 
+  // Provision an instance + history record for every fleet aircraft and assign
+  // one pilot per machine (MISSIONS_EPIC §1.2).
+  let readyBase: GameState['base'] = { ...state.base, pilots };
+  for (const definitionId of MISSIONS_READY_FLEET) {
+    readyBase = ensureAircraftInstance(readyBase, definitionId, 1);
+  }
+  MISSIONS_READY_PILOTS.forEach((pilot, index) => {
+    const aircraftIdForPilot = MISSIONS_READY_FLEET[index];
+    if (aircraftIdForPilot !== undefined) {
+      readyBase = assignPilotToAircraft(readyBase, aircraftIdForPilot, pilot.id);
+    }
+  });
+
   return {
     ...state,
     base: {
-      ...state.base,
+      ...readyBase,
       credits: 50_000,
       materials: 500,
       research: 500,
