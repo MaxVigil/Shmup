@@ -94,6 +94,7 @@ export function createInitialGameState(): GameState {
         1,
       ),
       loans: [],
+      marketWishlist: [],
       aircraftLoadouts: {
         [startingAircraft.id]: [
           startingWeapon.id,

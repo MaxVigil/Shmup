@@ -476,6 +476,9 @@ const en = {
   'trade.buyTitle': 'Procurement',
   'trade.sellTitle': 'Surplus sales',
   'trade.buy': 'BUY · {credits}',
+  'trade.addWishlist': 'WISHLIST',
+  'trade.inWishlist': 'IN WISHLIST',
+  'trade.compareFleet': 'COMPARE WITH FLEET',
 
   'trade.aircraftTitle': 'Ready aircraft',
   'trade.aircraftBlueprintTitle': 'Aircraft blueprints',
@@ -1244,6 +1247,9 @@ const uk: Record<TranslationKey, string> = {
   'trade.buyTitle': 'Закупівлі',
   'trade.sellTitle': 'Продаж надлишків',
   'trade.buy': 'КУПИТИ · {credits}',
+  'trade.addWishlist': 'У ВІДКЛАДЕНЕ',
+  'trade.inWishlist': 'У СПИСКУ',
+  'trade.compareFleet': 'ПОРІВНЯТИ З ФЛОТОМ',
 
   'trade.aircraftTitle': 'Готові літаки',
   'trade.aircraftBlueprintTitle': 'Креслення літаків',

@@ -116,6 +116,16 @@ match.
 - 291 unit tests, lint, typecheck, and build pass. PLAYTEST Round 21 scripts the
   history check.
 
+## Missions epic M9 — market strengthening
+
+- `marketWishlist` (persisted) with `TOGGLE_MARKET_WISHLIST`: weapon and aircraft
+  cards get a WISHLIST toggle; wishlisted rows highlight and the label flips to
+  IN WISHLIST.
+- Aircraft offers gain a COMPARE WITH FLEET toggle showing the active machine's
+  stats vs the offer.
+- 292 unit tests, lint, typecheck, and build pass. PLAYTEST Round 22 scripts the
+  market check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

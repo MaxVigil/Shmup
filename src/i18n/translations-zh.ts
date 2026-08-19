@@ -468,6 +468,9 @@ export const zh = {
   'trade.buyTitle': '采购',
   'trade.sellTitle': '盈余销售',
   'trade.buy': '购买 · {credits}',
+  'trade.addWishlist': '收藏',
+  'trade.inWishlist': '已收藏',
+  'trade.compareFleet': '与机队比较',
 
   'trade.aircraftTitle': '现成战机',
   'trade.aircraftBlueprintTitle': '战机图纸',

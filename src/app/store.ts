@@ -165,6 +165,7 @@ export type GameCommand =
   | { readonly type: 'RESEARCH_TECHNOLOGY'; readonly technologyId: string }
   | { readonly type: 'PURCHASE_MARKET_WEAPON'; readonly weaponId: string }
   | { readonly type: 'PURCHASE_MARKET_BLUEPRINT'; readonly blueprintId: string }
+  | { readonly type: 'TOGGLE_MARKET_WISHLIST'; readonly itemId: string }
   | { readonly type: 'PURCHASE_AIRCRAFT_BLUEPRINT'; readonly blueprintId: string }
   | { readonly type: 'MANUFACTURE_AIRCRAFT'; readonly blueprintId: string }
   | { readonly type: 'RESEARCH_AIRCRAFT_UPGRADE'; readonly upgradeId: string }
@@ -580,6 +581,14 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             throw new Error(`Unknown market weapon ${command.weaponId}.`);
           }
           state = purchaseMarketWeapon(state, weapon);
+          break;
+        }
+        case 'TOGGLE_MARKET_WISHLIST': {
+          const wishlist = state.base.marketWishlist;
+          const next = wishlist.includes(command.itemId)
+            ? wishlist.filter((id) => id !== command.itemId)
+            : [...wishlist, command.itemId];
+          state = { ...state, base: { ...state.base, marketWishlist: next } };
           break;
         }
         case 'PURCHASE_MARKET_BLUEPRINT': {

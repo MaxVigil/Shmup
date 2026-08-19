@@ -346,6 +346,18 @@ in the month report and the resolved-mission state.
 **Expected:** the timeline grows with each sortie; a destroyed aircraft appears
 in LOST AIRCRAFT and is gone from the fleet.
 
+## Round 22 — Market wishlist & compare (M9)
+
+**URL:** `?missionsReady=true`
+**Actions:**
+- Open Market: weapon and aircraft cards have a WISHLIST toggle.
+- Toggle a few items: the cards highlight and the label flips to IN WISHLIST.
+- On an aircraft offer use COMPARE WITH FLEET: the comparison line shows the
+  active fleet machine's stats vs the offer.
+
+**Expected:** wishlist state persists across renders (and reloads); compare shows
+both sides of the trade-off.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

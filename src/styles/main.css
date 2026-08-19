@@ -1061,6 +1061,11 @@ h1 {
   flex-wrap: wrap;
 }
 
+.loadout-row.is-wishlisted {
+  border-color: rgba(224, 179, 106, 0.5);
+  background: rgba(224, 179, 106, 0.06);
+}
+
 .loadout-row strong {
   display: block;
   color: #b7d9d2;

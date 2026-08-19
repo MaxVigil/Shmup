@@ -177,6 +177,7 @@ function v14BaseDefaults(): Pick<
   | 'aircraftHistory'
   | 'missionResults'
   | 'intelFacts'
+  | 'marketWishlist'
 > {
   return {
     constructionQueue: [],
@@ -200,6 +201,7 @@ function v14BaseDefaults(): Pick<
     aircraftHistory: {},
     missionResults: [],
     intelFacts: [],
+    marketWishlist: [],
   };
 }
 

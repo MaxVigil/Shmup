@@ -212,6 +212,7 @@ export interface BaseState {
   readonly fueledAircraftIds: readonly string[];
   readonly threatMap: readonly MissionState[];
   readonly loans: readonly LoanState[];
+  readonly marketWishlist: readonly string[];
   readonly aircraftLoadouts: Readonly<Record<string, readonly (string | null)[]>>;
   readonly weaponStock: Readonly<Record<string, number>>;
   readonly consumableStock: Readonly<Record<string, number>>;

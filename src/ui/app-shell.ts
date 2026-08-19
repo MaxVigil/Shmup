@@ -2412,9 +2412,18 @@ function renderTrade(): void {
     );
     const row = document.createElement('div');
     row.className = 'loadout-row';
+    const wishlisted = state.base.marketWishlist.includes(weapon.id);
+    row.classList.toggle('is-wishlisted', wishlisted);
     const label = document.createElement('span');
     label.className = 'loadout-row__label';
     label.textContent = localizedWeaponName(weapon.id);
+    const wishlist = document.createElement('button');
+    wishlist.className = 'base-action';
+    wishlist.type = 'button';
+    wishlist.textContent = t(wishlisted ? 'trade.inWishlist' : 'trade.addWishlist');
+    wishlist.addEventListener('click', () => {
+      store.dispatch({ type: 'TOGGLE_MARKET_WISHLIST', itemId: weapon.id });
+    });
     const buy = document.createElement('button');
     buy.className = 'base-action';
     buy.type = 'button';
@@ -2423,7 +2432,7 @@ function renderTrade(): void {
     buy.addEventListener('click', () => {
       store.dispatch({ type: 'PURCHASE_MARKET_WEAPON', weaponId: weapon.id });
     });
-    row.append(label, buy);
+    row.append(label, wishlist, buy);
     dynamic.appendChild(row);
   }
   for (const blueprint of contentCatalog.marketWeaponBlueprints) {
@@ -2506,12 +2515,21 @@ function renderTrade(): void {
     );
     const row = document.createElement('div');
     row.className = 'loadout-row';
+    const wishlisted = state.base.marketWishlist.includes(aircraft.id);
+    row.classList.toggle('is-wishlisted', wishlisted);
     const label = document.createElement('span');
     label.className = 'loadout-row__label';
     label.textContent = t(aircraftNameKey[aircraft.id] ?? 'content.interceptor');
     const meta = document.createElement('small');
     meta.textContent = aircraftStatSummary(aircraft);
-    row.append(label, meta);
+    const wishlist = document.createElement('button');
+    wishlist.className = 'base-action';
+    wishlist.type = 'button';
+    wishlist.textContent = t(wishlisted ? 'trade.inWishlist' : 'trade.addWishlist');
+    wishlist.addEventListener('click', () => {
+      store.dispatch({ type: 'TOGGLE_MARKET_WISHLIST', itemId: aircraft.id });
+    });
+    row.append(label, meta, wishlist);
     if (owned) {
       const ownedNote = document.createElement('strong');
       ownedNote.textContent = t('hangar.aircraftOwned');
@@ -2527,6 +2545,28 @@ function renderTrade(): void {
       });
       row.append(buy);
     }
+    const compare = document.createElement('button');
+    compare.className = 'base-action';
+    compare.type = 'button';
+    compare.textContent = t('trade.compareFleet');
+    const compareDetail = document.createElement('small');
+    compareDetail.hidden = true;
+    let compareOpen = false;
+    compare.addEventListener('click', () => {
+      compareOpen = !compareOpen;
+      if (compareOpen) {
+        const activeId = state.base.activeAircraftId;
+        const active = activeId === null
+          ? undefined
+          : contentCatalog.aircraft.find((entry) => entry.id === activeId);
+        compareDetail.textContent = active === undefined
+          ? t('hangar.noActiveAircraft')
+          : `FLEET ${t(aircraftNameKey[active.id] ?? 'content.interceptor')}: ${aircraftStatSummary(active)} | OFFER: ${aircraftStatSummary(aircraft)}`;
+      }
+      compareDetail.hidden = !compareOpen;
+      compare.textContent = compareOpen ? '▲' : t('trade.compareFleet');
+    });
+    row.append(compare, compareDetail);
     dynamic.appendChild(row);
   }
 

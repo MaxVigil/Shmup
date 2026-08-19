@@ -750,7 +750,9 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
   intel records.
 - [x] M8 — aircraft history + archive records: per-sortie timeline events in the
   Hangar hero; LOST AIRCRAFT section in the Archive.
-- [ ] M9 — market strengthening: rotation/stock/wishlist/compare (next).
+- [x] M9 — market strengthening: wishlist toggles on weapon/aircraft cards with
+  highlight; compare-with-fleet on aircraft offers.
+- [ ] M10 — balance + human playtests (next).
 
 ## Future ideas (backlog)
 
