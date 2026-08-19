@@ -38,6 +38,7 @@ export const zh = {
   'nav.sortie': '出击',
   'baseNav.aria': '基地部门',
   'baseNav.operations': '行动',
+  'operations.buildTest': 'BUILD TEST 001',
   'baseNav.market': '市场',
   'baseNav.personnel': '人员',
   'baseNav.archive': '档案',

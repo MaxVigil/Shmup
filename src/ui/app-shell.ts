@@ -4189,6 +4189,7 @@ function renderLocale(): void {
   setText('route-sortie', 'nav.sortie');
   baseNavigation.setAttribute('aria-label', t('baseNav.aria'));
   setText('base-tab-operations', 'baseNav.operations');
+  setText('build-test-banner', 'operations.buildTest');
   setText('base-tab-hangar', 'baseNav.hangar');
   setText('base-tab-research', 'baseNav.research');
   setText('base-tab-engineering', 'baseNav.engineering');

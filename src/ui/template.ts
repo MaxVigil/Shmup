@@ -87,6 +87,7 @@ export function buildAppTemplate(initialState: GameState): string {
       </div>
 
       <section id="base-panel-command" class="base-panel" role="tabpanel" aria-labelledby="base-tab-command" hidden>
+        <p class="build-test-banner" id="build-test-banner"></p>
         <header class="section-heading">
           <p class="eyebrow" id="command-section-eyebrow"></p>
           <h1 id="command-section-title"></h1>
