@@ -105,6 +105,17 @@ export function buildAppTemplate(initialState: GameState): string {
             <p class="run-report" id="base-run-report" aria-live="polite"></p>
           </div>
         </div>
+        <section id="mission-briefing" class="technology-lab mission-briefing" aria-labelledby="briefing-title" hidden>
+          <p class="technology-lab__eyebrow" id="briefing-eyebrow"></p>
+          <h2 id="briefing-title"></h2>
+          <p class="lede" id="briefing-lede"></p>
+          <dl id="briefing-grid" class="briefing-grid"></dl>
+          <div id="briefing-ready" class="briefing-ready" aria-live="polite"></div>
+          <div class="briefing-actions">
+            <button id="briefing-compare" class="base-action is-primary" type="button"></button>
+            <button id="briefing-hangar" class="base-action" type="button"></button>
+          </div>
+        </section>
       </section>
 
       <section id="base-panel-research" class="base-panel" role="tabpanel" aria-labelledby="base-tab-research" hidden>

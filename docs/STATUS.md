@@ -51,6 +51,16 @@ match.
 - 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 15 scripts the
   nav reachability check.
 
+## Missions epic M3 — Operations mission map + briefing
+
+- Selecting a mission (marker or card) now opens a briefing in Operations:
+  objective, theatre + contracting faction, known/unknown Intel (derived from
+  mission result records), capability demands, success reward (bounty + nation
+  gift), failure penalty, and a ready-aircraft list.
+- Actions: compare aircraft (sortie picker) and prepare in Hangar.
+- 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 16 scripts the
+  briefing check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

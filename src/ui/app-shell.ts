@@ -3188,6 +3188,64 @@ function renderCommand(): void {
   }
 
   endMonthButton.textContent = t('command.endMonth');
+  renderBriefing();
+}
+
+function renderBriefing(): void {
+  const briefing = byId<HTMLElement>('mission-briefing');
+  byId<HTMLElement>('briefing-eyebrow').textContent = t('briefing.eyebrow');
+  byId<HTMLElement>('briefing-title').textContent = t('briefing.title');
+  byId<HTMLElement>('briefing-lede').textContent = t('briefing.lede');
+  const state = store.getSnapshot();
+  const mission = state.base.activeMissionId === null
+    ? undefined
+    : state.base.threatMap.find((entry) => entry.id === state.base.activeMissionId);
+  briefing.hidden = mission === undefined;
+  if (mission === undefined) {
+    return;
+  }
+  const stateDefinition = contentCatalog.councilStates.find(
+    (entry) => entry.id === mission.targetCountryId,
+  );
+  const country = stateDefinition === undefined
+    ? mission.targetCountryId
+    : t(stateDefinition.nameKey as TranslationKey);
+  const gift = (contentCatalog.nationGifts as Readonly<
+    Record<string, { readonly credits: number; readonly materials: number }>
+  >)[mission.targetCountryId];
+  const grid = byId<HTMLElement>('briefing-grid');
+  grid.textContent = '';
+  const rows: ReadonlyArray<readonly [string, string]> = [
+    [t('briefing.objective'), t('briefing.sweepObjective')],
+    [t('briefing.location'), t('briefing.locationValue', { country })],
+    [t('briefing.known'), state.base.missionResults.some(
+      (record) => record.missionId === mission.id,
+    )
+      ? t('briefing.knownContact')
+      : t('briefing.knownNone')],
+    [t('briefing.unknown'), t('briefing.unknownValue')],
+    [t('briefing.tests'), t('briefing.testsSweep')],
+    [t('briefing.reward'), t('briefing.rewardValue', {
+      bounty: missionBounty(mission),
+      gift: gift?.credits ?? 0,
+    })],
+    [t('briefing.failure'), t('briefing.failureValue')],
+  ];
+  for (const [term, detail] of rows) {
+    const dt = document.createElement('dt');
+    dt.textContent = term;
+    const dd = document.createElement('dd');
+    dd.textContent = detail;
+    grid.append(dt, dd);
+  }
+  const ready = state.base.hangarSlots.filter(
+    (id): id is string => id !== null && isAircraftReadyForSortie(state, id),
+  );
+  const readyNames = ready.map((id) => aircraftInstanceMeta(state.base, id)?.callsign ?? id);
+  byId<HTMLElement>('briefing-ready').textContent = t('briefing.readyCount', {
+    count: ready.length,
+    list: readyNames.join(', ') || '—',
+  });
 }
 
 function renderCredit(): void {
@@ -4092,6 +4150,14 @@ byId<HTMLButtonElement>('open-warehouse-hangar').addEventListener('click', () =>
 
 byId<HTMLButtonElement>('open-warehouse-market').addEventListener('click', () => {
   showBaseSection('warehouse');
+});
+
+byId<HTMLButtonElement>('briefing-compare').addEventListener('click', () => {
+  openSortiePicker();
+});
+
+byId<HTMLButtonElement>('briefing-hangar').addEventListener('click', () => {
+  showBaseSection('hangar');
 });
 
 researchTechnologyButton.addEventListener('click', () => {

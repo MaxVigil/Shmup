@@ -500,6 +500,40 @@ select:focus-visible {
   padding: 0.1rem 0.3rem;
 }
 
+.mission-briefing {
+  margin-top: 1rem;
+}
+
+.briefing-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.briefing-grid dt {
+  color: #6f8792;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+.briefing-grid dd {
+  margin: 0;
+  color: #dfe9f3;
+}
+
+.briefing-ready {
+  color: #8fbf9f;
+  font-size: 0.82rem;
+}
+
+.briefing-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
 .fleet-slot__actions {
   display: flex;
   gap: 0.4rem;

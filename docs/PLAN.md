@@ -732,7 +732,11 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
   Research/Engineering/Market/Personnel/Archive); Finance→Market, Medical→
   Personnel, Warehouse→shared drawer (from Hangar/Market), Databank→technical
   reference from Settings/Archive.
-- [ ] M3 — Operations mission map + briefing (next).
+- [x] M3 — Operations mission map + briefing: selecting a mission opens a
+  briefing with objective, theatre, known/unknown Intel, capability demands,
+  reward/failure preview, and ready-aircraft list.
+- [ ] M4 — hybrid preparation flow: compare aircraft, “Prepare in Hangar” with
+  pinned mission context, final readiness check (next).
 
 ## Future ideas (backlog)
 

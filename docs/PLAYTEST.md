@@ -262,6 +262,20 @@ a Warden Seeker volley or sustained Gunship fire).
 **Expected:** every previous screen is reachable within two clicks; no tab or
 screen is orphaned; the nav is keyboard-accessible (Arrow keys, Home/End).
 
+## Round 16 — Mission briefing (M3)
+
+**URL:** `?missionsReady=true`
+**Actions:**
+- On Operations, click a mission marker (or select a mission card).
+- Read the briefing: objective, theatre + contracting faction, known/unknown
+  Intel, capability demands, success reward (bounty + nation gift), failure
+  penalty, and the ready-aircraft list.
+- Use `Compare aircraft` (sortie picker) and `Prepare in Hangar`.
+
+**Expected:** selecting a mission updates the briefing immediately; reward
+(bounty + gift) matches the mission; ready list shows callsigns; after a prior
+sortie in the sector the Intel row switches to “prior contact”.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)
