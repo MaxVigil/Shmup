@@ -3133,11 +3133,11 @@ function renderReadinessCheck(): void {
   const rows: ReadonlyArray<readonly [string, string]> = [
     [t('readiness.mission'), mission === undefined
       ? t('readiness.noMission')
-      : t('readiness.missionValue', {
+      : `${t(`missionType.${mission.type}` as TranslationKey)} · ${t('readiness.missionValue', {
           country,
           threat: mission.threatLevel,
           bounty: missionBounty(mission),
-        })],
+        })}`],
     [t('readiness.aircraft'), aircraft === undefined
       ? '—'
       : t('readiness.aircraftValue', {
@@ -3258,6 +3258,7 @@ function renderCommand(): void {
       : t(stateDefinition.nameKey as TranslationKey);
     const meta = document.createElement('small');
     meta.textContent = [
+      t(`missionType.${mission.type}` as TranslationKey),
       t('command.threatLevel', { value: mission.threatLevel }),
       t('command.bounty', { credits: missionBounty(mission) }),
     ].join(' · ');
@@ -3290,6 +3291,32 @@ function renderCommand(): void {
   renderBriefing();
 }
 
+function missionTypeObjectiveKey(type: string): TranslationKey {
+  switch (type) {
+    case 'interception':
+      return 'briefing.objectiveInterception';
+    case 'escort':
+      return 'briefing.objectiveEscort';
+    case 'recon':
+      return 'briefing.objectiveRecon';
+    default:
+      return 'briefing.objectiveSweep';
+  }
+}
+
+function missionTypeTestsKey(type: string): TranslationKey {
+  switch (type) {
+    case 'interception':
+      return 'briefing.testsInterception';
+    case 'escort':
+      return 'briefing.testsEscort';
+    case 'recon':
+      return 'briefing.testsRecon';
+    default:
+      return 'briefing.testsSweep';
+  }
+}
+
 function renderBriefing(): void {
   const briefing = byId<HTMLElement>('mission-briefing');
   byId<HTMLElement>('briefing-eyebrow').textContent = t('briefing.eyebrow');
@@ -3314,16 +3341,18 @@ function renderBriefing(): void {
   >)[mission.targetCountryId];
   const grid = byId<HTMLElement>('briefing-grid');
   grid.textContent = '';
+  const objectiveKey = missionTypeObjectiveKey(mission.type);
+  const testsKey = missionTypeTestsKey(mission.type);
   const rows: ReadonlyArray<readonly [string, string]> = [
-    [t('briefing.objective'), t('briefing.sweepObjective')],
-    [t('briefing.location'), t('briefing.locationValue', { country })],
+    [t('briefing.objective'), t(objectiveKey)],
+    [t('briefing.location'), `${t(`missionType.${mission.type}` as TranslationKey)} · ${t('briefing.locationValue', { country })}`],
     [t('briefing.known'), state.base.missionResults.some(
       (record) => record.missionId === mission.id,
     )
       ? t('briefing.knownContact')
       : t('briefing.knownNone')],
     [t('briefing.unknown'), t('briefing.unknownValue')],
-    [t('briefing.tests'), t('briefing.testsSweep')],
+    [t('briefing.tests'), t(testsKey)],
     [t('briefing.reward'), t('briefing.rewardValue', {
       bounty: missionBounty(mission),
       gift: gift?.credits ?? 0,
@@ -4585,6 +4614,15 @@ function launchSortie(): void {
           (mission) => mission.id === store.getSnapshot().base.activeMissionId,
         )?.threatLevel ?? 1,
       () => isReduceEffectsEnabled(),
+      () => {
+        const snapshot = store.getSnapshot();
+        const activeMission = snapshot.base.activeMissionId === null
+          ? undefined
+          : snapshot.base.threatMap.find(
+              (mission) => mission.id === snapshot.base.activeMissionId,
+            );
+        return activeMission?.type ?? 'sweep';
+      },
     );
   } else {
     game.scene.getScene('combat').scene.restart();

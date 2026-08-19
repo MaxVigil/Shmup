@@ -76,6 +76,14 @@ const M2_FAST_MODE = import.meta.env.DEV &&
   new URLSearchParams(window.location.search).get('m2Fast') === 'true';
 const ENCOUNTER_DURATION_MS = M2_FAST_MODE ? 20_000 : 180_000;
 const EXTRACTION_WINDOW_MS = M2_FAST_MODE ? 4_500 : 90_000;
+
+/** HUD objective line per mission type (M5, MISSIONS_EPIC §7.2). */
+const MISSION_OBJECTIVE_KEY: Readonly<Record<string, TranslationKey>> = {
+  sweep: 'combat.objective.sweep',
+  interception: 'combat.objective.interception',
+  escort: 'combat.objective.escort',
+  recon: 'combat.objective.recon',
+};
 const CONTROLS_HINT_DURATION_MS = 15_000;
 const ROCKET_CHARGES_DEFAULT = 3;
 const ROCKET_DAMAGE = 200;
@@ -304,6 +312,7 @@ export class CombatScene extends Phaser.Scene {
   private endStatusKey: TranslationKey | null = null;
   private debugInvincible = false;
   private threatLevel = 1;
+  private missionType = 'sweep';
   private reduceEffects = false;
 
   constructor(
@@ -333,6 +342,7 @@ export class CombatScene extends Phaser.Scene {
     ) => void = () => {},
     private readonly getThreatLevel: () => number = () => 1,
     private readonly getReduceEffects: () => boolean = () => false,
+    private readonly getMissionType: () => string = () => 'sweep',
   ) {
     super('combat');
   }
@@ -369,6 +379,7 @@ export class CombatScene extends Phaser.Scene {
   create(): void {
     this.resetEncounterState();
     this.threatLevel = Math.max(1, Math.round(this.getThreatLevel()));
+    this.missionType = this.getMissionType();
 
     const { width, height } = this.scale;
     this.rng = createSeededRng(0x5eed2026);
@@ -426,6 +437,7 @@ export class CombatScene extends Phaser.Scene {
     this.armourText = this.createHudText(20, 18, this.t('combat.armour', { value: '100' }));
     this.reserveText = this.createHudText(width - 20, 18, '').setOrigin(1, 0);
     this.timeText = this.createHudText(width / 2, 18, '03:00').setOrigin(0.5, 0);
+    this.createHudText(width / 2, 40, this.missionObjective()).setOrigin(0.5);
     this.statusText = this.add
       .text(
         width / 2,
@@ -2283,6 +2295,10 @@ export class CombatScene extends Phaser.Scene {
 
   private t(key: TranslationKey, params: TranslationParams = {}): string {
     return translate(this.getLocale(), key, params);
+  }
+
+  private missionObjective(): string {
+    return this.t(MISSION_OBJECTIVE_KEY[this.missionType] ?? 'combat.objective.sweep');
   }
 
   private isStunModuleEquipped(): boolean {

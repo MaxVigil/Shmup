@@ -249,10 +249,13 @@ export interface NationGiftDefinition {
   readonly materials: number;
 }
 
+export type MissionType = 'sweep' | 'interception' | 'escort' | 'recon';
+
 export interface MissionState {
   readonly id: string;
   readonly targetCountryId: string;
   readonly threatLevel: number;
+  readonly type: MissionType;
 }
 
 export interface WeaponUpgradeDefinition {

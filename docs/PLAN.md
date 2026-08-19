@@ -738,7 +738,11 @@ Status: M0 (playability safety net) done — contract `docs/MISSIONS_EPIC.md`.
 - [x] M4 — hybrid preparation flow: final readiness check before launch
   (mission/aircraft/pilot/build summary, warnings, Launch/Back) and pinned
   mission context in the Hangar with “back to briefing”.
-- [ ] M5 — mission wave 1: Sweep, Interception, Escort, Recon (next).
+- [x] M5 — mission wave 1 (types): seeded Sweep / Interception / Escort / Recon
+  missions; type shown in cards/briefing/readiness and as a HUD objective line;
+  type-aware settlement (interception gift gating on the Warden, escort
+  unresolved on breach).
+- [ ] M6 — retreat redesign + outcome taxonomy (next).
 
 ## Future ideas (backlog)
 

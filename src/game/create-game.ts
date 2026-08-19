@@ -36,6 +36,7 @@ export function createGame(
   onActiveWeaponChanged: (weaponId: string, canSwitch: boolean) => void = () => {},
   getThreatLevel: () => number = () => 1,
   getReduceEffects: () => boolean = () => false,
+  getMissionType: () => string = () => 'sweep',
 ): Phaser.Game {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -66,6 +67,7 @@ export function createGame(
       onActiveWeaponChanged,
       getThreatLevel,
       getReduceEffects,
+      getMissionType,
     )],
   };
 

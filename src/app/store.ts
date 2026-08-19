@@ -298,20 +298,30 @@ export function createGameStore(initialState = createInitialGameState()): GameSt
             : state.base.threatMap.find(
                 (mission) => mission.id === state.base.activeMissionId,
               );
-          const afterMission = activeMission === undefined || !command.outcome.extracted
-            ? { ...afterProjects, activeMissionId: null }
-            : grantNationThanks(
-                {
-                  ...afterProjects,
-                  resolvedThreatIds: afterProjects.resolvedThreatIds.includes(
-                    activeMission.id,
-                  )
-                    ? afterProjects.resolvedThreatIds
-                    : [...afterProjects.resolvedThreatIds, activeMission.id],
-                  activeMissionId: null,
-                },
-                activeMission.targetCountryId,
-              );
+          const missionType = activeMission?.type ?? 'sweep';
+          const extracted = command.outcome.extracted;
+          const breached = command.outcome.targetsBreached > 0;
+          // Type-aware resolution (M5): escort missions stay unresolved when the
+          // transport was breached; interception resolves but only gifts thanks
+          // when the priority target (Warden) was destroyed.
+          const missionResolved = extracted && !(missionType === 'escort' && breached);
+          const giftEligible = missionResolved &&
+            !(missionType === 'interception' && !command.outcome.wardenSignalDetected);
+          let afterMission: BaseState = { ...afterProjects, activeMissionId: null };
+          if (activeMission !== undefined && missionResolved) {
+            afterMission = {
+              ...afterProjects,
+              resolvedThreatIds: afterProjects.resolvedThreatIds.includes(
+                activeMission.id,
+              )
+                ? afterProjects.resolvedThreatIds
+                : [...afterProjects.resolvedThreatIds, activeMission.id],
+              activeMissionId: null,
+            };
+            if (giftEligible) {
+              afterMission = grantNationThanks(afterMission, activeMission.targetCountryId);
+            }
+          }
           const activePilotId = state.base.activePilotId;
           const activeAircraftId = state.base.activeAircraftId;
           const armourLost = Math.max(0, Math.min(1, command.armourLostRatio ?? 0));

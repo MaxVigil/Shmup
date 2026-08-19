@@ -67,7 +67,11 @@ export function isGameState(
         typeof mission.targetCountryId === 'string' &&
         typeof mission.threatLevel === 'number' &&
         Number.isInteger(mission.threatLevel) &&
-        mission.threatLevel >= 1,
+        mission.threatLevel >= 1 &&
+        (mission.type === 'sweep' ||
+          mission.type === 'interception' ||
+          mission.type === 'escort' ||
+          mission.type === 'recon'),
     ) &&
     Array.isArray(value.base.loans) &&
     value.base.loans.every(

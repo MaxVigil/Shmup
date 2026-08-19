@@ -93,4 +93,74 @@ describe('SETTLE_SORTIE writes a mission result record', () => {
       targetsDestroyed: 3,
     });
   });
+
+  it('withholds the gift for an interception when the Warden was not destroyed', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        threatMap: [{
+          id: 'mission-1-1',
+          targetCountryId: initial.base.threatMap[0]!.targetCountryId,
+          threatLevel: 1,
+          type: 'interception',
+        }],
+      },
+    });
+    const mission = store.getSnapshot().base.threatMap[0]!;
+    store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 0,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
+    const snapshot = store.getSnapshot();
+    expect(snapshot.base.resolvedThreatIds).toContain(mission.id);
+    expect(snapshot.base.nationThanks[mission.targetCountryId]).toBeUndefined();
+  });
+
+  it('keeps an escort mission unresolved when the transport was breached', () => {
+    const initial = createInitialGameState();
+    const store = createGameStore({
+      ...initial,
+      base: {
+        ...initial.base,
+        threatMap: [{
+          id: 'mission-1-1',
+          targetCountryId: initial.base.threatMap[0]!.targetCountryId,
+          threatLevel: 1,
+          type: 'escort',
+        }],
+      },
+    });
+    const mission = store.getSnapshot().base.threatMap[0]!;
+    store.dispatch({ type: 'SELECT_MISSION', missionId: mission.id });
+    store.dispatch({
+      type: 'SETTLE_SORTIE',
+      outcome: {
+        extracted: true,
+        materialsFound: 0,
+        researchFound: 0,
+        preservedTechnologyIds: [],
+        targetsDestroyed: 0,
+        targetsBreached: 2,
+        creditsEarned: 0,
+        creditsPenalized: 0,
+        wardenSignalDetected: false,
+      },
+    });
+    const snapshot = store.getSnapshot();
+    expect(snapshot.base.resolvedThreatIds).not.toContain(mission.id);
+    expect(snapshot.base.nationThanks[mission.targetCountryId]).toBeUndefined();
+  });
 });

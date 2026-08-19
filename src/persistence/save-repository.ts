@@ -1,4 +1,5 @@
 import { contentCatalog } from '../content/catalog';
+import type { MissionState, MissionType } from '../content/model';
 import {
   aircraftById,
   aircraftId,
@@ -271,7 +272,19 @@ function addAircraftInstancesVersion(state: GameState): GameState {
       // Unknown/conflicting legacy pilot: keep the active-pilot mirror untouched.
     }
   }
-  return { ...state, schemaVersion: 21, base };
+  // Legacy missions have no type; baseline them as sweeps (M5).
+  const threatMap = state.base.threatMap.map((mission) => ({
+    ...mission,
+    type: legacyMissionType(mission),
+  }));
+  return { ...state, schemaVersion: 21, base: { ...base, threatMap } };
+}
+
+function legacyMissionType(mission: MissionState): MissionType {
+  const raw = (mission as { type?: string }).type;
+  return raw === 'interception' || raw === 'escort' || raw === 'recon'
+    ? raw
+    : 'sweep';
 }
 
 /** Walks intermediate migration versions up to the current schema. */

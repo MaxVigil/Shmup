@@ -73,6 +73,18 @@ match.
 - 285 unit tests, lint, typecheck, and build pass. PLAYTEST Round 17 scripts the
   preparation-loop check.
 
+## Missions epic M5 — mission wave 1 (types)
+
+- Missions now carry a seeded type — Sweep / Interception / Escort / Recon
+  (`MissionState.type`, MISSIONS_EPIC §7.2); legacy missions baseline to Sweep.
+- The type appears in mission cards, the briefing (objective + capability
+  demands), the readiness check, and as a HUD objective line in combat.
+- Type-aware settlement: Interception resolves but only gifts the nation thanks
+  when the Warden (priority target) is destroyed; Escort stays unresolved when
+  the transport was breached.
+- 287 unit tests, lint, typecheck, and build pass. PLAYTEST Round 18 scripts the
+  mission-type check.
+
 ## Epic E6 — UX/UI hygiene & accessibility
 
 Implemented on `test` (E6.0–E6.6).

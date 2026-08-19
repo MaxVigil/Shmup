@@ -51,7 +51,7 @@ describe('balance documentation', () => {
     expect(DOMAIN_BALANCE.mission.sortiesPerMonth).toBe(MONTH_SORTIE_LENGTH);
     expect(DOMAIN_BALANCE.mission.threatsPerMonth).toBe(THREAT_MAP_MISSION_COUNT);
     expect(DOMAIN_BALANCE.mission.bountyPerThreatLevel).toBe(
-      missionBounty({ id: 't', targetCountryId: 'x', threatLevel: 1 }),
+      missionBounty({ id: 't', targetCountryId: 'x', threatLevel: 1, type: 'sweep' }),
     );
 
     expect(DOMAIN_BALANCE.pilots.fatiguePerSortie).toBe(PILOT_FATIGUE_PER_SORTIE);

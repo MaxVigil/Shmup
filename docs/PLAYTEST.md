@@ -291,6 +291,22 @@ sortie in the sector the Intel row switches to “prior contact”.
 `BACK` returns to the aircraft list; `LAUNCH` starts the sortie with the selected
 aircraft; the mission context survives the hangar detour.
 
+## Round 18 — Mission types (M5)
+
+**URL:** `?missionsReady=true&m2Fast=true`
+**Actions:**
+- Open Operations: mission cards now show a type (Sweep / Interception / Escort /
+  Recon) next to threat and bounty.
+- Open a briefing: the objective and capability demands match the type.
+- Launch each type: the combat HUD shows the type-specific objective line.
+- For an Interception, extract without destroying the Warden → the mission
+  resolves but the nation gift is withheld.
+- For an Escort, extract with breached targets → the mission stays unresolved.
+
+**Expected:** distinct objective text per type in the briefing and HUD; the
+settlement differences (interception gift gating, escort breach) are observable
+in the month report and the resolved-mission state.
+
 ---
 
 ## Round 11 — UX/UI hygiene: overlays, focus, screen flow (E6)

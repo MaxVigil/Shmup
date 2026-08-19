@@ -547,7 +547,7 @@ describe('game store month cycle', () => {
       targetsBreached: 0,
       creditsEarned: 0,
       creditsPenalized: 0,
-      wardenSignalDetected: false,
+      wardenSignalDetected: true,
     } as const;
     store.dispatch({ type: 'SELECT_MISSION', missionId: mission?.id ?? '' });
     store.dispatch({ type: 'SETTLE_SORTIE', outcome });

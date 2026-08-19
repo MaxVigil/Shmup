@@ -3,12 +3,21 @@ import type {
   AircraftDefinition,
   CouncilStateDefinition,
   MissionState,
+  MissionType,
 } from '../content/model';
 import type { BaseState, GameState } from './model';
 import { createSeededRng } from './rng';
 
 export const MONTH_SORTIE_LENGTH = 3;
 export const THREAT_MAP_MISSION_COUNT = 3;
+
+/** Mission wave 1 types (MISSIONS_EPIC §7.2): each tests a different build demand. */
+export const MISSION_TYPES: readonly MissionType[] = [
+  'sweep',
+  'interception',
+  'escort',
+  'recon',
+];
 
 function stableIdHash(value: string): number {
   let hash = 0x811c9dc5;
@@ -58,6 +67,7 @@ export function generateThreatMap(
       id: `mission-${month}-${index + 1}`,
       targetCountryId: target.id,
       threatLevel: rng.integer(1, maxThreatExclusive),
+      type: MISSION_TYPES[rng.integer(0, MISSION_TYPES.length)] ?? 'sweep',
     });
   }
   return missions;
